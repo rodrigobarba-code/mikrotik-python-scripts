@@ -1,5 +1,10 @@
 # Description: Regions Routes for the Region Blueprint
 
+# Importing Required Local Modules
+from app.blueprints.users.functions import users_functions as functions  # Import the users functions object
+from . import regions_bp  # Import the regions Blueprint
+# Importing Required Local Modules
+
 # Importing Required Libraries
 from flask import render_template, redirect, url_for, flash, request, jsonify, session
 # Importing Required Libraries
@@ -16,10 +21,6 @@ from app.blueprints.regions.entities import RegionEntity
 from app.blueprints.regions.models import Region
 # Importing Required Models
 
-from . import regions_bp  # Import the regions Blueprint
-from app.blueprints.users.functions import users_functions as functions  # Import the users functions object
-
-
 # Regions Main Route
 @regions_bp.route('/', methods=['GET'])
 @restriction.login_required  # Need to be logged in
@@ -33,8 +34,6 @@ def regions():
     except Exception as e:  # If an exception occurs
         flash(str(e), 'danger')  # Flash an error message
         return redirect(url_for('regions.regions'))  # Redirect to the regions route
-
-
 # Regions Main Route
 
 # Regions Add Route
@@ -49,8 +48,8 @@ def add_region():
                 region_name=request.form['region_name']  # Set the region name
             )
             Region.add_region(region)  # Add the region
-            functions.create_log(session['user_id'], 'Region added', 'INSERT', 'regions')  # Create a log
             flash('Region added successfully', 'success')  # Flash a success message
+            functions.create_log(session['user_id'], 'Region Added', 'INSERT', 'regions')  # Create a log
         except Exception as e:  # If an exception occurs
             flash(str(e), 'danger')  # Flash an error message
         return redirect(url_for('regions.regions'))  # Redirect to the regions route
@@ -58,8 +57,6 @@ def add_region():
         'regions/form_regions.html',  # Render the form_regions template
         region=None  # Pass None to the template
     )
-
-
 # Regions Add Route
 
 # Regions Update Route
@@ -74,8 +71,8 @@ def update_region(region_id):
                 region_name=request.form['region_name']  # Set the region name
             )
             Region.update_region(region)  # Update the region
-            functions.create_log(session['user_id'], 'Region Updated', 'UPDATE', 'regions')  # Create a log
             flash('Region was updated successfully', 'success')  # Flash a success message
+            functions.create_log(session['user_id'], 'Region Updated', 'UPDATE', 'regions')  # Create a log
         except Exception as e:  # If an exception occurs
             flash(str(e), 'danger')  # Flash an error message
         return redirect(url_for('regions.regions'))  # Redirect to the regions route
@@ -88,8 +85,6 @@ def update_region(region_id):
     except Exception as e:  # If an exception occurs
         flash(str(e), 'danger')  # Flash an error message
         return redirect(url_for('regions.regions'))  # Redirect to the regions route
-
-
 # Regions Update Route
 
 # Regions Delete Route
@@ -99,13 +94,11 @@ def update_region(region_id):
 def delete_region(region_id):
     try:  # Try to delete the region
         Region.delete_region(region_id)  # Delete the region
-        functions.create_log(session['user_id'], 'Region Deleted', 'DELETE', 'regions')  # Create a log
         flash('Region deleted successfully', 'success')  # Flash a success message
+        functions.create_log(session['user_id'], 'Region Deleted', 'DELETE', 'regions')  # Create a log
     except Exception as e:  # If an exception occurs
         flash(str(e), 'danger')  # Flash an error message
     return redirect(url_for('regions.regions'))  # Redirect to the regions route
-
-
 # Regions Delete Route
 
 # Regions Bulk Delete Route
@@ -113,33 +106,32 @@ def delete_region(region_id):
 @restriction.login_required  # Need to be logged in
 @restriction.admin_required  # Need to be an admin
 def bulk_delete_region():
-    data = request.get_json()
-    regions_ids = data.get('items_ids', [])
+    data = request.get_json()  # Get the JSON data
+    regions_ids = data.get('items_ids', [])  # Get the regions IDs
     try:
-        flag = 0
-        for region_id in regions_ids:
-            Region.delete_region(region_id)
-            flag += 1
-        flash('Regions Deleted Successfully', 'success')
-        functions.create_log(session['user_id'], 'Regions Deleted', 'DELETE', 'regions')
-        return jsonify({'message': 'Users deleted successfully'}), 200
-    except Exception as e:
-        flash(str(e), 'danger')
-        return jsonify({'message': 'Failed to delete users', 'error': str(e)}), 500
-
-
+        flag = 0  # Set the flag to 0
+        for region_id in regions_ids:  # Loop through the regions IDs
+            Region.delete_region(region_id)  # Delete the region
+            flag += 1  # Increment the flag
+        flash(f'{flag} Regions Deleted Successfully', 'success')  # Flash a success message
+        functions.create_log(session['user_id'], f'{flag} Regions Deleted', 'DELETE', 'regions')  # Create a log
+        return jsonify({'message': 'Regions deleted successfully'}), 200  # Return a success message
+    except Exception as e:  # If an exception occurs
+        flash(str(e), 'danger')  # Flash an error message
+        return jsonify({'message': 'Failed to delete regions', 'error': str(e)}), 500  # Return an error message
 # Regions Bulk Delete Route
 
 # Regions Delete All Route
-@regions_bp.route('/delete/all', methods=['GET'])
+@regions_bp.route('/delete/all', methods=['POST'])
 @restriction.login_required  # Need to be logged in
 @restriction.admin_required  # Need to be an admin
 def delete_all_regions():
     try:  # Try to delete all regions
         Region.delete_all_regions()  # Delete all regions
-        functions.create_log(session['user_id'], 'All Regions Deleted', 'DELETE', 'regions')  # Create a log
         flash('All Regions Deleted Successfully', 'success')  # Flash a success message
-    except Exception as e:
-        flash(str(e), 'danger')
-    return redirect(url_for('regions.regions'))
+        functions.create_log(session['user_id'], 'All Regions Deleted', 'DELETE', 'regions')  # Create a log
+        return jsonify({'message': 'Regions deleted successfully'}), 200  # Return a success message
+    except Exception as e:  # If an exception occurs
+        flash(str(e), 'danger')  # Flash an error message
+        return jsonify({'message': 'Failed to delete regions', 'error': str(e)}), 500  # Return an error message
 # Regions Delete All Route

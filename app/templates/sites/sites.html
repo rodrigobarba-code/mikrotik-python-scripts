@@ -1,3 +1,4 @@
+{% from 'macros.html' import delete_modal, delete_select_modal, delete_all_modal %}
 {% extends 'base.html' %}
 {% block title %} Sites {% endblock %}
 {% block head %}
@@ -5,6 +6,10 @@
 {% endblock %}
 {% block scripts %}
     <script src="{{ url_for('static', filename='js/sites/scripts.js') }}"></script>
+    <script>
+        deleteAllModal("{{ url_for('sites.delete_all_sites') }}", "{{ url_for('sites.sites') }}", 'sites');
+        deleteSelectModal("{{ url_for('sites.bulk_delete_site') }}", "{{ url_for('sites.sites') }}", 'site');
+    </script>
 {% endblock %}
 {% block content %}
     <!-- Sites Jumbotron -->
@@ -12,7 +17,7 @@
         <div class="p-5 mb-4 base-jumbotron">
             <div class="container-fluid py-5">
                 <h1 class="display-5 fw-bold">Sites</h1>
-                <p class="col-md-8 fs-4">Manage the sites</p>
+                <p class="col-md-8 fs-4">Lorem Ipsum</p>
                 <a href="{{ url_for('sites.add_site') }}" class="btn btn-primary btn-lg" type="button"><i
                         class="fa-solid fa-plus"></i> Create New Site</a>
             </div>
@@ -23,7 +28,21 @@
     <!-- Sites Database -->
     <section class="sites-database pt-3">
         <div class="container w-75">
-            <h2 class="sites-database-title"><b>Available</b> Sites</h2>
+            <div class="row">
+                <div class="col-12 col-md-8 text-left">
+                    <h2 class="sites-database-title"><b>Available</b> Sites</h2>
+                </div>
+                <div class="col-12 col-md-4 d-flex justify-content-end">
+                    <button type="button" class="btn btn-md btn-danger me-2" data-bs-toggle="modal" id="delete-select"
+                            data-bs-target="#delete-select-modal">
+                        <i class="fa-solid fa-square-minus"></i>&nbsp; Delete Selected
+                    </button>
+                    <button type="button" class="btn btn-md btn-dark" data-bs-toggle="modal" id="delete-all"
+                            data-bs-target="#delete-all-modal">
+                        <i class="fa-solid fa-trash"></i>&nbsp; Delete All
+                    </button>
+                </div>
+            </div>
         </div>
     </section>
     <!-- Sites Database -->
@@ -39,9 +58,10 @@
     <!-- Sites Table -->
     <section class="sites-table hide-scroll pt-3 pb-3">
         <div class="container w-75" id="sites-table-c">
-            <table class="table table-responsive" id="sites-table">
+            <table class="table table-responsive" id="datatable-object">
                 <thead>
                 <tr>
+                    <th scope="col"></th>
                     <th scope="col">#</th>
                     <th scope="col">Sites's Name</th>
                     <th scope="col">Region</th>
@@ -52,15 +72,25 @@
                 <tbody>
                 {% for site in site_list %}
                     <tr>
+                        <td class="text-center"><label for="site-{{ site.site_id }}"></label>
+                            <input type="checkbox" class="form-check-input" id="site-{{ site.site_id }}">
+                        </td>
                         <th scope="row">{{ site.site_id }}</th>
                         <td>{{ site.site_name }}</td>
                         <td>{{ region_functions.get_region(site.fk_region_id).region_name }}</td>
                         <td>{{ site.site_segment }}</td>
                         <td>
-                            <a href="{{ url_for('sites.update_site', site_id=site.site_id) }}" class="btn btn-warning"
-                               type="button"><i class="fa-solid fa-edit"></i></a>
-                            <a href="{{ url_for('sites.delete_site', site_id=site.site_id) }}" class="btn btn-danger"
-                               type="button"><i class="fa-solid fa-trash"></i></a>
+                            <a href="{{ url_for('sites.update_site', site_id=site.site_id) }}" type="button"
+                               class="btn btn-sm btn-warning"><i class="fa-solid fa-edit"></i></a>
+                            <button type="button" id="delete-button-site-{{ site.site_id }}"
+                                    class="btn btn-sm btn-danger"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#delete-modal"
+                                    data-id="{{ site.site_id }}"
+                                    data-type="site"
+                                    data-url="{{ url_for('sites.delete_site', site_id=site.site_id) }}"
+                                    data-name="{{ site.site_name }}"
+                            ><i class="fa-solid fa-trash"></i></button>
                         </td>
                     </tr>
                 {% endfor %}
@@ -69,4 +99,10 @@
         </div>
     </section>
     <!-- Sites Table -->
+
+    <!-- Delete Modals -->
+    <div class="delete-modal-container">{{ delete_modal() }}</div>
+    <div class="delete-select-modal-container">{{ delete_select_modal() }}</div>
+    <div class="delete-all-modal-container">{{ delete_all_modal() }}</div>
+    <!-- Delete Modals -->
 {% endblock %}

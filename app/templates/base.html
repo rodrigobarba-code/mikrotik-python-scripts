@@ -1,178 +1,92 @@
 <!DOCTYPE html>
-
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %} Seven Suite {% endblock %}</title>
+    <title> {% block title %} Seven Suite {% endblock %} </title>
 
-    <! -- Bootstrap CSS -->
+    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-    <! -- Bootstrap CSS -->
+    <!-- Bootstrap CSS -->
 
-    <! -- Google Fonts -->
+    <!-- Font Awesome -->
+    <script src="https://kit.fontawesome.com/8562bd2fa0.js" crossorigin="anonymous"></script>
+    <!-- Font Awesome -->
+
+    <!-- Google Fonts -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Varela+Round|Open+Sans">
-    <! -- Google Fonts -->
+    <!-- Google Fonts -->
 
-    <! -- Font Awesome -->
-    <script src="https://kit.fontawesome.com/8562bd2fa0.js" crossorigin="anonymous"></script>
-    <! -- Font Awesome -->
-
-    <! -- Box Icons -->
+    <!-- Box Icons -->
     <link href='https://unpkg.com/boxicons@2.1.1/css/boxicons.min.css' rel='stylesheet'>
-    <! -- Box Icons -->
+    <!-- Box Icons -->
 
-    <! -- JQuery -->
+    <!-- JQuery -->
     <script
             src="https://code.jquery.com/jquery-3.7.1.js"
             integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
             crossorigin="anonymous">
     </script>
-    <! -- JQuery -->
+    <!-- JQuery -->
 
-    <! -- Data Tables CSS -->
+    <!-- Data Tables CSS -->
     <link href="https://cdn.datatables.net/v/bs5/jq-3.7.0/dt-2.0.8/datatables.min.css" rel="stylesheet">
-    <! -- Data Tables CSS -->
+    <!-- Data Tables CSS -->
 
-    <! -- Custom CSS -->
+    <!-- Custom Internal CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base/sidebar.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base/styles.css') }}">
-    <! -- Custom CSS -->
+    <!-- Custom Internal CSS -->
 
+    <!-- Custom External CSS -->
     {% block head %}
     {% endblock %}
+    <!-- Custom External CSS -->
 </head>
-
 <body>
-<! -- Sidebar -->
-<div class="sidebar close">
-    <div class="logo-details">
-        <a class="a-logo" href="{{ url_for('home.home') }}" id="logo-link">
-            <img class="logo-icon" alt="Seven Suite Logo"
-                 src="{{ url_for('static', filename='img/seven_suite_icon.svg') }}">
-            <span class="logo_name">Seven&nbsp;Suite</span>
-        </a>
-    </div>
-    <ul class="nav-links">
-        <li>
-            <a href="{{ url_for('dashboard.dashboard') }}">
-                <i class="fa-solid fa-gauge"></i>
-                <span class="link_name">Dashboard</span>
-            </a>
-            <ul class="sub-menu blank">
-                <li><a class="link_name" href="{{ url_for('dashboard.dashboard') }}">Dashboard</a></li>
-            </ul>
-        </li>
-        <li>
-            <div class="iocn-link">
-                <a>
-                    <i class="fa-solid fa-database"></i>
-                    <span class="link_name">Databases</span>
-                </a>
-                <i class='bx bxs-chevron-down arrow'></i>
-            </div>
-            <ul class="sub-menu">
-                <li><a href="{{ url_for('regions.regions') }}">Regions</a></li>
-                <li><a href="{{ url_for('sites.sites') }}">Sites</a></li>
-                <hr class="w-75" style="color: white">
-                <li><a href="{{ url_for('routers.routers') }}">Routers</a></li>
-            </ul>
-        </li>
-        <li>
-            <div class="iocn-link">
-                <a>
-                    <i class="fa-solid fa-users"></i>
-                    <span class="link_name">Users</span>
-                </a>
-                <i class='bx bxs-chevron-down arrow'></i>
-            </div>
-            <ul class="sub-menu">
-                <li><a href="{{ url_for('users.users') }}">Users</a></li>
-                <li><a href="{{ url_for('users.log') }}">Log</a></li>
-            </ul>
-        </li>
-        <div class="user-actions">
-            <ul class="bg-dark dropdown-menu position-relative d-flex gap-1 p-2 rounded-3"
-                data-bs-theme="dark">
-                <li><a id="profile-button" class="dropdown-item rounded-2" href="{{ url_for('profile.profile') }}"><i
-                        class="fa-solid fa-address-card"></i>Profile</a></li>
-                <li>
-                    <hr class="dropdown-divider">
-                </li>
-                <li><a id="logout-button" class="dropdown-item rounded-2" href="{{ url_for('auth.logout') }}"><i
-                        class=" fa-solid fa-right-from-bracket"></i>Log Out</a></li>
-            </ul>
-        </div>
-        <div class="profile-details" style="text-align: left">
-            <div class="profile-content">
-                <img src="{{ session['user_avatar'] }}"
-                     alt="profileImg">
-            </div>
-            <div class="name-job">
-                <div class="profile_name">{{ session['user_name'] }} {{ session['user_lastname'] }}</div>
-                {% set job_display = {
-                    'admin': 'Admin',
-                    'employee': 'Employee',
-                    'guest': 'Guest'
-                } %}
-                <div class="job">{{ job_display[session['user_privileges']] }}</div>
-            </div>
-        </div>
-        </li>
-    </ul>
-</div>
-<! -- Sidebar -->
+{% from "macros.html" import sidebar, messages %}
 
-<! -- Content -->
+<!-- Sidebar -->
+{{ sidebar(menu_items, profile_menu_items) }}
+<!-- Sidebar -->
+
+<!-- Content -->
 <section class="home-section">
     <div class="home-content" id="home-content">
         <i class='bx bx-menu'></i>
         <span id="top-link" class="text"></span>
     </div>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="container-fluid pt-2 pb-2">
-                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                </div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-    {% block content %}
-    {% endblock %}
-</section>
-<! -- Content -->
+    <!-- Messages -->
+    {{ messages() }}
+    <!-- Messages -->
 
-<! -- Bootstrap JS -->
+    <!-- Content -->
+    {% block content %} {% endblock %}
+    <!-- Content -->
+</section>
+<!-- Content -->
+
+<!-- Bootstrap JavaScript -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
         crossorigin="anonymous"></script>
-<! -- Bootstrap JS -->
+<!-- Bootstrap JavaScript -->
 
-<! -- Data Tables JS -->
+<!-- Data Tables JavaScript -->
 <script src="https://cdn.datatables.net/v/bs5/jq-3.7.0/dt-2.0.8/datatables.min.js"></script>
-<! -- Data Tables JS -->
+<!-- Data Tables JavaScript -->
 
-<! -- Custom JS -->
+<!-- Custom Internal JavaScript -->
 <script src="{{ url_for('static', filename='js/base/sidebar.js') }}"></script>
 <script src="{{ url_for('static', filename='js/base/scripts.js') }}"></script>
-<script>
-    $(document).ready(function () {
-        let title = document.title;
-        $('#top-link').text(title);
-    });
-</script>
-<! -- Custom JS -->
+<!-- Custom Internal JavaScript -->
 
+<!-- Custom External JavaScript -->
 {% block scripts %}
 {% endblock %}
+<!-- Custom External JavaScript -->
 </body>
-
 </html>

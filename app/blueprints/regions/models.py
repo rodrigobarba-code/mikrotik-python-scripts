@@ -117,7 +117,7 @@ class Region(db.Model):
                 # If the region does not exist, raise RegionNotFound Exception
                 raise RegionNotFound(region_id)
             else:
-                # Verify if the region is associated with a site
+                # Verify if the region is associated with a router
                 if db.session.query(Site).filter(Site.fk_region_id == region_id).first():
                     # If the region is associated with a site, raise RegionAssociatedWithSite Exception
                     raise RegionAssociatedWithSite(

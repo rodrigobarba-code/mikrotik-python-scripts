@@ -2,101 +2,103 @@
 {% extends 'base.html' %}
 {% block title %} Regions {% endblock %}
 {% block head %}
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/regions/styles.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/regions/styles.css') }}">
 {% endblock %}
 {% block scripts %}
-<script src="{{ url_for('static', filename='js/regions/scripts.js') }}"></script>
-<script>
-    deleteSelectModal("{{ url_for('regions.bulk_delete_region') }}", "{{ url_for('regions.regions') }}", 'region');
-</script>
+    <script src="{{ url_for('static', filename='js/regions/scripts.js') }}"></script>
+    <script>
+        deleteAllModal("{{ url_for('regions.delete_all_regions') }}", "{{ url_for('regions.regions') }}", 'regions');
+        deleteSelectModal("{{ url_for('regions.bulk_delete_region') }}", "{{ url_for('regions.regions') }}", 'region');
+    </script>
 {% endblock %}
 {% block content %}
-<!-- Regions Jumbotron -->
-<section class="regions-jumbotron">
-    <div class="p-5 mb-4 base-jumbotron">
-        <div class="container-fluid py-5">
-            <h1 class="display-5 fw-bold">Regions</h1>
-            <p class="col-md-8 fs-4">Lorem Ipsum</p>
-            <a href="{{ url_for('regions.add_region') }}" class="btn btn-primary btn-lg" type="button"><i
-                    class="fa-solid fa-plus"></i> Create New Region</a>
-        </div>
-    </div>
-</section>
-<!-- Regions Jumbotron -->
-
-<!-- Regions Database -->
-<section class="regions-database pt-3">
-    <div class="container w-75">
-        <div class="row">
-            <div class="col-12 col-md-8 text-left">
-                <h2 class="users-database-title"><b>Available</b> Regions</h2>
-            </div>
-            <div class="col-12 col-md-4 d-flex justify-content-end">
-                <button type="button" class="btn btn-md btn-danger me-2" data-bs-toggle="modal" id="delete-select"
-                        data-bs-target="#delete-select-modal">
-                    <i class="fa-solid fa-square-minus"></i>&nbsp; Delete Selected
-                </button>
-                <button type="button" class="btn btn-md btn-dark" data-bs-toggle="modal"
-                        data-bs-target="#delete-all-modal">
-                    <i class="fa-solid fa-trash"></i>&nbsp; Delete All
-                </button>
+    <!-- Regions Jumbotron -->
+    <section class="regions-jumbotron">
+        <div class="p-5 mb-4 base-jumbotron">
+            <div class="container-fluid py-5">
+                <h1 class="display-5 fw-bold">Regions</h1>
+                <p class="col-md-8 fs-4">Lorem Ipsum</p>
+                <a href="{{ url_for('regions.add_region') }}" class="btn btn-primary btn-lg" type="button"><i
+                        class="fa-solid fa-plus"></i> Create New Region</a>
             </div>
         </div>
-    </div>
-</section>
-<!-- Regions Database -->
+    </section>
+    <!-- Regions Jumbotron -->
 
-<!-- Regions Separator -->
-<section class="regions-separator">
-    <div class="container w-75">
-        <hr>
-    </div>
-</section>
-<!-- Regions Separator -->
+    <!-- Regions Database -->
+    <section class="regions-database pt-3">
+        <div class="container w-75">
+            <div class="row">
+                <div class="col-12 col-md-8 text-left">
+                    <h2 class="regions-database-title"><b>Available</b> Regions</h2>
+                </div>
+                <div class="col-12 col-md-4 d-flex justify-content-end">
+                    <button type="button" class="btn btn-md btn-danger me-2" data-bs-toggle="modal" id="delete-select"
+                            data-bs-target="#delete-select-modal">
+                        <i class="fa-solid fa-square-minus"></i>&nbsp; Delete Selected
+                    </button>
+                    <button type="button" class="btn btn-md btn-dark" data-bs-toggle="modal" id="delete-all"
+                            data-bs-target="#delete-all-modal">
+                        <i class="fa-solid fa-trash"></i>&nbsp; Delete All
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Regions Database -->
 
-<!-- Regions Table -->
-<section class="regions-table hide-scroll pt-3 pb-3">
-    <div class="container w-75" id="regions-table-c">
-        <table class="table table-responsive" id="regions-table">
-            <thead>
-            <tr>
-                <th scope="col"></th>
-                <th scope="col">#</th>
-                <th scope="col">Region's Name</th>
-                <th scope="col">Actions</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for region in region_list %}
-            <tr>
-                <td class="text-center"><label for="region-{{ region.region_id }}"></label>
-                    <input type="checkbox" class="form-check-input" id="region-{{ region.region_id }}">
-                </td>
-                <th scope="row">{{ region.region_id }}</th>
-                <td>{{ region.region_name }}</td>
-                <td>
-                    <a href="{{ url_for('regions.update_region', region_id=region.region_id) }}" type="button"
-                       class="btn btn-sm btn-warning"><i class="fa-solid fa-edit"></i></a>
-                    <button type="button" id="delete-button-region-{{ region_id }}" class="btn btn-sm btn-danger"
-                            data-bs-toggle="modal"
-                            data-bs-target="#delete-modal"
-                            data-id="{{ region.region_id }}"
-                            data-type="region"
-                            data-url="{{ url_for('regions.delete_region', region_id=region.region_id) }}"
-                            data-name="{{ region.region_name }}"
-                    ><i class="fa-solid fa-trash"></i></button>
-                </td>
-            </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</section>
-<!-- Regions Table -->
+    <!-- Regions Separator -->
+    <section class="regions-separator">
+        <div class="container w-75">
+            <hr>
+        </div>
+    </section>
+    <!-- Regions Separator -->
 
-<!-- Delete Modals -->
-<div class="delete-modal-container">{{ delete_modal() }}</div>
-<div class="delete-select-modal-container">{{ delete_select_modal() }}</div>
-<div class="delete-all-modal-container">{{ delete_all_modal() }}</div>
-<!-- Delete Modals -->
+    <!-- Regions Table -->
+    <section class="regions-table hide-scroll pt-3 pb-3">
+        <div class="container w-75" id="regions-table-c">
+            <table class="table table-responsive" id="datatable-object">
+                <thead>
+                <tr>
+                    <th scope="col"></th>
+                    <th scope="col">#</th>
+                    <th scope="col">Region's Name</th>
+                    <th scope="col">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for region in region_list %}
+                    <tr>
+                        <td class="text-center"><label for="region-{{ region.region_id }}"></label>
+                            <input type="checkbox" class="form-check-input" id="region-{{ region.region_id }}">
+                        </td>
+                        <th scope="row">{{ region.region_id }}</th>
+                        <td>{{ region.region_name }}</td>
+                        <td>
+                            <a href="{{ url_for('regions.update_region', region_id=region.region_id) }}" type="button"
+                               class="btn btn-sm btn-warning"><i class="fa-solid fa-edit"></i></a>
+                            <button type="button" id="delete-button-region-{{ region.region_id }}"
+                                    class="btn btn-sm btn-danger"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#delete-modal"
+                                    data-id="{{ region.region_id }}"
+                                    data-type="region"
+                                    data-url="{{ url_for('regions.delete_region', region_id=region.region_id) }}"
+                                    data-name="{{ region.region_name }}"
+                            ><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+    <!-- Regions Table -->
+
+    <!-- Delete Modals -->
+    <div class="delete-modal-container">{{ delete_modal() }}</div>
+    <div class="delete-select-modal-container">{{ delete_select_modal() }}</div>
+    <div class="delete-all-modal-container">{{ delete_all_modal() }}</div>
+    <!-- Delete Modals -->
 {% endblock %}

@@ -26,12 +26,13 @@
                 <div class="form-group">
                     <label class="mb-2" for="site_name">Site's Name</label>
                     <input value="{{ site.site_name if site is not none }}" type="text" class="form-control mb-2"
-                           id="site_name" name="site_name" placeholder="Enter site's name" maxlength="128">
+                           id="site_name" name="site_name" placeholder="Enter site's name" maxlength="128" required>
                 </div>
                 <div class="row">
                     <div class="col">
                         <label class="mb-2" for="fk_region_id">Region</label>
-                        <select class="form-select" id="fk_region_id" name="fk_region_id" aria-label="Region Selector" required>
+                        <select class="form-select" id="fk_region_id" name="fk_region_id" aria-label="Region Selector"
+                                required>
                             <option value="" selected>Choose a region</option>
                             {% for region in region_list %}
                                 {% if site is not none and region.region_id == site.fk_region_id %}
@@ -46,7 +47,8 @@
                         <label class="mb-2" for="site_name">Site's Segment</label>
                         <input value="{{ site.site_segment if site is not none }}" type="number"
                                class="form-control mb-2"
-                               id="site_segment" name="site_segment" placeholder="Enter site's name" maxlength="10" required>
+                               id="site_segment" name="site_segment" placeholder="Enter site's name" maxlength="10"
+                               required>
                     </div>
                 </div>
                 <div class="mb-3 form-check">
