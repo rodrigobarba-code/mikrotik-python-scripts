@@ -25,6 +25,7 @@ def login():
             if bcrypt.checkpw(password, user.user_password):  # Check the password hash with the one in the database
                 # Create the session variables for the user
                 session['user_id'] = user.user_id  # Identify the user by the user_id
+                session['user_username'] = user.user_username  # Identify the user by the user_username
                 session['user_privileges'] = user.user_privileges  # Identify the user by the user_privileges
                 session['user_name'] = user.user_name  # Indentify the user by the user_name
                 session['user_lastname'] = user.user_lastname  # Indentify the user by the user_lastname
@@ -52,6 +53,7 @@ def logout():
     # Remove all user information from client session
     session.pop('user_id', None)  # Remove the user_id session variable
     session.pop('user_privileges', None)  # Remove the user_privileges session variable
+    session.pop('user_username', None)  # Remove the user_username session variable
     session.pop('user_name', None)  # Remove the user_name session variable
     session.pop('user_lastname', None)  # Remove the user_lastname session variable
     session.pop('user_avatar', None)  # Remove the user_avatar session variable
