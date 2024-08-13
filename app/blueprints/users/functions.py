@@ -11,6 +11,8 @@ from app.blueprints.users.models import UserLog
 # Importing Necessary Entities
 from app.blueprints.users.entities import UserEntity
 from app.blueprints.users.entities import UserLogEntity
+
+
 # Importing Necessary Entities
 
 # Class for Users Functions
@@ -18,6 +20,7 @@ class UsersFunctions:
     # Constructor
     def __init__(self):  # Constructor
         pass  # Pass the constructor
+
     # Constructor
 
     # Function to create a log for an action made by a user
@@ -37,6 +40,8 @@ class UsersFunctions:
         user_log.validate()  # Validate the UserLogEntity object
         UserLog.add_user_log(user_log)  # Add the log to the database
     # Function to create a log for an action made by a user
+
+
 # Class for Users Functions
 
 # Create an object for the UsersFunctions class
