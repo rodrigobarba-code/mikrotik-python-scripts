@@ -1,6 +1,6 @@
 <!-- Macros for the modals -->
 <!-- Macro for sidebar -->
-{% macro sidebar(menu_items, profile_menu_items) %}
+{% macro sidebar(menu_items, profile_menu_items, job_display) %}
     <div class="sidebar close">
         <div class="logo-details">
             <a class="a-logo" href="{{ url_for('home.home') }}" id="logo-link">
@@ -8,6 +8,7 @@
                      src="{{ url_for('static', filename='img/seven_suite_icon.svg') }}">
                 <span class="logo_name">Seven&nbsp;Suite</span>
             </a>
+            <i class="close-sidebar-btn fas fa-times"></i>
         </div>
         <ul class="nav-links">
             {% for item in menu_items %}
@@ -68,7 +69,6 @@
             </div>
             <div class="name-job">
                 <div class="profile_name">{{ session['user_name'] }} {{ session['user_lastname'] }}</div>
-                {% set job_display = {'admin': 'Admin', 'employee': 'Employee', 'guest': 'Guest'} %}
                 <div class="job">{{ job_display[session['user_privileges']] }}</div>
             </div>
         </div>
@@ -185,3 +185,30 @@
 {% endmacro %}
 <!-- Macro for the not item found -->
 <!-- Macros for the modals -->
+
+<!-- Macros for the settings -->
+
+<!-- Macro for the tab nav item -->
+{% macro tab_nav_item(href, text, icon, active=False, is_tab=False) %}
+    <li class="nav-item">
+        <a href="{{ href }}" class="nav-link {% if active %}active{% endif %}" data-bs-toggle="tab" role="tab">
+            <i class="fas fa-{{ icon }} me-2"></i>
+            {% if not is_tab %}{{ text }}{% endif %}
+        </a>
+    </li>
+{% endmacro %}
+<!-- Macro for the tab nav item -->
+
+<!-- Macro for the tab content -->
+{% macro tab_content(id, title, active=False) %}
+    <div class="tab-pane fade {% if active %}show active{% endif %}" id="{{ id }}" role="tabpanel">
+        <h6>{{ title }}</h6>
+        <hr>
+        <form>
+            <!-- Form content here -->
+        </form>
+    </div>
+{% endmacro %}
+<!-- Macro for the tab content -->
+
+<!-- Macros for the settings -->
