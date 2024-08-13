@@ -9,24 +9,11 @@
     align-items: center;
 }
 
-.main-profile {
-    width: 100%;
-    margin-top: 0;
-    text-align: left;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
+.user-profile {
+    transform: translate(0, -45%);
+    width: auto;
 }
 
-.user-profile-img {
-    margin-left: 50px;
-}
-
-.user-profile-img img {
-
-}
-
-.user-profile-info {
-    margin-left: 250px;
+.user-profile-info{
+    text-align: center;
 }
