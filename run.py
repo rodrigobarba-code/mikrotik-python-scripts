@@ -1,7 +1,7 @@
 # Importing main application constructor
 from app import create_app
 from flask_caching import Cache
-from app.config import AppConfig, Sidebar
+from app.config import AppConfig, Sidebar, UserJobs
 # Importing main application constructor
 
 app = create_app()  # Creating application instance
@@ -13,6 +13,7 @@ cache = Cache(app, config={'CACHE_TYPE': 'simple'})  # Initializing the cache
 def injects():
     return dict(
         menu_items=Sidebar.menu_items,  # Injecting menu items into the context
+        job_display = UserJobs.job_display,  # Injecting user jobs into the context
         profile_menu_items=Sidebar.profile_menu_items  # Injecting profile menu items into the context
     )
 # Injecting global variables into the context
@@ -24,3 +25,4 @@ if __name__ == '__main__':
         debug=AppConfig.DEBUG  # Running the app in debug mode
     )  # Running the app with the configurations
 # Running application
+
