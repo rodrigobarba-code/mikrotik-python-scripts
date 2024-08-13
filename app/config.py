@@ -42,6 +42,20 @@ class Sidebar:
                 {'name': 'Users', 'endpoint': 'users.users'},  # Name and endpoint of the submenu item
                 {'name': 'Log', 'endpoint': 'users.log'}  # Name and endpoint of the submenu item
             ]
+        },
+        {
+            'name': 'Router Scan',  # Name of the menu item
+            'icon': 'fa-solid fa-satellite-dish',  # Icon of the menu item
+            'endpoint': 'scan.scan',  # Endpoint of the menu item
+            'submenu': None  # Submenu of the menu item
+        },
+        {
+            'name': 'IP Address Management',  # Name of the menu item
+            'icon': 'fa-solid fa-ethernet',  # Icon of the menu item
+            'endpoint': '#',  # Endpoint of the menu item, if endpoint is # then it is a dropdown menu
+            'submenu': [  # Submenu of the menu item
+                {'name': 'IP Addresses', 'endpoint': 'dashboard.dashboard'}  # Name and endpoint of the submenu item
+            ]
         }
     ]
     # Sidebar menu items
