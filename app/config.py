@@ -1,9 +1,12 @@
 import os  # Importing OS module to generate a random secret key
 
+
 # Config class to store all the configurations of the database
 class DatabaseConfig:
     SQLALCHEMY_TRACK_MODIFICATIONS = False  # SQLALCHEMY_TRACK_MODIFICATIONS too False to suppress warning
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///seven_suite.db'  # Database URI for the app
+
+
 # Config class to store all the configurations of the database
 
 # Config class to store all the configurations of the application
@@ -11,6 +14,8 @@ class AppConfig:
     PORT = 5000  # Port number for the app
     DEBUG = True  # Debug mode for the app
     SECRET_KEY = os.urandom(24)  # Secret key for the app
+
+
 # Config class to store all the configurations of the application
 
 # Class for sidebar definition
@@ -51,7 +56,14 @@ class Sidebar:
         {
             'name': 'Profile',  # Name of the menu item
             'icon': 'fa-solid fa-address-card',  # Icon of the menu item
-            'endpoint': '#',  # Endpoint of the menu item blank if endpoint is #
+            'endpoint': 'profile.profile',  # Endpoint of the menu item blank if endpoint is #
+            'profile': True  # Profile menu item
+        },
+        'separator',  # Separator for the profile menu items
+        {
+            'name': 'Settings',  # Name of the menu item
+            'icon': 'fa-solid fa-cog',  # Icon of the menu item
+            'endpoint': 'settings.settings',  # Endpoint of the menu item
             'profile': True  # Profile menu item
         },
         'separator',  # Separator for the profile menu items
@@ -63,4 +75,13 @@ class Sidebar:
         }
     ]
     # Sidebar profile menu items
+
+
 # Class for sidebar definition
+
+# Class for user jobs
+class UserJobs:
+    # User jobs
+    job_display = {'admin': 'Admin', 'employee': 'Employee', 'guest': 'Guest'}
+    # User jobs
+# Class for user jobs
