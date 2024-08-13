@@ -375,7 +375,6 @@ html, body {
         width: 260px; /* Adjust based on your sidebar width */
         position: fixed; /* Ensure sidebar is positioned over content */
         left: 0; /* Ensure sidebar is positioned at the left edge */
-        overflox-y: hidden;
     }
 
     .home-section {
@@ -411,4 +410,33 @@ html, body {
         transform: translateY(0); /* Move it to its natural position */
         pointer-events: auto; /* Allow interaction */
     }
+}
+
+/* Ensure the button is visible when the sidebar is open */
+.sidebar .close-sidebar-btn {
+    display: block;
+    opacity: 1; /* Ensure the button is fully visible */
+}
+
+/* Add transition for smooth appearance/disappearance of the close button */
+.close-sidebar-btn {
+    transform: translate(90px, 0); /* Move it out of view */
+    cursor: pointer;
+    border-radius: 200px;
+    background-color: #1d1b31;
+    transition: opacity 0.8s ease, transform 0.8s ease; /* Add transition properties */
+    z-index: -1;
+}
+
+/* Ensure the button is hidden when the sidebar is closed */
+.sidebar.close .close-sidebar-btn {
+    transform: translate(0, 0); /* Initial position */
+    opacity: 0; /* Hide the button */
+    pointer-events: none; /* Prevent interaction when hidden */
+}
+
+/* Add this class to disable animations */
+.no-animation {
+    animation: none !important;
+    transform: none !important;
 }
