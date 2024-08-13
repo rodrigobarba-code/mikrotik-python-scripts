@@ -45,7 +45,7 @@
                         <div class="form-group">
                             <label for="router_brand">Router Brand</label>
                             <input type="text" class="form-control" id="router_brand" name="router_brand"
-                                   value="{{ router.router_brand if router is not none else '' }}" maxlength="128" required>
+                                   value="Mikrotik" maxlength="128" disabled>
                         </div>
                     </div>
                     <div class="col-6">
@@ -86,7 +86,7 @@
                         <div class="form-group">
                             <label for="router_mac">Router MAC Address</label>
                             <input type="text" class="form-control" id="router_mac" name="router_mac"
-                                   value="{{ router.router_mac if router is not none else '' }}" maxlength="17" pattern="^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$" required>
+                                   value="{{ router.router_mac if router is not none else '' }}" maxlength="17" pattern="^([0-9A-Fa-f]{2}[:]){5}([0-9A-Fa-f]{2})$" required>
                         </div>
                     </div>
                 </div>
@@ -113,6 +113,11 @@
                           <label class="form-check-label" for="allow_scan">Allow Remote Scan</label>
                         </div>
                     </div>
+                </div>
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="condition-check">
+                    <label class="form-check-label" for="condition-check">I've read and accept that the data provided will be
+                        used to create or update a new router.</label>
                 </div>
                 <div class="row">
                     <div class="col-12">

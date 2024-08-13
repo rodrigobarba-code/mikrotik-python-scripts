@@ -1,3 +1,4 @@
+{% from 'macros.html' import delete_modal, delete_select_modal, delete_all_modal %}
 {% extends 'base.html' %}
 {% block title %} Users {% endblock %}
 {% block head %}
@@ -6,8 +7,8 @@
 {% block scripts %}
     <script src="{{ url_for('static', filename='js/users/scripts.js') }}"></script>
     <script>
-        deleteSelectedUsersModal("{{ url_for('users.bulk_delete_user') }}", "{{ url_for('users.users') }}");
-        deleteAllUsersModal("{{ url_for('users.delete_all_users') }}", "{{ url_for('users.users') }}");
+        deleteAllModal("{{ url_for('users.delete_all_users') }}", "{{ url_for('users.users') }}", 'users');
+        deleteSelectModal("{{ url_for('users.bulk_delete_user') }}", "{{ url_for('users.users') }}", 'user');
     </script>
 {% endblock %}
 {% block content %}
@@ -29,15 +30,16 @@
         <div class="container w-75">
             <div class="row">
                 <div class="col-12 col-md-8 text-left">
-                    <h2 class="users-database-title"><b>Available</b> Users</h2>
+                    <h2 class="sites-database-title"><b>Available</b> Users</h2>
                 </div>
                 <div class="col-12 col-md-4 d-flex justify-content-end">
-                    <button class="btn btn-danger me-2" data-bs-toggle="modal" id="delete-selected"
-                            data-bs-target="#delete-select-modal-users">
-                        Delete Selected
+                    <button type="button" class="btn btn-md btn-danger me-2" data-bs-toggle="modal" id="delete-select"
+                            data-bs-target="#delete-select-modal">
+                        <i class="fa-solid fa-square-minus"></i>&nbsp; Delete Selected
                     </button>
-                    <button class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#delete-all-modal-users">
-                        Delete All
+                    <button type="button" class="btn btn-md btn-dark" data-bs-toggle="modal" id="delete-all"
+                            data-bs-target="#delete-all-modal">
+                        <i class="fa-solid fa-trash"></i>&nbsp; Delete All
                     </button>
                 </div>
             </div>
@@ -56,7 +58,7 @@
     <!-- Users Table -->
     <section class="users-table hide-scroll pt-3 pb-3">
         <div class="container w-75" id="regions-table-c">
-            <table class="table table-responsive" id="users-table">
+            <table class="table table-responsive" id="datatable-object">
                 <thead>
                 <tr>
                     <th scope="col"></th>
@@ -72,9 +74,8 @@
                 <tbody>
                 {% for user in user_list %}
                     <tr>
-                        <td class="text-center"><label for="user-{{ user.user_id }}"></label><input type="checkbox"
-                                                                                                    class="form-check-input"
-                                                                                                    id="user-{{ user.user_id }}">
+                        <td class="text-center"><label for="user-{{ user.user_id }}"></label>
+                            <input type="checkbox" class="form-check-input" id="user-{{ user.user_id }}">
                         </td>
                         <th scope="row">{{ user.user_id }}</th>
                         <td>{{ user.user_username }}</td>
@@ -82,15 +83,20 @@
                         <td>{{ user.user_lastname }}</td>
                         <td>{{ user.user_privileges }}</td>
                         <td><h5><span
-                                class="badge bg-{{ "success" if user.user_state == 1 else "danger" }}">{{ "Active" if user.user_state == 1 else "Inactive" }}</span>
+                                class="badge bg-{{ 'success' if user.user_state == 1 else 'danger' }}">{{ "Active" if user.user_state == 1 else "Inactive" }}</span>
                         </h5></td>
                         <td>
                             <a href="{{ url_for('users.update_user', user_id=user.user_id) }}" type="button"
-                               class="btn btn-sm btn-warning"><i
-                                    class="fa-solid fa-edit"></i></a>
-                            <a href="{{ url_for('users.delete_user', user_id=user.user_id) }}" type="button"
-                               class="btn btn-sm btn-danger"><i
-                                    class="fa-solid fa-trash"></i></a>
+                               class="btn btn-sm btn-warning"><i class="fa-solid fa-edit"></i></a>
+                            <button type="button" id="delete-button-user-{{ user.user_id }}"
+                                    class="btn btn-sm btn-danger"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#delete-modal"
+                                    data-id="{{ user.user_id }}"
+                                    data-type="site"
+                                    data-url="{{ url_for('users.delete_user', user_id=user.user_id) }}"
+                                    data-name="{{ user.user_username }}"
+                            ><i class="fa-solid fa-trash"></i></button>
                         </td>
                     </tr>
                 {% endfor %}
@@ -100,48 +106,9 @@
     </section>
     <!-- Users Table -->
 
-    <!-- Delete Select Modal Users -->
-    <section class="delete-select-modal-users">
-        <div class="modal fade" id="delete-select-modal-users" tabindex="-1" aria-labelledby="" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="">Confirm Deletion</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        Are you sure you want to delete <span id="total-selected">0</span> user(s)?
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="button" class="btn btn-danger" id="confirm-delete">Delete</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    <!-- Delete Select Modal Users -->
-
-    <!-- Delete All Modal Users -->
-    <section class="delete-all-modal-users">
-        <div class="modal fade" id="delete-all-modal-users" tabindex="-1" aria-labelledby=""
-             aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="">Confirm Deletion</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body
-                    ">Are you sure you want to delete all users?
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="button" class="btn btn-danger" id="confirm-delete-all">Delete</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    <!-- Delete All Modal Users -->
+    <!-- Delete Modals -->
+    <div class="delete-modal-container">{{ delete_modal() }}</div>
+    <div class="delete-select-modal-container">{{ delete_select_modal() }}</div>
+    <div class="delete-all-modal-container">{{ delete_all_modal() }}</div>
+    <!-- Delete Modals -->
 {% endblock %}

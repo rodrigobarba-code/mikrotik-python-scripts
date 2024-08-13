@@ -1,83 +1,15 @@
+{% from 'macros.html' import delete_modal, delete_select_modal, delete_all_modal %}
 {% extends 'base.html' %}
 {% block title %} Routers {% endblock %}
 {% block head %}
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/routers/styles.css') }}">
 {% endblock %}
 {% block scripts %}
-    <script src="{{ url_for('static', filename='js/routers/scripts.js') }}"></script>
+    <script src="{{ url_for('static', filename='/js/routers/scripts.js') }}"></script>
     <script>
-        document.getElementById('delete-selected').addEventListener('click', function () {
-            const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
-            document.getElementById('total-selected').innerText = String(checkboxes.length);
-        });
-
-        document.getElementById('confirm-delete').addEventListener('click', function () {
-            const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
-            const selectedIds = Array.from(checkboxes).map(cb => cb.id.replace('router-', ''));
-
-            if (selectedIds.length > 0) {
-                fetch('{{ url_for('routers.bulk_delete_router') }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({router_ids: selectedIds})
-                }).then(response => {
-                    if (response.ok) {
-                        location.href = '{{ url_for('routers.routers') }}';
-
-                    } else {
-                        alert('Failed to delete routers');
-                    }
-                });
-            } else {
-                alert('No routers selected');
-            }
-        });
-
-        document.getElementById('confirm-delete-all').addEventListener('click', function () {
-            fetch('{{ url_for('routers.delete_all_routers') }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            }).then(response => {
-                if (response.ok) {
-                    location.href = '{{ url_for('routers.routers') }}';
-                } else {
-                    alert('Failed to delete routers');
-                }
-            });
-        });
-
-        function show_router_details(router_id) {
-            fetch('{{ url_for('routers.get_router_details') }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({router_id: router_id})
-            }).then(response => {
-                if (response.ok) {
-                    response.json().then(data => {
-                        document.getElementById('router-name-d').innerText = data.router_name;
-                        document.getElementById('router-description-d').innerText = data.router_description;
-                        document.getElementById('router-brand-d').innerText = data.router_brand;
-                        document.getElementById('router-model-d').innerText = data.router_model;
-                        document.getElementById('router-site-d').innerText = data.fk_site_id;
-                        document.getElementById('router-ip-d').innerText = data.router_ip;
-                        document.getElementById('router-mac-d').innerText = data.router_mac;
-                        document.getElementById('router-username-d').innerText = data.router_username;
-                        document.getElementById('router-password-d').innerText = data.router_password;
-                        document.getElementById('router-allow-scan-d').innerText = data.allow_scan;
-
-                        $('#detailsModal').modal('show');
-                    });
-                } else {
-                    alert('Failed to get router details');
-                }
-            });
-        }
+        const routerDetails = new RouterDetails('{{ url_for('routers.get_router_details') }}');
+        deleteAllModal("{{ url_for('routers.delete_all_routers') }}", "{{ url_for('routers.routers') }}", 'routers');
+        deleteSelectModal("{{ url_for('routers.bulk_delete_router') }}", "{{ url_for('routers.routers') }}", 'router');
     </script>
 {% endblock %}
 {% block content %}
@@ -102,19 +34,19 @@
                 <div class="col-8 text-left">
                     <h2 class="routers-database-title"><b>Available</b> Routers</h2>
                 </div>
-                <div class="col-4 d-flex justify-content-end">
-                    <button class="btn btn-danger me-2" id="delete-selected" data-bs-toggle="modal"
-                            data-bs-target="#deleteModal">
-                        Delete Selected
+                <div class="col-12 col-md-4 d-flex justify-content-end">
+                    <button type="button" class="btn btn-md btn-danger me-2" data-bs-toggle="modal" id="delete-select"
+                            data-bs-target="#delete-select-modal">
+                        <i class="fa-solid fa-square-minus"></i>&nbsp; Delete Selected
                     </button>
-                    <button class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#deleteAllModal">
-                        Delete All
+                    <button type="button" class="btn btn-md btn-dark" data-bs-toggle="modal" id="delete-all"
+                            data-bs-target="#delete-all-modal">
+                        <i class="fa-solid fa-trash"></i>&nbsp; Delete All
                     </button>
                 </div>
             </div>
         </div>
     </section>
-
     <!-- Routers Database -->
 
     <!-- Routers Separator -->
@@ -128,7 +60,7 @@
     <!-- Routers Table -->
     <section class="routers-table hide-scroll pt-3 pb-3">
         <div class="container w-75" id="sites-table-c">
-            <table class="table table-responsive" id="routers-table">
+            <table class="table table-responsive" id="datatable-object">
                 <thead>
                 <tr>
                     <th scope="col"></th>
@@ -141,23 +73,31 @@
                 </thead>
                 <tbody>
                 {% for router in router_list %}
-                    <tr class="main-row" data-router-id="{{ router.router_id }}">
-                        <td class="text-center"><label for="router-{{ router.router_id }}"></label><input
-                                type="checkbox" class="form-check-input" id="router-{{ router.router_id }}"></td>
+                    <tr>
+                        <td class="text-center"><label for="router-{{ router.router_id }}"></label>
+                            <input type="checkbox" class="form-check-input" id="router-{{ router.router_id }}">
+                        </td>
                         <td>{{ router.router_id }}</td>
                         <td>{{ router.router_name }}</td>
                         <td>{{ router.router_description }}</td>
-                        <td><h5><span
-                                class="badge rounded-pill bg-{{ "success" if router.allow_scan == 1 else "secondary" }}">{{ "Enable" if router.allow_scan == 1 else "Disable" }}</span>
-                        </h5></td>
                         <td>
-                            <a href="{{ url_for('routers.update_router', router_id=router.router_id) }}"
-                               class="btn btn-warning" type="button"><i class="fa-solid fa-edit"></i></a>
-                            <a href="{{ url_for('routers.delete_router', router_id=router.router_id) }}"
-                               class="btn btn-danger" type="button"><i class="fa-solid fa-trash"></i></a>
+                            <h5><span class="badge rounded-pill bg-{{ 'success' if router.allow_scan == 1 else 'secondary'}}">{{ "Enable" if router.allow_scan == 1 else "Disable" }}</span></h5>
+                        </td>
+                        <td>
+                            <a href="{{ url_for('routers.update_router', router_id=router.router_id) }}" type="button"
+                               class="btn btn-sm btn-warning"><i class="fa-solid fa-edit"></i></a>
+                            <button type="button" id="delete-button-router-{{ router.router_id }}"
+                                    class="btn btn-sm btn-danger"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#delete-modal"
+                                    data-id="{{ router.router_id }}"
+                                    data-type="router"
+                                    data-url="{{ url_for('routers.delete_router', router_id=router.router_id) }}"
+                                    data-name="{{ router.router_name }}"
+                            ><i class="fa-solid fa-trash"></i></button>
                             <button data-bs-toggle="modal" data-bs-target="#detailsModal"
-                                    class="btn btn-primary show-details-button" type="button"
-                                    onclick="show_router_details({{ router.router_id }})"><i
+                                    class="btn btn-sm btn-primary show-details-button" type="button"
+                                    onclick="routerDetails.show('{{ router.router_id }}')"><i
                                     class="fa-solid fa-eye"></i></button>
                         </td>
                     </tr>
@@ -168,50 +108,11 @@
     </section>
     <!-- Routers Table -->
 
-    <!-- Router Selected Delete Modal -->
-    <section class="router-selected-delete-modal">
-        <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="deleteModalLabel">Confirm Deletion</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        Are you sure you want to delete <span id="total-selected">0</span> router(s)?
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="button" class="btn btn-danger" id="confirm-delete">Delete</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    <!-- Router Selected Delete Modal -->
-
-    <!-- Router Delete All Modal -->
-    <section class="router-delete-all-modal" id="deleteAll">
-        <div class="modal fade" id="deleteAllModal" tabindex="-1" aria-labelledby="deleteAllModalLabel"
-             aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="deleteAllModalLabel">Confirm Deletion</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body
-                    ">Are you sure you want to delete all routers?
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="button" class="btn btn-danger" id="confirm-delete-all">Delete</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    <!-- Router Delete All Modal -->
+    <!-- Delete Modals -->
+    <div class="delete-modal-container">{{ delete_modal() }}</div>
+    <div class="delete-select-modal-container">{{ delete_select_modal() }}</div>
+    <div class="delete-all-modal-container">{{ delete_all_modal() }}</div>
+    <!-- Delete Modals -->
 
     <!-- Router Details Modal -->
     <section class="router-details-modal">
@@ -266,5 +167,4 @@
         </div>
     </section>
     <!-- Router Details Modal -->
-    <!-- Router Table -->
 {% endblock %}

@@ -7,7 +7,7 @@
 {% block scripts %}
     <script src="{{ url_for('static', filename='js/users/scripts.js') }}"></script>
     <script>
-        deleteByDateUserLogModal("{{ url_for('users.delete_by_date_user_log') }}", "{{ url_for('users.log') }}");
+        deleteByDateUserLogModal("{{ url_for('users.delete_from_date_user_log') }}", "{{ url_for('users.log') }}");
     </script>
 {% endblock %}
 {% block content %}
@@ -27,19 +27,19 @@
         <div class="row">
             <div class="col-md-4">
                 <div class="mb-3">
-                    <label for="basic-url" class="form-label">Filter by text:</label>
+                    <label for="searchbox-user-log" class="form-label">Filter by text:</label>
                     <div class="input-group">
                         <input id="searchbox-user-log" type="text" class="form-control"
                                placeholder="Search by text"
                                aria-label=""
                                aria-describedby="button-addon2">
                     </div>
-                    <div class="form-text" id="basic-addon4">Ex. Added User, Deleted User, Updated User, etc.</div>
+                    <div class="form-text">Ex. Added User, Deleted User, Updated User, etc.</div>
                 </div>
             </div>
             <div class="col-md-2">
                 <div class="mb-3">
-                    <label for="basic-url" class="form-label">Filter by category:</label>
+                    <label for="selectbox-user-log" class="form-label">Filter by category:</label>
                     <div class="input-group">
                         <select id="selectbox-user-log" class="form-select" aria-label="">
                             <option selected value="all">All</option>
@@ -50,28 +50,28 @@
                             <option value="logout">Logout</option>
                         </select>
                     </div>
-                    <div class="form-text" id="basic-addon4">If you want to sort by a specific badge.</div>
+                    <div class="form-text">If you want to sort by a specific badge.</div>
                 </div>
             </div>
             <div class="col-md-2">
                 <div class="mb-3">
-                    <label for="basic-url" class="form-label">Filter by date:</label>
+                    <label for="datebox-user-log" class="form-label">Filter by date:</label>
                     <div class="input-group">
                         <input type="date" class="form-control" id="datebox-user-log" name="datebox-user-log">
                     </div>
-                    <div class="form-text" id="basic-addon4">If you want to sort by a specific date.</div>
+                    <div class="form-text">If you want to sort by a specific date.</div>
                 </div>
             </div>
             <div class="col-md-2">
                 <div class="mb-3">
-                    <label for="basic-url" class="form-label">&nbsp;</label>
+                    <label class="form-label">&nbsp;</label>
                     <div class="input-group w-100">
                         <button type="button" class="btn btn-danger w-100" data-bs-toggle="modal"
                                 data-bs-target="#delete-by-date-user-log-modal">
                             <i class="fa-solid fa-calendar-days"></i>&nbsp; Delete by date
                         </button>
                     </div>
-                    <div class="form-text" id="basic-addon4">Delete above from a specific date.</div>
+                    <div class="form-text">Delete above from a specific date.</div>
                 </div>
             </div>
             <div class="col-md-2 pb-md-3 d-flex justify-content-end align-items-end">
@@ -101,16 +101,18 @@
                             {% else %}
                                 <ul class="timeline">
                                     {% for log in user_log_list %}
-                                        <li class="event" data-date="{{ log.user_log_date[0] }}&#10;{{ log.user_log_date[1] }}">
+                                        <script>
+
+                                        </script>
+                                        <li class="event" data-date="" data-datetime="{{ log.user_log_date }}">
                                             <h6>It has been done a <span
                                                     class="badge bg-{% if log.user_log_action == 'INSERT' %}success{% elif log.user_log_action == 'UPDATE' %}warning{% elif log.user_log_action == 'DELETE' %}danger{% elif log.user_log_action == 'LOGIN' %}primary{% else %}secondary{% endif %}">{{ log.user_log_action }}</span>
                                             </h6>
-
                                             {% if log.user_log_action in ['INSERT', 'UPDATE', 'DELETE'] %}
                                                 <p>On the table {{ log.user_log_table }}, by
-                                                    Username: {{ user_functions.get_user(log.fk_user_id).user_username }},
+                                                    Username: {{ log.rk_user_username }},
                                                     With
-                                                    Name: {{ user_functions.get_user(log.fk_user_id).user_name }} {{ user_functions.get_user(log.fk_user_id).user_lastname }}</p>
+                                                    Name: {{ log.rk_user_name }} {{ log.rk_user_lastname }}</p>
                                                 <p>Description: {{ log.user_log_description }}</p>
                                                 <strong>
                                                     <p>The Public IP Address is {{ log.user_log_public_ip }}</p>
@@ -118,13 +120,15 @@
                                                 </strong>
                                             {% else %}
                                                 {% if log.user_log_action == 'LOGIN' %}
-                                                    <p>It has occured a login, by user {{ log.fk_user_id }}</p>
+                                                    <p>It has occurred a login, by user {{ log.rk_user_username }}, name:
+                                                        {{ log.rk_user_name }} {{ log.rk_user_lastname }}</p>
                                                     <strong>
                                                         <p>The Public IP Address is {{ log.user_log_public_ip }}</p>
                                                         <p>The Local IP Address is {{ log.user_log_local_ip }}</p>
                                                     </strong>
                                                 {% else %}
-                                                    <p>It has occured a logout, by user {{ log.fk_user_id }}</p>
+                                                    <p>It has occurred a logout, by user {{ log.rk_user_username }}, name:
+                                                        {{ log.rk_user_name }} {{ log.rk_user_lastname }}</p>
                                                     <strong>
                                                         <p>The Public IP Address is {{ log.user_log_public_ip }}</p>
                                                         <p>The Local IP Address is {{ log.user_log_local_ip }}</p>

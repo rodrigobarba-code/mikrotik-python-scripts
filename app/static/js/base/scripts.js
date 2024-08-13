@@ -51,10 +51,10 @@ $(document).ready(function () {
  */
 document.addEventListener('DOMContentLoaded', () => {
     const buttonCheckCondition = document.getElementById('condition-check');  // Get the condition check button
-    const regionForm = document.querySelector('form');  // Get the region form
+    const checkForm = document.querySelector('form');  // Get the region form
 
     // Add event listener to the form to verify if the checkbox is checked
-    regionForm.addEventListener('submit', (e) => {
+    checkForm.addEventListener('submit', (e) => {
         // Check if the checkbox is not checked
         if (!buttonCheckCondition.checked) {
             e.preventDefault();  // Prevent the form from submitting

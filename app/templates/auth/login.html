@@ -5,38 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body.dark-mode {
-            background-color: #121212;
-            color: #ffffff;
-        }
-
-        .card.glass {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .dark-mode .card.glass {
-            background: rgba(255, 255, 255, 0.1);
-            color: #ffffff;
-        }
-
-        .form-control.dark-mode #username,
-        .form-control.dark-mode #password {
-            background-color: #444444 !important;
-        }
-    </style>
 </head>
 <body>
+<!-- Login Form -->
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-6">
-            <div class="card mt-5 glass">
+            <div class="card mt-5">
                 <div class="card-header text-center">
                     <h3>Login</h3>
-                    <button id="dark-mode-toggle" class="btn btn-secondary btn-sm">Toggle Dark Mode</button>
                 </div>
                 <div class="card-body">
                     <form method="POST" action="{{ url_for('auth.login') }}">
@@ -55,14 +32,14 @@
                             </div>
                         </div>
                         {% with messages = get_flashed_messages(with_categories=true) %}
-                        {% endwith %}
                         {% if messages %}
-                            <div class="alert alert-danger">
-                                {% for category, message in messages %}
-                                    {{ message }}
-                                {% endfor %}
-                            </div>
+                        <div class="alert alert-danger">
+                            {% for category, message in messages %}
+                            {{ message }}
+                            {% endfor %}
+                        </div>
                         {% endif %}
+                        {% endwith %}
                         <button type="submit" class="btn btn-primary btn-block">Login</button>
                     </form>
                 </div>
@@ -70,13 +47,12 @@
         </div>
     </div>
 </div>
+<!-- Login Form -->
+
+<!-- External JavaScript -->
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-<script>
-    document.getElementById('dark-mode-toggle').addEventListener('click', function () {
-        document.body.classList.toggle('dark-mode');
-    });
-</script>
+<!-- External JavaScript -->
 </body>
 </html>

@@ -92,12 +92,16 @@
                     </div>
                 </div>
                 <div class="mb-3 form-check">
-                    <input type="checkbox" class="form-check-input" id="users-check">
-                    <label class="form-check-label" for="users-check">I've read and accept that the data provided will
+                    <input type="checkbox" class="form-check-input" id="condition-check">
+                    <label class="form-check-label" for="condition-check">I've read and accept that the data provided will
                         be used to create or update a new user.</label>
                 </div>
-                <button type="submit" class="btn btn-primary">Save</button>
-                <a href="{{ url_for('users.users') }}" class="btn btn-secondary">Cancel</a>
+                <div class="row">
+                    <div class="col-12">
+                        <button type="button" class="btn btn-secondary" onclick="window.history.back()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">{{ "Add User" if user is none else "Update User" }}</button>
+                    </div>
+                </div>
             </form>
         </div>
     </section>

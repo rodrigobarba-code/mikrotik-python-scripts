@@ -9,10 +9,6 @@ from app.extensions import func
 from app.blueprints.sites.entities import SiteEntity
 # Importing Required Entities
 
-# Importing Required Models
-from app.blueprints.routers.models import Router
-# Importing Required Models
-
 # Importing Required Exceptions
 from app.blueprints.sites.exceptions import *
 # Importing Required Exceptions
@@ -95,8 +91,9 @@ class Site(db.Model):
                 raise SiteNotFound(
                     new_site.site_id  # Site ID
                 )
-            # Check if the site segment already exists
-            elif Site.query.filter(Site.site_segment == new_site.site_segment).first():
+            # Check if the site segment already exists in other site
+            elif Site.query.filter(Site.site_segment == new_site.site_segment).first() and \
+                    Site.query.filter(Site.site_segment == new_site.site_segment).first().site_id != new_site.site_id:
                 # Raise SiteSameSegment Exception
                 raise SiteSameSegment(
                     site_id=Site.query.filter(Site.site_segment == new_site.site_segment).first().site_id,  # Site ID
@@ -106,8 +103,9 @@ class Site(db.Model):
                 old_site = db.session.query(Site).get(new_site.site_id)
 
                 if old_site.site_name != new_site.site_name:
-                    # Check if the site name already exists
-                    if Site.query.filter(func.lower(Site.site_name) == func.lower(new_site.site_name)).first():
+                    # Check if the site name already exists in other site
+                    if Site.query.filter(func.lower(Site.site_name) == func.lower(new_site.site_name)).first() and \
+                            Site.query.filter(func.lower(Site.site_name) == func.lower(new_site.site_name)).first().site_id != new_site.site_id:
                         # If the site name already exists, raise SiteAlreadyExists Exception
                         raise SiteAlreadyExists(
                             # Site ID
@@ -140,7 +138,7 @@ class Site(db.Model):
 
     # Site - Delete Site
     @staticmethod
-    def delete_site(site_id):
+    def delete_site(site_id, model):
         try:
             # Check if the site exists
             if not Site.query.get(site_id):
@@ -148,7 +146,7 @@ class Site(db.Model):
                 raise SiteNotFound(site_id)
             else:
                 # Verify if the site is associated with at least one router
-                if db.session.query(Router).filter(Router.fk_site_id == site_id).first():
+                if db.session.query(model).filter(model.fk_site_id == site_id).first():
                     # If the site is associated with a region, raise SiteAssociatedWithRouters Exception
                     raise SiteAssociatedWithRouters(
                         site_id=site_id  # Site ID
@@ -172,10 +170,20 @@ class Site(db.Model):
 
     # Sites - Delete All Sites
     @staticmethod
-    def delete_all_sites():
+    def delete_all_sites(model):
         try:
-            Site.query.delete()  # Delete all sites
-            db.session.commit()  # Commit the session
+            for site in Site.query.all():  # For each site
+                # Verify if the site is associated with at least one router
+                if db.session.query(model).filter(model.fk_site_id == site.site_id).first():
+                    # If the site is associated with a region, raise SiteAssociatedWithRouters Exception
+                    raise SiteAssociatedWithRouters(
+                        site_id=site.site_id  # Site ID
+                    )
+                else:
+                    # If the site exists and is not associated with a router, delete it
+                    db.session.delete(site)  # Delete the site
+                    db.session.commit()  # Commit the session
+                    # If the site exists and is not associated with a router, delete it
         except Exception as e:
             db.session.rollback()  # Rollback the session
             return SiteError()  # Raise SiteError Exception

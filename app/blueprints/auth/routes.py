@@ -1,5 +1,7 @@
 # Importing necessary modules
 import bcrypt
+from app.functions import get_local_ip, get_public_ip
+from app.blueprints.users.functions import users_functions as functions
 from flask import render_template, redirect, url_for, flash, request, session
 # Importing necessary modules
 
@@ -27,8 +29,11 @@ def login():
                 session['user_id'] = user.user_id  # Identify the user by the user_id
                 session['user_username'] = user.user_username  # Identify the user by the user_username
                 session['user_privileges'] = user.user_privileges  # Identify the user by the user_privileges
+                session['user_username'] = user.user_username  # Indentify the user by the user_username
                 session['user_name'] = user.user_name  # Indentify the user by the user_name
                 session['user_lastname'] = user.user_lastname  # Indentify the user by the user_lastname
+                session['user_public_ip'] = str(get_public_ip())  # Indentify the user by the user_public_ip
+                session['user_local_ip'] = str(get_local_ip())
                 # Create the session variables for the user
 
                 # Set the user avatar based on the user privileges
@@ -38,8 +43,10 @@ def login():
                     session['user_avatar'] = url_for('static', filename='img/user_avatars/user_avatar.svg')
                 elif user.user_privileges == 'guest':
                     session['user_avatar'] = url_for('static', filename='img/user_avatars/guest_avatar.svg')
-                return redirect(url_for('home.home'))
                 # Set the user avatar based on the user privileges
+
+                functions.create_log(session['user_id'], 'User logged in', 'LOGIN', 'users')  # Create a log
+                return redirect(url_for('home.home'))  # Redirect the user to the home page
             else:
                 flash('Invalid password, are you sure you typed it correctly?')  # If the password is incorrect, will return an error message
         else:
@@ -50,6 +57,8 @@ def login():
 # Auth Logout Route
 @auth_bp.route('/logout')
 def logout():
+    functions.create_log(session['user_id'], 'User logged out', 'LOGOUT', 'users')  # Create a log
+
     # Remove all user information from client session
     session.pop('user_id', None)  # Remove the user_id session variable
     session.pop('user_privileges', None)  # Remove the user_privileges session variable
@@ -57,6 +66,8 @@ def logout():
     session.pop('user_name', None)  # Remove the user_name session variable
     session.pop('user_lastname', None)  # Remove the user_lastname session variable
     session.pop('user_avatar', None)  # Remove the user_avatar session variable
+    session.pop('user_public_ip', None)  # Remove the user_public_ip session variable
+    session.pop('user_local_ip', None)  # Remove the user_local_ip session variable
     # Remove all user information from client session
 
     return redirect(url_for('auth.login'))  # Redirect the user to the login page
