@@ -54,3 +54,17 @@ class RouterOSAPI:
         return self.router.talk(command)  # Run command and return the result
     # Method to retrieve data from the RouterOS API
 # Class to handle the RouterOS API
+
+# Main function
+def main():
+    # Create an instance of the RouterOSAPI class
+    router = RouterOSAPI('10.1.3.254', 'AccesoN0C', 'N0c#2024.@!!')
+    # Create an instance of the RouterOSAPI class
+
+    # Retrieve data from the RouterOS API
+    print(router.retrieve_data('/ip/address/print'))  # Retrieve ARP table
+    # Retrieve data from the RouterOS API
+# Main function
+
+if __name__ == '__main__':
+    main()  # Run the main function
