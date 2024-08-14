@@ -1,6 +1,105 @@
+{% from 'macros.html' import delete_modal, delete_select_modal, delete_all_modal %}
 {% extends 'base.html' %}
-
 {% block title %} Router Scan {% endblock %}
-
-{% block content %}
+{% block head %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/scan/styles.css') }}">
 {% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/scan/scripts.js') }}"></script>
+    <script>
+        // deleteAllModal("{{ url_for('regions.delete_all_regions') }}", "{{ url_for('regions.regions') }}", 'regions');
+        // deleteSelectModal("{{ url_for('regions.bulk_delete_region') }}", "{{ url_for('regions.regions') }}", 'region');
+    </script>
+{% endblock %}
+{% block content %}
+    <!-- Router Scan Jumbotron -->
+    <section class="scan-jumbotron">
+        <div class="p-5 mb-4 base-jumbotron">
+            <div class="container-fluid py-5">
+                <h1 class="display-5 fw-bold">Router Scan</h1>
+                <p class="col-md-8 fs-4">Lorem Ipsum</p>
+                <a id="start-btn" href="" class="btn btn-primary btn-lg" type="button">
+                    <i class="fa-solid fa-magnifying-glass-plus"></i> Scan </a>
+                <div id="pb-container" style="display: block">
+                    <div class="row align-items-center mt-4">
+                        <h3 class="form-label mt-2">Scanning Progress ...</h3>
+                        <div class="col">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="progress flex-grow-1" role="progressbar" aria-label="Default striped example" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">
+                                    <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%">
+                                        0%
+                                    </div>
+                                </div>
+                                    <a class="p-2" type="button" style="font-size: 1.5rem">
+                                        <i class="fa-solid fa-xmark"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="form-label mt-2">(Only the routers that are allowed to be scanned will be displayed)</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Router Scan Jumbotron -->
+
+    <!-- Router Scan Database -->
+    <section class="scan-database pt-3">
+        <div class="container w-75">
+            <div class="row">
+                <div class="col-12 col-md-8 text-left">
+                    <h2 class="regions-database-title"><b>ARP List</b> Available</h2>
+                </div>
+                <div class="col-12 col-md-4 d-flex justify-content-end">
+                    <button type="button" class="btn btn-md btn-danger me-2" data-bs-toggle="modal" id="delete-select"
+                            data-bs-target="#delete-select-modal">
+                        <i class="fa-solid fa-square-minus"></i>&nbsp; Delete Selected
+                    </button>
+                    <button type="button" class="btn btn-md btn-dark" data-bs-toggle="modal" id="delete-all"
+                            data-bs-target="#delete-all-modal">
+                        <i class="fa-solid fa-trash"></i>&nbsp; Delete All
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Router Scan Database -->
+
+    <!-- Router Scan Separator -->
+    <section class="scan-separator">
+        <div class="container w-75">
+            <hr>
+        </div>
+    </section>
+    <!-- Router Scan Separator -->
+
+    <!-- Router Scan Table -->
+    <section class="regions-table hide-scroll pt-3 pb-3">
+        <div class="container w-75" id="regions-table-c">
+            <table class="table table-responsive" id="datatable-object">
+                <thead>
+                <tr>
+                    <th scope="col"></th>
+                    <th scope="col">#</th>
+                    <th scope="col">ARP IP Address</th>
+                    <th scope="col">ARP MAC Address</th>
+                    <th scope="col">ARP Interface</th>
+                    <th scope="col">Tags</th>
+                    <th scope="col">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+
+                </tbody>
+            </table>
+        </div>
+    </section>
+    <!-- Router Scan Table -->
+
+    <!-- Delete Modals -->
+    <div class="delete-modal-container">{{ delete_modal() }}</div>
+    <div class="delete-select-modal-container">{{ delete_select_modal() }}</div>
+    <div class="delete-all-modal-container">{{ delete_all_modal() }}</div>
+    <!-- Delete Modals -->
+{% endblock %}
+
