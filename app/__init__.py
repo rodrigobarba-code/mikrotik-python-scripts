@@ -18,7 +18,7 @@ from app.blueprints.dashboard import dashboard_bp
 
 # Function constructor to create the app
 def create_app():
-    app = Flask(__name__)  # Creating the app
+    app = Flask(__name__)  # Creating the app instance
 
     app.config.from_object(AppConfig)  # Setting the application configurations
     app.config.from_object(DatabaseConfig)  # Setting the database configurations
