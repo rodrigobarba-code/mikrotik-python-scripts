@@ -26,8 +26,6 @@ html, body {
 
 .sidebar.close {
     width: 78px;
-    height: inherit; /* Ensure sidebar takes full height */
-
 }
 
 .sidebar .logo-details {
@@ -83,7 +81,8 @@ html, body {
 .sidebar .nav-links {
     height: 100%;
     padding: 30px 0 150px 0;
-    overflow: auto;
+    overflow-x: hidden;
+    overflow-y: scroll;
 }
 
 .sidebar.close .nav-links {
@@ -107,7 +106,7 @@ html, body {
 }
 
 .sidebar.close .nav-links li .iocn-link {
-    display: block
+    display: block;
 }
 
 .sidebar .nav-links li i {
@@ -182,7 +181,6 @@ html, body {
     padding: 10px 20px;
     border-radius: 0 6px 6px 0;
     opacity: 0;
-    display: block;
     pointer-events: none;
     transition: 0s;
 }
@@ -229,11 +227,8 @@ html, body {
 }
 
 .sidebar.close .profile-details {
-    background: none;
-}
-
-.sidebar.close .profile-details {
     width: 78px;
+    background: none;
 }
 
 .sidebar .profile-details .profile-content {
@@ -271,27 +266,6 @@ html, body {
 
 .sidebar .profile-details .job {
     font-size: 12px;
-}
-
-.home-section {
-    position: relative;
-    background: #E4E9F7;
-    transition: all 0.5s ease;
-    margin-left: 78px
-}
-
-
-/*Make a transition when it */
-.home-section .home-content {
-    height: 60px;
-    display: flex;
-    align-items: center;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    background-color: #E4E9F7;
-    overflow: hidden;
-    transition: background-color 0.8s ease, color 0.8s ease, border-radius 0.3s ease, box-shadow 0.3s ease, margin 0.3s ease, transform 0.3s ease;
 }
 
 .home-section .home-content .bx-menu,
@@ -347,58 +321,57 @@ html, body {
     background-color: rgba(123, 226, 255, 0.76);
 }
 
-/* Default width for .dropdown-menu when sidebar is open */
 .dropdown-menu {
     flex-direction: column;
     width: 100%; /* Adjust based on your layout */
     transition: width 0.2s ease; /* Smooth transition for width adjustment */
 }
 
-/* Adjusted width for .dropdown-menu when sidebar is closed */
 .sidebar.close .profile-details .user-actions .dropdown-menu {
-    width: 100%; /* Adjust based on your layout when sidebar is closed */
+    width: 100%;
 }
 
 .user-actions.visible {
-    opacity: 1; /* Make it fully visible */
-    transform: translateY(0); /* Move it to its natural position */
-    pointer-events: auto; /* Allow interaction */
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
 }
 
 .profile-content img {
     cursor: pointer;
 }
 
-/* Ensure sidebar overlaps content on phone views */
 @media (max-width: 768px) {
     .sidebar {
-        width: 260px; /* Adjust based on your sidebar width */
-        position: fixed; /* Ensure sidebar is positioned over content */
-        left: 0; /* Ensure sidebar is positioned at the left edge */
+        width: 260px;
+        position: fixed;
+        left: 0;
     }
 
     .home-section {
-        position: relative; /* Ensure this is positioned relative to allow z-index to work */
-        left: 0; /* Ensure content is not shifted by sidebar */
-        overflox-y: hidden; /* Hide horizontal overflow */
-        height: max-content;
-        margin-left: 78px;
+        position: relative;
+        left: 0;
+    }
+
+    .home-section .home-content.sidebar.scrolled {
+        overflow: hidden;
+    }
+
+    .home-section .home-content.sidebar.scrolled #top-link {
+        display: none;
     }
 
     .sidebar .home-section {
         padding-left: 78px;
-
     }
 
     .profile-details {
         height: auto;
     }
 
-    .sidebar.close .profile-details {
-    }
-
-    .nav-links {
-        overflow: hidden;
+    .sidebar .nav-links {
+        overflow-x: hidden;
+        overflow-y: scroll;
     }
 
     .user-actions {
@@ -406,37 +379,59 @@ html, body {
     }
 
     .user-actions.visible {
-        opacity: 1; /* Make it fully visible */
-        transform: translateY(0); /* Move it to its natural position */
-        pointer-events: auto; /* Allow interaction */
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: auto;
     }
 }
 
-/* Ensure the button is visible when the sidebar is open */
-.sidebar .close-sidebar-btn {
-    display: block;
-    opacity: 1; /* Ensure the button is fully visible */
+.home-section {
+    position: relative;
+    background: #E4E9F7;
+    transition: all 0.3s ease;
+    left: 0;
+    box-sizing: border-box;
+    padding-left: 78px;
 }
 
-/* Add transition for smooth appearance/disappearance of the close button */
-.close-sidebar-btn {
-    transform: translate(90px, 0); /* Move it out of view */
-    cursor: pointer;
-    border-radius: 200px;
-    background-color: #1d1b31;
-    transition: opacity 0.8s ease, transform 0.8s ease; /* Add transition properties */
-    z-index: -1;
+.home-section.close {
+    left: 78px;
+    width: calc(100% - 78px);
 }
 
-/* Ensure the button is hidden when the sidebar is closed */
-.sidebar.close .close-sidebar-btn {
-    transform: translate(0, 0); /* Initial position */
-    opacity: 0; /* Hide the button */
-    pointer-events: none; /* Prevent interaction when hidden */
+.home-section .home-content {
+    height: 60px;
+    display: flex;
+    align-items: center;
+    width: calc(100% - 78px);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background-color: #E4E9F7;
+    transition: all 0.5s ease;
 }
 
-/* Add this class to disable animations */
-.no-animation {
-    animation: none !important;
-    transform: none !important;
+.home-section .home-content.scrolled {
+    border-radius: 30px;
+    margin: 10px;
+    transform: translate(0, 10px);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    color: white;
+    background: #252a2f;
+    width: calc(100% - 20px);
 }
+
+.home-section .home-content.sidebar {
+    transform: translate(180px, 0px);
+    width: calc(100% - 258px);
+}
+
+.home-section .home-content.sidebar.scrolled {
+    transform: translate(180px, 10px);
+    width: calc(100% - 230px);
+}
+
+.home-section .home-content.sidebar.close {
+    transform: translateX(0);
+}
+
