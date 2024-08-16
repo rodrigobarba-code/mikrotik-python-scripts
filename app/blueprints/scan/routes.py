@@ -9,33 +9,49 @@ from flask import render_template, session
 
 from . import scan_bp  # Importing the blueprint instance
 
-progress_data = {}  # Initializing the progress data
+progress_data = {
+    'progress': 0  # Initializing the progress data
+}
+
 socketio = SocketIO()  # Initializing the socketio instance
 
 # Scan Main Route
 @scan_bp.route('/scan', methods=['GET', 'POST'])
 def scan():
-    return render_template('scan/scan.html')
+    return render_template('scan/scan.html')  # Rendering Router Scan Template
 # Scan Main Route
 
-# SocketIO Routes
-@socketio.on('start_progress')
-def handle_start_progress():
-    user_id = session.get('user_id')
-    progress = 0
-    progress_data[user_id] = progress
+# Socket IO Sockets
+# ARP Scan Process Sockets
+# Start ARP Scan Process Socket
+@socketio.on('start_arp_scan_process')
+def start_arp_scan_process():
+    progress = 0  # Initializing the progress
+    progress_data['progress'] = progress  # Setting the progress data
 
-    while progress < 100:
-        eventlet.sleep(1)
-        progress += 5
-        progress_data[user_id] = progress
-        emit('progress_update', {'progress': progress}, broadcast=True)
+    while progress < 100:  # Looping until the progress reaches 100
+        eventlet.sleep(1)  # Sleeping for 1 second
+        progress += 5  # Incrementing the progress by 5
+        progress_data['progress'] = progress  # Setting the progress data
+        emit(  # Emitting the progress update
+            'arp_scan_process_update',  # Event name
+            {'progress': progress}, broadcast=True  # Data and broadcasting the event
+        )
 
-    emit('progress_complete', broadcast=True)
+    emit(  # Emitting the progress complete
+        'arp_scan_process_complete',  # Event name
+        broadcast=True  # Broadcasting the event
+    )
+# Start ARP Scan Process Socket
 
-@socketio.on('get_progress')
-def handle_get_progress():
-    user_id = session.get('user_id')
-    progress = progress_data.get(user_id, 0)
-    emit('progress_update', {'progress': progress})
-# SocketIO Routes
+# Get ARP Scan Progress Socket
+@socketio.on('get_arp_scan_progress')
+def get_arp_scan_progress():
+    progress = progress_data['progress']  # Getting the progress data
+    emit(  # Emitting the progress update
+        'arp_scan_process_update',   # Event name
+        {'progress': progress}  # Data
+    )
+# Get ARP Scan Progress Socket
+# ARP Scan Process Routes
+# Socket IO Routes

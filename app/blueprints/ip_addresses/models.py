@@ -60,8 +60,20 @@ class IPSegment(db.Model):
     # IP Segment - Add IP Segment
     @staticmethod
     def add_ip_segment(ip_segment):
-        pass
+        try:  # Try to add the IP Segment
+            db.session.add(ip_segment)  # Add the IP Segment to the database
+            db.session.commit()  # Commit the changes
+            return ip_segment  # Return the IP Segment
+        except Exception as e:  # Catch any exceptions
+            db.session.rollback()  # Rollback the changes
+            pass  # Pass the exception
     # IP Segment - Add IP Segment
+
+    # IP Segment - Update IP Segment
+    @staticmethod
+    def update_ip_segment(ip_segment_id, ip_segment):
+        pass
+    # IP Segment - Update IP Segment
 
     # IP Segment - Delete IP Segment
     @staticmethod

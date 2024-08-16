@@ -11,6 +11,13 @@ class AppConfig:
     PORT = 5000  # Port number for the app
     DEBUG = True  # Debug mode for the app
     SECRET_KEY = os.urandom(24)  # Secret key for the app
+    METADATA = {  # Metadata for the app
+        'title': 'Seven Suite',  # Title of the app
+        'description': 'Seven Suite is a network management tool',  # Description of the app
+        'author': 'Seven Suite Team',  # Author of the app
+        'keywords': 'network, management, tool',  # Keywords for the app
+        'progress_scan': 0  # Progress of the scan
+    }
 # Config class to store all the configurations of the application
 
 # Class for sidebar definition

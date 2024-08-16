@@ -20,6 +20,7 @@ cache = Cache(app, config={'CACHE_TYPE': 'simple'})  # Initializing the cache
 @cache.cached(timeout=600)
 def injects():
     return dict(
+        metadata=AppConfig.METADATA,  # Injecting metadata into the context
         menu_items=Sidebar.menu_items,  # Injecting menu items into the context
         profile_menu_items=Sidebar.profile_menu_items  # Injecting profile menu items into the context
     )
