@@ -14,8 +14,13 @@ class AppConfig:
     PORT = 5000  # Port number for the app
     DEBUG = True  # Debug mode for the app
     SECRET_KEY = os.urandom(24)  # Secret key for the app
-
-
+    METADATA = {  # Metadata for the app
+        'title': 'Seven Suite',  # Title of the app
+        'description': 'Seven Suite is a network management tool',  # Description of the app
+        'author': 'Seven Suite Team',  # Author of the app
+        'keywords': 'network, management, tool',  # Keywords for the app
+        'progress_scan': 0  # Progress of the scan
+    }
 # Config class to store all the configurations of the application
 
 # Class for sidebar definition
@@ -59,7 +64,7 @@ class Sidebar:
             'icon': 'fa-solid fa-ethernet',  # Icon of the menu item
             'endpoint': '#',  # Endpoint of the menu item, if endpoint is # then it is a dropdown menu
             'submenu': [  # Submenu of the menu item
-                {'name': 'IP Addresses', 'endpoint': 'dashboard.dashboard'}  # Name and endpoint of the submenu item
+                {'name': 'IP Addresses', 'endpoint': 'ip_addresses.ip_addresses'}  # Name and endpoint of the submenu item
             ]
         }
     ]

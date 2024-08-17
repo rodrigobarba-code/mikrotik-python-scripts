@@ -1,0 +1,94 @@
+{% from 'macros.html' import delete_modal, delete_select_modal, delete_all_modal %}
+{% extends 'base.html' %}
+{% block title %} IP Segments {% endblock %}
+{% block head %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/ip_addresses/styles.css') }}">
+{% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/ip_addresses/scripts.js') }}"></script>
+    <script>
+        // deleteAllModal("{{ url_for('regions.delete_all_regions') }}", "{{ url_for('regions.regions') }}", 'regions');
+        // deleteSelectModal("{{ url_for('regions.bulk_delete_region') }}", "{{ url_for('regions.regions') }}", 'region');
+    </script>
+{% endblock %}
+{% block content %}
+    <!-- IP Segments Jumbotron -->
+    <section class="segments-jumbotron">
+        <div class="p-5 mb-4 base-jumbotron">
+            <div class="container-fluid py-5">
+                <h1 class="display-5 fw-bold">IP Segments</h1>
+                <p class="col-md-8 fs-4">Lorem Ipsum</p>
+            </div>
+        </div>
+    </section>
+    <!-- IP Segments Jumbotron -->
+
+    <!-- IP Segments Database -->
+    <section class="segments-database pt-3">
+        <div class="container w-75">
+            <div class="row">
+                <div class="col-12 col-md-8 text-left">
+                    <h2 class="regions-database-title"><b>Available</b> IP Segments</h2>
+                </div>
+                <div class="col-12 col-md-4 d-flex justify-content-end">
+                    <button type="button" class="btn btn-md btn-danger me-2" data-bs-toggle="modal" id="delete-select"
+                            data-bs-target="#delete-select-modal">
+                        <i class="fa-solid fa-square-minus"></i>&nbsp; Delete Selected
+                    </button>
+                    <button type="button" class="btn btn-md btn-dark" data-bs-toggle="modal" id="delete-all"
+                            data-bs-target="#delete-all-modal">
+                        <i class="fa-solid fa-trash"></i>&nbsp; Delete All
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- IP Segments Database -->
+
+    <!-- IP Segments Separator -->
+    <section class="segments-separator">
+        <div class="container w-75">
+            <hr>
+        </div>
+    </section>
+    <!-- IP Segments Separator -->
+
+    <!-- IP Segments Table -->
+    <section class="segments-table hide-scroll pt-3 pb-3">
+        <div class="container w-75" id="regions-table-c">
+            <table class="table table-responsive" id="datatable-object">
+                <thead>
+                <tr>
+                    <th scope="col"></th>
+                    <th scope="col">#</th>
+                    <th scope="col">IP</th>
+                    <th scope="col">Subnet</th>
+                    <th scope="col">Network</th>
+                    <th scope="col">Interface</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for ip_segment in ip_segment_list %}
+                    <tr>
+                        <td>
+                            <input type="checkbox" class="form-check-input" id="select-{{ ip_segment.id }}">
+                        </td>
+                        <th scope="row">{{ loop.index }}</th>
+                        <td>{{ ip_segment.ip_segment_ip }}</td>
+                        <td>{{ ip_segment.ip_segment_mask }}</td>
+                        <td>{{ ip_segment.ip_segment_network }}</td>
+                        <td>{{ ip_segment.ip_segment_interface }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+    <!-- IP Segments Table -->
+
+    <!-- Delete Modals -->
+    <div class="delete-modal-container">{{ delete_modal() }}</div>
+    <div class="delete-select-modal-container">{{ delete_select_modal() }}</div>
+    <div class="delete-all-modal-container">{{ delete_all_modal() }}</div>
+    <!-- Delete Modals -->
+{% endblock %}

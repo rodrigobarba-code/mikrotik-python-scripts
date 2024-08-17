@@ -8,21 +8,20 @@ from app.config import DatabaseConfig, AppConfig
 # Importing Blueprints
 from app.blueprints.home import home_bp
 from app.blueprints.auth import auth_bp
-from app.blueprints.profile import profile_bp
-from app.blueprints.settings import settings_bp
 from app.blueprints.scan import scan_bp
 from app.blueprints.sites import sites_bp
 from app.blueprints.users import users_bp
 from app.blueprints.routers import routers_bp
 from app.blueprints.regions import regions_bp
+from app.blueprints.profile import profile_bp
+from app.blueprints.settings import settings_bp
 from app.blueprints.dashboard import dashboard_bp
-
-
+from app.blueprints.ip_addresses import ip_addresses_bp
 # Importing Blueprints
 
 # Function constructor to create the app
 def create_app():
-    app = Flask(__name__)  # Creating the app
+    app = Flask(__name__)  # Creating the app instance
 
     app.config.from_object(AppConfig)  # Setting the application configurations
     app.config.from_object(DatabaseConfig)  # Setting the database configurations
@@ -41,6 +40,7 @@ def create_app():
     app.register_blueprint(routers_bp, url_prefix='/routers')  # Registering the routers blueprint
     app.register_blueprint(regions_bp, url_prefix='/regions')  # Registering the regions blueprint
     app.register_blueprint(dashboard_bp, url_prefix='/dashboard')  # Registering the dashboard blueprint
+    app.register_blueprint(ip_addresses_bp, url_prefix='/segments')  # Registering the ip_addresses blueprint
     # Registering the blueprints
 
     return app  # Returning the app
