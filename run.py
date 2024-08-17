@@ -6,8 +6,8 @@ eventlet.monkey_patch()  # Patching the eventlet
 # Importing main application constructor
 from app import create_app
 from flask_caching import Cache
-from app.config import AppConfig, Sidebar
 from app.blueprints.scan.routes import socketio
+from app.config import AppConfig, UserJobs, Sidebar
 # Importing main application constructor
 
 el = eventlet  # Assigning eventlet to el
@@ -22,7 +22,7 @@ def injects():
     return dict(
         metadata=AppConfig.METADATA,  # Injecting metadata into the context
         menu_items=Sidebar.menu_items,  # Injecting menu items into the context
-        job_display = UserJobs.job_display,  # Injecting user jobs into the context
+        job_display=UserJobs.job_display,  # Injecting user jobs into the context
         profile_menu_items=Sidebar.profile_menu_items  # Injecting profile menu items into the context
     )
 # Injecting global variables into the context
