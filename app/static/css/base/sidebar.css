@@ -17,11 +17,12 @@ html, body {
     position: fixed;
     top: 0;
     left: 0;
-    height: 100%;
+    height: 100vh;
     width: 260px;
     background: #11101d;
     z-index: 101; /* Higher than .home-section */
     transition: all 0.5s ease;
+    overflow: hidden;
 }
 
 .sidebar.close {
@@ -285,6 +286,9 @@ html, body {
 
 .profile-content {
     position: relative;
+    flex-direction: column;
+    display: flex;
+    height: 100%;
 }
 
 .user-actions {
@@ -298,6 +302,10 @@ html, body {
     transform: translateY(100%); /* Start hidden below the visible area */
     transition: opacity 0.5s, transform 0.5s; /* Smooth transition for both properties */
     pointer-events: none; /* Prevent interaction when it's invisible */
+    flex-grow: 1;
+    flex-direction: column;
+    justify-content: flex-end;
+    overflow-y: auto;
 }
 
 .user-actions .dropdown-item {
@@ -344,6 +352,7 @@ html, body {
 @media (max-width: 768px) {
     .sidebar {
         width: 260px;
+        height: 100vh;
         position: fixed;
         left: 0;
     }
@@ -361,8 +370,17 @@ html, body {
         display: none;
     }
 
+    .home-section .home-content.sidebar #top-link {
+        display: none;
+    }
+
+
     .sidebar .home-section {
         padding-left: 78px;
+    }
+
+    .profile-content {
+        height: auto;
     }
 
     .profile-details {
@@ -423,7 +441,7 @@ html, body {
 
 .home-section .home-content.sidebar {
     transform: translate(180px, 0px);
-    width: calc(100% - 258px);
+    width: calc(100% - 238px);
 }
 
 .home-section .home-content.sidebar.scrolled {
