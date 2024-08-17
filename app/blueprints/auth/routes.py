@@ -27,6 +27,7 @@ def login():
             if bcrypt.checkpw(password, user.user_password):  # Check the password hash with the one in the database
                 # Create the session variables for the user
                 session['user_id'] = user.user_id  # Identify the user by the user_id
+                session['user_username'] = user.user_username  # Identify the user by the user_username
                 session['user_privileges'] = user.user_privileges  # Identify the user by the user_privileges
                 session['user_username'] = user.user_username  # Indentify the user by the user_username
                 session['user_name'] = user.user_name  # Indentify the user by the user_name

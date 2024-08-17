@@ -13,6 +13,8 @@ from app.blueprints.sites import sites_bp
 from app.blueprints.users import users_bp
 from app.blueprints.routers import routers_bp
 from app.blueprints.regions import regions_bp
+from app.blueprints.profile import profile_bp
+from app.blueprints.settings import settings_bp
 from app.blueprints.dashboard import dashboard_bp
 from app.blueprints.ip_addresses import ip_addresses_bp
 # Importing Blueprints
@@ -30,6 +32,8 @@ def create_app():
     # Registering the blueprints
     app.register_blueprint(home_bp, url_prefix='/')  # Registering the home blueprint
     app.register_blueprint(auth_bp, url_prefix='/auth')  # Registering the auth blueprint
+    app.register_blueprint(profile_bp, url_prefix='/profile')  # Registering the profile blueprint
+    app.register_blueprint(settings_bp, url_prefix='/settings')  # Registering the settings blueprint
     app.register_blueprint(scan_bp, url_prefix='/router')  # Registering the scan blueprint
     app.register_blueprint(sites_bp, url_prefix='/sites')  # Registering the sites blueprint
     app.register_blueprint(users_bp, url_prefix='/users')  # Registering the users blueprint
