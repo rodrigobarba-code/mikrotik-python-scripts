@@ -1,11 +1,13 @@
 # Importing necessary modules
+import time
 import eventlet
-from flask_socketio import emit, SocketIO
-from flask import render_template, session
+from flask import render_template
+from flask_socketio import SocketIO, emit
 # Importing necessary modules
 
-# Importing necessary decorators
-# Importing necessary decorators
+# Importing Router API
+from app.api.api import RouterAPI
+# Importing Router API
 
 from . import scan_bp  # Importing the blueprint instance
 
@@ -28,16 +30,21 @@ def scan():
 def start_arp_scan_process():
     progress = 0  # Initializing the progress
     progress_data['progress'] = progress  # Setting the progress data
-
-    while progress < 100:  # Looping until the progress reaches 100
-        eventlet.sleep(1)  # Sleeping for 1 second
-        progress += 5  # Incrementing the progress by 5
-        progress_data['progress'] = progress  # Setting the progress data
-        emit(  # Emitting the progress update
-            'arp_scan_process_update',  # Event name
-            {'progress': progress}, broadcast=True  # Data and broadcasting the event
-        )
-
+    try:
+        start_time = time.time()  # Getting the start time
+        RouterAPI.scan_arp()  # Scanning the ARP
+        end_time = time.time()  # Getting the end time
+        duration = end_time - start_time  # Calculating the duration
+        for i in range(100):
+            progress = duration * i / 100  # Calculating the progress
+            progress_data['progress'] = progress
+            emit(  # Emitting the progress update
+                'arp_scan_process_update',  # Event name
+                {'progress': progress}  # Data
+            )
+            eventlet.sleep(0.1)  # Sleeping for 0.1 seconds
+    except Exception as e:  # If an exception occurs
+        print(str(e))
     emit(  # Emitting the progress complete
         'arp_scan_process_complete',  # Event name
         broadcast=True  # Broadcasting the event

@@ -3,16 +3,15 @@
 # Importing Required Libraries
 from sqlalchemy import Enum
 from app.extensions import db
-from app.extensions import func
 # Importing Required Libraries
 
 # Importing Required Entities
 from app.blueprints.ip_addresses.entities import IPSegmentTag, IPSegmentEntity
 # Importing Required Entities
 
-# Importing Required Exceptions
-from app.blueprints.scan.exceptions import *
-# Importing Required Exceptions
+# Importing Required Functions
+from app.blueprints.ip_addresses.functions import IPAddressesFunctions
+# Importing Required Functions
 
 # IP Segment Model
 class IPSegment(db.Model):
@@ -20,7 +19,7 @@ class IPSegment(db.Model):
 
     # Columns
     ip_segment_id = db.Column(db.Integer, primary_key=True, nullable=False)  # IP Segment ID
-    fk_router_id = db.Column(db.Integer, db.ForeignKey('router.router_id'), nullable=False)  # FK Router ID
+    fk_router_id = db.Column(db.Integer, db.ForeignKey('routers.router_id'), nullable=False)  # FK Router ID
     ip_segment_ip = db.Column(db.String(15), nullable=False)  # IP Segment IP
     ip_segment_mask = db.Column(db.String(15), nullable=False)  # IP Segment Mask
     ip_segment_network = db.Column(db.String(15), nullable=False)  # IP Segment Network
@@ -59,38 +58,128 @@ class IPSegment(db.Model):
     # Static Methods
     # IP Segment - Add IP Segment
     @staticmethod
-    def add_ip_segment(ip_segment):
+    def add_ip_segment(ip_segment: IPSegmentEntity):
         try:  # Try to add the IP Segment
-            db.session.add(ip_segment)  # Add the IP Segment to the database
-            db.session.commit()  # Commit the changes
-            return ip_segment  # Return the IP Segment
-        except Exception as e:  # Catch any exceptions
-            db.session.rollback()  # Rollback the changes
-            pass  # Pass the exception
+            # If the IP Segment is new and does not exist
+            if (IPAddressesFunctions.validate_ip_segment_exists(
+                ip_segment.ip_segment_ip,
+                ip_segment.ip_segment_mask,
+                ip_segment.ip_segment_interface
+            )):
+                print('IP Segment does not exist')
+                # If the segment does not exist, add it
+                ip_segment.validate_ip_segment()  # Validate the IP Segment
+                ip_segment_obj = IPSegment(  # Create the IP Segment Object for Database Insertion
+                    fk_router_id=ip_segment.fk_router_id,  # FK Router ID
+                    ip_segment_ip=ip_segment.ip_segment_ip,  # IP Segment IP
+                    ip_segment_mask=ip_segment.ip_segment_mask,  # IP Segment Mask
+                    ip_segment_network=ip_segment.ip_segment_network,  # IP Segment Network
+                    ip_segment_interface=ip_segment.ip_segment_interface,  # IP Segment Interface
+                    ip_segment_actual_iface=ip_segment.ip_segment_actual_iface,  # IP Segment Actual Interface
+                    ip_segment_tag=ip_segment.ip_segment_tag,  # IP Segment Tag
+                    ip_segment_comment=ip_segment.ip_segment_comment,  # IP Segment Comment
+                    ip_segment_is_invalid=ip_segment.ip_segment_is_invalid,  # IP Segment Is Invalid
+                    ip_segment_is_dynamic=ip_segment.ip_segment_is_dynamic,  # IP Segment Is Dynamic
+                    ip_segment_is_disabled=ip_segment.ip_segment_is_disabled  # IP Segment Is Disabled
+                )
+                db.session.add(ip_segment_obj)  # Add the IP Segment Object to the Database Session
+                db.session.commit()  # Commit the Database Session
+            # If already exists, update all the fields
+            else:
+                print('IP Segment exists')
+                ip_segment.validate_ip_segment()  # Validate the IP Segment
+                ip_segment_obj = IPSegment.query.filter(
+                    IPSegment.ip_segment_ip == ip_segment.ip_segment_ip,  # IP Segment IP
+                    IPSegment.ip_segment_mask == ip_segment.ip_segment_mask,  # IP Segment Mask
+                    IPSegment.ip_segment_interface == ip_segment.ip_segment_interface  # IP Segment Interface
+                ).first()
+                ip_segment_obj.fk_router_id = ip_segment.fk_router_id  # FK Router ID
+                ip_segment_obj.ip_segment_network = ip_segment.ip_segment_network  # IP Segment Network
+                ip_segment_obj.ip_segment_interface = ip_segment.ip_segment_interface  # IP Segment Interface
+                ip_segment_obj.ip_segment_actual_iface = ip_segment.ip_segment_actual_iface  # IP Segment Actual Interface
+                ip_segment_obj.ip_segment_tag = ip_segment.ip_segment_tag  # IP Segment Tag
+                ip_segment_obj.ip_segment_comment = ip_segment.ip_segment_comment  # IP Segment Comment
+                ip_segment_obj.ip_segment_is_invalid = ip_segment.ip_segment_is_invalid  # IP Segment Is Invalid
+                ip_segment_obj.ip_segment_is_dynamic = ip_segment.ip_segment_is_dynamic  # IP Segment Is Dynamic
+                ip_segment_obj.ip_segment_is_disabled = ip_segment.ip_segment_is_disabled  # IP Segment Is Disabled
+                db.session.commit()  # Commit the Database Session
+        except Exception as e:  # If an Exception occurs
+            db.session.rollback()  # Rollback the Database Session
+            print(e)
     # IP Segment - Add IP Segment
-
-    # IP Segment - Update IP Segment
-    @staticmethod
-    def update_ip_segment(ip_segment_id, ip_segment):
-        pass
-    # IP Segment - Update IP Segment
 
     # IP Segment - Delete IP Segment
     @staticmethod
     def delete_ip_segment(ip_segment_id):
-        pass
+        try:  # Try to delete the IP Segment
+            ip_segment = IPSegment.query.get(ip_segment_id)  # Get the IP Segment
+            db.session.delete(ip_segment)  # Delete the IP Segment
+            db.session.commit()  # Commit the Database Session
+        except Exception as e:  # If an Exception occurs
+            db.session.rollback()  # Rollback the Database Session
+            print(e)
     # IP Segment - Delete IP Segment
+
+    # Ip Segment - Delete All IP Segments
+    @staticmethod
+    def delete_all_ip_segments():
+        try:  # Try to delete all IP Segments
+            IPSegment.query.delete()  # Delete all IP Segments
+            db.session.commit()  # Commit the Database Session
+        except Exception as e:
+            db.session.rollback()
+            print(e)
+    # Ip Segment - Delete All IP Segments
 
     # IP Segment - Get IP Segment
     @staticmethod
     def get_ip_segment(ip_segment_id):
-        pass
+        try:  # Try to get the IP Segment
+            ip_segment = IPSegment.query.get(ip_segment_id)  # Get the IP Segment
+            obj = IPSegmentEntity(  # Create an instance of the IPSegmentEntity class
+                ip_segment_id=ip_segment.ip_segment_id,  # IP Segment ID
+                fk_router_id=ip_segment.fk_router_id,  # FK Router ID
+                ip_segment_ip=ip_segment.ip_segment_ip,  # IP Segment IP
+                ip_segment_mask=ip_segment.ip_segment_mask,  # IP Segment Mask
+                ip_segment_network=ip_segment.ip_segment_network,  # IP Segment Network
+                ip_segment_interface=ip_segment.ip_segment_interface,  # IP Segment Interface
+                ip_segment_actual_iface=ip_segment.ip_segment_actual_iface,  # IP Segment Actual Interface
+                ip_segment_tag=ip_segment.ip_segment_tag,  # IP Segment Tag
+                ip_segment_comment=ip_segment.ip_segment_comment,  # IP Segment Comment
+                ip_segment_is_invalid=ip_segment.ip_segment_is_invalid,  # IP Segment Is Invalid
+                ip_segment_is_dynamic=ip_segment.ip_segment_is_dynamic,  # IP Segment Is Dynamic
+                ip_segment_is_disabled=ip_segment.ip_segment_is_disabled  # IP Segment Is Disabled
+            )
+            return obj  # Return the IP Segment Entity
+        except Exception as e:  # If an Exception occurs
+            print(e)
     # IP Segment - Get IP Segment
 
     # IP Segment - Get IP Segments
     @staticmethod
     def get_ip_segments():
-        pass
+        try:  # Try to get the IP Segments
+            ip_segments = IPSegment.query.all()  # Get all the IP Segments
+            ip_segment_list = []  # IP Segment List
+            for ip_segment in ip_segments:  # For each IP Segment
+                obj = IPSegmentEntity(  # Create an instance of the IPSegmentEntity class
+                    ip_segment_id=ip_segment.ip_segment_id,  # IP Segment ID
+                    fk_router_id=ip_segment.fk_router_id,  # FK Router ID
+                    ip_segment_ip=ip_segment.ip_segment_ip,  # IP Segment IP
+                    ip_segment_mask=ip_segment.ip_segment_mask,  # IP Segment Mask
+                    ip_segment_network=ip_segment.ip_segment_network,  # IP Segment Network
+                    ip_segment_interface=ip_segment.ip_segment_interface,  # IP Segment Interface
+                    ip_segment_actual_iface=ip_segment.ip_segment_actual_iface,  # IP Segment Actual Interface
+                    ip_segment_tag=ip_segment.ip_segment_tag,  # IP Segment Tag
+                    ip_segment_comment=ip_segment.ip_segment_comment,  # IP Segment Comment
+                    ip_segment_is_invalid=ip_segment.ip_segment_is_invalid,  # IP Segment Is Invalid
+                    ip_segment_is_dynamic=ip_segment.ip_segment_is_dynamic,  # IP Segment Is Dynamic
+                    ip_segment_is_disabled=ip_segment.ip_segment_is_disabled  # IP Segment Is Disabled
+                )
+                ip_segment_list.append(obj)  # Append the IP Segment Entity to the IP Segment List
+            return ip_segment_list  # Return the IP Segment List
+        except Exception as e:  # If an Exception occurs
+            print(e)
     # IP Segment - Get IP Segments
     # Static Methods
 # IP Segment Model

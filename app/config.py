@@ -61,7 +61,7 @@ class Sidebar:
             'icon': 'fa-solid fa-ethernet',  # Icon of the menu item
             'endpoint': '#',  # Endpoint of the menu item, if endpoint is # then it is a dropdown menu
             'submenu': [  # Submenu of the menu item
-                {'name': 'IP Addresses', 'endpoint': 'dashboard.dashboard'}  # Name and endpoint of the submenu item
+                {'name': 'IP Addresses', 'endpoint': 'ip_addresses.ip_addresses'}  # Name and endpoint of the submenu item
             ]
         }
     ]

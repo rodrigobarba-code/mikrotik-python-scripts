@@ -1,3 +1,5 @@
+# Description: IP Addresses Blueprint
+
 # Importing Blueprint
 from flask import Blueprint
 # Importing Blueprint

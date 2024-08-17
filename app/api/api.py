@@ -10,12 +10,17 @@ from app.api.modules.GetAllowedRouters import GetAllowedRouters
 # Importing Necessary Modules
 
 # Importing Necessary Entities
-from app.blueprints.scan.entities import ARPEntity
+from app.blueprints.ip_addresses.entities import IPSegmentTag
+from app.blueprints.ip_addresses.entities import IPSegmentEntity
 # Importing Necessary Entities
 
 # Importing Necessary Modules
 from app.blueprints.ip_addresses.models import IPSegment
 # Importing Necessary Modules
+
+# Importing Necessary Functions
+from app.blueprints.ip_addresses.functions import IPAddressesFunctions
+# Importing Necessary Functions
 
 # Class to handle the Router OS API
 class RouterAPI:
@@ -84,74 +89,8 @@ class RouterAPI:
     # Method to get IP address data from the Router OS API and save it to the database
     # Also check that the information don't already exist in the database
     @staticmethod
-    def get_ip_data(router_id) -> list:
+    def get_ip_data() -> list:
         ip_list = []  # IP list
-        routers = GetAllowedRouters(db).get()
-        for router in routers:
-            print(
-                router.router_ip,
-                router.router_username,
-                router.router_password
-            )
-        """
-        for router in routers:  # Loop through the routers
-            router_api = RouterAPI(  # Create an instance of the RouterAPI class
-                router.router_ip,  # Router IP
-                router.router_username,  # Router username
-                router.router_password  # Router password
-            )
-            router_api.set_api()  # Set the API object
-            ip_data = RouterAPI.retrieve_data(router_api.get_api(), '/ip/address/print')  # Retrieve IP data
-            for ip in ip_data:
-                ip_list.append(  # Append the IP data to the IP list
-                    IPSegmentEntity(  # Create an instance of the IPSegmentEntity class
-                        ip_segment_id=ip['.id'],  # IP Segment ID
-                        fk_router_id=router_id,  # FK Router ID
-                        ip_segment_ip=ip['address'],  # IP Segment IP
-                        ip_segment_mask=ip['netmask'],  # IP Segment Mask
-                        ip_segment_network=ip['network'],  # IP Segment Network
-                        ip_segment_interface=ip['interface'],  # IP Segment Interface
-                        ip_segment_actual_iface=ip['actual-interface'],  # IP Segment Actual Interface
-                        ip_segment_tag=ip['comment'],  # IP Segment Tag
-                        ip_segment_comment=ip['comment'],  # IP Segment Comment
-                        ip_segment_is_invalid=ip['invalid'],  # IP Segment Is Invalid
-                        ip_segment_is_dynamic=ip['dynamic'],  # IP Segment Is Dynamic
-                        ip_segment_is_disabled=ip['disabled']  # IP Segment Is Disabled
-                    )
-                )
-                IPSegmentEntity.validate_ip_segment()  # Validate the IP Segment Entity
-        return ip_list  # Return the IP list
-        """
-    # Method to get IP address data from the Router OS API and save it to the database
-
-    # Method to add IP address data to the database
-    @staticmethod
-    def add_ip_data(ip_list) -> None:
-        for ip in ip_list:
-            ip_segment = IPSegment(  # Create an instance of the IPSegment class
-                ip_segment_id=ip.ip_segment_id,  # IP Segment ID
-                fk_router_id=ip.fk_router_id,  # FK Router ID
-                ip_segment_ip=ip.ip_segment_ip,  # IP Segment IP
-                ip_segment_mask=ip.ip_segment_mask,  # IP Segment Mask
-                ip_segment_network=ip.ip_segment_network,  # IP Segment Network
-                ip_segment_interface=ip.ip_segment_interface,  # IP Segment Interface
-                ip_segment_actual_iface=ip.ip_segment_actual_iface,  # IP Segment Actual Interface
-                ip_segment_tag=ip.ip_segment_tag,  # IP Segment Tag
-                ip_segment_comment=ip.ip_segment_comment,  # IP Segment Comment
-                ip_segment_is_invalid=ip.ip_segment_is_invalid,  # IP Segment Is Invalid
-                ip_segment_is_dynamic=ip.ip_segment_is_dynamic,  # IP Segment Is Dynamic
-                ip_segment_is_disabled=ip.ip_segment_is_disabled  # IP Segment Is Disabled
-            )
-            try:
-                IPSegment.add_ip_segment(ip_segment)
-            except Exception as e:
-                pass
-    # Method to add IP address data to the database
-
-    # Method to get the data from ARP data, and return it as list of ARP objects
-    @staticmethod
-    def get_arp_data() -> list:
-        arp_list = []  # ARP list
         routers = GetAllowedRouters(db).get()  # Get all allowed routers
         for router in routers:  # Loop through the routers
             router_api = RouterAPI(  # Create an instance of the RouterAPI class
@@ -160,33 +99,59 @@ class RouterAPI:
                 router.router_password  # Router password
             )
             router_api.set_api()  # Set the API object
-            arp_data = RouterAPI.retrieve_data(router_api.get_api(), '/ip/arp/print')  # Retrieve ARP data
-            for arp in arp_data:  # Loop through the ARP data
-                arp_list.append(  # Append the ARP data to the ARP list
-                    ARPEntity(  # Create an instance of the ARPEntity class
-                        arp_id=arp['.id'],  # ARP ID
-                        fk_ip_address_id=router.router_id,  # FK IP Address ID
-                        arp_ip=arp['address'],  # ARP IP
-                        arp_mac=arp['mac-address'],  # ARP MAC
-                        arp_tag=arp['tag'],  # ARP Tag
-                        arp_interface=arp['interface'],  # ARP Interface
-                        arp_is_dhcp=arp['dynamic'],  # ARP DHCP
-                        arp_is_invalid=arp['invalid'],  # ARP Invalid
-                        arp_is_dynamic=arp['dynamic'],  # ARP Dynamic
-                        arp_is_complete=arp['complete'],  # ARP Complete
-                        arp_is_disabled=arp['disabled'],  # ARP Disabled
-                        arp_is_published=arp['published']  # ARP Published
+            router_id = router.router_id  # Router ID
+            ip_data = RouterAPI.retrieve_data(router_api.get_api(), '/ip/address/print')  # Retrieve IP data
+            for ip in ip_data:
+                ip_tmp = ip['address'].split('/')  # Split the IP and Mask
+                ip_obj = IPSegmentEntity(  # Create an instance of the IPSegmentEntity class
+                        ip_segment_id=int(),  # IP Segment ID
+                        fk_router_id=router_id,  # FK Router ID
+                        ip_segment_ip=ip_tmp[0],  # IP Segment IP
+                        ip_segment_mask=ip_tmp[1],  # IP Segment Mask
+                        ip_segment_network=ip['network'],  # IP Segment Network
+                        ip_segment_interface=ip['interface'],  # IP Segment Interface
+                        ip_segment_actual_iface=ip['actual-interface'],  # IP Segment Actual Interface
+                        ip_segment_tag=IPSegmentTag.PUBLIC_IP,  # IP Segment Tag
+                        ip_segment_comment="Default",  # IP Segment Comment
+                        ip_segment_is_invalid=True if ip['invalid'] == 'true' else False,  # IP Segment Is Invalid
+                        ip_segment_is_dynamic=True if ip['dynamic'] == 'true' else False,  # IP Segment Is Dynamic
+                        ip_segment_is_disabled=True if ip['disabled'] == 'true' else False  # IP Segment Is Disabled
                     )
-                )
-        return arp_list  # Return the ARP list
-    # Method to get the data from ARP data, and return it as list of ARP objects
+                ip_obj.validate_ip_segment()  # Validate the IP Segment
+                ip_list.append(ip_obj)  # Append the IP object to the IP list
+            # Delete IP Segments that are in the database but are not in the router list
+            IPAddressesFunctions.delete_ip_segments(ip_list, router.router_id)  # Delete IP Segments
+            # Delete IP Segments that are in the database but are not in the router list
+        return ip_list  # Return the IP list
+    # Method to get IP address data from the Router OS API and save it to the database
+
+    # Method to add IP address data to the database
+    @staticmethod
+    def add_ip_data(ip_list):
+        try:
+            for ip in ip_list:  # For each IP
+                try:  # Try to add the IP Segment
+                    ip.validate_ip_segment()  # Validate the IP Segment
+                    IPSegment.add_ip_segment(ip)  # Add the IP Segment
+                except Exception as e:  # If an Exception occurs
+                    print(str(e))  # Print the Exception
+        except Exception as e:  # If an Exception occurs
+            print(str(e))  # Print the Exception
+    # Method to add IP address data to the database
+
+    # Method to scan arp data from the Router OS API
+    @staticmethod
+    def scan_arp() -> list:
+        RouterAPI.add_ip_data(RouterAPI.get_ip_data())  # Add IP data to the database
+        return True  # Return True
+    # Method to scan arp data from the Router OS API
     # Static Methods
 # Class to handle the RouterOS API
 
-# Main function
+# Main function - ONLY FOR TESTING
 def main():
-    pass
-# Main function
+    pass  # Do nothing
+# Main function - ONLY FOR TESTING
 
 # Running the main function
 if __name__ == '__main__':

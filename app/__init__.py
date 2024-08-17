@@ -14,6 +14,7 @@ from app.blueprints.users import users_bp
 from app.blueprints.routers import routers_bp
 from app.blueprints.regions import regions_bp
 from app.blueprints.dashboard import dashboard_bp
+from app.blueprints.ip_addresses import ip_addresses_bp
 # Importing Blueprints
 
 # Function constructor to create the app
@@ -35,6 +36,7 @@ def create_app():
     app.register_blueprint(routers_bp, url_prefix='/routers')  # Registering the routers blueprint
     app.register_blueprint(regions_bp, url_prefix='/regions')  # Registering the regions blueprint
     app.register_blueprint(dashboard_bp, url_prefix='/dashboard')  # Registering the dashboard blueprint
+    app.register_blueprint(ip_addresses_bp, url_prefix='/segments')  # Registering the ip_addresses blueprint
     # Registering the blueprints
 
     return app  # Returning the app
