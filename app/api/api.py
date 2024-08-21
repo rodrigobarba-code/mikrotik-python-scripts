@@ -102,6 +102,11 @@ class RouterAPI:
             router_id = router.router_id  # Router ID
             ip_data = RouterAPI.retrieve_data(router_api.get_api(), '/ip/address/print')  # Retrieve IP data
             for ip in ip_data:
+                comment = "None"
+                try:  # Try to get the comment
+                    comment = ip['comment']  # Get the comment
+                except:  # If an exception occurs
+                    pass  # Do nothing
                 ip_tmp = ip['address'].split('/')  # Split the IP and Mask
                 ip_obj = IPSegmentEntity(  # Create an instance of the IPSegmentEntity class
                         ip_segment_id=int(),  # IP Segment ID
@@ -111,8 +116,10 @@ class RouterAPI:
                         ip_segment_network=ip['network'],  # IP Segment Network
                         ip_segment_interface=ip['interface'],  # IP Segment Interface
                         ip_segment_actual_iface=ip['actual-interface'],  # IP Segment Actual Interface
-                        ip_segment_tag=IPSegmentTag.PUBLIC_IP,  # IP Segment Tag
-                        ip_segment_comment="Default",  # IP Segment Comment
+                        ip_segment_tag=IPAddressesFunctions.determine_ip_segment_tag(
+                            ip_tmp[0],  # IP Segment IP
+                        ),  # IP Segment Tag
+                        ip_segment_comment=comment,  # IP Segment Comment
                         ip_segment_is_invalid=True if ip['invalid'] == 'true' else False,  # IP Segment Is Invalid
                         ip_segment_is_dynamic=True if ip['dynamic'] == 'true' else False,  # IP Segment Is Dynamic
                         ip_segment_is_disabled=True if ip['disabled'] == 'true' else False  # IP Segment Is Disabled

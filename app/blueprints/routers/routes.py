@@ -190,11 +190,3 @@ def get_router_details():
     except Exception as e:
         return jsonify({'message': 'Failed to get router data', 'error': str(e)}), 500
 # Routers Get Router Details Route
-
-# Router Test Route
-@routers_bp.route('/test', methods=['GET'])
-def test():
-    r = api.RouterAPI  # Create an instance of the RouterAPI class
-    r.get_ip_data(1)  # Get the IP data
-    return 'Test'
-# Router Test Route

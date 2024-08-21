@@ -4,14 +4,6 @@
 from app.extensions import db
 # Importing Necessary Libraries
 
-# Importing Required Entities
-from app.blueprints.routers.entities import RouterEntity
-# Importing Required Entities
-
-# Importing Required Exceptions
-from app.blueprints.ip_addresses.exceptions import *
-# Importing Required Exceptions
-
 # Class for IP Addresses Functions
 class IPAddressesFunctions:
     # Constructor
@@ -69,9 +61,29 @@ class IPAddressesFunctions:
 
             # For each Database Segment
             # For each Database Segment
-            db.session.commit()  # Commit the Database Session
         except Exception as e:  # If an Exception occurs
             db.session.rollback()  # Rollback the Database Session
             print(str(e))  # Print the Exception
     # Function to delete IP Segments that are in the database but are not in the router list
+
+    # Function to determine the Tag of an IP Segment
+    @staticmethod
+    def determine_ip_segment_tag(ip_segment_ip):
+        try:
+            # Importing Required Entities
+            from app.blueprints.ip_addresses.entities import IPSegmentTag
+
+            # Importing Required Models
+            from app.blueprints.ip_addresses.models import IPSegment
+            # Importing Required Models
+
+            # If the IP Segment exists
+            # If IP starts with 10.x.x.x
+            if ip_segment_ip.startswith("10."):
+                return IPSegmentTag.PRIVATE_IP  # Return Private IP
+            else:
+                return IPSegmentTag.PUBLIC_IP
+            # If the IP Segment exists
+        except Exception as e:  # If an Exception occurs
+            print(str(e))  # Print the Exception
 # Class for IP Addresses Functions

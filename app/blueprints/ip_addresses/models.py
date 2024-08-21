@@ -66,7 +66,6 @@ class IPSegment(db.Model):
                 ip_segment.ip_segment_mask,
                 ip_segment.ip_segment_interface
             )):
-                print('IP Segment does not exist')
                 # If the segment does not exist, add it
                 ip_segment.validate_ip_segment()  # Validate the IP Segment
                 ip_segment_obj = IPSegment(  # Create the IP Segment Object for Database Insertion
@@ -86,7 +85,6 @@ class IPSegment(db.Model):
                 db.session.commit()  # Commit the Database Session
             # If already exists, update all the fields
             else:
-                print('IP Segment exists')
                 ip_segment.validate_ip_segment()  # Validate the IP Segment
                 ip_segment_obj = IPSegment.query.filter(
                     IPSegment.ip_segment_ip == ip_segment.ip_segment_ip,  # IP Segment IP
