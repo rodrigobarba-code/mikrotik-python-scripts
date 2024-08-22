@@ -18,7 +18,11 @@
                         <div class="iocn-link">
                             <a {% if item.endpoint != '#' %} href="{{ url_for(item.endpoint) }}" {% endif %}>
                                 <i class="{{ item.icon }}"></i>
-                                <span class="link_name">{{ item.name }}</span>
+                                {% if item.marquee %}
+                                    <marquee direction="left" scrollamount="4"><span class="link_name">{{ item.name }}</span></marquee>
+                                {% else %}
+                                    <span class="link_name">{{ item.name }}</span>
+                                {% endif %}
                             </a>
                             <i class='bx bxs-chevron-down arrow'></i>
                         </div>
@@ -36,7 +40,11 @@
                     <li>
                         <a {% if item.endpoint != '#' %} href="{{ url_for(item.endpoint) }}" {% endif %}>
                             <i class="{{ item.icon }}"></i>
-                            <span class="link_name">{{ item.name }}</span>
+                            {% if item.marquee %}
+                                <marquee direction="left" scrollamount="4"><span class="link_name">{{ item.name }}</span></marquee>
+                            {% else %}
+                                <span class="link_name">{{ item.name }}</span>
+                            {% endif %}
                         </a>
                         <ul class="sub-menu blank">
                             <li><a class="link_name" {% if item.endpoint != '#' %}

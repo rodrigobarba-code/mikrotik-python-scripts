@@ -62,6 +62,7 @@ class Sidebar:
         {
             'name': 'IP Address Management',  # Name of the menu item
             'icon': 'fa-solid fa-ethernet',  # Icon of the menu item
+            'marquee': True,  # Marquee menu item
             'endpoint': '#',  # Endpoint of the menu item, if endpoint is # then it is a dropdown menu
             'submenu': [  # Submenu of the menu item
                 {'name': 'IP Addresses', 'endpoint': 'ip_addresses.ip_addresses'}  # Name and endpoint of the submenu item
