@@ -9,6 +9,10 @@ from app.extensions import db
 from app.blueprints.ip_addresses.entities import IPSegmentTag, IPSegmentEntity
 # Importing Required Entities
 
+# Importing Required Models
+from app.blueprints.routers.models import Router
+# Importing Required Models
+
 # Importing Required Functions
 from app.blueprints.ip_addresses.functions import IPAddressesFunctions
 # Importing Required Functions
@@ -179,5 +183,33 @@ class IPSegment(db.Model):
         except Exception as e:  # If an Exception occurs
             print(e)
     # IP Segment - Get IP Segments
+
+    # IP Segment - Get IP Segments by Site ID
+    @staticmethod
+    def get_ip_segments_by_site_id(site_id):
+        try:  # Try to get the IP Segments
+            router = Router.query.filter_by(fk_site_id=site_id).first()  # Get the Router
+            ip_segments = IPSegment.query.filter_by(fk_router_id=router.router_id).all()  # Get all the IP Segments
+            ip_segment_list = []  # IP Segment List
+            for ip_segment in ip_segments:  # For each IP Segment
+                obj = IPSegmentEntity(  # Create an instance of the IPSegmentEntity class
+                    ip_segment_id=ip_segment.ip_segment_id,  # IP Segment ID
+                    fk_router_id=ip_segment.fk_router_id,  # FK Router ID
+                    ip_segment_ip=ip_segment.ip_segment_ip,  # IP Segment IP
+                    ip_segment_mask=ip_segment.ip_segment_mask,  # IP Segment Mask
+                    ip_segment_network=ip_segment.ip_segment_network,  # IP Segment Network
+                    ip_segment_interface=ip_segment.ip_segment_interface,  # IP Segment Interface
+                    ip_segment_actual_iface=ip_segment.ip_segment_actual_iface,  # IP Segment Actual Interface
+                    ip_segment_tag=ip_segment.ip_segment_tag,  # IP Segment Tag
+                    ip_segment_comment=ip_segment.ip_segment_comment,  # IP Segment Comment
+                    ip_segment_is_invalid=ip_segment.ip_segment_is_invalid,  # IP Segment Is Invalid
+                    ip_segment_is_dynamic=ip_segment.ip_segment_is_dynamic,  # IP Segment Is Dynamic
+                    ip_segment_is_disabled=ip_segment.ip_segment_is_disabled  # IP Segment Is Disabled
+                )
+                ip_segment_list.append(obj)  # Append the IP Segment Entity to the IP Segment List
+            return ip_segment_list  # Return the IP Segment List
+        except Exception as e:  # If an Exception occurs
+            print(e)
+    # IP Segment - Get IP Segments by Site ID
     # Static Methods
 # IP Segment Model

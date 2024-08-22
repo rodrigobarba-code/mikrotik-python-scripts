@@ -14,6 +14,8 @@ from app.decorators import RequirementsDecorators as restriction
 # Importing Required Decorators
 
 # Importing Required Models
+from app.blueprints.sites.models import Site
+from app.blueprints.regions.models import Region
 from app.blueprints.routers.models import Router
 from app.blueprints.ip_addresses.models import IPSegment
 # Importing Required Models
@@ -24,16 +26,44 @@ from app.blueprints.ip_addresses.models import IPSegment
 @restriction.admin_required  # Need to be an admin
 def ip_addresses():
     try:
-        ip_segment_list = IPSegment.get_ip_segments()  # Get the IP Segments
+        available_sites_obj = Site.get_sites()  # Get the available sites
+        available_sites = []  # Initialize the available sites list
 
+        # Loop through the available sites
+        for site in available_sites_obj:
+            available_sites.append({
+                'id': site.site_id,  # Site ID
+                'name': site.site_name,  # Site Name
+                'region': Region.get_region(site.fk_region_id).region_name, # Region Name
+                'segment': site.site_segment  # Site Segment
+            })
+        # Loop through the available sites
         return render_template(
-            'ip_addresses/ip_addresses.html',  # Render the IP Addresses template
-            ip_segment_list=ip_segment_list  # IP Segment List
+            'ip_addresses/ip_addresses_sites.html',  # Render the IP Addresses template
+            available_sites=available_sites  # Pass the available sites to the template
         )
     except Exception as e:  # If an exception occurs
         flash(str(e), 'danger')  # Flash an error message
         return redirect(url_for('ip_addresses.ip_addresses'))  # Redirect to the IP Addresses route
 # IP Addresses Main Route
+
+# IP Addresses Main w/ID Route
+@ip_addresses_bp.route('/<int:site_id>', methods=['GET'])
+@restriction.login_required  # Need to be logged in
+@restriction.admin_required  # Need to be an admin
+def ip_addresses_site(site_id):
+    try:
+        site_name = Site.get_site(site_id).site_name  # Get the Site Name
+        ip_segment_list = IPSegment.get_ip_segments_by_site_id(site_id)  # Get the IP Segments by Site ID
+        return render_template(
+            'ip_addresses/ip_addresses.html',  # Render the IP Addresses template
+            ip_segment_list=ip_segment_list,  # Pass the IP Segments to the template
+            site_name=site_name  # Pass the Site Name to the template
+        )
+    except Exception as e:  # If an exception occurs
+        flash(str(e), 'danger')  # Flash an error message
+        return redirect(url_for('ip_addresses.ip_addresses_site', site_id=site_id))  # Redirect to the IP Addresses route
+# IP Addresses Main w/ID Route
 
 # IP Addresses Delete Route
 @ip_addresses_bp.route('/delete/<int:segment_id>', methods=['GET'])
@@ -108,7 +138,7 @@ def get_ip_segment_details():
             'is_dynamic': segment.ip_segment_is_dynamic,  # Is Dynamic
             'is_disabled': segment.ip_segment_is_disabled  # Is Disabled
         }
-        return jsonify({'message': 'IP Segment data retrieved successfully', 'data': json_obj}), 200  # Return the IP Segment data
+        return jsonify(json_obj), 200  # Return the IP Segment data
     except Exception as e:  # If an exception occurs
         return jsonify({'message': 'Failed to get router data', 'error': str(e)}), 500  # Return an error message
 # IP Addresses Get IP Segments Details Route

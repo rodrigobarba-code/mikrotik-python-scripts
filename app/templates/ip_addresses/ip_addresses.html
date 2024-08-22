@@ -1,6 +1,6 @@
 {% from 'macros.html' import delete_modal, delete_select_modal, delete_all_modal %}
 {% extends 'base.html' %}
-{% block title %} IP Segments {% endblock %}
+{% block title %} IP Segments &#9830; Available Sites &#9830; {{ site_name }} {% endblock %}
 {% block head %}
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/ip_addresses/styles.css') }}">
 {% endblock %}
@@ -14,10 +14,17 @@
 {% endblock %}
 {% block content %}
     <!-- IP Segments Jumbotron -->
-    <section class="segments-jumbotron">
-        <div class="p-5 mb-4 base-jumbotron">
-            <div class="container-fluid py-5">
-                <h1 class="display-5 fw-bold">IP Segments</h1>
+    <section class="segments-jumbotron pt-5">
+        <div class="container-fluid py-5 d-flex flex-column flex-md-row">
+            <div class="d-flex col-md-1 order-md-1 order-2 text-md-start text-center my-md-0 my-3 justify-content-center align-items-center">
+                <button class="btn btn-c-return">
+                    <a href="{{ url_for('ip_addresses.ip_addresses') }}" class="text-decoration-none text-dark" style="font-size: 2.5rem">
+                        <i class="fa-solid fa-backward" style="color: white"></i>
+                    </a>
+                </button>
+            </div>
+            <div class="col-md-11 order-md-2 order-1">
+                <h1 class="display-5 fw-bold">IP Segments for {{ site_name }}</h1>
                 <p class="col-md-8 fs-4">Lorem Ipsum</p>
             </div>
         </div>
@@ -70,47 +77,50 @@
                 </tr>
                 </thead>
                 <tbody>
-                {% for ip_segment in ip_segment_list %}
-                    <tr>
-                        <td class="text-center"><label for="segment-{{ ip_segment.ip_segment_id }}"></label>
-                            <input type="checkbox" class="form-check-input" id="segment-{{ ip_segment.ip_segment_id }}">
-                        </td>
-                        <th scope="row">{{ ip_segment.ip_segment_id }}</th>
-                        <td>{{ ip_segment.ip_segment_ip }}</td>
-                        <td>{{ ip_segment.ip_segment_mask }}</td>
-                        <td>{{ ip_segment.ip_segment_network }}</td>
+                {% if ip_segment_list %}
+                    {% for ip_segment in ip_segment_list %}
+                        <tr>
+                            <td class="text-center"><label for="segment-{{ ip_segment.ip_segment_id }}"></label>
+                                <input type="checkbox" class="form-check-input" id="segment-{{ ip_segment.ip_segment_id }}">
+                            </td>
+                            <th scope="row">{{ ip_segment.ip_segment_id }}</th>
+                            <td>{{ ip_segment.ip_segment_ip }}</td>
+                            <td>{{ ip_segment.ip_segment_mask }}</td>
+                            <td>{{ ip_segment.ip_segment_network }}</td>
 
-                        {% if ip_segment.ip_segment_tag.value == 'Public IP' %}
-                            {% set badge_class = 'primary' %}
-                        {% elif ip_segment.ip_segment_tag.value == 'Private IP' %}
-                            {% set badge_class = 'success' %}
-                        {% elif ip_segment.ip_segment_tag.value == '' %}
-                            {% set badge_class = 'warning' %}
-                        {% else %}
-                            {% set badge_class = 'secondary' %}
-                        {% endif %}
+                            {% if ip_segment.ip_segment_tag.value == 'Public IP' %}
+                                {% set badge_class = 'primary' %}
+                            {% elif ip_segment.ip_segment_tag.value == 'Private IP' %}
+                                {% set badge_class = 'success' %}
+                            {% elif ip_segment.ip_segment_tag.value == '' %}
+                                {% set badge_class = 'warning' %}
+                            {% else %}
+                                {% set badge_class = 'secondary' %}
+                            {% endif %}
 
-                        <td>
-                            <span class="badge bg-{{ badge_class }}">{{ ip_segment.ip_segment_tag.value }}</span>
-                        </td>
-                        <td>
-                            <button type="button" id="delete-button-segment-{{ ip_segment.ip_segment_id }}"
-                                    class="btn btn-sm btn-danger"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#delete-modal"
-                                    data-id="{{ ip_segment.ip_segment_id }}"
-                                    data-type="segment"
-                                    data-url="{{ url_for('ip_addresses.delete_segment', segment_id=ip_segment.ip_segment_id) }}"
-                                    data-name="{{ ip_segment.ip_segment_ip }}"
-                            ><i class="fa-solid fa-trash"></i></button>
-                            <button id="show-segment-details" type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal"
-                                    data-bs-target="#arp-details-modal" data-id="{{ ip_segment.id }}"
-                                    onclick="segmentDetails.show('{{ ip_segment.ip_segment_id }}')">
-                                <i class="fa-solid fa-eye"></i>
-                            </button>
-                        </td>
-                    </tr>
-                {% endfor %}
+                            <td>
+                                <span class="badge bg-{{ badge_class }}">{{ ip_segment.ip_segment_tag.value }}</span>
+                            </td>
+                            <td>
+                                <button type="button" id="delete-button-segment-{{ ip_segment.ip_segment_id }}"
+                                        class="btn btn-sm btn-danger"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#delete-modal"
+                                        data-id="{{ ip_segment.ip_segment_id }}"
+                                        data-type="segment"
+                                        data-url="{{ url_for('ip_addresses.delete_segment', segment_id=ip_segment.ip_segment_id) }}"
+                                        data-name="{{ ip_segment.ip_segment_ip }}"
+                                ><i class="fa-solid fa-trash"></i></button>
+                                <button id="show-segment-details" type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal"
+                                        data-bs-target="#arp-details-modal" data-id="{{ ip_segment.id }}"
+                                        onclick="segmentDetails.show('{{ ip_segment.ip_segment_id }}')">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                {% endif %}
                 </tbody>
             </table>
         </div>

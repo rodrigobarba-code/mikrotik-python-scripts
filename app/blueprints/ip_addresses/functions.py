@@ -45,22 +45,28 @@ class IPAddressesFunctions:
     @staticmethod
     def delete_ip_segments(router_segment_list, fk_router_id):
         try:
+            # Make a list of Strings IPs with Mask, and Interface Included just for router_segment_list that has the FK_Router_ID
+            router_segment_list_p = [str(router_segment.ip_segment_ip) + "/" + str(router_segment.ip_segment_mask) + "@" + str(router_segment.ip_segment_interface) for router_segment in router_segment_list if router_segment.fk_router_id == fk_router_id]
+            # Make a list of Strings IPs with Mask, and Interface Included just for router_segment_list that has the FK_Router_ID
+
             # Importing Required Models
             from app.blueprints.ip_addresses.models import IPSegment
             # Importing Required Models
 
             # Querying the Database
-            database_segment_list = []  # Database Segment List
-            ip_segments = IPSegment.query.filter(  # Query the IP Segments
-                IPSegment.fk_router_id == fk_router_id  # FK Router ID
-            ).all()  # Get all results
-            for ip_segment in ip_segments:  # For each IP Segment
-                # Create a tuple with the IP and Mask and Interface in a String format
-                database_segment_list.append([ip_segment.ip_segment_ip, ip_segment.ip_segment_mask, ip_segment.ip_segment_interface, ip_segment.ip_segment_id])
+            ip_segments = IPSegment.query.filter(
+                IPSegment.fk_router_id == fk_router_id  # Filter by FK Router ID
+            ).all()
             # Querying the Database
 
-            # For each Database Segment
-            # For each Database Segment
+            # For each IP Segment in the Database
+            for ip_segment in ip_segments:
+                # If the IP Segment is not in the router list
+                if str(ip_segment.ip_segment_ip) + "/" + str(ip_segment.ip_segment_mask) + "@" + str(ip_segment.ip_segment_interface) not in router_segment_list_p:
+                    db.session.delete(ip_segment)  # Delete the IP Segment
+            # For each IP Segment in the Database
+
+            db.session.commit()  # Commit the Database Session
         except Exception as e:  # If an Exception occurs
             db.session.rollback()  # Rollback the Database Session
             print(str(e))  # Print the Exception

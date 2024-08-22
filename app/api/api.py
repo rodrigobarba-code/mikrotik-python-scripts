@@ -10,7 +10,6 @@ from app.api.modules.GetAllowedRouters import GetAllowedRouters
 # Importing Necessary Modules
 
 # Importing Necessary Entities
-from app.blueprints.ip_addresses.entities import IPSegmentTag
 from app.blueprints.ip_addresses.entities import IPSegmentEntity
 # Importing Necessary Entities
 
@@ -109,20 +108,20 @@ class RouterAPI:
                     pass  # Do nothing
                 ip_tmp = ip['address'].split('/')  # Split the IP and Mask
                 ip_obj = IPSegmentEntity(  # Create an instance of the IPSegmentEntity class
-                        ip_segment_id=int(),  # IP Segment ID
-                        fk_router_id=router_id,  # FK Router ID
-                        ip_segment_ip=ip_tmp[0],  # IP Segment IP
-                        ip_segment_mask=ip_tmp[1],  # IP Segment Mask
-                        ip_segment_network=ip['network'],  # IP Segment Network
-                        ip_segment_interface=ip['interface'],  # IP Segment Interface
-                        ip_segment_actual_iface=ip['actual-interface'],  # IP Segment Actual Interface
-                        ip_segment_tag=IPAddressesFunctions.determine_ip_segment_tag(
-                            ip_tmp[0],  # IP Segment IP
-                        ),  # IP Segment Tag
-                        ip_segment_comment=comment,  # IP Segment Comment
-                        ip_segment_is_invalid=True if ip['invalid'] == 'true' else False,  # IP Segment Is Invalid
-                        ip_segment_is_dynamic=True if ip['dynamic'] == 'true' else False,  # IP Segment Is Dynamic
-                        ip_segment_is_disabled=True if ip['disabled'] == 'true' else False  # IP Segment Is Disabled
+                    ip_segment_id=int(),  # IP Segment ID
+                    fk_router_id=router_id,  # FK Router ID
+                    ip_segment_ip=ip_tmp[0],  # IP Segment IP
+                    ip_segment_mask=ip_tmp[1],  # IP Segment Mask
+                    ip_segment_network=ip['network'],  # IP Segment Network
+                    ip_segment_interface=ip['interface'],  # IP Segment Interface
+                    ip_segment_actual_iface=ip['actual-interface'],  # IP Segment Actual Interface
+                    ip_segment_tag=IPAddressesFunctions.determine_ip_segment_tag(
+                        ip_tmp[0],  # IP Segment IP
+                    ),  # IP Segment Tag
+                    ip_segment_comment=comment,  # IP Segment Comment
+                    ip_segment_is_invalid=True if ip['invalid'] == 'true' else False,  # IP Segment Is Invalid
+                    ip_segment_is_dynamic=True if ip['dynamic'] == 'true' else False,  # IP Segment Is Dynamic
+                    ip_segment_is_disabled=True if ip['disabled'] == 'true' else False  # IP Segment Is Disabled
                     )
                 ip_obj.validate_ip_segment()  # Validate the IP Segment
                 ip_list.append(ip_obj)  # Append the IP object to the IP list
