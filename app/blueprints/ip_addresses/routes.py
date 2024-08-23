@@ -27,7 +27,10 @@ from app.blueprints.ip_addresses.models import IPSegment
 def ip_addresses():
     try:
         available_sites_obj = Site.get_sites()  # Get the available sites
+        available_regions_obj = Region.get_regions()  # Get the available regions
+
         available_sites = []  # Initialize the available sites list
+        available_regions = []  # Initialize the available regions list
 
         # Loop through the available sites
         for site in available_sites_obj:
@@ -38,8 +41,18 @@ def ip_addresses():
                 'segment': site.site_segment  # Site Segment
             })
         # Loop through the available sites
+
+        # Loop through the available regions
+        for region in available_regions_obj:
+            available_regions.append({
+                'id': region.region_id,  # Region ID
+                'name': region.region_name  # Region Name
+            })
+        # Loop through the available regions
+
         return render_template(
             'ip_addresses/ip_addresses_sites.html',  # Render the IP Addresses template
+            available_regions=available_regions,  # Pass the available regions to the template
             available_sites=available_sites  # Pass the available sites to the template
         )
     except Exception as e:  # If an exception occurs

@@ -84,6 +84,7 @@
 <!-- Macro for sidebar -->
 
 <!-- Macro for messages -->
+<!-- Macro for notification section -->
 {% macro messages() %}
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
@@ -100,8 +101,26 @@
     {% block content %}
     {% endblock %}
 {% endmacro %}
+<!-- Macro for notification section -->
+
+<!-- Macro for the not item found -->
+{% macro not_item_found() %}
+    <div class="text-center mb-3">
+        <img src="{{ url_for('static', filename='img/no-item-found.jpg') }}" alt="Empty"
+             class="img-fluid" width="300" style="margin-top: -50px">
+        <h5 class="text-center" style="margin-top: -50px">No logs found</h5>
+        <p class="mb-3">It seems that there are no logs to show</p>
+    </div>
+    <style>
+        #user-timeline-body {
+            height: max-content;
+        }
+    </style>
+{% endmacro %}
+<!-- Macro for the not item found -->
 <!-- Macro for messages -->
 
+<!-- Macro for modals -->
 <!-- Macro for the delete modal -->
 {% macro delete_modal() %}
     <div class="modal fade delete-modal" id="delete-modal" tabindex="-1" aria-labelledby="delete-modal-label"
@@ -175,26 +194,9 @@
     </section>
 {% endmacro %}
 <!-- Macro for the delete all modal -->
+<!-- Macro for modals -->
 
-<!-- Macro for the not item found -->
-{% macro not_item_found() %}
-    <div class="text-center mb-3">
-        <img src="{{ url_for('static', filename='img/no-item-found.jpg') }}" alt="Empty"
-             class="img-fluid" width="300" style="margin-top: -50px">
-        <h5 class="text-center" style="margin-top: -50px">No logs found</h5>
-        <p class="mb-3">It seems that there are no logs to show</p>
-    </div>
-    <style>
-        #user-timeline-body {
-            height: max-content;
-        }
-    </style>
-{% endmacro %}
-<!-- Macro for the not item found -->
-<!-- Macros for the modals -->
-
-<!-- Macros for the settings -->
-
+<!-- Macros for settings -->
 <!-- Macro for the tab nav item -->
 {% macro tab_nav_item(href, text, icon, active=False, is_tab=False) %}
     <li class="nav-item">
@@ -217,5 +219,17 @@
     </div>
 {% endmacro %}
 <!-- Macro for the tab content -->
-
 <!-- Macros for the settings -->
+
+<!-- Macros for recyclable components -->
+<!-- Macro for the search bar -->
+{% macro search_bar_with_checkbox(col, col_md, col_lg, type, section) %}
+    <div class="col-{{col}} col-md-{{col_md}} col-lg-{{col_lg}}">
+        <div class="form-group position-relative">
+            <input type="text" id="searchbar-{{section}}-{{type}}" class="form-control" placeholder="Search by {{type}}">
+            <div class="float-container" id="float-container-{{section}}-{{type}}" class="list-group mt-1"></div>
+        </div>
+    </div>
+{% endmacro %}
+<!-- Macro for the search bar -->
+<!-- Macros for recyclable components -->
