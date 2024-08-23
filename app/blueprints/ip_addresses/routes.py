@@ -31,13 +31,20 @@ def ip_addresses():
 
         available_sites = []  # Initialize the available sites list
         available_regions = []  # Initialize the available regions list
+        available_segments = []  # Initialize the available segments list
 
         # Loop through the available sites
         for site in available_sites_obj:
             available_sites.append({
                 'id': site.site_id,  # Site ID
                 'name': site.site_name,  # Site Name
-                'region': Region.get_region(site.fk_region_id).region_name, # Region Name
+                'value': site.site_name,  # Site Value
+                'region': Region.get_region(site.fk_region_id).region_name,  # Region Name
+                'segment': site.site_segment  # Site Segment
+            })
+
+            available_segments.append({
+                'value': site.site_segment,  # Site Value
                 'segment': site.site_segment  # Site Segment
             })
         # Loop through the available sites
@@ -46,12 +53,14 @@ def ip_addresses():
         for region in available_regions_obj:
             available_regions.append({
                 'id': region.region_id,  # Region ID
-                'name': region.region_name  # Region Name
+                'name': region.region_name,  # Region Name
+                'value': region.region_name  # Region Value
             })
         # Loop through the available regions
 
         return render_template(
             'ip_addresses/ip_addresses_sites.html',  # Render the IP Addresses template
+            available_segments=available_segments,  # Pass the available segments to the template
             available_regions=available_regions,  # Pass the available regions to the template
             available_sites=available_sites  # Pass the available sites to the template
         )

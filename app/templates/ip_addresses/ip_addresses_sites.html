@@ -7,8 +7,6 @@
 {% block scripts %}
     <script src="{{ url_for('static', filename='js/ip_addresses/scripts.js') }}"></script>
     <script>
-        const x = new SetupSearchbar("#searchbar-segments-site", "#float-container-segments-site", {{ available_sites|tojson }});
-        const y = new SetupSearchbar("#searchbar-segments-region", "#float-container-segments-region", {{ available_regions|tojson }});
     </script>
 {% endblock %}
 {% block content %}
@@ -33,21 +31,28 @@
                 <div class="col-12 col-md-12 text-right">
                     <section class="filter-section-for-ip-segments">
                         <div class="row">
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <div class="mb-2">
-                                    <label class="form-label">Filter by region:</label>
-                                    {{ search_bar_with_checkbox('12', '12', '12', 'region', 'segments') }}
+                                    <label class="form-label form-label-c" data-id="1"><b>Filter by region:</b></label>
+                                    {{ search_bar_with_checkbox(12, 12, 12, 'region', 'segments', available_regions) }}
                                     <div class="form-text">Ex. Mexicali, Tijuana, Ensenada</div>
                                 </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <div class="mb-2">
-                                    <label class="form-label">Filter by site:</label>
-                                    {{ search_bar_with_checkbox('12', '12', '12', 'site', 'segments') }}
+                                    <label class="form-label form-label-c" data-id="2"><b>Filter by site:</b></label>
+                                    {{ search_bar_with_checkbox(12, 12, 12, 'site', 'segments', available_sites) }}
                                     <div class="form-text">Ex. Robledo, Alamitos, Alfareros</div>
                                 </div>
                             </div>
-                            <div class="col-md-4 pb-md-3 d-flex justify-content-end align-items-end">
+                            <div class="col-md-3">
+                                <div class="mb-2">
+                                    <label class="form-label form-label-c" data-id="3"><b>Filter by segment:</b></label>
+                                    {{ search_bar_with_checkbox(12, 12, 12, 'segment', 'segments', available_segments) }}
+                                    <div class="form-text">Ex. 1, 2, 3</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 pb-md-3 d-flex justify-content-end align-items-end">
                                 <div class="pagination-controls align-bottom" style="bottom: 20px; right: 20px">
                                     <button id="prev" class="btn btn-primary"><i class="fa-solid fa-chevron-left"
                                                                                  style="color: white"></i></button>
@@ -76,7 +81,11 @@
         <div class="container w-75">
             <div class="row">
                 {% for site in available_sites %}
-                    <div class="col-c col-12 col-md-4">
+                    <div class="col-c col-12 col-md-4"
+                         data-filter-site="{{ site['name'] }}"
+                         data-filter-region="{{ site['region'] }}"
+                         data-filter-segment="{{ site['segment'] }}"
+                    >
                     <a href="{{ url_for('ip_addresses.ip_addresses_site', site_id=site['id']) }}">
                         <div class="card card-c mb-4">
                             <div class="card-background card-background-c" style="height: 100px"></div>
