@@ -308,4 +308,27 @@
     </script>
 {% endmacro %}
 <!-- Macro for the search bar -->
+
+<!-- Macro for pagination section -->
+{% macro render_pagination(total_pages, current_page, base_url) %}
+    <div id="pagination"></div>
+
+    <script>
+      $(function() {
+        $('#pagination').pagination({
+          dataSource: Array.from({length: total_pages}, (v, i) => i + 1),
+          pageSize: 1,
+          showPrevious: true,
+          showNext: true,
+          showPageNumbers: true,
+          callback: function(data, pagination) {
+            var url = '{{ base_url }}';
+            var page = pagination.pageNumber;
+            window.location.href = `${url}?page=${page}`;
+          }
+        });
+      });
+    </script>
+{% endmacro %}
+<!-- Macro for pagination section -->
 <!-- Macros for recyclable components -->

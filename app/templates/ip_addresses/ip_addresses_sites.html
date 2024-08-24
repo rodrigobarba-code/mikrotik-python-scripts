@@ -1,4 +1,4 @@
-{% from 'macros.html' import delete_modal, delete_select_modal, delete_all_modal, search_bar_with_checkbox %}
+{% from 'macros.html' import delete_modal, delete_select_modal, delete_all_modal, search_bar_with_checkbox, render_pagination %}
 {% extends 'base.html' %}
 {% block title %} IP Segments &#9830; Available Sites {% endblock %}
 {% block head %}
@@ -53,12 +53,7 @@
                                 </div>
                             </div>
                             <div class="col-md-3 pb-md-3 d-flex justify-content-end align-items-end">
-                                <div class="pagination-controls align-bottom" style="bottom: 20px; right: 20px">
-                                    <button id="prev" class="btn btn-primary"><i class="fa-solid fa-chevron-left"
-                                                                                 style="color: white"></i></button>
-                                    <button id="next" class="btn btn-primary"><i class="fa-solid fa-chevron-right"
-                                                                                 style="color: white"></i></button>
-                                </div>
+                                {{ render_pagination(total_pages=10, current_page=1, base_url='/items') }}
                             </div>
                         </div>
                     </section>
