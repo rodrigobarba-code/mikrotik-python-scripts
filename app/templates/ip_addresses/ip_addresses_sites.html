@@ -1,0 +1,102 @@
+{% from 'macros.html' import delete_modal, delete_select_modal, delete_all_modal, search_bar_with_checkbox, render_pagination %}
+{% extends 'base.html' %}
+{% block title %} IP Segments &#9830; Available Sites {% endblock %}
+{% block head %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/ip_addresses/styles.css') }}">
+{% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/ip_addresses/scripts.js') }}"></script>
+    <script>
+    </script>
+{% endblock %}
+{% block content %}
+    <!-- IP Segments Jumbotron -->
+    <section class="segments-jumbotron">
+        <div class="p-5 mb-4 base-jumbotron">
+            <div class="container-fluid py-5">
+                <h1 class="display-5 fw-bold">IP Segments</h1>
+                <p class="col-md-8 fs-4">Lorem Ipsum</p>
+            </div>
+        </div>
+    </section>
+    <!-- IP Segments Jumbotron -->
+
+    <!-- IP Segments Database -->
+    <section class="segments-database pt-3">
+        <div class="container w-75">
+            <div class="row">
+                <div class="col-12 col-md-12 text-left">
+                    <h2 class="regions-database-title">Select a <b>Site</b></h2>
+                </div>
+                <div class="col-12 col-md-12 text-right">
+                    <section class="filter-section-for-ip-segments">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="mb-2">
+                                    <label class="form-label form-label-c" data-id="1"><b>Filter by region:</b></label>
+                                    {{ search_bar_with_checkbox(12, 12, 12, 'region', 'segments', available_regions) }}
+                                    <div class="form-text">Ex. Mexicali, Tijuana, Ensenada</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-2">
+                                    <label class="form-label form-label-c" data-id="2"><b>Filter by site:</b></label>
+                                    {{ search_bar_with_checkbox(12, 12, 12, 'site', 'segments', available_sites) }}
+                                    <div class="form-text">Ex. Robledo, Alamitos, Alfareros</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-2">
+                                    <label class="form-label form-label-c" data-id="3"><b>Filter by segment:</b></label>
+                                    {{ search_bar_with_checkbox(12, 12, 12, 'segment', 'segments', available_segments) }}
+                                    <div class="form-text">Ex. 1, 2, 3</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 pb-md-3 d-flex justify-content-end align-items-end">
+                                {{ render_pagination(total_pages=10, current_page=1, base_url='/items') }}
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- IP Segments Database -->
+
+    <!-- IP Segments Separator -->
+    <section class="segments-separator">
+        <div class="container w-75">
+            <hr>
+        </div>
+    </section>
+    <!-- IP Segments Separator -->
+
+    <!-- IP Segments Available Sites -->
+    <section class="segments-available-sites">
+        <div class="container w-75">
+            <div class="row">
+                {% for site in available_sites %}
+                    <div class="col-c col-12 col-md-4"
+                         data-filter-site="{{ site['name'] }}"
+                         data-filter-region="{{ site['region'] }}"
+                         data-filter-segment="{{ site['segment'] }}"
+                    >
+                    <a href="{{ url_for('ip_addresses.ip_addresses_site', site_id=site['id']) }}">
+                        <div class="card card-c mb-4">
+                            <div class="card-background card-background-c" style="height: 100px"></div>
+                            <div class="card-body pb-0">
+                                <h4 class="card-title" style="text-decoration: none"><b>{{ site['name'] }}</b></h4> <hr>
+                                <p class="card-text">
+                                    <small class="text-body-secondary"><b>Region:</b> {{ site['region'] }}</small> &#9830;
+                                    <small class="text-body-secondary"><b>Segment:</b> {{ site['segment'] }}</small></p>
+                                </p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+    <!-- IP Segments Available Sites -->
+{% endblock %}

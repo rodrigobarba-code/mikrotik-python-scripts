@@ -1,4 +1,3 @@
-<!-- Macros for the modals -->
 <!-- Macro for sidebar -->
 {% macro sidebar(menu_items, profile_menu_items, job_display) %}
     <div class="sidebar close">
@@ -18,7 +17,11 @@
                         <div class="iocn-link">
                             <a {% if item.endpoint != '#' %} href="{{ url_for(item.endpoint) }}" {% endif %}>
                                 <i class="{{ item.icon }}"></i>
-                                <span class="link_name">{{ item.name }}</span>
+                                {% if item.marquee %}
+                                    <marquee direction="left" scrollamount="4"><span class="link_name">{{ item.name }}</span></marquee>
+                                {% else %}
+                                    <span class="link_name">{{ item.name }}</span>
+                                {% endif %}
                             </a>
                             <i class='bx bxs-chevron-down arrow'></i>
                         </div>
@@ -36,7 +39,11 @@
                     <li>
                         <a {% if item.endpoint != '#' %} href="{{ url_for(item.endpoint) }}" {% endif %}>
                             <i class="{{ item.icon }}"></i>
-                            <span class="link_name">{{ item.name }}</span>
+                            {% if item.marquee %}
+                                <marquee direction="left" scrollamount="4"><span class="link_name">{{ item.name }}</span></marquee>
+                            {% else %}
+                                <span class="link_name">{{ item.name }}</span>
+                            {% endif %}
                         </a>
                         <ul class="sub-menu blank">
                             <li><a class="link_name" {% if item.endpoint != '#' %}
@@ -76,6 +83,7 @@
 <!-- Macro for sidebar -->
 
 <!-- Macro for messages -->
+<!-- Macro for notification section -->
 {% macro messages() %}
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
@@ -93,9 +101,26 @@
     {% block content %}
     {% endblock %}
 {% endmacro %}
+<!-- Macro for notification section -->
+
+<!-- Macro for the not item found -->
+{% macro not_item_found() %}
+    <div class="text-center mb-3">
+        <img src="{{ url_for('static', filename='img/no-item-found.jpg') }}" alt="Empty"
+             class="img-fluid" width="300" style="margin-top: -50px">
+        <h5 class="text-center" style="margin-top: -50px">No logs found</h5>
+        <p class="mb-3">It seems that there are no logs to show</p>
+    </div>
+    <style>
+        #user-timeline-body {
+            height: max-content;
+        }
+    </style>
+{% endmacro %}
+<!-- Macro for the not item found -->
 <!-- Macro for messages -->
 
-
+<!-- Macro for modals -->
 <!-- Macro for the delete modal -->
 {% macro delete_modal() %}
     <div class="modal fade delete-modal" id="delete-modal" tabindex="-1" aria-labelledby="delete-modal-label"
@@ -169,26 +194,9 @@
     </section>
 {% endmacro %}
 <!-- Macro for the delete all modal -->
+<!-- Macro for modals -->
 
-<!-- Macro for the not item found -->
-{% macro not_item_found() %}
-    <div class="text-center mb-3">
-        <img src="{{ url_for('static', filename='img/no-item-found.jpg') }}" alt="Empty"
-             class="img-fluid" width="300" style="margin-top: -50px">
-        <h5 class="text-center" style="margin-top: -50px">No logs found</h5>
-        <p class="mb-3">It seems that there are no logs to show</p>
-    </div>
-    <style>
-        #user-timeline-body {
-            height: max-content;
-        }
-    </style>
-{% endmacro %}
-<!-- Macro for the not item found -->
-<!-- Macros for the modals -->
-
-<!-- Macros for the settings -->
-
+<!-- Macros for settings -->
 <!-- Macro for the tab nav item -->
 {% macro tab_nav_item(href, text, icon, active=False, is_tab=False) %}
     <li class="nav-item">
@@ -211,5 +219,116 @@
     </div>
 {% endmacro %}
 <!-- Macro for the tab content -->
-
 <!-- Macros for the settings -->
+
+<!-- Macros for recyclable components -->
+<!-- Macro for the search bar -->
+{% macro search_bar_with_checkbox(col, col_md, col_lg, type, section, data) %}
+    <div class="col-{{col}} col-md-{{col_md}} col-lg-{{col_lg}}">
+        <div class="form-group position-relative">
+            <select id="searchbar-{{section}}-{{type}}" class="form-control select2" placeholder="Search by {{type}}" style="width: 100%; border-radius: 10px;">
+                <option value=""></option>
+                {% for item in data %}
+                    <option value="{{ item['value'] }}">{{ item['value'] }}</option>
+                {% endfor %}
+            </select>
+            <div class="float-container" id="float-container-{{section}}-{{type}}" class="list-group mt-1"></div>
+        </div>
+    </div>
+    <style>
+        .select2-selection--single {
+            height: 40px !important;
+            border-radius: 10px !important;
+            display: flex;
+            align-items: center;
+        }
+
+        .select2-selection__rendered {
+            line-height: 40px !important;
+        }
+
+        .select2-selection__arrow {
+            height: 40px !important;
+        }
+
+        .select2-selection__clear {
+            height: 40px !important;
+        }
+    </style>
+    <script>
+        $(window).on('load', function() {
+            $('.select2').val(null).trigger('change');
+        });
+
+        $(document).ready(function() {
+            $('#searchbar-{{section}}-{{type}}').select2({
+                placeholder: 'Search by {{type}}',
+                allowClear: true,
+                width: '100%',
+                templateResult: function(data) {
+                    if (data.loading) {
+                        return data.text;
+                    }
+                    if (!data.id) {
+                        var $noResult = $('<span class="no-results"></span>').text('No results found');
+                        return $noResult;
+                    }
+                    return data.text;
+                }
+            });
+
+            $('#searchbar-{{section}}-{{type}}').on('change', function() {
+                var selectedValue = $(this).val();
+                $('.col-c').each(function() {
+                    var filterValue = $(this).data('filter-{{type}}');
+
+                    if (selectedValue === "" || String(filterValue) === String(selectedValue)) {
+                        $(this).show();
+                    } else {
+                        $(this).hide();
+                    }
+                });
+            });
+
+            $('.select2').on('select2:select', function(e) {
+                var selectedValue = e.params.data.id;
+                if (selectedValue !== "") {
+                    $('.select2').not(this).prop('disabled', true);
+                }
+            });
+
+            $('.select2').on('select2:unselect', function() {
+                $('.select2').prop('disabled', false);
+            });
+
+            $('.select2').on('select2:clear', function() {
+                $('.select2').prop('disabled', false);
+            });
+        });
+    </script>
+{% endmacro %}
+<!-- Macro for the search bar -->
+
+<!-- Macro for pagination section -->
+{% macro render_pagination(total_pages, current_page, base_url) %}
+    <div id="pagination"></div>
+
+    <script>
+      $(function() {
+        $('#pagination').pagination({
+          dataSource: Array.from({length: total_pages}, (v, i) => i + 1),
+          pageSize: 1,
+          showPrevious: true,
+          showNext: true,
+          showPageNumbers: true,
+          callback: function(data, pagination) {
+            var url = '{{ base_url }}';
+            var page = pagination.pageNumber;
+            window.location.href = `${url}?page=${page}`;
+          }
+        });
+      });
+    </script>
+{% endmacro %}
+<!-- Macro for pagination section -->
+<!-- Macros for recyclable components -->

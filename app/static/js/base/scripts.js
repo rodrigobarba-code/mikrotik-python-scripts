@@ -7,8 +7,21 @@
 $(document).ready(function () {
     // Assign title to top link
     let title = document.title;  // Get the title of the page
-    $('#top-link').text(title);  // Assign title to top link
+    $('#top-link').html(
+        "<marquee id='top-link-m' direction='left' behavior='scroll' scrollamount='5'>" + title + "</marquee>" +
+        "<div id='top-link-n' class='text-center'>" + title + "</div>"
+    );  // Assign title to top link
     // Assign title to top link
+
+    // Change top link on phone view
+    if ($(window).width() < 768) {
+        $('#top-link-m').show();  // Show the marquee
+        $('#top-link-n').hide();  // Hide the text
+    } else {
+        $('#top-link-m').hide();  // Hide the marquee
+        $('#top-link-n').show();  // Show the text
+    }
+    // Change top link on phone view
 
     // Assign Data Table to regions table
     $("#datatable-object").DataTable({
