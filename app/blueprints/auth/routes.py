@@ -1,8 +1,9 @@
 # Importing necessary modules
 import bcrypt
+from datetime import timedelta  # Importing the timedelta module from the datetime module to set the session timeout
 from app.functions import get_local_ip, get_public_ip
 from app.blueprints.users.functions import users_functions as functions
-from flask import render_template, redirect, url_for, flash, request, session
+from flask import render_template, redirect, url_for, flash, request, session, current_app
 # Importing necessary modules
 
 # Importing necessary decorators
@@ -15,43 +16,57 @@ from app.blueprints.users.models import User
 
 from . import auth_bp  # Importing the blueprint instance
 
+
 # Auth Login Route
 @auth_bp.route('/login', methods=['GET', 'POST'])
-def login():
+def login():  # Login route
     if request.method == 'POST':  # If the request method is POST
         username = request.form.get('username')  # Get the username from the form
         password = request.form.get('password').encode('utf-8')  # Get the password from the form and encode it
-        # Query the database for the user to check if it exists
-        user = User.query.filter_by(user_username=username).first()
-        if user:  # If the user exists, will try to check the password, otherwise will return an error message
-            if bcrypt.checkpw(password, user.user_password):  # Check the password hash with the one in the database
-                # Create the session variables for the user
-                session['user_id'] = user.user_id  # Identify the user by the user_id
-                session['user_username'] = user.user_username  # Identify the user by the user_username
-                session['user_privileges'] = user.user_privileges  # Identify the user by the user_privileges
-                session['user_username'] = user.user_username  # Indentify the user by the user_username
-                session['user_name'] = user.user_name  # Indentify the user by the user_name
-                session['user_lastname'] = user.user_lastname  # Indentify the user by the user_lastname
-                session['user_public_ip'] = str(get_public_ip())  # Indentify the user by the user_public_ip
-                session['user_local_ip'] = str(get_local_ip())
-                # Create the session variables for the user
+        remember_me = request.form.get('logged')  # Get the "Remember me" checkbox value
 
-                # Set the user avatar based on the user privileges
-                if user.user_privileges == 'admin':  # If the user is an admin, will set the admin avatar
-                    session['user_avatar'] = url_for('static', filename='img/user_avatars/admin_avatar.svg')
-                elif user.user_privileges == 'employee':  # If the user is an employee, will set the employee avatar
-                    session['user_avatar'] = url_for('static', filename='img/user_avatars/user_avatar.svg')
-                elif user.user_privileges == 'guest':
-                    session['user_avatar'] = url_for('static', filename='img/user_avatars/guest_avatar.svg')
-                # Set the user avatar based on the user privileges
+        user = User.query.filter_by(user_username=username).first()  # Get the user from the database
+        if user and bcrypt.checkpw(password, user.user_password):  # If the user exists and the password is correct
+            session['user_id'] = user.user_id  # Set the user_id session variable
+            session['user_username'] = user.user_username  # Set the user_username session variable
+            session['user_privileges'] = user.user_privileges  # Set the user_privileges session variable
+            session['user_name'] = user.user_name  # Set the user_name session variable
+            session['user_lastname'] = user.user_lastname  # Set the user_lastname session variable
+            session['user_public_ip'] = str(get_public_ip())  # Set the user_public_ip session variable
+            session['user_local_ip'] = str(get_local_ip())  # Set the user_local_ip session variable
 
-                functions.create_log(session['user_id'], 'User logged in', 'LOGIN', 'users')  # Create a log
-                return redirect(url_for('home.home'))  # Redirect the user to the home page
-            else:
-                flash('Invalid password, are you sure you typed it correctly?')  # If the password is incorrect, will return an error message
-        else:
-            flash('Invalid username, maybe you need to register')  # If the user does not exist, will return an error message
-    return render_template('auth/login.html')  # If the request method is GET, will render the login page
+            if user.user_privileges == 'admin':  # Set the user_avatar session variable based on the user's privileges
+                session['user_avatar'] = url_for('static',
+                                                 filename='img/user_avatars/admin_avatar.svg')  # Set the user_avatar session variable
+            elif user.user_privileges == 'employee':  # Set the user_avatar session variable based on the user's privileges
+                session['user_avatar'] = url_for('static',
+                                                 filename='img/user_avatars/user_avatar.svg')  # Set the user_avatar session variable
+            elif user.user_privileges == 'guest':  # Set the user_avatar session variable based on the user's privileges
+                session['user_avatar'] = url_for('static',
+                                                 filename='img/user_avatars/guest_avatar.svg')  # Set the user_avatar session variable
+
+            functions.create_log(session['user_id'], 'User logged in', 'LOGIN', 'users')  # Create a log
+            flash('Welcome back ' + user.user_name + ' ' + user.user_lastname + '!',
+                  'success')  # Flash a success message
+
+            if remember_me:  # If the "Remember me" checkbox is checked
+                session.permanent = True  # Make the session permanent (1 year)
+                timeout = timedelta(days=356)  # Set session timeout to 1 year
+                current_app.permanent_session_lifetime = timeout  # Set the session timeout
+            else:  # If the "Remember me" checkbox is not checked
+                session.permanent = False  # Make the session non-permanent
+                timeout = timedelta(hours=1)  # Set session timeout to 10 seconds for testing
+                current_app.permanent_session_lifetime = timeout  # Set the session timeout
+
+            return render_template('auth/login.html', redirect_to_home=True)  # Render the login page
+        else:  # If the user does not exist or the password is incorrect
+            flash('Invalid credentials', 'error')  # Flash an error message
+    if request.method == 'GET':  # If the request method is GET
+        if 'user_id' in session:  # If the user is already logged in and tries to access the login page
+            return redirect(url_for('home.home'))  # Redirect the user to the home page
+    return render_template('auth/login.html')  # Render the login page
+
+
 # Auth Login Route
 
 # Auth Logout Route

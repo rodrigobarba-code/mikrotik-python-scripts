@@ -1,4 +1,3 @@
-<!-- Macros for the modals -->
 <!-- Macro for sidebar -->
 {% macro sidebar(menu_items, profile_menu_items, job_display) %}
     <div class="sidebar close">
@@ -89,10 +88,11 @@
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}
-                <div class="container-fluid pt-2 pb-2">
-                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                <div class="container-fluid pt-2 pb-2 alert-container">
+                    <div class="alert alert-{{ category }} alert-dismissible show fade" role="alert">
                         {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"
+                                data-bs-target=".alert-container"></button>
                     </div>
                 </div>
             {% endfor %}
