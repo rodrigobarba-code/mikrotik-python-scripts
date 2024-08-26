@@ -6,6 +6,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const homeContent = document.querySelector('.home-content');
     const homeSection = document.querySelector('.home-section');
 
+
+
+    let isTouching = false;
+    let startY;
+
+    userActions.addEventListener('touchstart', function(e) {
+        isTouching = true;
+        startY = e.touches[0].clientY;
+    });
+
+    userActions.addEventListener('touchmove', function(e) {
+        if (isTouching) {
+            const currentY = e.touches[0].clientY;
+            if (currentY > startY + 50) { // Adjust the threshold as needed
+                hideUserActions();
+                isTouching = false;
+            }
+        }
+    });
+
+    userActions.addEventListener('touchend', function() {
+        isTouching = false;
+    });
     // Log the elements to ensure they are correctly selected
     console.log(sidebar, userActions, sidebarBtn, profileImg, homeContent);
 

@@ -54,6 +54,10 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base/styles.css') }}">
     <!-- Custom Internal CSS -->
 
+    <!-- Assets CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/sweetalert2/css/sweetalert2.css') }}">
+    <!-- Assets CSS -->
+
     <!-- Custom External CSS -->
     {% block head %}
     {% endblock %}
@@ -104,6 +108,11 @@
 <script src="{{ url_for('static', filename='js/base/sidebar.js') }}"></script>
 <script src="{{ url_for('static', filename='js/base/scripts.js') }}"></script>
 <!-- Custom Internal JavaScript -->
+
+<!-- Assets JavaScript -->
+<script src="{{ url_for('static', filename='assets/sweetalert2/js/sweetalert2.js') }}"></script>
+<script src="{{ url_for('static', filename='assets/notyf/js/notyf.js') }}"></script>
+<!-- Assets JavaScript -->
 
 <!-- Custom External JavaScript -->
 {% block scripts %}
