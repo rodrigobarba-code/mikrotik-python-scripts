@@ -22,7 +22,6 @@ html, body {
     background: #11101d;
     z-index: 101; /* Higher than .home-section */
     transition: all 0.5s ease;
-    overflow: hidden;
 }
 
 .sidebar.close {
@@ -82,8 +81,7 @@ html, body {
 .sidebar .nav-links {
     height: 100%;
     padding: 30px 0 150px 0;
-    overflow-x: hidden;
-    overflow-y: scroll;
+    overflow: auto;
 }
 
 .sidebar.close .nav-links {
@@ -182,6 +180,7 @@ html, body {
     padding: 10px 20px;
     border-radius: 0 6px 6px 0;
     opacity: 0;
+    display: block;
     pointer-events: none;
     transition: 0s;
 }
@@ -329,6 +328,10 @@ html, body {
     background-color: rgba(123, 226, 255, 0.76);
 }
 
+#settings-button:hover {
+    background-color: rgba(123, 226, 255, 0.76);
+}
+
 .dropdown-menu {
     flex-direction: column;
     width: 100%; /* Adjust based on your layout */
@@ -355,6 +358,7 @@ html, body {
         height: 100vh;
         position: fixed;
         left: 0;
+        overflow: hidden;
     }
 
     .home-section {
