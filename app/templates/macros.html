@@ -18,7 +18,8 @@
                             <a {% if item.endpoint != '#' %} href="{{ url_for(item.endpoint) }}" {% endif %}>
                                 <i class="{{ item.icon }}"></i>
                                 {% if item.marquee %}
-                                    <marquee direction="left" scrollamount="4"><span class="link_name">{{ item.name }}</span></marquee>
+                                    <marquee direction="left" scrollamount="4"><span
+                                            class="link_name">{{ item.name }}</span></marquee>
                                 {% else %}
                                     <span class="link_name">{{ item.name }}</span>
                                 {% endif %}
@@ -40,7 +41,8 @@
                         <a {% if item.endpoint != '#' %} href="{{ url_for(item.endpoint) }}" {% endif %}>
                             <i class="{{ item.icon }}"></i>
                             {% if item.marquee %}
-                                <marquee direction="left" scrollamount="4"><span class="link_name">{{ item.name }}</span></marquee>
+                                <marquee direction="left" scrollamount="4"><span
+                                        class="link_name">{{ item.name }}</span></marquee>
                             {% else %}
                                 <span class="link_name">{{ item.name }}</span>
                             {% endif %}
@@ -219,20 +221,56 @@
     </div>
 {% endmacro %}
 <!-- Macro for the tab content -->
+
+<!-- Macro for the settings form -->
+{% macro settings_form(full_name='', bio='', url='', location='') %}
+    <form>
+        <div class="form-group">
+            <label for="fullName">Full Name</label>
+            <input type="text" class="form-control" id="fullName" aria-describedby="fullNameHelp"
+                   placeholder="Enter your fullname" value="{{ session['user_name'] }}">
+            <small id="fullNameHelp" class="form-text text-muted">Your name</small>
+        </div>
+        <div class="form-group">
+            <label for="bio">Your Bio</label>
+            <textarea class="form-control autosize" id="bio" placeholder="Write something about you"
+                      style="overflow: hidden; overflow-wrap: break-word; resize: none; height: 62px;">{{ bio }}</textarea>
+        </div>
+        <div class="form-group">
+            <label for="url">URL</label>
+            <input type="text" class="form-control" id="url" placeholder="Enter your website address"
+                   value="{{ url }}">
+        </div>
+        <div class="form-group">
+            <label for="location">Location</label>
+            <input type="text" class="form-control" id="location" placeholder="Enter your location"
+                   value="{{ location }}">
+        </div>
+        <div class="form-group small text-muted mt-2 mb-2">
+            All of the fields on this page are optional and can be deleted at any time, and by filling them out,
+            you're giving us consent to share this data wherever your user profile appears.
+        </div>
+        <button type="button" class="btn btn-primary">Update Profile</button>
+        <button type="reset" class="btn btn-light">Reset Changes</button>
+    </form>
+{% endmacro %}
+<!-- Macro for the settings form -->
+
 <!-- Macros for the settings -->
 
 <!-- Macros for recyclable components -->
 <!-- Macro for the search bar -->
 {% macro search_bar_with_checkbox(col, col_md, col_lg, type, section, data) %}
-    <div class="col-{{col}} col-md-{{col_md}} col-lg-{{col_lg}}">
+    <div class="col-{{ col }} col-md-{{ col_md }} col-lg-{{ col_lg }}">
         <div class="form-group position-relative">
-            <select id="searchbar-{{section}}-{{type}}" class="form-control select2" placeholder="Search by {{type}}" style="width: 100%; border-radius: 10px;">
+            <select id="searchbar-{{ section }}-{{ type }}" class="form-control select2"
+                    placeholder="Search by {{ type }}" style="width: 100%; border-radius: 10px;">
                 <option value=""></option>
                 {% for item in data %}
                     <option value="{{ item['value'] }}">{{ item['value'] }}</option>
                 {% endfor %}
             </select>
-            <div class="float-container" id="float-container-{{section}}-{{type}}" class="list-group mt-1"></div>
+            <div class="float-container" id="float-container-{{ section }}-{{ type }}" class="list-group mt-1"></div>
         </div>
     </div>
     <style>
@@ -256,16 +294,16 @@
         }
     </style>
     <script>
-        $(window).on('load', function() {
+        $(window).on('load', function () {
             $('.select2').val(null).trigger('change');
         });
 
-        $(document).ready(function() {
+        $(document).ready(function () {
             $('#searchbar-{{section}}-{{type}}').select2({
                 placeholder: 'Search by {{type}}',
                 allowClear: true,
                 width: '100%',
-                templateResult: function(data) {
+                templateResult: function (data) {
                     if (data.loading) {
                         return data.text;
                     }
@@ -277,9 +315,9 @@
                 }
             });
 
-            $('#searchbar-{{section}}-{{type}}').on('change', function() {
+            $('#searchbar-{{section}}-{{type}}').on('change', function () {
                 var selectedValue = $(this).val();
-                $('.col-c').each(function() {
+                $('.col-c').each(function () {
                     var filterValue = $(this).data('filter-{{type}}');
 
                     if (selectedValue === "" || String(filterValue) === String(selectedValue)) {
@@ -290,18 +328,18 @@
                 });
             });
 
-            $('.select2').on('select2:select', function(e) {
+            $('.select2').on('select2:select', function (e) {
                 var selectedValue = e.params.data.id;
                 if (selectedValue !== "") {
                     $('.select2').not(this).prop('disabled', true);
                 }
             });
 
-            $('.select2').on('select2:unselect', function() {
+            $('.select2').on('select2:unselect', function () {
                 $('.select2').prop('disabled', false);
             });
 
-            $('.select2').on('select2:clear', function() {
+            $('.select2').on('select2:clear', function () {
                 $('.select2').prop('disabled', false);
             });
         });
@@ -314,20 +352,20 @@
     <div id="pagination"></div>
 
     <script>
-      $(function() {
-        $('#pagination').pagination({
-          dataSource: Array.from({length: total_pages}, (v, i) => i + 1),
-          pageSize: 1,
-          showPrevious: true,
-          showNext: true,
-          showPageNumbers: true,
-          callback: function(data, pagination) {
-            var url = '{{ base_url }}';
-            var page = pagination.pageNumber;
-            window.location.href = `${url}?page=${page}`;
-          }
+        $(function () {
+            $('#pagination').pagination({
+                dataSource: Array.from({length: total_pages}, (v, i) => i + 1),
+                pageSize: 1,
+                showPrevious: true,
+                showNext: true,
+                showPageNumbers: true,
+                callback: function (data, pagination) {
+                    var url = '{{ base_url }}';
+                    var page = pagination.pageNumber;
+                    window.location.href = `${url}?page=${page}`;
+                }
+            });
         });
-      });
     </script>
 {% endmacro %}
 <!-- Macro for pagination section -->
