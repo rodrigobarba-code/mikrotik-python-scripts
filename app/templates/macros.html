@@ -226,199 +226,23 @@
 {% macro search_bar_with_checkbox(col, col_md, col_lg, type, section, data) %}
     <div class="col-{{col}} col-md-{{col_md}} col-lg-{{col_lg}}">
         <div class="form-group position-relative">
-            <select id="searchbar-{{section}}-{{type}}" class="form-control select2" placeholder="Search by {{type}}" style="width: 100%; border-radius: 10px;">
+            <select id="searchbar-{{section}}-{{type}}" class="form-control select2 searchbar" placeholder="Search by {{type}}" style="width: 100%; border-radius: 10px;">
                 <option value=""></option>
                 {% for item in data %}
                     <option value="{{ item['value'] }}">{{ item['value'] }}</option>
                 {% endfor %}
             </select>
-            <div class="float-container" id="float-container-{{section}}-{{type}}" class="list-group mt-1"></div>
+            <div id="float-container-{{section}}-{{type}}" class="list-group mt-1 float-container"></div>
         </div>
     </div>
-    <style>
-        .select2-selection--single {
-            height: 40px !important;
-            border-radius: 10px !important;
-            display: flex;
-            align-items: center;
-        }
-
-        .select2-selection__rendered {
-            line-height: 40px !important;
-        }
-
-        .select2-selection__arrow {
-            height: 40px !important;
-        }
-
-        .select2-selection__clear {
-            height: 40px !important;
-        }
-    </style>
-    <script>
-        $(window).on('load', function() {
-            $('.select2').val(null).trigger('change');
-        });
-
-        $(document).ready(function() {
-            $('#searchbar-{{section}}-{{type}}').select2({
-                placeholder: 'Search by {{type}}',
-                allowClear: true,
-                width: '100%',
-                templateResult: function(data) {
-                    if (data.loading) {
-                        return data.text;
-                    }
-                    if (!data.id) {
-                        var $noResult = $('<span class="no-results"></span>').text('No results found');
-                        return $noResult;
-                    }
-                    return data.text;
-                }
-            });
-
-            $('#searchbar-{{section}}-{{type}}').on('change', function() {
-                var selectedValue = $(this).val();
-                $('.col-c').each(function() {
-                    var filterValue = $(this).data('filter-{{type}}');
-
-                    if (selectedValue === "" || String(filterValue) === String(selectedValue)) {
-                        $(this).show().addClass("filtered");
-                    } else {
-                        $(this).hide().removeClass("filtered");
-                    }
-                });
-            });
-
-            $('.select2').on('select2:select', function(e) {
-                var selectedValue = e.params.data.id;
-                if (selectedValue !== "") {
-                    $('.select2').not(this).prop('disabled', true);
-                }
-            });
-
-            $('.select2').on('select2:unselect', function() {
-                $('.select2').prop('disabled', false);
-            });
-
-            $('.select2').on('select2:clear', function() {
-                $('.select2').prop('disabled', false);
-            });
-        });
-    </script>
+    <script> initializeSearchBar('{{ section }}', '{{ type }}') </script>
 {% endmacro %}
 <!-- Macro for the search bar -->
 
 <!-- Macro for pagination section -->
-{% macro pagination(total_items, items_per_page=9) %}
-    {% set total_pages = (total_items // items_per_page) + (1 if total_items % items_per_page > 0 else 0) %}
-
-    <nav aria-label="Page navigation">
-      <ul class="pagination" style="font-weight: bolder;">
-        <li class="page-item first-page">
-          <a class="page-link" href="#" aria-label="First">
-            <span aria-hidden="true">
-                <i class="fa-solid fa-chevron-up fa-rotate-270"></i>
-                <i class="fa-solid fa-chevron-up fa-rotate-270" style="margin-left: -10px"></i>
-            </span>
-          </a>
-        </li>
-        <li class="page-item prev-page">
-          <a class="page-link" href="#" aria-label="Previous">
-            <span aria-hidden="true"><i class="fa-solid fa-chevron-up fa-rotate-270"></i></span>
-          </a>
-        </li>
-        <!-- Dynamic page numbers will be inserted here -->
-        <li class="page-item next-page">
-          <a class="page-link" href="#" aria-label="Next">
-            <span aria-hidden="true"><i class="fa-solid fa-chevron-up fa-rotate-90"></i></span>
-          </a>
-        </li>
-        <li class="page-item last-page">
-          <a class="page-link" href="#" aria-label="Last">
-            <span aria-hidden="true">
-                <i class="fa-solid fa-chevron-up fa-rotate-90"></i>
-                <i class="fa-solid fa-chevron-up fa-rotate-90" style="margin-left: -10px"></i>
-            </span>
-          </a>
-        </li>
-      </ul>
-    </nav>
-
-    <script>
-        $(document).ready(function() {
-            const itemsPerPage = {{ items_per_page }};
-            const totalItems = {{ total_items }};
-            const totalPages = {{ total_pages }};
-            const $items = $('.row-c .col-c');
-            let currentPage = 1;
-
-            function showPage(page) {
-                $items.hide();
-                const start = (page - 1) * itemsPerPage;
-                const end = start + itemsPerPage;
-                $items.slice(start, end).show();
-                currentPage = page;
-            }
-
-            function updatePagination() {
-                $('.pagination .page-number').remove();
-
-                let startPage = Math.max(1, currentPage - 1);
-                let endPage = Math.min(totalPages, startPage + 2);
-
-                if (currentPage === 1) {
-                    startPage = 1;
-                    endPage = Math.min(3, totalPages);
-                } else if (currentPage === totalPages) {
-                    startPage = Math.max(1, totalPages - 2);
-                    endPage = totalPages;
-                }
-
-                for (let i = startPage; i <= endPage; i++) {
-                    $('<li class="page-item page-number"><a class="page-link" href="#" data-page="' + i + '">' + i + '</a></li>')
-                        .insertBefore('.pagination .next-page');
-                }
-
-                $('.pagination .page-item').removeClass('active');
-                $('.pagination .page-link[data-page="' + currentPage + '"]').parent().addClass('active');
-
-                if (currentPage === 1) {
-                    $('.pagination .first-page, .pagination .prev-page').addClass('disabled');
-                } else {
-                    $('.pagination .first-page, .pagination .prev-page').removeClass('disabled');
-                }
-
-                if (currentPage === totalPages) {
-                    $('.pagination .next-page, .pagination .last-page').addClass('disabled');
-                } else {
-                    $('.pagination .next-page, .pagination .last-page').removeClass('disabled');
-                }
-            }
-
-            showPage(currentPage);
-            updatePagination();
-
-            $('.pagination').on('click', '.page-link', function(e) {
-                e.preventDefault();
-                const $this = $(this);
-                let page = $this.data('page');
-
-                if ($this.attr('aria-label') === 'First') {
-                    page = 1;
-                } else if ($this.attr('aria-label') === 'Previous') {
-                    page = Math.max(1, currentPage - 1);
-                } else if ($this.attr('aria-label') === 'Next') {
-                    page = Math.min(totalPages, currentPage + 1);
-                } else if ($this.attr('aria-label') === 'Last') {
-                    page = totalPages;
-                }
-
-                showPage(page);
-                updatePagination();
-            });
-        });
-    </script>
+{% macro pagination(size=6) %}
+    <ul id="pagination" class="pagination"></ul>
+    <script> initializePagination({{ size }}, "{{ url_for('ip_addresses.ip_addresses_site', site_id=0) }}") </script>
 {% endmacro %}
 <!-- Macro for pagination section -->
 <!-- Macros for recyclable components -->

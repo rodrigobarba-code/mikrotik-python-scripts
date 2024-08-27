@@ -40,7 +40,8 @@ def ip_addresses():
                 'name': site.site_name,  # Site Name
                 'value': site.site_name,  # Site Value
                 'region': Region.get_region(site.fk_region_id).region_name,  # Region Name
-                'segment': site.site_segment  # Site Segment
+                'segment': site.site_segment,  # Site Segment
+                'hidden': False
             })
 
             available_segments.append({
@@ -62,8 +63,7 @@ def ip_addresses():
             'ip_addresses/ip_addresses_sites.html',  # Render the IP Addresses template
             available_segments=available_segments,  # Pass the available segments to the template
             available_regions=available_regions,  # Pass the available regions to the template
-            available_sites=available_sites,  # Pass the available sites to the template
-            total_sites=len(available_sites)  # Pass the total sites to the template
+            available_sites=available_sites  # Pass the available sites to the template
         )
     except Exception as e:  # If an exception occurs
         flash(str(e), 'danger')  # Flash an error message
