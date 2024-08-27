@@ -1,4 +1,4 @@
-{% from 'macros.html' import delete_modal, delete_select_modal, delete_all_modal, search_bar_with_checkbox, render_pagination %}
+{% from 'macros.html' import delete_modal, delete_select_modal, delete_all_modal, search_bar_with_checkbox, pagination %}
 {% extends 'base.html' %}
 {% block title %} IP Segments &#9830; Available Sites {% endblock %}
 {% block head %}
@@ -31,33 +31,37 @@
                 <div class="col-12 col-md-12 text-right">
                     <section class="filter-section-for-ip-segments">
                         <div class="row">
-                            <div class="col-md-3">
+                            <div class="col-md-4">
                                 <div class="mb-2">
                                     <label class="form-label form-label-c" data-id="1"><b>Filter by region:</b></label>
                                     {{ search_bar_with_checkbox(12, 12, 12, 'region', 'segments', available_regions) }}
                                     <div class="form-text">Ex. Mexicali, Tijuana, Ensenada</div>
                                 </div>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-4">
                                 <div class="mb-2">
                                     <label class="form-label form-label-c" data-id="2"><b>Filter by site:</b></label>
                                     {{ search_bar_with_checkbox(12, 12, 12, 'site', 'segments', available_sites) }}
                                     <div class="form-text">Ex. Robledo, Alamitos, Alfareros</div>
                                 </div>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-4">
                                 <div class="mb-2">
                                     <label class="form-label form-label-c" data-id="3"><b>Filter by segment:</b></label>
                                     {{ search_bar_with_checkbox(12, 12, 12, 'segment', 'segments', available_segments) }}
                                     <div class="form-text">Ex. 1, 2, 3</div>
                                 </div>
                             </div>
-                            <div class="col-md-3 pb-md-3 d-flex justify-content-end align-items-end">
-                                {{ render_pagination(total_pages=10, current_page=1, base_url='/items') }}
-                            </div>
+
                         </div>
                     </section>
                 </div>
+            </div>
+            <div class="row">
+                <div class="col-12 col-md-12 text-right">
+                    <div class="d-flex mt-3 justify-content-end align-items-end">
+                        {{ pagination(total_sites) }}
+                    </div>
             </div>
         </div>
     </section>
@@ -74,7 +78,7 @@
     <!-- IP Segments Available Sites -->
     <section class="segments-available-sites">
         <div class="container w-75">
-            <div class="row">
+            <div class="row row-c">
                 {% for site in available_sites %}
                     <div class="col-c col-12 col-md-4"
                          data-filter-site="{{ site['name'] }}"

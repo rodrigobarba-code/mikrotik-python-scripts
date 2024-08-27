@@ -62,7 +62,8 @@ def ip_addresses():
             'ip_addresses/ip_addresses_sites.html',  # Render the IP Addresses template
             available_segments=available_segments,  # Pass the available segments to the template
             available_regions=available_regions,  # Pass the available regions to the template
-            available_sites=available_sites  # Pass the available sites to the template
+            available_sites=available_sites,  # Pass the available sites to the template
+            total_sites=len(available_sites)  # Pass the total sites to the template
         )
     except Exception as e:  # If an exception occurs
         flash(str(e), 'danger')  # Flash an error message
