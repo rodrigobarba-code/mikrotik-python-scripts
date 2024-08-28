@@ -40,7 +40,8 @@ def ip_addresses():
                 'name': site.site_name,  # Site Name
                 'value': site.site_name,  # Site Value
                 'region': Region.get_region(site.fk_region_id).region_name,  # Region Name
-                'segment': site.site_segment  # Site Segment
+                'segment': site.site_segment,  # Site Segment
+                'hidden': False
             })
 
             available_segments.append({

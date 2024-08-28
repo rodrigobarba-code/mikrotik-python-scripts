@@ -124,7 +124,7 @@ def bulk_delete_site():
     try:
         flag = 0  # Set the flag to 0
         for site_id in sites_ids:  # Loop through the sites IDs
-            Site.delete_site(site_id)  # Delete the site
+            Site.delete_site(site_id, Router)  # Delete the site
             flag += 1  # Increment the flag
         flash(f'{flag} Sites Deleted Successfully', 'success')  # Flash a success message
         functions.create_log(session['user_id'], f'{flag} Sites Deleted', 'DELETE', 'sites')  # Create a log

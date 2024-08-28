@@ -37,9 +37,10 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@x.x.x/dist/select2-bootstrap4.min.css">
     <!-- Select 2 CSS -->
 
-    <!-- Pagination CSS -->
+    <!-- Pagination CSS & Java Script -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/paginationjs/2.1.5/pagination.css" />
-    <!-- Pagination CSS -->
+    <script src="{{ url_for('static', filename='js/base/macros.js') }}"></script>
+    <!-- Pagination CSS & Java Script -->
 
     <!-- Socket IO -->
     <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
@@ -52,10 +53,13 @@
     <!-- Custom Internal CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base/sidebar.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base/macros.css') }}">
+
     <!-- Custom Internal CSS -->
 
     <!-- Assets CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='assets/sweetalert2/css/sweetalert2.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/pagination/pagination.css') }}">
     <!-- Assets CSS -->
 
     <!-- Custom External CSS -->
