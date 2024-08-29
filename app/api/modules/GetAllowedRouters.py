@@ -23,7 +23,7 @@ class GetAllowedRouters:
     # Constructor
 
     # Method to Get Allowed Routers
-    def get(self) -> list:
+    def get(self):
         try:  # Try to get the allowed routers
             with current_app.app_context():
                 # Create a dictionary to store the routers

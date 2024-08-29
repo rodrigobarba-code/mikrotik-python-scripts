@@ -6,9 +6,10 @@ import enum
 
 # Class for ARP Tags
 class ARPTag(enum.Enum):
-    PUBLIC_CLIENT = 'IP Address Public Client'
-    PRIVATE_CLIENT = 'IP Address Private Client'
+    PUBLIC_CLIENT = 'Public Client'
+    PRIVATE_CLIENT = 'Private Client'
     INTERN_CONNECTION = 'Intern Connection'
+    IP_ADDRESS_DUPLICATED = 'Duplicated'
 
 # Class for ARP Entity
 class ARPEntity:
@@ -19,6 +20,7 @@ class ARPEntity:
         fk_ip_address_id,  # FK IP Address ID
         arp_ip,  # ARP IP
         arp_mac,  # ARP MAC
+        arp_alias,  # ARP Alias
         arp_tag,  # ARP Interface
         arp_interface,  # ARP Interface
         arp_is_dhcp,  # ARP DHCP
@@ -32,6 +34,7 @@ class ARPEntity:
         self.fk_ip_address_id = fk_ip_address_id
         self.arp_ip = arp_ip
         self.arp_mac = arp_mac
+        self.arp_alias = arp_alias
         self.arp_tag = arp_tag
         self.arp_interface = arp_interface
         self.arp_is_dhcp = arp_is_dhcp
@@ -50,7 +53,6 @@ class ARPEntity:
             assert isinstance(self.fk_ip_address_id, int)  # Verify if FK IP Address ID is an Integer
             assert isinstance(self.arp_ip, str)  # Verify if ARP IP is a String
             assert isinstance(self.arp_mac, str)  # Verify if ARP MAC is a String
-            assert isinstance(self.arp_tag, str is ARPTag.PUBLIC_CLIENT or ARPTag.PRIVATE_CLIENT or ARPTag.INTERN_CONNECTION)  # Verify if ARP Tag is a String
             assert isinstance(self.arp_interface, str)  # Verify if ARP Interface is a String
             assert isinstance(self.arp_is_dhcp, bool)  # Verify if ARP DHCP is a Boolean
             assert isinstance(self.arp_is_invalid, bool)  # Verify if ARP Invalid is a Boolean

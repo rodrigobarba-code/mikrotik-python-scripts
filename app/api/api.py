@@ -1,19 +1,26 @@
 # Description: File to handle the Router OS API
+# Password: N0c#2024.@!!
 
 # Importing Necessary Libraries
+import json
 import ros_api
+from app.blueprints.routers.models import Router
+from app.blueprints.scan.functions import ARPFunctions
 # Importing Necessary Libraries
 
 # Importing Necessary Modules
 from app.extensions import db
+from app.api.modules.FindIPSegment import FindIPSegment
 from app.api.modules.GetAllowedRouters import GetAllowedRouters
 # Importing Necessary Modules
 
 # Importing Necessary Entities
+from app.blueprints.scan.entities import ARPEntity, ARPTag
 from app.blueprints.ip_addresses.entities import IPSegmentEntity
 # Importing Necessary Entities
 
 # Importing Necessary Modules
+from app.blueprints.scan.models import ARP
 from app.blueprints.ip_addresses.models import IPSegment
 # Importing Necessary Modules
 
@@ -102,10 +109,8 @@ class RouterAPI:
             ip_data = RouterAPI.retrieve_data(router_api.get_api(), '/ip/address/print')  # Retrieve IP data
             for ip in ip_data:
                 comment = "None"
-                try:  # Try to get the comment
-                    comment = ip['comment']  # Get the comment
-                except:  # If an exception occurs
-                    pass  # Do nothing
+                if 'comment' in ip:
+                    comment = ip['comment']
                 ip_tmp = ip['address'].split('/')  # Split the IP and Mask
                 ip_obj = IPSegmentEntity(  # Create an instance of the IPSegmentEntity class
                     ip_segment_id=int(),  # IP Segment ID
@@ -145,11 +150,78 @@ class RouterAPI:
             print(str(e))  # Print the Exception
     # Method to add IP address data to the database
 
+    # Method to get ARP data from the Router OS API and save it to the database
+    @staticmethod
+    def get_arp_data() -> list:
+        arp_list = []  # ARP list
+        routers = GetAllowedRouters(db).get()  # Get all allowed routers
+        for router in routers:  # Loop through the routers
+            router_api = RouterAPI(  # Create an instance of the RouterAPI class
+                router.router_ip,  # Router IP
+                router.router_username,  # Router username
+                router.router_password  # Router password
+            )
+            router_api.set_api()  # Set the API object
+            router_id = router.router_id  # Router ID
+            ip_segments_by_router = IPSegment.get_ip_segments_by_router_id(router_id)  # Get IP segments by router ID
+            arp_data = RouterAPI.retrieve_data(router_api.get_api(), '/ip/arp/print')  # Retrieve ARP data
+            for arp in arp_data:
+                arp_obj = ARPEntity(  # Create an instance of the ARPEntity class
+                    arp_id=int(),  # ARP ID
+                    fk_ip_address_id=int(FindIPSegment.find(ip_segments_by_router, arp['address'])),  # FK IP Address ID
+                    arp_ip=arp['address'],  # ARP IP
+                    arp_mac="" if 'mac-address' not in arp else arp['mac-address'],  # ARP MAC
+                    arp_alias=str(),  # ARP Alias
+                    arp_tag="Default",  # ARP Tag
+                    arp_interface=arp['interface'],  # ARP Interface
+                    arp_is_dhcp=True if arp['dynamic'] == 'true' else False,  # ARP DHCP
+                    arp_is_invalid=True if arp['invalid'] == 'true' else False,  # ARP Invalid
+                    arp_is_dynamic=True if arp['dynamic'] == 'true' else False,  # ARP Dynamic
+                    arp_is_complete=True if arp['complete'] == 'true' else False,  # ARP Complete
+                    arp_is_disabled=True if arp['disabled'] == 'true' else False,  # ARP Disabled
+                    arp_is_published=True if arp['published'] == 'true' else False  # ARP Published
+                )
+                arp_obj.validate_arp()  # Validate the ARP
+                arp_list.append(arp_obj)  # Append the ARP object to the ARP list
+            # Getting Queue List from Router
+            queue_data = RouterAPI.retrieve_data(router_api.get_api(), '/queue/simple/print')
+            # Getting Queue List from Router
+            # Create a dictionary of key:value pairs with the ARP IP and Name
+            queue_dict = {}
+            for queue in queue_data:
+                name = queue['name']
+                ip = queue['target'].split('/')[0]
+                queue_dict[ip] = name
+            # Create a dictionary of key:value pairs with the ARP IP and Name
+            ARPFunctions.assign_alias(queue_dict)  # Assign alias to ARP list
+            # Validate if the ARP is duplicated
+            ARPFunctions.detect_ip_duplicated()
+            # Validate if the ARP is duplicated
+            # Delete ARPs that are in the database but are not in the router list
+            ARPFunctions.delete_arps(arp_list, router.router_id)
+            # Delete ARPs that are in the database but are not in the router list
+        return arp_list  # Return the ARP list
+    # Method to get ARP data from the Router OS API and save it to the database
+
+    # Method to add ARP data to the database
+    @staticmethod
+    def add_arp_data(arp_list):
+        try:
+            for arp in arp_list:  # For each ARP
+                try:  # Try to add the ARP
+                    arp.validate_arp()  # Validate the ARP
+                    ARP.add_arp(arp)  # Add the ARP
+                except Exception as e:  # If an Exception occurs
+                    print(str(e))  # Print the Exception
+        except Exception as e:  # If an Exception occurs
+            print(str(e))  # Print the Exception
+    # Method to add ARP data to the database
+
     # Method to scan arp data from the Router OS API
     @staticmethod
-    def scan_arp() -> list:
+    def arp_scan():
         RouterAPI.add_ip_data(RouterAPI.get_ip_data())  # Add IP data to the database
-        return True  # Return True
+        RouterAPI.add_arp_data(RouterAPI.get_arp_data())  # Add ARP data to the database
     # Method to scan arp data from the Router OS API
     # Static Methods
 # Class to handle the RouterOS API

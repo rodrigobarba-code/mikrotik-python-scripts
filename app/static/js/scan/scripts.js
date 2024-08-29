@@ -23,6 +23,9 @@ socket.on('finish_arp_scan', function() {
         // Hide the progress bar container
         document.getElementById('pb-container').setAttribute('hidden', 'true');
     }
+
+    // Reload the page
+    location.reload();
 });
 
 window.onload = function() {

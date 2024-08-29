@@ -80,7 +80,9 @@
                 <tr>
                     <th scope="col"></th>
                     <th scope="col">#</th>
+                    <th scope="col">ARP Alias</th>
                     <th scope="col">ARP IP Address</th>
+                    <th scope="col">ARP IP Segment</th>
                     <th scope="col">ARP MAC Address</th>
                     <th scope="col">ARP Interface</th>
                     <th scope="col">Tags</th>
@@ -88,7 +90,27 @@
                 </tr>
                 </thead>
                 <tbody>
-
+                    {% for arp in arp_list %}
+                        <tr>
+                            <td>
+                                <input class="form-check form-check-input" type="checkbox" value="{{ arp.id }}" id="flexCheckDefault">
+                            </td>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ arp['alias'] }}</td>
+                            <td>{{ arp['ip'] }}</td>
+                            <td>{{ arp['segment'] }}</td>
+                            <td>{{ arp['mac'] }}</td>
+                            <td>{{ arp['interface'] }}</td>
+                            <td>
+                                <span class="badge bg-primary">Default</span>
+                            </td>
+                            <td>
+                                <a class="btn btn-sm btn-danger" href="">
+                                    <i class="fa-solid fa-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
                 </tbody>
             </table>
         </div>

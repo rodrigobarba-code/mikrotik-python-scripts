@@ -92,4 +92,5 @@ class IPAddressesFunctions:
             # If the IP Segment exists
         except Exception as e:  # If an Exception occurs
             print(str(e))  # Print the Exception
+    # Function to determine the Tag of an IP Segment
 # Class for IP Addresses Functions
