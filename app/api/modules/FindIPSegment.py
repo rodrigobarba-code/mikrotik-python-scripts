@@ -17,17 +17,19 @@ class FindIPSegment:
 
     # Method to find IP Segment
     @staticmethod
-    def find(ip_segments, arp_ip) -> int:
+    def find(ip_segments, arp_ip) -> list:
         try:  # Try to find the IP Segment
             with current_app.app_context():  # Create a context
-                arp_ip_obj = ipaddress.ip_address(arp_ip)  # ARP IP Object
-                for segment in ip_segments:
-                    ip = segment.ip_segment_ip + "/" + segment.ip_segment_mask  # IP Segment
-                    network = ipaddress.ip_network(ip, strict=False)  # IP Network
-                    if arp_ip_obj in network:  # If the ARP IP is in the network
-                        return int(segment.ip_segment_id)  # Return the IP Segment ID
-                    else:
-                        return 1  # Return 1
+                ip = ipaddress.ip_address(arp_ip)  # IP Object
+                # Create a set of all the IP addresses in the network
+                ip_segments_set = [[segment.ip_segment_id, segment.ip_segment_ip, segment.ip_segment_ip+ "/" + segment.ip_segment_mask] for segment in ip_segments]
+                # Create a set of all the IP addresses in the network
+                for ip_network in ip_segments_set:  # For each segment
+                    network = ipaddress.ip_network(ip_network[2], strict=False)  # IP Network
+                    if ip in network:  # If the IP is in the network
+                        return [True, int(ip_network[0])]  # Return the IP Segment ID
+                else:  # If the IP Segment is not found
+                    return [False, None]  # Return False
         except Exception as e:  # Catch any exceptions
             # Return an error message
             print(str("An error occurred while finding the IP Segment: " + str(e)))

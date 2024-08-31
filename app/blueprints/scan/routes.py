@@ -10,7 +10,7 @@ from app.api.api import RouterAPI
 # Importing Router API
 
 # Importing necessary models
-from app.blueprints.scan.models import ARP
+from app.blueprints.scan.models import ARP, ARPTags
 from app.blueprints.ip_addresses.models import IPSegment
 # Importing necessary models
 
@@ -25,20 +25,24 @@ socketio = SocketIO()  # Initializing the socketio instance
 # Scan Main Route
 @scan_bp.route('/scan', methods=['GET', 'POST'])
 def scan():
-    arp_dict = {}  # ARP dictionary
+    # ARP.delete_all_arps()
+    # ARPTags.delete_all_arp_tags()
+
+    arp_dict = []  # ARP dictionary
     arp_list = ARP.get_arps()  # Getting the ARP list
     for arp in arp_list:
-        arp_dict = {
+        arp_dict.append({
+            'id': arp.arp_id,
             'ip': arp.arp_ip,
             'mac': arp.arp_mac,
-            'segment': IPSegment.query.get(arp.fk_ip_address_id).ip_segment_ip,
+            'segment': str(IPSegment.query.get(arp.fk_ip_address_id).ip_segment_ip + "/" + IPSegment.query.get(arp.fk_ip_address_id).ip_segment_mask),
             'interface': arp.arp_interface,
             'alias': arp.arp_alias,
-            'tag': arp.arp_tag
-        }
+            'tag': ARPTags.get_arp_tags(arp.arp_id)
+        })
     return render_template(
         'scan/scan.html',  # Rendering the scan template
-        arp_list={} if arp_dict is None else arp_dict,  # ARP list
+        arp_list=[] if arp_dict is None else arp_dict,  # ARP list
     )  # Rendering Router Scan Template
 # Scan Main Route
 

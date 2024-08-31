@@ -10,6 +10,10 @@ from collections import Counter
 from app.blueprints.scan.entities import ARPTag
 # Importing Necessary Entities
 
+# Importing Necessary Models
+from app.blueprints.ip_addresses.models import IPSegment
+# Importing Necessary Models
+
 # Class for ARP Functions
 class ARPFunctions:
     # Constructor
@@ -51,7 +55,7 @@ class ARPFunctions:
     def delete_arps(router_arp_list, fk_router_id):
         try:
             # Make a list of Strings IPs with Mask, and Interface Included just for router_arp_list that has the FK_Router_ID
-            router_arp_list_p = [str(router_arp.arp_ip) + "@" + str(router_arp.arp_mac) for router_arp in router_arp_list if router_arp.fk_router_id == fk_router_id]
+            router_arp_list_p = [str(router_arp.arp_ip) + "@" + str(router_arp.arp_mac) for router_arp in router_arp_list]
             # Make a list of Strings IPs with Mask, and Interface Included just for router_arp_list that has the FK_Router_ID
 
             # Importing Required Models
@@ -59,18 +63,18 @@ class ARPFunctions:
             # Importing Required Models
 
             # Querying the Database
-            arps = ARP.query.filter(
-                ARP.fk_router_id == fk_router_id  # Filter by FK Router ID
+            arps = db.session.query(IPSegment, ARP).join(ARP, IPSegment.ip_segment_id == ARP.fk_ip_address_id).filter(
+                IPSegment.fk_router_id == fk_router_id  # ARP Router ID
             ).all()
             # Querying the Database
 
             # For each ARP in the Database
-            for arp in arps:
+            for ip, arp in arps:
                 # If the ARP is not in the router list
                 if str(arp.arp_ip) + "@" + str(arp.arp_mac) not in router_arp_list_p:
                     db.session.delete(arp)  # Delete the ARP
         except Exception as e:  # If an Exception occurs
-            print(str(e))
+            print("Error in delete_arps: " + str(e))  # Print the Exception
     # Function to delete ARPs that are in the database but are not in the router list
 
     # Function to detect if IP is duplicated with at least one MAC and change the ARP Tag to IP_ADDRESS_DUPLICATED
@@ -109,7 +113,7 @@ class ARPFunctions:
 
     # Function to assign the alias to the ARP based on the Queue List by JSON as parameter
     @staticmethod
-    def assign_alias(queue_list: dict):
+    def assign_alias(arp_ip: str, queue_list: dict) -> str:
         try:
             # Importing Required Models
             from app.blueprints.scan.models import ARP
@@ -117,47 +121,11 @@ class ARPFunctions:
 
             # For each Queue in the Queue List
             for key, value in queue_list.items():
-                # Querying the Database
-                arp = ARP.query.filter(
-                    ARP.arp_ip == key  # ARP IP
-                ).first()
-                # Querying the Database
-
-                # If the ARP exists
-                if arp:
-                    arp.arp_alias = value
+                if arp_ip == key:
+                    return str(value)  # Return the Key
+            else:
+                return str("")  # Return an Empty String
             # For each Queue in the Queue List
-
-            db.session.commit()  # Commit the Database Session
         except Exception as e:
             print(str(e))  # Print the Exception
     # Function to assign the alias to the ARP based on the Queue List by JSON as parameter
-
-    # Function to determine the Tag of an ARP
-    @staticmethod
-    def determine_arp_tag(arp_ip) -> ARPTag:
-        try:
-            # Importing Required Entities
-            from app.blueprints.scan.entities import ARPTag
-
-            # Importing Required Models
-            from app.blueprints.scan.models import ARP
-            # Importing Required Models
-
-            # Querying the Database
-            arp = ARP.query.filter(
-                ARP.arp_id == arp_ip  # ARP IP
-            ).first()
-            # Querying the Database
-
-            # If the IP Segment exists
-            # If IP starts with 10.x.x.x
-            if arp.startswith("10."):
-                return ARPTag.PRIVATE_CLIENT  # Return Private Client
-            else:
-                return ARPTag.PUBLIC_CLIENT  # Return Public Client
-            # If the IP Segment exists
-        except Exception as e:  # If an Exception occurs
-            print(str(e))  # Print the Exception
-    # Function to determine the Tag of an ARP
-# Class for ARP Functions

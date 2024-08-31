@@ -1,15 +1,42 @@
 # Description: Scan Entities
 
-# Importing Required Libraries
-import enum
-# Importing Required Libraries
-
 # Class for ARP Tags
-class ARPTag(enum.Enum):
-    PUBLIC_CLIENT = 'Public Client'
-    PRIVATE_CLIENT = 'Private Client'
-    INTERN_CONNECTION = 'Intern Connection'
-    IP_ADDRESS_DUPLICATED = 'Duplicated'
+class ARPTag:
+    # Constructor
+    def __init__(
+        self,
+        arp_tag_id,  # ARP Tag ID
+        fk_arp_id,  # FK ARP ID
+        arp_tag_value,  # ARP Tag Value
+    ):
+        self.arp_tag_id = arp_tag_id
+        self.fk_arp_id = fk_arp_id
+        self.arp_tag_value = arp_tag_value
+    # Constructor
+
+    # Validate ARP Tag
+    def validate_arp_tag(self):
+        try:
+            assert isinstance(self.arp_tag_id, int)  # Verify if ARP Tag ID is an Integer
+            assert isinstance(self.fk_arp_id, int)  # Verify if FK ARP ID is an Integer
+            assert isinstance(self.arp_tag_key, str)  # Verify if ARP Tag Key is a String
+            assert isinstance(self.arp_tag_value, str)  # Verify if ARP Tag Value is a String
+        except AssertionError:  # If any of the above assertions fail
+            raise ValueError('Invalid ARP Tag')  # Raise a ValueError
+    # Validate ARP Tag
+
+    # Get Tags
+    @staticmethod
+    def get_tags():
+        return {
+            'PUBLIC_IP': 'Public IP',  # Public IP
+            'PRIVATE_IP': 'Private IP',  # Private IP
+            'INTERNAL_CONNECTION': 'Internal Connection',  # Internal Connection
+            'EXTERNAL_CONNECTION': 'External Connection',  # External Connection
+            'DUPLICATED_IP': 'Duplicated IP',  # Duplicated IP
+        }
+    # Get Tags
+# Class for ARP Tags
 
 # Class for ARP Entity
 class ARPEntity:
@@ -21,7 +48,6 @@ class ARPEntity:
         arp_ip,  # ARP IP
         arp_mac,  # ARP MAC
         arp_alias,  # ARP Alias
-        arp_tag,  # ARP Interface
         arp_interface,  # ARP Interface
         arp_is_dhcp,  # ARP DHCP
         arp_is_invalid,  # ARP Invalid
@@ -35,7 +61,6 @@ class ARPEntity:
         self.arp_ip = arp_ip
         self.arp_mac = arp_mac
         self.arp_alias = arp_alias
-        self.arp_tag = arp_tag
         self.arp_interface = arp_interface
         self.arp_is_dhcp = arp_is_dhcp
         self.arp_is_invalid = arp_is_invalid

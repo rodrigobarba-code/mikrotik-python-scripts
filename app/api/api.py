@@ -1,5 +1,4 @@
 # Description: File to handle the Router OS API
-# Password: N0c#2024.@!!
 
 # Importing Necessary Libraries
 import json
@@ -20,7 +19,7 @@ from app.blueprints.ip_addresses.entities import IPSegmentEntity
 # Importing Necessary Entities
 
 # Importing Necessary Modules
-from app.blueprints.scan.models import ARP
+from app.blueprints.scan.models import ARP, ARPTags
 from app.blueprints.ip_addresses.models import IPSegment
 # Importing Necessary Modules
 
@@ -161,28 +160,12 @@ class RouterAPI:
                 router.router_username,  # Router username
                 router.router_password  # Router password
             )
+            arp_region_list = []  # ARP region list
             router_api.set_api()  # Set the API object
             router_id = router.router_id  # Router ID
             ip_segments_by_router = IPSegment.get_ip_segments_by_router_id(router_id)  # Get IP segments by router ID
             arp_data = RouterAPI.retrieve_data(router_api.get_api(), '/ip/arp/print')  # Retrieve ARP data
-            for arp in arp_data:
-                arp_obj = ARPEntity(  # Create an instance of the ARPEntity class
-                    arp_id=int(),  # ARP ID
-                    fk_ip_address_id=int(FindIPSegment.find(ip_segments_by_router, arp['address'])),  # FK IP Address ID
-                    arp_ip=arp['address'],  # ARP IP
-                    arp_mac="" if 'mac-address' not in arp else arp['mac-address'],  # ARP MAC
-                    arp_alias=str(),  # ARP Alias
-                    arp_tag="Default",  # ARP Tag
-                    arp_interface=arp['interface'],  # ARP Interface
-                    arp_is_dhcp=True if arp['dynamic'] == 'true' else False,  # ARP DHCP
-                    arp_is_invalid=True if arp['invalid'] == 'true' else False,  # ARP Invalid
-                    arp_is_dynamic=True if arp['dynamic'] == 'true' else False,  # ARP Dynamic
-                    arp_is_complete=True if arp['complete'] == 'true' else False,  # ARP Complete
-                    arp_is_disabled=True if arp['disabled'] == 'true' else False,  # ARP Disabled
-                    arp_is_published=True if arp['published'] == 'true' else False  # ARP Published
-                )
-                arp_obj.validate_arp()  # Validate the ARP
-                arp_list.append(arp_obj)  # Append the ARP object to the ARP list
+
             # Getting Queue List from Router
             queue_data = RouterAPI.retrieve_data(router_api.get_api(), '/queue/simple/print')
             # Getting Queue List from Router
@@ -193,13 +176,32 @@ class RouterAPI:
                 ip = queue['target'].split('/')[0]
                 queue_dict[ip] = name
             # Create a dictionary of key:value pairs with the ARP IP and Name
-            ARPFunctions.assign_alias(queue_dict)  # Assign alias to ARP list
-            # Validate if the ARP is duplicated
-            ARPFunctions.detect_ip_duplicated()
-            # Validate if the ARP is duplicated
+
+            for arp in arp_data:
+                ip_segment = FindIPSegment.find(ip_segments_by_router, arp['address'])  # Find the IP segment
+                if ip_segment[0] is True:  # If the IP segment is found
+                    arp_obj = ARPEntity(  # Create an instance of the ARPEntity class
+                        arp_id=int(),  # ARP ID
+                        fk_ip_address_id=int(ip_segment[1]),  # FK IP Address ID
+                        arp_ip=arp['address'],  # ARP IP
+                        arp_mac="" if 'mac-address' not in arp else arp['mac-address'],  # ARP MAC
+                        arp_alias=ARPFunctions.assign_alias(str(arp['address']), queue_dict),  # ARP Alias
+                        arp_interface=arp['interface'],  # ARP Interface
+                        arp_is_dhcp=True if arp['dynamic'] == 'true' else False,  # ARP DHCP
+                        arp_is_invalid=True if arp['invalid'] == 'true' else False,  # ARP Invalid
+                        arp_is_dynamic=True if arp['dynamic'] == 'true' else False,  # ARP Dynamic
+                        arp_is_complete=True if arp['complete'] == 'true' else False,  # ARP Complete
+                        arp_is_disabled=True if arp['disabled'] == 'true' else False,  # ARP Disabled
+                        arp_is_published=True if arp['published'] == 'true' else False  # ARP Published
+                    )
+                    arp_obj.validate_arp()  # Validate the ARP
+                    arp_region_list.append(arp_obj)  # Append the ARP object to the ARP list
+                else:
+                    pass
             # Delete ARPs that are in the database but are not in the router list
-            ARPFunctions.delete_arps(arp_list, router.router_id)
+            ARPFunctions.delete_arps(arp_region_list, router.router_id)
             # Delete ARPs that are in the database but are not in the router list
+            arp_list.extend(arp_region_list)  # Extend the ARP list
         return arp_list  # Return the ARP list
     # Method to get ARP data from the Router OS API and save it to the database
 
@@ -213,6 +215,7 @@ class RouterAPI:
                     ARP.add_arp(arp)  # Add the ARP
                 except Exception as e:  # If an Exception occurs
                     print(str(e))  # Print the Exception
+            ARPTags.assign_first_tag()  # Assign the first tag
         except Exception as e:  # If an Exception occurs
             print(str(e))  # Print the Exception
     # Method to add ARP data to the database
@@ -228,7 +231,7 @@ class RouterAPI:
 
 # Main function - ONLY FOR TESTING
 def main():
-    pass  # Do nothing
+    pass  # Do nothing  # Password: N0c#2024.@!!
 # Main function - ONLY FOR TESTING
 
 # Running the main function
