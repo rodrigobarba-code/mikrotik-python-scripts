@@ -21,6 +21,8 @@ class AppConfig:
         'keywords': 'network, management, tool',  # Keywords for the app
         'progress_scan': 0  # Progress of the scan
     }
+
+
 # Config class to store all the configurations of the application
 
 # Class for sidebar definition
@@ -65,7 +67,8 @@ class Sidebar:
             'marquee': True,  # Marquee menu item
             'endpoint': '#',  # Endpoint of the menu item, if endpoint is # then it is a dropdown menu
             'submenu': [  # Submenu of the menu item
-                {'name': 'IP Addresses', 'endpoint': 'ip_addresses.ip_addresses'}  # Name and endpoint of the submenu item
+                {'name': 'IP Addresses', 'endpoint': 'ip_addresses.ip_addresses'}
+                # Name and endpoint of the submenu item
             ]
         }
     ]
@@ -102,6 +105,6 @@ class Sidebar:
 # Class for user jobs
 class UserJobs:
     # User jobs
-    job_display = {'admin': 'Admin', 'employee': 'Employee', 'guest': 'Guest'}
+    job_display = {'admin': 'Admin', 'employee': 'Employee', 'guest': 'Guest', 'superadmin': 'Super Admin'}
     # User jobs
 # Class for user jobs
