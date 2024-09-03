@@ -52,7 +52,7 @@ class ARPFunctions:
 
     # Function to delete ARPs that are in the database but are not in the router list
     @staticmethod
-    def delete_arps(router_arp_list, fk_router_id):
+    def delete_arps(router_arp_list, fk_router_id, model):
         try:
             # Make a list of Strings IPs with Mask, and Interface Included just for router_arp_list that has the FK_Router_ID
             router_arp_list_p = [str(router_arp.arp_ip) + "@" + str(router_arp.arp_mac) for router_arp in router_arp_list]
@@ -70,6 +70,7 @@ class ARPFunctions:
 
             # For each ARP in the Database
             for ip, arp in arps:
+                model.delete_arp_tags(arp.arp_id)
                 # If the ARP is not in the router list
                 if str(arp.arp_ip) + "@" + str(arp.arp_mac) not in router_arp_list_p:
                     db.session.delete(arp)  # Delete the ARP

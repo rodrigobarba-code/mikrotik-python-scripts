@@ -19,7 +19,6 @@ class ARPTag:
         try:
             assert isinstance(self.arp_tag_id, int)  # Verify if ARP Tag ID is an Integer
             assert isinstance(self.fk_arp_id, int)  # Verify if FK ARP ID is an Integer
-            assert isinstance(self.arp_tag_key, str)  # Verify if ARP Tag Key is a String
             assert isinstance(self.arp_tag_value, str)  # Verify if ARP Tag Value is a String
         except AssertionError:  # If any of the above assertions fail
             raise ValueError('Invalid ARP Tag')  # Raise a ValueError

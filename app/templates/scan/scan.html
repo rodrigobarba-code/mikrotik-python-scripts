@@ -7,8 +7,8 @@
 {% block scripts %}
     <script src="{{ url_for('static', filename='js/scan/scripts.js') }}"></script>
     <script>
-        // deleteAllModal("{{ url_for('regions.delete_all_regions') }}", "{{ url_for('regions.regions') }}", 'regions');
-        // deleteSelectModal("{{ url_for('regions.bulk_delete_region') }}", "{{ url_for('regions.regions') }}", 'region');
+        deleteAllModal("{{ url_for('scan.delete_all_arps_ips') }}", "{{ url_for('scan.scan') }}", 'scans');
+        deleteSelectModal("{{ url_for('scan.bulk_delete_arp_ips') }}", "{{ url_for('scan.scan') }}", 'scan');
     </script>
 {% endblock %}
 {% block content %}
@@ -92,35 +92,47 @@
                 <tbody>
                     {% for arp in arp_list %}
                         <tr>
-                            <td>
-                                <input class="form-check form-check-input" type="checkbox" value="{{ arp.id }}" id="flexCheckDefault">
+                            <td class="text-center"><label for="scan-{{ arp['id'] }}"></label>
+                                <input type="checkbox" class="form-check-input" id="scan-{{ arp['id'] }}">
                             </td>
                             <td>{{ arp['id'] }}</td>
-                            <td>{{ arp['alias'] }}</td>
+                            <td>
+                                {% if arp['alias'] == '' %}
+                                    <i class="text-secondary">No alias provided</i>
+                                {% else %}
+                                    {{ arp['alias'] }}
+                                {% endif %}
+                            </td>
                             <td>{{ arp['ip'] }}</td>
                             <td>{{ arp['segment'] }}</td>
                             <td>{{ arp['mac'] }}</td>
                             <td>{{ arp['interface'] }}</td>
                             <td>
                                 {% for tag in arp['tag'] %}
-                                    {% set bg_badge = 'bg-primary' %}
+                                    {% set bg_color = '#213A57' %}
                                     {% if tag == 'Public IP' %}
-                                        {% set bg_badge = 'bg-primary' %}
+                                        {% set bg_color = '#0B6477' %}
                                     {% elif tag == 'Private IP' %}
-                                        {% set bg_badge = 'bg-success' %}
+                                        {% set bg_color = '#14919B' %}
                                     {% elif tag == 'Internal Connection' %}
-                                        {% set bg_badge = 'bg-warning' %}
+                                        {% set bg_color = '#0AD1C8' %}
                                     {% elif tag == 'Duplicated IP' %}
-                                        {% set bg_badge = 'bg-danger' %}
+                                        {% set bg_color = '#EF476F' %}
                                     {% endif %}
 
-                                    <span class="badge {{ bg_badge }}">{{ tag }}</span>
+                                    <span class="badge" style="background-color: {{ bg_color }}">{{ tag }}</span>
                                 {% endfor %}
                             </td>
-                            <td>
-                                <a class="btn btn-sm btn-danger" href="">
-                                    <i class="fa-solid fa-trash"></i>
-                                </a>
+                            <td class="text-center">
+                                <button type="button" id="delete-button-scan-{{ arp['id'] }}"
+                                    class="btn btn-sm btn-danger"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#delete-modal"
+                                    data-id="{{ arp['id'] }}"
+                                    data-type="scan"
+                                    data-url="{{ url_for('scan.delete_arp_ip', arp_id=arp['id']) }}"
+                                    data-name="{{ arp['alias'] }}"
+                                ><i class="fa-solid fa-trash"></i></button>
                             </td>
                         </tr>
                     {% endfor %}

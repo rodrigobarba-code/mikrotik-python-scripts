@@ -234,13 +234,6 @@ class ARPTags(db.Model):
                 )
                 db.session.add(arp_tag_obj)  # Add the ARP Tag Object
                 db.session.commit()  # Commit the Database
-            else:
-                arp_tag_obj = ARPTags.query.filter(
-                    ARPTags.fk_arp_id == arp_tag.fk_arp_id,  # FK ARP ID
-                    ARPTags.arp_tag_value == arp_tag.arp_tag_value  # ARP Tag Value
-                ).first()
-                arp_tag_obj.arp_tag_value = arp_tag.arp_tag_value
-                db.session.commit()  # Commit the Database
         except Exception as e:  # If an Exception occurs
             db.session.rollback()  # Rollback the Database Session
             print(str(e))  # Print the Exception
@@ -268,6 +261,17 @@ class ARPTags(db.Model):
             db.session.rollback()
             print(str(e))
     # ARP Tag - Delete All ARP Tags
+
+    # ARP Tag - Delete All ARP Tags by ARP ID
+    @staticmethod
+    def delete_arp_tags(arp_id):
+        try:  # Try to delete all the ARP Tags
+            ARPTags.query.filter(ARPTags.fk_arp_id == arp_id).delete()  # Delete all the ARP Tags
+            db.session.commit()  # Commit the Database Session
+        except Exception as e:  # If an Exception occurs
+            db.session.rollback()  # Rollback the Database Session
+            print(str(e))  # Print the Exception
+    # ARP Tag - Delete All ARP Tags by ARP ID
 
     # ARP Tag - Get Tag List of a Specific ARP
     @staticmethod
@@ -300,6 +304,12 @@ class ARPTags(db.Model):
                 # If IP starts with 10.x.x.x
                 arp_item = ""
                 if arp.arp_ip.startswith("10."):
+                    arp_temp = ARPTag(
+                        arp_tag_id=int(),  # ARP Tag ID
+                        fk_arp_id=arp.arp_id,  # FK ARP ID
+                        arp_tag_value=arp_tags['INTERNAL_CONNECTION']  # ARP Tag Value
+                    )
+                    ARPTags.add_arp_tag(arp_temp)  # Add the ARP Tag
                     arp_item = arp_tags['PRIVATE_IP']  # Set the ARP Tag to Private Network
                 else:
                     arp_item = arp_tags['PUBLIC_IP']
@@ -314,8 +324,6 @@ class ARPTags(db.Model):
                 ARPTags.add_arp_tag(arp_tag)  # Add the ARP Tag
                 # If the ARP Tag is not None
             # For each ARP in the ARPs
-
-            db.session.commit()  # Commit the Database Session
         except Exception as e:  # If an Exception occurs
             db.session.rollback()  # Rollback the Database Session
             print(str(e))  # Print the Exception

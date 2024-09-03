@@ -162,6 +162,7 @@ class RouterAPI:
             )
             arp_region_list = []  # ARP region list
             router_api.set_api()  # Set the API object
+
             router_id = router.router_id  # Router ID
             ip_segments_by_router = IPSegment.get_ip_segments_by_router_id(router_id)  # Get IP segments by router ID
             arp_data = RouterAPI.retrieve_data(router_api.get_api(), '/ip/arp/print')  # Retrieve ARP data
@@ -199,7 +200,7 @@ class RouterAPI:
                 else:
                     pass
             # Delete ARPs that are in the database but are not in the router list
-            ARPFunctions.delete_arps(arp_region_list, router.router_id)
+            ARPFunctions.delete_arps(arp_region_list, router.router_id, ARPTags)
             # Delete ARPs that are in the database but are not in the router list
             arp_list.extend(arp_region_list)  # Extend the ARP list
         return arp_list  # Return the ARP list
@@ -211,7 +212,6 @@ class RouterAPI:
         try:
             for arp in arp_list:  # For each ARP
                 try:  # Try to add the ARP
-                    arp.validate_arp()  # Validate the ARP
                     ARP.add_arp(arp)  # Add the ARP
                 except Exception as e:  # If an Exception occurs
                     print(str(e))  # Print the Exception

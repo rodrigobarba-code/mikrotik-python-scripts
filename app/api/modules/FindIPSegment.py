@@ -22,7 +22,7 @@ class FindIPSegment:
             with current_app.app_context():  # Create a context
                 ip = ipaddress.ip_address(arp_ip)  # IP Object
                 # Create a set of all the IP addresses in the network
-                ip_segments_set = [[segment.ip_segment_id, segment.ip_segment_ip, segment.ip_segment_ip+ "/" + segment.ip_segment_mask] for segment in ip_segments]
+                ip_segments_set = [[segment.ip_segment_id, segment.ip_segment_ip, segment.ip_segment_ip + "/" + segment.ip_segment_mask] for segment in ip_segments]
                 # Create a set of all the IP addresses in the network
                 for ip_network in ip_segments_set:  # For each segment
                     network = ipaddress.ip_network(ip_network[2], strict=False)  # IP Network
