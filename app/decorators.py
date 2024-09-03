@@ -26,9 +26,10 @@ class RequirementsDecorators:
         @wraps(f)  # Wraps the function to keep the original function name
         def decorated_function(*args, **kwargs):
             # If the user_privileges is not in the session or the user_privileges is not 'admin'
-            if 'user_privileges' not in session or session['user_privileges'] != 'admin' or session['user_privileges'] != 'superadmin':
+            if 'user_privileges' not in session or session['user_privileges'] not in ['admin', 'superadmin']:
                 return redirect(url_for('auth.login'))  # Redirect to the login page
             return f(*args, **kwargs)  # Return the function
+
         return decorated_function  # Return the decorated function
 
     # Decorator for admin requirements
