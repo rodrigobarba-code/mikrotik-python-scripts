@@ -34,7 +34,7 @@ def create_app():
     app.register_blueprint(auth_bp, url_prefix='/auth')  # Registering the auth blueprint
     app.register_blueprint(profile_bp, url_prefix='/profile')  # Registering the profile blueprint
     app.register_blueprint(settings_bp, url_prefix='/settings')  # Registering the settings blueprint
-    app.register_blueprint(scan_bp, url_prefix='/router')  # Registering the scan blueprint
+    app.register_blueprint(scan_bp, url_prefix='/router/scan')  # Registering the scan blueprint
     app.register_blueprint(sites_bp, url_prefix='/sites')  # Registering the sites blueprint
     app.register_blueprint(users_bp, url_prefix='/users')  # Registering the users blueprint
     app.register_blueprint(routers_bp, url_prefix='/routers')  # Registering the routers blueprint

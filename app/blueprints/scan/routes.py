@@ -33,7 +33,7 @@ from . import scan_bp  # Importing the blueprint instance
 socketio = SocketIO()  # Initializing the socketio instance
 
 # Scan Main Route
-@scan_bp.route('/scan', methods=['GET', 'POST'])
+@scan_bp.route('/', methods=['GET', 'POST'])
 def scan():
     # ARP.delete_all_arps()
     # ARPTags.delete_all_arp_tags()
@@ -107,6 +107,34 @@ def delete_all_arps_ips():
         flash(str(e), 'danger')  # Flash an error message
         return jsonify({'message': 'Failed to delete ARP IPs', 'error': str(e)}), 500
 # Scan Delete All Route
+
+# Scan Get Scan Details Route
+@scan_bp.route('/get_scan_details/', methods=['GET'])
+def get_scan_details():
+    try:  # Try to get the ARP details
+        arp_id = request.args.get('id')  # Get the ARP ID
+        arp_item = ARP.get_arp(arp_id)  # Get the ARP Item
+        arp_tags = ARPTags.get_arp_tags(arp_id)  # Get the ARP Tags
+        segment = str(IPSegment.query.get(arp_item.fk_ip_address_id).ip_segment_ip + "/" + IPSegment.query.get(
+            arp_item.fk_ip_address_id).ip_segment_mask)  # Get the segment
+        return jsonify([{  # Return the ARP details
+            'id': ["Identifier", arp_item.arp_id],  # ID
+            'segment': ["IP Segment", segment],  # Segment
+            'ip': ["ARP IP", arp_item.arp_ip],  # IP
+            'mac': ["ARP MAC", arp_item.arp_mac],  # MAC
+            'alias': ["ARP Alias", arp_item.arp_alias],  # Alias
+            'tags': arp_tags,  # Tags
+            'arp_interface': ["ARP Interface", arp_item.arp_interface],  # Interface
+            'arp_is_dhcp': ["ARP is DHCP?", arp_item.arp_is_dhcp],  # DHCP
+            'arp_is_invalid': ["ARP is Invalid?", arp_item.arp_is_invalid],  # Invalid
+            'arp_is_dynamic': ["ARP is Dynamic?", arp_item.arp_is_dynamic],  # Dynamic
+            'arp_is_complete': ["ARP is Complete?", arp_item.arp_is_complete],  # Complete
+            'arp_is_disabled': ["ARP is Disabled?", arp_item.arp_is_disabled],  # Disabled
+            'arp_is_published': ["ARP is Published?", arp_item.arp_is_published],  # Published
+        }]), 200  # Return a success message
+    except Exception as e:  # If an exception occurs
+        return jsonify({'message': 'Failed to get ARP details', 'error': str(e)}), 500  # Return an error message
+# Scan Get Scan Details Route
 
 # Socket IO Sockets
 # ARP Scan Process Sockets

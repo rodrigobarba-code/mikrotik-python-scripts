@@ -170,4 +170,78 @@ function initializePagination(size, command) {
 }
 /* Function to initialize the pagination. */
 /* Macro for pagination section */
+
+/* Macro for show details button */
+/*
+ * Function to fetch the items data for the show details button.
+ * @param {number} id - The id of the item.
+ * @param {string} url - The url to fetch the item data.
+ * @param {string} type - The type of the item.
+ */
+function fetchItemsData(id, url, type) {
+    // Try to fetch the item data.
+    $.ajax({
+        url: url,  // The url to fetch the item data.
+        method: 'GET',  // The method to fetch the item data.
+        data: {  // The data to fetch the item data.
+            id: id  // The id of the item.
+        },
+        // The success function.
+        success: function(response) {
+            let itemList = '<ul class="list-group">';  // The item list.
+
+            response.forEach(function(item) {
+                // Loop through the item.
+                for (let key in item) {
+                    let value = item[key]; // Get the value of the item.
+                    // Check if the value is a boolean, or the key is tags or the value is empty.
+                    // If so, add a pill to the item list.
+                    if (typeof value[1] === 'boolean') {
+                        // Add a pill to the item list.
+                        let pill = value[1] ? '<span class="badge" style="background-color: #14919B">True</span>' : '<span class="badge" style="background-color: #FF5C5C">False</span>';
+                        // Add a pill to the item list.
+                        itemList += `<li class="list-group-item"><b>${value[0]}</b>: ${pill}</li>`;
+                    } else if (key === 'tags') {
+                        // Add a pill to the item list.
+                        let tags = '';
+                        // Loop through the value.
+                        for (let i = 0; i < value.length; i++) {
+                            // Add a pill to the item list.
+                            tags += `<span class="badge" style="background-color: #14919B">${value[i]}</span> &nbsp;`;
+                        }
+                        // Add a pill to the item list.
+                        itemList += `<li class="list-group-item"><b>Tags</b>: ${tags}</li>`;
+                    } else {
+                        // Add a list group item to the item list.
+                        let v = value[1] === "" ? 'N/A' : value[1];
+                        // Add a list group item to the item list.
+                        itemList += `<li class="list-group-item"><b>${value[0]}</b>: ${v}</li>`;
+                    }
+                }
+            });
+
+            itemList += '</ul>';  // Close the item list.
+
+            // Show the item details with a sweet alert.
+            Swal.fire({
+                title: `${type} ${id} Details`,  // The title of the item details.
+                html: itemList,  // The item list.
+                icon: 'info',  // The icon of the item details.
+                confirmButtonText: 'Close',  // The confirm button text.
+            });
+            // Show the item details.
+        },
+        // If there is an error fetching the item data, return an error sweet alert.
+        error: function(error) {
+            Swal.fire({
+                title: 'Error',  // The title of the error.
+                text: 'Could not fetch item details.',  // The text of the error.
+                icon: 'error',  // The icon of the error.
+                confirmButtonText: 'Close'  // The confirm button text.
+            });
+        }
+    });
+}
+/* Function to fetch the items data for the show details button. */
+/* Macro for show details button */
 /* Macros for recyclable components */

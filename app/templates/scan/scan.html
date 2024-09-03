@@ -1,4 +1,4 @@
-{% from 'macros.html' import delete_modal, delete_select_modal, delete_all_modal %}
+{% from 'macros.html' import delete_modal, delete_select_modal, delete_all_modal, show_details_button %}
 {% extends 'base.html' %}
 {% block title %} Router Scan {% endblock %}
 {% block head %}
@@ -124,6 +124,7 @@
                                 {% endfor %}
                             </td>
                             <td class="text-center">
+                                {{ show_details_button(arp['id'], url_for('scan.get_scan_details'), 'ARP') }}
                                 <button type="button" id="delete-button-scan-{{ arp['id'] }}"
                                     class="btn btn-sm btn-danger"
                                     data-bs-toggle="modal"

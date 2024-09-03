@@ -245,4 +245,13 @@
     <script> initializePagination({{ size }}, "{{ url_for('ip_addresses.ip_addresses_site', site_id=0) }}") </script>
 {% endmacro %}
 <!-- Macro for pagination section -->
+
+<!-- Macro for show details button -->
+{% macro show_details_button(id, url, type) %}
+    <button class="btn btn-sm btn-primary show-details-button" type="button"
+            onclick="fetchItemsData({{ id }}, '{{ url }}', '{{ type }}')">
+        <i class="fa-solid fa-eye"></i>
+    </button>
+{% endmacro %}
+<!-- Macro for show details button -->
 <!-- Macros for recyclable components -->
