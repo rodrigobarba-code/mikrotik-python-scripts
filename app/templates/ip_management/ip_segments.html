@@ -1,24 +1,24 @@
 {% from 'macros.html' import delete_modal, delete_select_modal, delete_all_modal %}
 {% extends 'base.html' %}
-{% block title %} IP Segments &#9830; Available Sites &#9830; {{ site_name }} {% endblock %}
+{% block title %} IP Management &#10095; Sites &#10095; Options &#10095; IP Segments {{ site_name }} {% endblock %}
 {% block head %}
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/ip_addresses/styles.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/ip_management/styles.css') }}">
 {% endblock %}
 {% block scripts %}
-    <script src="{{ url_for('static', filename='js/ip_addresses/scripts.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/ip_management/scripts.js') }}"></script>
     <script>
-        const segmentDetails = new SegmentsDetails('{{ url_for('ip_addresses.get_ip_segment_details') }}');
-        deleteAllModal("{{ url_for('ip_addresses.delete_all_segments') }}", "{{ url_for('ip_addresses.ip_addresses') }}", 'segments');
-        deleteSelectModal("{{ url_for('ip_addresses.bulk_delete_segment') }}", "{{ url_for('ip_addresses.ip_addresses') }}", 'segment');
+        const segmentDetails = new SegmentsDetails('{{ url_for('ip_management.get_ip_segment_details') }}');
+        deleteAllModal("{{ url_for('ip_management.delete_all_segments') }}", "{{ url_for('ip_management.ip_management') }}", 'segments');
+        deleteSelectModal("{{ url_for('ip_management.bulk_delete_segment') }}", "{{ url_for('ip_management.ip_management') }}", 'segment');
     </script>
 {% endblock %}
 {% block content %}
     <!-- IP Segments Jumbotron -->
-    <section class="segments-jumbotron pt-5">
+    <section class="segments-jumbotron pt-5 mb-3">
         <div class="container-fluid py-5 d-flex flex-column flex-md-row">
             <div class="d-flex col-md-1 order-md-1 order-2 text-md-start text-center my-md-0 my-3 justify-content-center align-items-center">
                 <button class="btn btn-c-return">
-                    <a href="{{ url_for('ip_addresses.ip_addresses') }}" class="text-decoration-none text-dark" style="font-size: 2.5rem">
+                    <a href="{{ url_for('ip_management.ip_management_options_by_site', site_id=site_id) }}" class="text-decoration-none text-dark" style="font-size: 2.5rem">
                         <i class="fa-solid fa-backward" style="color: white"></i>
                     </a>
                 </button>
@@ -108,7 +108,7 @@
                                         data-bs-target="#delete-modal"
                                         data-id="{{ ip_segment.ip_segment_id }}"
                                         data-type="segment"
-                                        data-url="{{ url_for('ip_addresses.delete_segment', segment_id=ip_segment.ip_segment_id) }}"
+                                        data-url="{{ url_for('ip_management.delete_segment', segment_id=ip_segment.ip_segment_id) }}"
                                         data-name="{{ ip_segment.ip_segment_ip }}"
                                 ><i class="fa-solid fa-trash"></i></button>
                                 <button id="show-segment-details" type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal"

@@ -16,7 +16,7 @@ class IPAddressesFunctions:
     def validate_ip_segment_exists(ip_segment_ip, ip_segment_mask, ip_segment_interface):
         try:
             # Importing Required Models
-            from app.blueprints.ip_addresses.models import IPSegment
+            from app.blueprints.ip_management.models import IPSegment
             # Importing Required Models
 
             # Querying the Database
@@ -50,7 +50,7 @@ class IPAddressesFunctions:
             # Make a list of Strings IPs with Mask, and Interface Included just for router_segment_list that has the FK_Router_ID
 
             # Importing Required Models
-            from app.blueprints.ip_addresses.models import IPSegment
+            from app.blueprints.ip_management.models import IPSegment
             # Importing Required Models
 
             # Querying the Database
@@ -77,10 +77,10 @@ class IPAddressesFunctions:
     def determine_ip_segment_tag(ip_segment_ip):
         try:
             # Importing Required Entities
-            from app.blueprints.ip_addresses.entities import IPSegmentTag
+            from app.blueprints.ip_management.entities import IPSegmentTag
 
             # Importing Required Models
-            from app.blueprints.ip_addresses.models import IPSegment
+            from app.blueprints.ip_management.models import IPSegment
             # Importing Required Models
 
             # If the IP Segment exists

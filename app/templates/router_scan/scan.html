@@ -2,13 +2,13 @@
 {% extends 'base.html' %}
 {% block title %} Router Scan {% endblock %}
 {% block head %}
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/scan/styles.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/router_scan/styles.css') }}">
 {% endblock %}
 {% block scripts %}
-    <script src="{{ url_for('static', filename='js/scan/scripts.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/router_scan/scripts.js') }}"></script>
     <script>
-        deleteAllModal("{{ url_for('scan.delete_all_arps_ips') }}", "{{ url_for('scan.scan') }}", 'scans');
-        deleteSelectModal("{{ url_for('scan.bulk_delete_arp_ips') }}", "{{ url_for('scan.scan') }}", 'scan');
+        deleteAllModal("{{ url_for('router_scan.delete_all_arps_ips') }}", "{{ url_for('router_scan.scan') }}", 'scans');
+        deleteSelectModal("{{ url_for('router_scan.bulk_delete_arp_ips') }}", "{{ url_for('router_scan.scan') }}", 'scan');
     </script>
 {% endblock %}
 {% block content %}
@@ -124,14 +124,14 @@
                                 {% endfor %}
                             </td>
                             <td class="text-center">
-                                {{ show_details_button(arp['id'], url_for('scan.get_scan_details'), 'ARP') }}
+                                {{ show_details_button(arp['id'], url_for('router_scan.get_scan_details'), 'ARP') }}
                                 <button type="button" id="delete-button-scan-{{ arp['id'] }}"
                                     class="btn btn-sm btn-danger"
                                     data-bs-toggle="modal"
                                     data-bs-target="#delete-modal"
                                     data-id="{{ arp['id'] }}"
                                     data-type="scan"
-                                    data-url="{{ url_for('scan.delete_arp_ip', arp_id=arp['id']) }}"
+                                    data-url="{{ url_for('router_scan.delete_arp_ip', arp_id=arp['id']) }}"
                                     data-name="{{ arp['alias'] }}"
                                 ><i class="fa-solid fa-trash"></i></button>
                             </td>

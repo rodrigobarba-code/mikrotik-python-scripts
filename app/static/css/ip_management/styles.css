@@ -1,0 +1,111 @@
+/* Styles for IP Management */
+a {
+    color: #212529;
+    text-decoration: none;
+}
+
+a:hover {
+    color: #212529;
+    text-decoration: none;
+
+    -webkit-transition: background-color 1000ms linear;
+    -ms-transition: background-color 1000ms linear;
+    transition: background-color 1000ms linear;
+}
+
+.management-jumbotron {
+    color: white;
+    background: rgb(131,58,180);
+    background: linear-gradient(45deg, rgba(131,58,180,1) 0%, rgba(253,29,29,1) 50%, rgba(252,176,69,1) 100%);
+    width: 100%;
+    min-height: 300px;
+    z-index: 2;
+}
+
+.segments-jumbotron {
+    color: white;
+    background: rgb(2,37,78);
+    background-image: radial-gradient( circle farthest-corner at 10% 20%,  rgba(2,37,78,1) 0%, rgba(4,56,126,1) 19.7%, rgba(85,245,221,1) 100.2% );
+    background-size: cover;
+    width: 100%;
+    min-height: 300px;
+    z-index: 2;
+}
+
+.col-c {
+    transition: transform 0.3s ease-in-out;
+}
+
+.col-c:hover {
+    transform: scale(1.05);
+}
+
+.card-c {
+    border-radius: 20px;
+    transition: box-shadow 0.3s ease-in-out;
+}
+
+.card-c:hover {
+    -webkit-box-shadow: 0px 20px 40px -6px rgba(128,128,128,1);
+    -moz-box-shadow: 0px 20px 40px -6px rgba(128,128,128,1);
+    box-shadow: 0px 20px 40px -6px rgba(128,128,128,1);
+}
+
+.col-c > a {
+    text-decoration: none;
+    color: #212529;;
+}
+
+.card-background-c {
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+}
+
+.btn-c-return {
+    transition: transform 0.3s ease-in-out;
+}
+
+.btn-c-return:hover {
+    transform: scale(1.25);
+}
+/* Styles for IP Management */
+
+/* Styles for IP Management Options */
+.management-options-jumbotron {
+    color: white;
+    background: rgb(38,51,97);
+    background-image: radial-gradient( circle farthest-corner at 10% 20%,  rgba(38,51,97,1) 0%, rgba(65,143,222,1) 79% );
+    background-size: cover;
+    width: 100%;
+    min-height: 300px;
+    z-index: 2;
+}
+
+.segments-background-c {
+    height: 100px;
+    border-radius: 20px;
+    background: rgb(2,37,78);
+    background-image: radial-gradient( circle farthest-corner at 10% 20%,  rgba(2,37,78,1) 0%, rgba(4,56,126,1) 19.7%, rgba(85,245,221,1) 100.2% );
+}
+
+.blacklist-background-c {
+    height: 100px;
+    border-radius: 20px;
+    background: rgb(26,33,64);
+    background-image: linear-gradient( 94.3deg,  rgba(26,33,64,1) 10.9%, rgba(81,84,115,1) 87.1% );
+}
+
+.authorized-background-c {
+    height: 100px;
+    border-radius: 20px;
+    background: rgb(222,73,5);
+    background-image: linear-gradient( 109.6deg,  rgba(222,73,5,1) 11.2%, rgba(236,249,10,1) 91.1% );
+}
+
+.available-background-c {
+    height: 100px;
+    border-radius: 20px;
+    background: rgb(123,216,96);
+    background-image: linear-gradient( 117deg,  rgba(123,216,96,1) 39.2%, rgba(255,255,255,1) 156.2% );
+}
+/* Styles for IP Management Options */

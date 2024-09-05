@@ -1,27 +1,27 @@
 {% from 'macros.html' import delete_modal, delete_select_modal, delete_all_modal, search_bar_with_checkbox, pagination %}
 {% extends 'base.html' %}
-{% block title %} IP Segments &#9830; Available Sites {% endblock %}
+{% block title %} IP Management &#10095; Sites {% endblock %}
 {% block head %}
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/ip_addresses/styles.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/ip_management/styles.css') }}">
 {% endblock %}
 {% block scripts %}
-    <script src="{{ url_for('static', filename='js/ip_addresses/scripts.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/ip_management/scripts.js') }}"></script>
     <script>let sites = {{ available_sites | tojson }};</script>
 {% endblock %}
 {% block content %}
     <!-- IP Segments Jumbotron -->
-    <section class="segments-jumbotron">
+    <section class="management-jumbotron">
         <div class="p-5 mb-4 base-jumbotron">
             <div class="container-fluid py-5">
-                <h1 class="display-5 fw-bold">IP Segments</h1>
-                <p class="col-md-8 fs-4">Lorem Ipsum</p>
+                <h1 class="display-5 fw-bold">IP Management</h1>
+                <p class="col-md-8 fs-4">Select a site to view possible 'IP Management' options to perform.</p>
             </div>
         </div>
     </section>
     <!-- IP Segments Jumbotron -->
 
     <!-- IP Segments Database -->
-    <section class="segments-database pt-3">
+    <section class="management-database pt-3">
         <div class="container w-75">
             <div class="row">
                 <div class="col-12 col-md-12 text-left">
@@ -68,7 +68,7 @@
     <!-- IP Segments Database -->
 
     <!-- IP Segments Separator -->
-    <section class="segments-separator">
+    <section class="management-separator">
         <div class="container w-75">
             <hr>
         </div>
@@ -76,7 +76,7 @@
     <!-- IP Segments Separator -->
 
     <!-- IP Segments Available Sites -->
-    <section class="segments-available-sites">
+    <section class="management-available-sites">
         <div class="container w-75">
             <div class="row row-c"></div>
         </div>

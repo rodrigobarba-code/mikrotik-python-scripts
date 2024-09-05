@@ -19,7 +19,7 @@ class AppConfig:
         'description': 'Seven Suite is a network management tool',  # Description of the app
         'author': 'Seven Suite Team',  # Author of the app
         'keywords': 'network, management, tool',  # Keywords for the app
-        'progress_scan': 0  # Progress of the scan
+        'progress_scan': 0  # Progress of the router_scan
     }
 
 
@@ -58,18 +58,15 @@ class Sidebar:
         {
             'name': 'Router Scan',  # Name of the menu item
             'icon': 'fa-solid fa-satellite-dish',  # Icon of the menu item
-            'endpoint': 'scan.scan',  # Endpoint of the menu item
+            'endpoint': 'router_scan.scan',  # Endpoint of the menu item
             'submenu': None  # Submenu of the menu item
         },
         {
-            'name': 'IP Address Management',  # Name of the menu item
+            'name': 'IP Management',  # Name of the menu item
             'icon': 'fa-solid fa-ethernet',  # Icon of the menu item
-            'marquee': True,  # Marquee menu item
-            'endpoint': '#',  # Endpoint of the menu item, if endpoint is # then it is a dropdown menu
-            'submenu': [  # Submenu of the menu item
-                {'name': 'IP Addresses', 'endpoint': 'ip_addresses.ip_addresses'}
-                # Name and endpoint of the submenu item
-            ]
+            'marquee': False,  # Marquee menu item
+            'endpoint': 'ip_management.ip_management',  # Endpoint of the menu item, if endpoint is # then it is a dropdown menu
+            'submenu': None  # Submenu of the menu item
         }
     ]
     # Sidebar menu items

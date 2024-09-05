@@ -6,7 +6,7 @@ eventlet.monkey_patch()  # Patching the eventlet
 # Importing main application constructor
 from app import create_app
 from flask_caching import Cache
-from app.blueprints.scan.routes import socketio
+from app.blueprints.router_scan.routes import socketio
 from app.config import AppConfig, UserJobs, Sidebar
 # Importing main application constructor
 

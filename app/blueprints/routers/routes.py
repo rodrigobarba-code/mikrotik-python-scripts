@@ -92,7 +92,7 @@ def update_router(router_id):
                 router_mac=request.form['router_mac'],  # Set the router MAC
                 router_username=request.form['router_username'],  # Set the router username
                 router_password=request.form['router_password'],  # Set the router password
-                allow_scan=1 if request.form.get('allow_scan') else 0  # Set the allow scan
+                allow_scan=1 if request.form.get('allow_scan') else 0  # Set the allow router_scan
             )
             router.validate()  # Validate the router
             Router.update_router(router)  # Update the router

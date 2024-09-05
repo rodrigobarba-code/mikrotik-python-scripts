@@ -242,7 +242,7 @@
 <!-- Macro for pagination section -->
 {% macro pagination(size=6) %}
     <ul id="pagination" class="pagination"></ul>
-    <script> initializePagination({{ size }}, "{{ url_for('ip_addresses.ip_addresses_site', site_id=0) }}") </script>
+    <script> initializePagination({{ size }}, "{{ url_for('ip_management.ip_management_options_by_site', site_id=0) }}") </script>
 {% endmacro %}
 <!-- Macro for pagination section -->
 

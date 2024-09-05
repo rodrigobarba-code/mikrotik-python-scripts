@@ -33,7 +33,7 @@ class RouterDetails {
                 $('#router-mac-d').text(data.router_mac);  // Set the text of the element with id router-mac-d to the router mac.
                 $('#router-username-d').text(data.router_username);  // Set the text of the element with id router-username-d to the router username.
                 $('#router-password-d').text(data.router_password);  // Set the text of the element with id router-password-d to the router password.
-                $('#router-allow-scan-d').text(data.allow_scan);  // Set the text of the element with id router-allow-scan-d to the allow scan.
+                $('#router-allow-router_scan-d').text(data.allow_scan);  // Set the text of the element with id router-allow-router_scan-d to the allow router_scan.
 
                 $('#detailsModal').modal('show');  // Show the modal with id detailsModal.
             },

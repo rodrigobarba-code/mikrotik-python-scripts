@@ -8,15 +8,15 @@ from sqlalchemy import Enum, ARRAY
 # Importing Required Libraries
 
 # Importing Required Entities
-from app.blueprints.scan.entities import ARPEntity, ARPTag
+from app.blueprints.router_scan.entities import ARPEntity, ARPTag
 # Importing Required Entities
 
 # Importing Required Functions
-from app.blueprints.scan.functions import ARPFunctions
+from app.blueprints.router_scan.functions import ARPFunctions
 # Importing Required Functions
 
 # Importing Required Exceptions
-from app.blueprints.scan.exceptions import *
+from app.blueprints.router_scan.exceptions import *
 # Importing Required Exceptions
 
 # ARP Model

@@ -1,7 +1,7 @@
 # Description: IP Addresses Routes for the IP Addresses Blueprint
 
 # Importing Required Local Modules
-from . import ip_addresses_bp  # Import the IP Addresses Blueprint
+from . import ip_management_bp  # Import the IP Addresses Blueprint
 from app.blueprints.users.functions import users_functions as functions  # Import the users functions object
 # Importing Required Local Modules
 
@@ -17,14 +17,14 @@ from app.decorators import RequirementsDecorators as restriction
 from app.blueprints.sites.models import Site
 from app.blueprints.regions.models import Region
 from app.blueprints.routers.models import Router
-from app.blueprints.ip_addresses.models import IPSegment
+from app.blueprints.ip_management.models import IPSegment
 # Importing Required Models
 
 # IP Addresses Main Route
-@ip_addresses_bp.route('/', methods=['GET'])
+@ip_management_bp.route('/', methods=['GET'])
 @restriction.login_required  # Need to be logged in
 @restriction.admin_required  # Need to be an admin
-def ip_addresses():
+def ip_management():
     try:
         available_sites_obj = Site.get_sites()  # Get the available sites
         available_regions_obj = Region.get_regions()  # Get the available regions
@@ -60,36 +60,56 @@ def ip_addresses():
         # Loop through the available regions
 
         return render_template(
-            'ip_addresses/ip_addresses_sites.html',  # Render the IP Addresses template
+            'ip_management/ip_management.html',  # Render the IP Addresses template
             available_segments=available_segments,  # Pass the available segments to the template
             available_regions=available_regions,  # Pass the available regions to the template
             available_sites=available_sites  # Pass the available sites to the template
         )
     except Exception as e:  # If an exception occurs
         flash(str(e), 'danger')  # Flash an error message
-        return redirect(url_for('ip_addresses.ip_addresses'))  # Redirect to the IP Addresses route
+        return redirect(url_for('ip_management.ip_management'))  # Redirect to the IP Addresses route
 # IP Addresses Main Route
 
-# IP Addresses Main w/ID Route
-@ip_addresses_bp.route('/<int:site_id>', methods=['GET'])
+# IP Management Options by Site Route
+@ip_management_bp.route('/options/<int:site_id>', methods=['GET'])
 @restriction.login_required  # Need to be logged in
 @restriction.admin_required  # Need to be an admin
-def ip_addresses_site(site_id):
+def ip_management_options_by_site(site_id):
     try:
+        site_id = site_id  # Get the Site ID
+        site_name = Site.get_site(site_id).site_name  # Get the Site Name
+        return render_template(
+            'ip_management/ip_management_options.html',  # Render the IP Addresses template
+            site_name=site_name,  # Pass the Site Name
+            site_id=site_id  # Pass the Site ID
+        )
+    except Exception as e:
+        flash(str(e), 'danger')  # Flash an error message
+        return redirect(url_for('ip_management.ip_management'))  # Redirect to the IP Addresses route
+# IP Management Options by Site Route
+
+# IP Addresses Main w/ID Route
+@ip_management_bp.route('/segments/<int:site_id>', methods=['GET'])
+@restriction.login_required  # Need to be logged in
+@restriction.admin_required  # Need to be an admin
+def ip_segment(site_id):
+    try:
+        site_id = site_id  # Get the Site ID
         site_name = Site.get_site(site_id).site_name  # Get the Site Name
         ip_segment_list = IPSegment.get_ip_segments_by_site_id(site_id)  # Get the IP Segments by Site ID
         return render_template(
-            'ip_addresses/ip_addresses.html',  # Render the IP Addresses template
+            'ip_management/ip_segments.html',  # Render the IP Addresses template
             ip_segment_list=ip_segment_list,  # Pass the IP Segments to the template
-            site_name=site_name  # Pass the Site Name to the template
+            site_name=site_name,  # Pass the Site Name to the template
+            site_id=site_id  # Pass the Site ID to the template
         )
     except Exception as e:  # If an exception occurs
         flash(str(e), 'danger')  # Flash an error message
-        return redirect(url_for('ip_addresses.ip_addresses_site', site_id=site_id))  # Redirect to the IP Addresses route
+        return redirect(url_for('ip_management.ip_segment', site_id=site_id))  # Redirect to the IP Addresses route
 # IP Addresses Main w/ID Route
 
 # IP Addresses Delete Route
-@ip_addresses_bp.route('/delete/<int:segment_id>', methods=['GET'])
+@ip_management_bp.route('/segments/delete/<int:segment_id>', methods=['GET'])
 @restriction.login_required  # Need to be logged in
 @restriction.admin_required  # Need to be an admin
 def delete_segment(segment_id):
@@ -97,14 +117,14 @@ def delete_segment(segment_id):
         IPSegment.delete_ip_segment(segment_id)  # Delete the IP Segment
         flash('IP Segment deleted successfully', 'success')  # Flash a success message
         functions.create_log(session['user_id'], 'Router Deleted', 'DELETE', 'routers')  # Create a log
-        return redirect(url_for('ip_addresses.ip_addresses'))  # Redirect to the routers route
+        return redirect(url_for('ip_management.ip_management'))  # Redirect to the routers route
     except Exception as e:  # If an exception occurs
         flash(str(e), 'danger')  # Flash an error message
-        return redirect(url_for('ip_addresses.ip_addresses'))  # Redirect to the IP Addresses route
+        return redirect(url_for('ip_management.ip_management'))  # Redirect to the IP Addresses route
 # IP Addresses Delete Routes
 
 # IP Addresses Delete Bulk Route
-@ip_addresses_bp.route('/delete/bulk', methods=['POST'])
+@ip_management_bp.route('/segments/delete/bulk', methods=['POST'])
 @restriction.login_required  # Need to be logged in
 @restriction.admin_required  # Need to be an admin
 def bulk_delete_segment():
@@ -116,7 +136,7 @@ def bulk_delete_segment():
             IPSegment.delete_ip_segment(segment_id)  # Delete the IP Segment
             flag += 1  # Set the flag to 1
         flash(f'{flag} IP Segments deleted successfully', 'success')  # Flash a success message
-        functions.create_log(session['user_id'], 'IP Segments Deleted', 'DELETE', 'ip_addresses')  # Create a log
+        functions.create_log(session['user_id'], 'IP Segments Deleted', 'DELETE', 'ip_management')  # Create a log
         return jsonify({'message': 'IP Segments deleted successfully'}), 200  # Return a success message
     except Exception as e:  # If an exception occurs
         flash(str(e), 'danger')  # Flash an error message
@@ -124,14 +144,14 @@ def bulk_delete_segment():
 # IP Addresses Delete Bulk Route
 
 # IP Addresses Delete All Route
-@ip_addresses_bp.route('/delete/all', methods=['POST'])
+@ip_management_bp.route('/segments/delete/all', methods=['POST'])
 @restriction.login_required  # Need to be logged in
 @restriction.admin_required  # Need to be an admin
 def delete_all_segments():
     try:  # Try to delete all IP Segments
         IPSegment.delete_all_ip_segments()  # Delete all IP Segments
         flash('All IP Segments deleted successfully', 'success')  # Flash a success message
-        functions.create_log(session['user_id'], 'All IP Segments Deleted', 'DELETE', 'ip_addresses')  # Create a log
+        functions.create_log(session['user_id'], 'All IP Segments Deleted', 'DELETE', 'ip_management')  # Create a log
         return jsonify({'message': 'All IP Segments deleted successfully'}), 200  # Return a success message
     except Exception as e:  # If an exception occurs
         flash(str(e), 'danger')  # Flash an error message
@@ -139,7 +159,7 @@ def delete_all_segments():
 # IP Addresses Delete All Route
 
 # IP Addresses Get IP Segments Details Route
-@ip_addresses_bp.route('/get_ip_segment_details', methods=['POST'])
+@ip_management_bp.route('/segments/get_ip_segment_details', methods=['POST'])
 @restriction.login_required  # Need to be logged in
 @restriction.admin_required  # Need to be an admin
 def get_ip_segment_details():

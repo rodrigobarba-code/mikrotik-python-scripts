@@ -6,7 +6,7 @@ from app.extensions import db
 # Importing Required Libraries
 
 # Importing Required Entities
-from app.blueprints.ip_addresses.entities import IPSegmentTag, IPSegmentEntity
+from app.blueprints.ip_management.entities import IPSegmentTag, IPSegmentEntity
 # Importing Required Entities
 
 # Importing Required Models
@@ -14,7 +14,7 @@ from app.blueprints.routers.models import Router
 # Importing Required Models
 
 # Importing Required Functions
-from app.blueprints.ip_addresses.functions import IPAddressesFunctions
+from app.blueprints.ip_management.functions import IPAddressesFunctions
 # Importing Required Functions
 
 # IP Segment Model

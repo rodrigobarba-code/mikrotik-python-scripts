@@ -7,11 +7,11 @@ from collections import Counter
 # Importing Necessary Libraries
 
 # Importing Necessary Entities
-from app.blueprints.scan.entities import ARPTag
+from app.blueprints.router_scan.entities import ARPTag
 # Importing Necessary Entities
 
 # Importing Necessary Models
-from app.blueprints.ip_addresses.models import IPSegment
+from app.blueprints.ip_management.models import IPSegment
 # Importing Necessary Models
 
 # Class for ARP Functions
@@ -26,7 +26,7 @@ class ARPFunctions:
     def validate_arp_exists(arp_ip, arp_mac):
         try:
             # Importing Required Models
-            from app.blueprints.scan.models import ARP
+            from app.blueprints.router_scan.models import ARP
             # Importing Required Models
 
             # Querying the Database
@@ -59,7 +59,7 @@ class ARPFunctions:
             # Make a list of Strings IPs with Mask, and Interface Included just for router_arp_list that has the FK_Router_ID
 
             # Importing Required Models
-            from app.blueprints.scan.models import ARP
+            from app.blueprints.router_scan.models import ARP
             # Importing Required Models
 
             # Querying the Database
@@ -83,7 +83,7 @@ class ARPFunctions:
     def detect_ip_duplicated():
         try:
             # Importing Required Models
-            from app.blueprints.scan.models import ARP
+            from app.blueprints.router_scan.models import ARP
             # Importing Required Models
 
             # Querying only the id and IP from the Database
@@ -117,7 +117,7 @@ class ARPFunctions:
     def assign_alias(arp_ip: str, queue_list: dict) -> str:
         try:
             # Importing Required Models
-            from app.blueprints.scan.models import ARP
+            from app.blueprints.router_scan.models import ARP
             # Importing Required Models
 
             # For each Queue in the Queue List

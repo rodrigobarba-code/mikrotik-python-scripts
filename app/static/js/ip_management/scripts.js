@@ -47,3 +47,28 @@ class SegmentsDetails {
     /* Method to show the segment details. */
 }
 // Class for handling ip segments details
+
+/**
+ * When the document has loaded, do the following.
+ *
+ * @returns {void} - When the document has loaded, do the following
+ */
+$(document).ready(() => {
+    // When the element with class col-c is hovered, do the following.
+    $('.col-c').hover(
+        // When the element with class col-c is hovered, do the following.
+        function() {
+            let color = $(this).css('background');  // Get the background color of the element with class col-c.
+            let gradient = $(this).find('.bg-c').css('background-image');  // Get the background image of the element with class bg-c.
+
+            $('.management-options-jumbotron').css('background', color);  // Set the background color of the element with class management-options-jumbotron to the color.
+            $('.management-options-jumbotron').css('background-image', gradient);  // Set the background image of the element with class management-options-jumbotron to the gradient.
+        },
+        // When the element with class col-c is not hovered, do the following.
+        function() {
+            $('.management-options-jumbotron').css('background', '');  // Set the background color of the element with class management-options-jumbotron to an empty string.
+            $('.management-options-jumbotron').css('background-image', '');  // Set the background image of the element with class management-options-jumbotron to an empty string.
+        }
+    );
+});
+/* When the document has loaded, do the following. */

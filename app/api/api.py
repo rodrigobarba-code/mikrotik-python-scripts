@@ -4,7 +4,7 @@
 import json
 import ros_api
 from app.blueprints.routers.models import Router
-from app.blueprints.scan.functions import ARPFunctions
+from app.blueprints.router_scan.functions import ARPFunctions
 # Importing Necessary Libraries
 
 # Importing Necessary Modules
@@ -14,17 +14,17 @@ from app.api.modules.GetAllowedRouters import GetAllowedRouters
 # Importing Necessary Modules
 
 # Importing Necessary Entities
-from app.blueprints.scan.entities import ARPEntity, ARPTag
-from app.blueprints.ip_addresses.entities import IPSegmentEntity
+from app.blueprints.router_scan.entities import ARPEntity, ARPTag
+from app.blueprints.ip_management.entities import IPSegmentEntity
 # Importing Necessary Entities
 
 # Importing Necessary Modules
-from app.blueprints.scan.models import ARP, ARPTags
-from app.blueprints.ip_addresses.models import IPSegment
+from app.blueprints.router_scan.models import ARP, ARPTags
+from app.blueprints.ip_management.models import IPSegment
 # Importing Necessary Modules
 
 # Importing Necessary Functions
-from app.blueprints.ip_addresses.functions import IPAddressesFunctions
+from app.blueprints.ip_management.functions import IPAddressesFunctions
 # Importing Necessary Functions
 
 # Class to handle the Router OS API
@@ -220,12 +220,12 @@ class RouterAPI:
             print(str(e))  # Print the Exception
     # Method to add ARP data to the database
 
-    # Method to scan arp data from the Router OS API
+    # Method to router_scan arp data from the Router OS API
     @staticmethod
     def arp_scan():
         RouterAPI.add_ip_data(RouterAPI.get_ip_data())  # Add IP data to the database
         RouterAPI.add_arp_data(RouterAPI.get_arp_data())  # Add ARP data to the database
-    # Method to scan arp data from the Router OS API
+    # Method to router_scan arp data from the Router OS API
     # Static Methods
 # Class to handle the RouterOS API
 
