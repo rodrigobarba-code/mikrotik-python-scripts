@@ -1,0 +1,30 @@
+.hide-scroll {
+    overflow: hidden;
+
+    /* Hide scrollbar for IE, Edge and Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+
+    /* Hide scrollbar for Chrome, Safari and Opera */
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+.float-container {
+    position: absolute;
+    z-index: 1000;
+    width: 100%;
+    max-height: 175px;
+    overflow-y: auto;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 0.25rem;
+    display: none; /* Initially hidden */
+}
+
+.list-group-item:hover {
+    background-color: #f1f1f1;
+    cursor: pointer;
+}

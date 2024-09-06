@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% block title %} {{ "Sites / Add" if site is none else "Sites / Update" }} {% endblock %}
+{% block head %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/sites/styles.css') }}">
+{% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/sites/scripts.js') }}"></script>
+{% endblock %}
+{% block content %}
+    <!-- Sites Jumbotron -->
+    <section class="sites-jumbotron">
+        <div class="p-5 mb-4 base-jumbotron">
+            <div class="container-fluid py-5">
+                <h1 class="display-5 fw-bold">{{ "Add Site" if site is none else "Update Site" }}</h1>
+                <p class="col-md-8 fs-4">Lorem Ipsum</p>
+            </div>
+        </div>
+    </section>
+    <!-- Sites Jumbotron -->
+
+    <!-- Sites Forms -->
+    <section class="sites-forms">
+        <div class="container-fluid w-75 pb-3">
+            <form action="{{ url_for('sites.add_site') if site is none else url_for('sites.update_site', site_id=site.site_id) }}"
+                  method="POST">
+                <div class="form-group">
+                    <label class="mb-2" for="site_name">Site's Name</label>
+                    <input value="{{ site.site_name if site is not none }}" type="text" class="form-control mb-2"
+                           id="site_name" name="site_name" placeholder="Enter site's name" maxlength="128" required>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <label class="mb-2" for="fk_region_id">Region</label>
+                        <select class="form-select" id="fk_region_id" name="fk_region_id" aria-label="Region Selector"
+                                required>
+                            <option value="" selected>Choose a region</option>
+                            {% for region in region_list %}
+                                {% if site is not none and region.region_id == site.fk_region_id %}
+                                    <option value="{{ region.region_id }}" selected>{{ region.region_name }}</option>
+                                {% else %}
+                                    <option value="{{ region.region_id }}">{{ region.region_name }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col">
+                        <label class="mb-2" for="site_name">Site's Segment</label>
+                        <input value="{{ site.site_segment if site is not none }}" type="number"
+                               class="form-control mb-2"
+                               id="site_segment" name="site_segment" placeholder="Enter site's name" maxlength="10"
+                               required>
+                    </div>
+                </div>
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="condition-check">
+                    <label class="form-check-label" for="condition-check">I've read and accept that the data provided will be
+                        used to create or update a new site.</label>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <button type="button" class="btn btn-secondary" onclick="window.history.back()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">{{ "Add Site" if site is none else "Update Site" }}</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </section>
+    <!-- Sites Forms -->
+{% endblock %}

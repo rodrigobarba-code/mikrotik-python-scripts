@@ -1,0 +1,170 @@
+{% from 'macros.html' import delete_modal, delete_select_modal, delete_all_modal %}
+{% extends 'base.html' %}
+{% block title %} Routers {% endblock %}
+{% block head %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/routers/styles.css') }}">
+{% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='/js/routers/scripts.js') }}"></script>
+    <script>
+        const routerDetails = new RouterDetails('{{ url_for('routers.get_router_details') }}');
+        deleteAllModal("{{ url_for('routers.delete_all_routers') }}", "{{ url_for('routers.routers') }}", 'routers');
+        deleteSelectModal("{{ url_for('routers.bulk_delete_router') }}", "{{ url_for('routers.routers') }}", 'router');
+    </script>
+{% endblock %}
+{% block content %}
+    <!-- Routers Jumbotron -->
+    <section class="routers-jumbotron">
+        <div class="p-5 mb-4 base-jumbotron">
+            <div class="container-fluid py-5">
+
+                <h1 class="display-5 fw-bold">Routers</h1>
+                <p class="col-md-8 fs-4">Lorem Ipsum</p>
+                <a href="{{ url_for('routers.add_router') }}" class="btn btn-primary btn-lg" type="button"><i
+                        class="fa-solid fa-plus"></i> Create New Router</a>
+            </div>
+        </div>
+    </section>
+    <!-- Routers Jumbotron -->
+
+    <!-- Routers Database -->
+    <section class="routers-database pt-3">
+        <div class="container w-100 align-items-center">
+            <div class="row">
+                <div class="col-8 text-left">
+                    <h2 class="routers-database-title"><b>Available</b> Routers</h2>
+                </div>
+                <div class="col-12 col-md-4 d-flex justify-content-end">
+                    <button type="button" class="btn btn-md btn-danger me-2" data-bs-toggle="modal" id="delete-select"
+                            data-bs-target="#delete-select-modal">
+                        <i class="fa-solid fa-square-minus"></i>&nbsp; Delete Selected
+                    </button>
+                    <button type="button" class="btn btn-md btn-dark" data-bs-toggle="modal" id="delete-all"
+                            data-bs-target="#delete-all-modal">
+                        <i class="fa-solid fa-trash"></i>&nbsp; Delete All
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Routers Database -->
+
+    <!-- Routers Separator -->
+    <section class="routers-separator">
+        <div class="container w-75">
+            <hr>
+        </div>
+    </section>
+    <!-- Routers Separator -->
+
+    <!-- Routers Table -->
+    <section class="routers-table hide-scroll pt-3 pb-3">
+        <div class="container w-75" id="sites-table-c">
+            <table class="table table-responsive" id="datatable-object">
+                <thead>
+                <tr>
+                    <th scope="col"></th>
+                    <th scope="col">#</th>
+                    <th scope="col">Router Name</th>
+                    <th scope="col">Router Description</th>
+                    <th scope="col">Allow Scan</th>
+                    <th scope="col">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for router in router_list %}
+                    <tr>
+                        <td class="text-center"><label for="router-{{ router.router_id }}"></label>
+                            <input type="checkbox" class="form-check-input" id="router-{{ router.router_id }}">
+                        </td>
+                        <td>{{ router.router_id }}</td>
+                        <td>{{ router.router_name }}</td>
+                        <td>{{ router.router_description }}</td>
+                        <td>
+                            <h5><span class="badge rounded-pill bg-{{ 'success' if router.allow_scan == 1 else 'secondary'}}">{{ "Enable" if router.allow_scan == 1 else "Disable" }}</span></h5>
+                        </td>
+                        <td>
+                            <a href="{{ url_for('routers.update_router', router_id=router.router_id) }}" type="button"
+                               class="btn btn-sm btn-warning"><i class="fa-solid fa-edit"></i></a>
+                            <button type="button" id="delete-button-router-{{ router.router_id }}"
+                                    class="btn btn-sm btn-danger"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#delete-modal"
+                                    data-id="{{ router.router_id }}"
+                                    data-type="router"
+                                    data-url="{{ url_for('routers.delete_router', router_id=router.router_id) }}"
+                                    data-name="{{ router.router_name }}"
+                            ><i class="fa-solid fa-trash"></i></button>
+                            <button data-bs-toggle="modal" data-bs-target="#detailsModal"
+                                    class="btn btn-sm btn-primary show-details-button" type="button"
+                                    onclick="routerDetails.show('{{ router.router_id }}')"><i
+                                    class="fa-solid fa-eye"></i></button>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+    <!-- Routers Table -->
+
+    <!-- Delete Modals -->
+    <div class="delete-modal-container">{{ delete_modal() }}</div>
+    <div class="delete-select-modal-container">{{ delete_select_modal() }}</div>
+    <div class="delete-all-modal-container">{{ delete_all_modal() }}</div>
+    <!-- Delete Modals -->
+
+    <!-- Router Details Modal -->
+    <section class="router-details-modal">
+        <div class="modal fade" id="detailsModal" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="detailsModalLabel">Router Details</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-12">
+                                    <p><strong>Router Name: </strong> <span id="router-name-d"></span></p>
+                                </div>
+                                <div class="col-12">
+                                    <p><strong>Router Description: </strong> <span id="router-description-d"></span></p>
+                                </div>
+                                <div class="col-12">
+                                    <p><strong>Router Brand: </strong> <span id="router-brand-d"></span></p>
+                                </div>
+                                <div class="col-12">
+                                    <p><strong>Router Model: </strong> <span id="router-model-d"></span></p>
+                                </div>
+                                <div class="col-12">
+                                    <p><strong>Router Site: </strong> <span id="router-site-d"></span></p>
+                                </div>
+                                <div class="col-12">
+                                    <p><strong>Router IP: </strong> <span id="router-ip-d"></span></p>
+                                </div>
+                                <div class="col-12">
+                                    <p><strong>Router MAC: </strong> <span id="router-mac-d"></span></p>
+                                </div>
+                                <div class="col-12">
+                                    <p><strong>Router Username: </strong> <span id="router-username-d"></span></p>
+                                </div>
+                                <div class="col-12">
+                                    <p><strong>Router Password: </strong> <span id="router-password-d"></span></p>
+                                </div>
+                                <div class="col-12">
+                                    <p><strong>Router Allow Scan: </strong> <span id="router-allow-scan-d"></span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Router Details Modal -->
+{% endblock %}

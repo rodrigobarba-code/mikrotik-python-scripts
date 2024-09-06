@@ -1,0 +1,31 @@
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+.ENV/
+# Virtual environments
+
+# Files for the virtual environment
+*.env
+*.flaskenv
+# Files for the virtual environment
+
+# Cache files
+__pycache__/
+*.py[cod]
+# Cache files
+
+# Setuptools distribution folder
+.vscode/
+.idea/
+# Setuptools distribution folder
+
+# Operating System files
+.DS_Store
+Thumbs.db
+# Operating System files
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+# Jupyter Notebook checkpoints

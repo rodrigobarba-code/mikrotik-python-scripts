@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% block title %} IP Management &#10095; Sites &#10095; Options {% endblock %}
+{% block head %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/ip_management/styles.css') }}">
+{% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/ip_management/scripts.js') }}"></script>
+{% endblock %}
+{% block content %}
+    <!-- IP Management Options Jumbotron -->
+    <section class="management-options-jumbotron pt-5 mb-3">
+        <div class="container-fluid py-5 d-flex flex-column flex-md-row">
+            <div class="d-flex col-md-1 order-md-1 order-2 text-md-start text-center my-md-0 my-3 justify-content-center align-items-center">
+                <button class="btn btn-c-return">
+                    <a href="{{ url_for('ip_management.ip_management') }}" class="text-decoration-none text-dark" style="font-size: 2.5rem">
+                        <i class="fa-solid fa-backward" style="color: white"></i>
+                    </a>
+                </button>
+            </div>
+            <div class="col-md-11 order-md-2 order-1">
+                <h1 class="display-5 fw-bold">Options for {{ site_name }}</h1>
+                <p class="col-md-8 fs-4">Select an option to manage IP addresses for {{ site_name }}.</p>
+            </div>
+        </div>
+    </section>
+    <!-- IP Management Options Jumbotron -->
+
+    <!-- IP Management Options Database -->
+    <section class="management-options-database pt-3">
+        <div class="container w-75">
+            <div class="row">
+                <div class="col-12 col-md-12 text-left">
+                    <h2 class="management-options-database-title">Select an <b>Option</b></h2>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- IP Management Options Database -->
+
+    <!-- IP Management Options Separator -->
+    <section class="management-options-separator">
+        <div class="container w-75">
+            <hr>
+        </div>
+    </section>
+    <!-- IP Management Options Separator -->
+
+    <!-- IP Management Options Available Options -->
+    <section class="management-options-available-options">
+        <div class="container w-75">
+            <div class="row row-c">
+                <a href="{{ url_for('ip_management.ip_segment', site_id=site_id) }}">
+                    <div class="col-c col-12 col-md-12">
+                        <div class="card-c card mb-3">
+                            <div class="row g-0">
+                                <div class="col-md-2">
+                                    <div class="segments-background-c bg-c m-3 d-flex justify-content-center align-items-center">
+                                        <i class="fa-solid fa-sitemap" style="color: white; font-size: 40px"></i>
+                                    </div>
+                                </div>
+                                <div class="col-md-10 d-flex align-items-center">
+                                    <div class="card-body">
+                                        <h5 class="card-title"><b>IP Segments</b></h5>
+                                        <p class="card-text">View and manage IP Segments for {{ site_name }}.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                <a href="{{ url_for('home.home') }}">
+                    <div class="col-c col-12 col-md-12">
+                        <div class="card-c card mb-3">
+                            <div class="row g-0">
+                                <div class="col-md-2">
+                                    <div class="blacklist-background-c bg-c m-3 d-flex justify-content-center align-items-center">
+                                        <i class="fa-solid fa-radiation" style="color: white; font-size: 40px"></i>
+                                    </div>
+                                </div>
+                                <div class="col-md-10 d-flex align-items-center">
+                                    <div class="card-body">
+                                        <h5 class="card-title"><b>Blacklist</b></h5>
+                                        <p class="card-text">Blacklist an IP address.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                <a href="{{ url_for('home.home') }}">
+                    <div class="col-c col-12 col-md-12">
+                        <div class="card-c card mb-3">
+                            <div class="row g-0">
+                                <div class="col-md-2">
+                                    <div class="authorized-background-c bg-c m-3 d-flex justify-content-center align-items-center">
+                                        <i class="fa-solid fa-star" style="color: white; font-size: 40px"></i>
+                                    </div>
+                                </div>
+                                <div class="col-md-10 d-flex align-items-center">
+                                    <div class="card-body">
+                                        <h5 class="card-title"><b>Authorized IPs</b></h5>
+                                        <p class="card-text">Check what IPs Addresses are authorized and validate them for {{ site_name }}.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                <a href="{{ url_for('home.home') }}">
+                    <div class="col-c col-12 col-md-12">
+                        <div class="card-c card mb-3">
+                            <div class="row g-0">
+                                <div class="col-md-2">
+                                    <div class="available-background-c bg-c m-3 d-flex justify-content-center align-items-center">
+                                        <i class="fa-solid fa-street-view" style="color: white; font-size: 40px"></i>
+                                    </div>
+                                </div>
+                                <div class="col-md-10 d-flex align-items-center">
+                                    <div class="card-body">
+                                        <h5 class="card-title"><b>Available IPs</b></h5>
+                                        <p class="card-text">Look for available IPs for {{ site_name }} to use.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+    <!-- IP Management Options Available Options -->
+{% endblock %}

@@ -1,0 +1,85 @@
+{% from 'macros.html' import delete_modal, delete_select_modal, delete_all_modal, search_bar_with_checkbox, pagination %}
+{% extends 'base.html' %}
+{% block title %} IP Management &#10095; Sites {% endblock %}
+{% block head %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/ip_management/styles.css') }}">
+{% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/ip_management/scripts.js') }}"></script>
+    <script>let sites = {{ available_sites | tojson }};</script>
+{% endblock %}
+{% block content %}
+    <!-- IP Segments Jumbotron -->
+    <section class="management-jumbotron">
+        <div class="p-5 mb-4 base-jumbotron">
+            <div class="container-fluid py-5">
+                <h1 class="display-5 fw-bold">IP Management</h1>
+                <p class="col-md-8 fs-4">Select a site to view possible 'IP Management' options to perform.</p>
+            </div>
+        </div>
+    </section>
+    <!-- IP Segments Jumbotron -->
+
+    <!-- IP Segments Database -->
+    <section class="management-database pt-3">
+        <div class="container w-75">
+            <div class="row">
+                <div class="col-12 col-md-12 text-left">
+                    <h2 class="regions-database-title">Select a <b>Site</b></h2>
+                </div>
+                <div class="col-12 col-md-12 text-right">
+                    <section class="filter-section-for-ip-segments">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-2">
+                                    <label class="form-label form-label-c" data-id="1"><b>Filter by region:</b></label>
+                                    {{ search_bar_with_checkbox(12, 12, 12, 'region', 'segments', available_regions) }}
+                                    <div class="form-text">Ex. Mexicali, Tijuana, Ensenada</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-2">
+                                    <label class="form-label form-label-c" data-id="2"><b>Filter by site:</b></label>
+                                    {{ search_bar_with_checkbox(12, 12, 12, 'site', 'segments', available_sites) }}
+                                    <div class="form-text">Ex. Robledo, Alamitos, Alfareros</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-2">
+                                    <label class="form-label form-label-c" data-id="3"><b>Filter by segment:</b></label>
+                                    {{ search_bar_with_checkbox(12, 12, 12, 'segment', 'segments', available_segments) }}
+                                    <div class="form-text">Ex. 1, 2, 3</div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </section>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12 col-md-12 text-right">
+                    <div class="d-flex mt-3 justify-content-end align-items-end">
+                        {{ pagination() }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- IP Segments Database -->
+
+    <!-- IP Segments Separator -->
+    <section class="management-separator">
+        <div class="container w-75">
+            <hr>
+        </div>
+    </section>
+    <!-- IP Segments Separator -->
+
+    <!-- IP Segments Available Sites -->
+    <section class="management-available-sites">
+        <div class="container w-75">
+            <div class="row row-c"></div>
+        </div>
+    </section>
+    <!-- IP Segments Available Sites -->
+{% endblock %}

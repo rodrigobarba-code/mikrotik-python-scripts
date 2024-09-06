@@ -1,0 +1,151 @@
+{% from 'macros.html' import delete_modal, delete_select_modal, delete_all_modal, show_details_button %}
+{% extends 'base.html' %}
+{% block title %} Router Scan {% endblock %}
+{% block head %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/router_scan/styles.css') }}">
+{% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/router_scan/scripts.js') }}"></script>
+    <script>
+        deleteAllModal("{{ url_for('router_scan.delete_all_arps_ips') }}", "{{ url_for('router_scan.scan') }}", 'scans');
+        deleteSelectModal("{{ url_for('router_scan.bulk_delete_arp_ips') }}", "{{ url_for('router_scan.scan') }}", 'scan');
+    </script>
+{% endblock %}
+{% block content %}
+    <!-- Router Scan Jumbotron -->
+    <section class="scan-jumbotron">
+        <div class="p-5 mb-4 base-jumbotron">
+            <div class="container-fluid py-5">
+                <h1 class="display-5 fw-bold">Router Scan</h1>
+                <p class="col-md-8 fs-4">Lorem Ipsum</p>
+                <a id="start-btn" class="btn btn-primary btn-lg" type="button">
+                    <i class="fa-solid fa-magnifying-glass-plus"></i> Scan </a>
+                <div id="pb-container" hidden>
+                    <div class="row align-items-center mt-4">
+                        <h3 class="form-label mt-2">Scanning Progress ...</h3>
+                        <div class="col">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="progress flex-grow-1" role="progressbar" aria-label="Default striped example" aria-valuemax="100">
+                                    <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%">
+                                    </div>
+                                </div>
+                                    <a class="p-2" type="button" style="font-size: 1.5rem">
+                                        <i class="fa-solid fa-xmark"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="form-label mt-2">(Only the routers that are allowed to be scanned will be displayed)</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Router Scan Jumbotron -->
+
+    <!-- Router Scan Database -->
+    <section class="scan-database pt-3">
+        <div class="container w-75">
+            <div class="row">
+                <div class="col-12 col-md-8 text-left">
+                    <h2 class="regions-database-title"><b>ARP List</b> Available</h2>
+                </div>
+                <div class="col-12 col-md-4 d-flex justify-content-end">
+                    <button type="button" class="btn btn-md btn-danger me-2" data-bs-toggle="modal" id="delete-select"
+                            data-bs-target="#delete-select-modal">
+                        <i class="fa-solid fa-square-minus"></i>&nbsp; Delete Selected
+                    </button>
+                    <button type="button" class="btn btn-md btn-dark" data-bs-toggle="modal" id="delete-all"
+                            data-bs-target="#delete-all-modal">
+                        <i class="fa-solid fa-trash"></i>&nbsp; Delete All
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Router Scan Database -->
+
+    <!-- Router Scan Separator -->
+    <section class="scan-separator">
+        <div class="container w-75">
+            <hr>
+        </div>
+    </section>
+    <!-- Router Scan Separator -->
+
+    <!-- Router Scan Table -->
+    <section class="regions-table hide-scroll pt-3 pb-3">
+        <div class="container w-75" id="regions-table-c">
+            <table class="table table-responsive" id="datatable-object">
+                <thead>
+                <tr>
+                    <th scope="col"></th>
+                    <th scope="col">#</th>
+                    <th scope="col">ARP Alias</th>
+                    <th scope="col">ARP IP Address</th>
+                    <th scope="col">ARP IP Segment</th>
+                    <th scope="col">ARP MAC Address</th>
+                    <th scope="col">ARP Interface</th>
+                    <th scope="col">Tags</th>
+                    <th scope="col">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                    {% for arp in arp_list %}
+                        <tr>
+                            <td class="text-center"><label for="scan-{{ arp['id'] }}"></label>
+                                <input type="checkbox" class="form-check-input" id="scan-{{ arp['id'] }}">
+                            </td>
+                            <td>{{ arp['id'] }}</td>
+                            <td>
+                                {% if arp['alias'] == '' %}
+                                    <i class="text-secondary">No alias provided</i>
+                                {% else %}
+                                    {{ arp['alias'] }}
+                                {% endif %}
+                            </td>
+                            <td>{{ arp['ip'] }}</td>
+                            <td>{{ arp['segment'] }}</td>
+                            <td>{{ arp['mac'] }}</td>
+                            <td>{{ arp['interface'] }}</td>
+                            <td>
+                                {% for tag in arp['tag'] %}
+                                    {% set bg_color = '#213A57' %}
+                                    {% if tag == 'Public IP' %}
+                                        {% set bg_color = '#0B6477' %}
+                                    {% elif tag == 'Private IP' %}
+                                        {% set bg_color = '#14919B' %}
+                                    {% elif tag == 'Internal Connection' %}
+                                        {% set bg_color = '#0AD1C8' %}
+                                    {% elif tag == 'Duplicated IP' %}
+                                        {% set bg_color = '#EF476F' %}
+                                    {% endif %}
+
+                                    <span class="badge" style="background-color: {{ bg_color }}">{{ tag }}</span>
+                                {% endfor %}
+                            </td>
+                            <td class="text-center">
+                                {{ show_details_button(arp['id'], url_for('router_scan.get_scan_details'), 'ARP') }}
+                                <button type="button" id="delete-button-scan-{{ arp['id'] }}"
+                                    class="btn btn-sm btn-danger"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#delete-modal"
+                                    data-id="{{ arp['id'] }}"
+                                    data-type="scan"
+                                    data-url="{{ url_for('router_scan.delete_arp_ip', arp_id=arp['id']) }}"
+                                    data-name="{{ arp['alias'] }}"
+                                ><i class="fa-solid fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+    <!-- Router Scan Table -->
+
+    <!-- Delete Modals -->
+    <div class="delete-modal-container">{{ delete_modal() }}</div>
+    <div class="delete-select-modal-container">{{ delete_select_modal() }}</div>
+    <div class="delete-all-modal-container">{{ delete_all_modal() }}</div>
+    <!-- Delete Modals -->
+{% endblock %}

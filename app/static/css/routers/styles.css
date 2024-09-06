@@ -1,0 +1,12 @@
+.routers-table {
+    overflow-x: scroll;
+}
+
+.routers-jumbotron {
+    color: white;
+    background: url("../../img/banner-routers.svg") no-repeat center, linear-gradient(221deg, rgba(33, 37, 41, 1) 15%, rgba(48, 61, 74, 1) 40%, rgba(59, 81, 93, 1) 65%, rgba(54, 93, 115, 1) 82%);
+    background-size: cover;
+    width: 100%;
+    min-height: 300px;
+    z-index: 2;
+}

@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block title %} Settings {% endblock %}
+{% block head %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/settings/styles.css') }}">
+{% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+{% endblock %}
+{% block content %}
+
+    {% import 'macros.html' as macros %}
+    <div id="snippetContent">
+        <div class="container">
+            <div class="row gutters-sm">
+                <div class="col-md-4 d-none d-md-block">
+                    <div class="card">
+                        <div class="card-body">
+                            <ul class="nav nav-pills flex-column" id="pills-tab" role="tablist">
+                                {{ macros.tab_nav_item('#profile', 'Profile Information', 'user', true) }}
+                                {{ macros.tab_nav_item('#account', 'Account Settings', 'cog') }}
+                                {{ macros.tab_nav_item('#security', 'Security', 'shield-alt') }}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header d-flex d-md-none">
+                            <ul class="nav nav-tabs" id="pills-tab" role="tablist">
+                                {{ macros.tab_nav_item('#profile', 'Profile Information', 'user', true, true) }}
+                                {{ macros.tab_nav_item('#account', 'Account Settings', 'cog', false, true) }}
+                                {{ macros.tab_nav_item('#security', 'Security', 'shield-alt', false, true) }}
+                            </ul>
+                        </div>
+                        <div class="card-body tab-content">
+                            <div class="tab-pane fade show active" id="profile" role="tabpanel">
+                                <h6>Profile Information</h6>
+                                <hr>
+                                {{ macros.settings_form(full_name='', bio='', url='', location='') }}
+                            </div>
+                            {{ macros.tab_content('account', 'Account Settings') }}
+                            {{ macros.tab_content('security', 'Security Settings') }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

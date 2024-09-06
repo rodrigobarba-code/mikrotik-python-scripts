@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %} {{ "Region / Add" if region is none else "Region / Update" }} {% endblock %}
+{% block head %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/regions/styles.css') }}">
+{% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/regions/scripts.js') }}"></script>
+{% endblock %}
+{% block content %}
+    <!-- Regions Jumbotron -->
+    <section class="regions-jumbotron">
+        <div class="p-5 mb-4 base-jumbotron">
+            <div class="container-fluid py-5">
+                <h1 class="display-5 fw-bold">{{ "Add Region" if region is none else "Update Region" }}</h1>
+                <p class="col-md-8 fs-4">Lorem Ipsum</p>
+            </div>
+        </div>
+    </section>
+    <!-- Regions Jumbotron -->
+
+    <!-- Regions Forms -->
+    <section class="regions-forms">
+        <div class="container-fluid w-75">
+            <form action="{{ url_for('regions.add_region') if region is none else url_for('regions.update_region', region_id=region.region_id) }}"
+                  method="POST">
+                <div class="form-group">
+                    <label class="mb-2" for="region_name">Region's Name</label>
+                    <input value="{{ region.region_name if region is not none }}" type="text" class="form-control mb-2"
+                           id="region_name" name="region_name" placeholder="Enter region's name" maxlength="128">
+                </div>
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="condition-check">
+                    <label class="form-check-label" for="condition-check">I've read and accept that the data provided
+                        will be used to create or update a new region.</label>
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+                <a href="{{ url_for('regions.regions') }}" class="btn btn-secondary">Cancel</a>
+            </form>
+        </div>
+    </section>
+    <!-- Regions Forms -->
+{% endblock %}

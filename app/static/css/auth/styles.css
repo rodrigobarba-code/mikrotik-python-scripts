@@ -1,0 +1,354 @@
+/* Particles Background */
+#particles-js {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+/* Logo */
+.logo {
+    width: 300px;
+    z-index: 2;
+}
+
+/* Main Container */
+.main .container {
+    width: fit-content;
+}
+
+/* Background Gradients */
+.background-radial-gradient {
+    background-color: hsl(218, 41%, 15%);
+    background-image: radial-gradient(650px circle at 0% 0%,
+    hsl(218, 41%, 35%) 15%,
+    hsl(218, 41%, 30%) 35%,
+    hsl(218, 41%, 20%) 75%,
+    hsl(218, 41%, 19%) 80%,
+    transparent 100%),
+    radial-gradient(1250px circle at 100% 100%,
+            hsl(218, 41%, 45%) 15%,
+            hsl(218, 41%, 30%) 35%,
+            hsl(218, 41%, 20%) 75%,
+            hsl(218, 41%, 19%) 80%,
+            transparent 100%);
+    background-size: 100% 100%;
+    overflow: hidden;
+}
+
+#radius-shape-1 {
+    height: 220px;
+    width: 220px;
+    top: -60px;
+    left: -130px;
+    background: radial-gradient(#3393ff, #003663);
+    overflow: hidden;
+}
+
+#radius-shape-2 {
+    border-radius: 38% 62% 63% 37% / 70% 33% 67% 30%;
+    bottom: -60px;
+    right: -110px;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(#3393ff, #003663);
+    overflow: hidden;
+}
+
+/* Glass Effect */
+.bg-glass {
+    background-color: hsla(0, 0%, 100%, 0.32) !important;
+    backdrop-filter: saturate(200%) blur(25px);
+    box-shadow: 0 0 0 0.25rem rgba(0, 0, 0, 0.06);
+    border-radius: 30px;
+    position: relative;
+    z-index: 1;
+}
+
+/* Floating Input & Label */
+.floating-input {
+    font-size: 20px;
+    background-color: transparent;
+    border-width: 2px;
+    border-radius: 20px;
+    color: white;
+    transition: margin 0.2s ease, border-radius 0.2s ease;
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+}
+
+.floating-input:focus {
+    color: #dddddd;
+    background-color: transparent;
+    border-radius: 10px;
+}
+
+#password:focus,
+#password:valid {
+    margin-top: 40px;
+    border-radius: 20px;
+    color: #dddddd;
+}
+
+.floating-label {
+    position: absolute;
+    top: 50%;
+    left: 20px;
+    transform: translateY(-50%);
+    transition: all 0.2s ease;
+    pointer-events: none;
+    color: #ffffff;
+    font-size: 20px;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.floating-input:focus + .floating-label,
+.floating-input:valid + .floating-label,
+.floating-input:not(:placeholder-shown) + .floating-label {
+    top: 0;
+    left: 10px;
+    transform: translateY(-110%);
+    margin-bottom: 10px;
+}
+
+.form-group {
+    position: relative;
+    margin-bottom: 30px;
+}
+
+/* Matrix-Like Animation for Label */
+@keyframes matrix-animation {
+    0% {
+        content: " ";
+    }
+    10% {
+        content: "U";
+    }
+    20% {
+        content: "Us";
+    }
+    30% {
+        content: "Use";
+    }
+    40% {
+        content: "User";
+    }
+    50% {
+        content: "Usern";
+    }
+    60% {
+        content: "Userna";
+    }
+    70% {
+        content: "Usernam";
+    }
+    80% {
+        content: "Username";
+    }
+    90% {
+        content: "Username";
+    }
+    100% {
+        content: "Username";
+    }
+}
+
+.floating-label:before {
+    content: "";
+    animation: matrix-animation 2s steps(10) forwards;
+}
+
+#password + .floating-label:before {
+    animation: password-animation 2s steps(8) forwards;
+}
+
+/* Password Animation */
+@keyframes password-animation {
+    0% {
+        content: " ";
+    }
+    10% {
+        content: "P";
+    }
+    20% {
+        content: "Pa";
+    }
+    30% {
+        content: "Pas";
+    }
+    40% {
+        content: "Pass";
+    }
+    50% {
+        content: "Passw";
+    }
+    60% {
+        content: "Passwo";
+    }
+    70% {
+        content: "Passwor";
+    }
+    80% {
+        content: "Password";
+    }
+    100% {
+        content: "Password";
+    }
+}
+
+/* Form Control */
+.form-control:focus {
+    outline: none;
+}
+
+/* Custom Button */
+.btn-custom {
+    padding: 15px 30px;
+    font-size: 18px;
+    color: white;
+    background: linear-gradient(45deg, rgb(0, 74, 173) 0%, rgb(81, 157, 202) 50%, rgb(0, 191, 99) 100%);
+    border: none;
+    border-radius: 50px;
+    box-shadow: 0 0 30px rgba(0, 50, 119, 0.45), 0 0 30px rgba(0, 138, 69, 0.41);
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    background-size: 200% 200%;
+    animation: gradientMove 3s ease infinite;
+    transition: font-weight 0.2s ease, color 0.2s ease;
+    font-weight: bold;
+}
+
+.btn-custom:hover {
+    background-position: 100% 0;
+    color: #ffffff;
+}
+
+@keyframes gradientMove {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* Logged In Switch */
+#logged-label {
+    color: #ffffff;
+    margin-left: 4px;
+    font-weight: 400;
+    font-size: 20px;
+    margin-right: 10px;
+}
+
+#logged-switch {
+    height: 23px;
+    width: 32px;
+}
+
+.notyf {
+    border-radius: 40px !important;
+}
+
+.notyf__toast {
+    border-radius: 40px !important
+}
+
+/* Custom styles for Notyf icons */
+.notyf__icon {
+    display: flex;
+    align-items: center; /* Aligns the icon vertically with the content */
+    justify-content: center; /* Centers the icon horizontally */
+    margin-right: 8px; /* Add space between the icon and the text */
+}
+
+.notyf__icon i {
+    font-size: 24px; /* Adjust the size of the Material Icon */
+    vertical-align: middle; /* Ensures the icon aligns with the text vertically */
+    line-height: 1; /* Adjusts the line height to prevent spacing issues */
+}
+
+
+/* Media Queries for Responsive Design */
+@media (max-width: 768px) {
+    .logo {
+        width: 200px;
+    }
+
+    #logo-login {
+        justify-content: center;
+    }
+
+    .floating-label {
+        font-size: 20px;
+    }
+
+    .floating-input {
+        font-size: 20px;
+    }
+
+    .form-control {
+        font-size: 16px;
+    }
+
+    .btn {
+        font-size: 20px;
+    }
+
+    .background-radial-gradient {
+        background-image: radial-gradient(650px circle at 0% 0%,
+        hsl(218, 41%, 35%) 15%,
+        hsl(218, 41%, 30%) 35%,
+        hsl(218, 41%, 20%) 75%,
+        hsl(218, 41%, 19%) 80%,
+        transparent 100%),
+        radial-gradient(1250px circle at 100% 100%,
+                hsl(218, 41%, 45%) 15%,
+                hsl(218, 41%, 30%) 35%,
+                hsl(218, 41%, 20%) 75%,
+                hsl(218, 41%, 19%) 80%,
+                transparent 100%);
+    }
+
+    #welcome-text {
+        font-size: 2.5rem;
+        z-index: 3;
+        justify-content: center;
+    }
+
+    #welcome-text h1 {
+        font-size: 25px;
+        z-index: 3;
+    }
+
+    #radius-shape-1 {
+        height: 120px;
+        width: 120px;
+        top: -30px;
+        left: -65px;
+        background: radial-gradient(#3393ff, #003663);
+    }
+
+    #radius-shape-2 {
+        border-radius: 38% 62% 63% 37% / 70% 33% 67% 30%;
+        bottom: -30px;
+        right: -55px;
+        width: 150px;
+        height: 150px;
+        background: radial-gradient(#3393ff, #003663);
+        overflow: hidden;
+    }
+
+    .bg-glass {
+        border-radius: 20px;
+    }
+
+    .btn-custom {
+        padding: 12px 25px;
+        font-size: 16px;
+    }
+}

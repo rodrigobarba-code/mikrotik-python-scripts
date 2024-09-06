@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% block title %} {{ "Users / Add" if user is none else "User / Update" }} {% endblock %}
+{% block head %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/users/styles.css') }}">
+{% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/users/scripts.js') }}"></script>
+{% endblock %}
+{% block content %}
+    <!-- Users Jumbotron -->
+    <section class="users-jumbotron">
+        <div class="p-5 mb-4 base-jumbotron">
+            <div class="container-fluid py-5">
+                <h1 class="display-5 fw-bold">{{ "Add User" if user is none else "Update User" }}</h1>
+                <p class="col-md-8 fs-4">Lorem Ipsum</p>
+            </div>
+        </div>
+    </section>
+    <!-- Users Jumbotron -->
+
+    <!-- Users Forms -->
+    <section class="users-forms">
+        <div class="container-fluid w-75">
+            <form action="{{ url_for('users.add_user') if user is none else url_for('users.update_user', user_id=user.user_id) }}"
+                  method="POST">
+                <div class="row">
+                    <div class="col-6">
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="username" name="user_username"
+                                   value="{{ user.user_username if user is not none else '' }}" maxlength="128"
+                                   required>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="password" name="user_password"
+                                   value="" maxlength="128" {% if user is none %} required {% endif %}>
+                            {% if user is not none %}
+                                <div id="password-help-user-log" class="form-text">Let this blank if you don't want to
+                                    change the password.
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-6">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Name</label>
+                            <input type="text" class="form-control" id="name" name="user_name"
+                                   value="{{ user.user_name if user is not none else '' }}" maxlength="128" required>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="mb-3">
+                            <label for="lastname" class="form-label">Lastname</label>
+                            <input type="text" class="form-control" id="lastname" name="user_lastname"
+                                   value="{{ user.user_lastname if user is not none else '' }}" maxlength="128"
+                                   required>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-6">
+                        <div class="mb-3">
+                            <label for="privileges" class="form-label">Privileges</label>
+                            <select class="form-select" id="privileges" name="user_privileges" required>
+                                <option value="">Select a privilege</option>
+                                <option value="admin" {% if user.user_privileges == 'admin' %} selected {% endif %}>
+                                    Administrator
+                                </option>
+                                <option value="employee" {% if user.user_privileges == 'employee' %}
+                                        selected {% endif %}>Employee
+                                </option>
+                                <option value="guest" {% if user.user_privileges == 'guest' %} selected {% endif %}>
+                                    Guest
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="mb-3">
+                            <label for="state" class="form-label">State</label>
+                            <select class="form-select" id="state" name="user_state" required>
+                                <option value="">Select a state</option>
+                                <option value="1" {% if user.user_state == 1 %} selected {% endif %}>Active</option>
+                                <option value="0" {% if user.user_state == 0 %} selected {% endif %}>Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="condition-check">
+                    <label class="form-check-label" for="condition-check">I've read and accept that the data provided will
+                        be used to create or update a new user.</label>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <button type="button" class="btn btn-secondary" onclick="window.history.back()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">{{ "Add User" if user is none else "Update User" }}</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </section>
+    <!-- Users Forms -->
+{% endblock %}

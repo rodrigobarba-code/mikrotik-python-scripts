@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %} Profile {% endblock %}
+{% block head %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/profile/styles.css') }}">
+{% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/profile/scripts.js') }}"></script>
+    <script>
+    </script>
+{% endblock %}
+{% block content %}
+    <!-- Users Jumbotron -->
+    <section class="profile-jumbotron">
+    </section>
+    <!-- Users Jumbotron -->
+
+    <section class="user-profile d-flex flex-column justify-content-center align-items-center">
+        <div class="user-profile-img">
+            <img src="{{ session['user_avatar'] }}" class="rounded-circle mb-3" style="width: 200px;"
+                 alt="Avatar"/>
+        </div>
+        <div class="user-profile-info">
+            <div class="d-flex flex-row">
+                <h5 class="mb-2"><strong>{{ session['user_name'] }} {{ session['user_lastname'] }}</strong> <span
+                        class="badge bg-primary">{{ job_display[session['user_privileges']] }}</span></h5>
+            </div>
+            <p class="text-muted">@{{ session['user_username'] }}</p>
+        </div>
+    </section>
+{% endblock %}
