@@ -28,22 +28,20 @@ modeSwitch.addEventListener("click", () => {
 document.addEventListener('DOMContentLoaded', () => {
     const sidebar = document.querySelector('.sidebar');
     const userActions = document.querySelector('.user-actions');
-    const sidebarBtn = document.querySelector('.bx-menu');
+    const sidebarBtn = document.querySelector('.toggle');
     const profileImg = document.querySelector('.profile-content img');
     const homeContent = document.querySelector('.home-content');
-    const homeSection = document.querySelector('.home-section');
 
-
-
-    let isTouching = false;
+    let
+        isTouching = false;
     let startY;
 
-    userActions.addEventListener('touchstart', function(e) {
+    userActions.addEventListener('touchstart', function (e) {
         isTouching = true;
         startY = e.touches[0].clientY;
     });
 
-    userActions.addEventListener('touchmove', function(e) {
+    userActions.addEventListener('touchmove', function (e) {
         if (isTouching) {
             const currentY = e.touches[0].clientY;
             if (currentY > startY + 50) { // Adjust the threshold as needed
@@ -53,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    userActions.addEventListener('touchend', function() {
+    userActions.addEventListener('touchend', function () {
         isTouching = false;
     });
     // Log the elements to ensure they are correctly selected

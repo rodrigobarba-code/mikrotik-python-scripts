@@ -22,7 +22,8 @@
                             <a {% if item.endpoint != '#' %} href="{{ url_for(item.endpoint) }}" {% endif %}>
                                 <i class="{{ item.icon }}" style="{{ item.style }}"></i>
                                 {% if item.marquee %}
-                                    <marquee direction="left" scrollamount="4"><span class="link_name">{{ item.name }}</span></marquee>
+                                    <marquee direction="left" scrollamount="4"><span
+                                            class="link_name">{{ item.name }}</span></marquee>
                                 {% else %}
                                     <span class="link_name">{{ item.name }}</span>
                                 {% endif %}
@@ -44,7 +45,8 @@
                         <a {% if item.endpoint != '#' %} href="{{ url_for(item.endpoint) }}" {% endif %}>
                             <i class="{{ item.icon }}"></i>
                             {% if item.marquee %}
-                                <marquee direction="left" scrollamount="4"><span class="link_name">{{ item.name }}</span></marquee>
+                                <marquee direction="left" scrollamount="4"><span
+                                        class="link_name">{{ item.name }}</span></marquee>
                             {% else %}
                                 <span class="link_name">{{ item.name }}</span>
                             {% endif %}
@@ -59,6 +61,7 @@
         </ul>
 
         <div class="user-actions">
+            <ul class="dropdown-menu position-relative d-flex gap-1 p-2 ">
             <ul class="dropdown-menu position-relative d-flex gap-1 p-2">
                 {% for item in profile_menu_items %}
                     <li class="">
@@ -76,6 +79,7 @@
                                 </div>
                             </div>
                         {% else %}
+                            <a id="{{ item.name | lower | replace(' ', '-') }}-button" class="dropdown-item rounded-3"
                             <a id="{{ item.name | lower | replace(' ', '-') }}-button"
                                class="dropdown-item rounded-3 text"
                                     {% if item.endpoint != '#' %} href="{{ url_for(item.endpoint) }}" {% endif %}>
@@ -241,16 +245,15 @@
 <!-- Macros for recyclable components -->
 <!-- Macro for the search bar -->
 {% macro search_bar_with_checkbox(col, col_md, col_lg, type, section, data) %}
-    <div class="col-{{ col }} col-md-{{ col_md }} col-lg-{{ col_lg }}">
+    <div class="col-{{col}} col-md-{{col_md}} col-lg-{{col_lg}}">
         <div class="form-group position-relative">
-            <select id="searchbar-{{ section }}-{{ type }}" class="form-control select2 searchbar"
-                    placeholder="Search by {{ type }}" style="width: 100%; border-radius: 10px;">
+            <select id="searchbar-{{section}}-{{type}}" class="form-control select2 searchbar" placeholder="Search by {{type}}" style="width: 100%; border-radius: 10px;">
                 <option value=""></option>
                 {% for item in data %}
                     <option value="{{ item['value'] }}">{{ item['value'] }}</option>
                 {% endfor %}
             </select>
-            <div id="float-container-{{ section }}-{{ type }}" class="list-group mt-1 float-container"></div>
+            <div id="float-container-{{section}}-{{type}}" class="list-group mt-1 float-container"></div>
         </div>
     </div>
     <script> initializeSearchBar('{{ section }}', '{{ type }}') </script>
