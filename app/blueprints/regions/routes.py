@@ -1,24 +1,29 @@
-from models.users.functions import users_functions as functions
-from . import regions_bp
-from flask import render_template, redirect, url_for, flash, request, jsonify, session
-from app.decorators import RequirementsDecorators as restriction
 import requests
+from . import regions_bp
 from entities.region import RegionEntity
+from models.users.functions import users_functions as functions
+from app.decorators import RequirementsDecorators as restriction
+from flask import render_template, redirect, url_for, flash, request, jsonify, session
 
 @regions_bp.route('/', methods=['GET'])
 @restriction.login_required  
 def regions():
     try:
-        region_list = []
         response = requests.get('http://localhost:8080/api/regions/')
         if response.status_code == 200:
-            for region in response.json():
-                region_list.append(RegionEntity(**region))
-        else:
-            region_list = []
+            if response.json().get('backend_status') == 200:
+                region_list = [
+                    RegionEntity(region.get('region_id'), region.get('region_name'))
+                    for region in response.json().get('regions')
+                ]
+            else:
+                raise Exception(response.json().get('message'))
+        elif response.status_code == 500:
+            raise Exception('Failed to retrieve regions')
         return render_template(
             'regions/regions.html',  
-            region_list=region_list, region=None  
+            region_list=region_list,
+            region=None
         )
     except Exception as e:  
         flash(str(e), 'danger')  
@@ -30,13 +35,16 @@ def regions():
 def add_region():
     if request.method == 'POST':  
         try:
-            response = requests.post('http://localhost:8080/api/regions/',
+            response = requests.post('http://localhost:8080/api/region/',
                                      params={'region_name': request.form['region_name']})
             if response.status_code == 200:
-                flash('Region added successfully', 'success')
-                functions.create_log(session['user_id'], 'Region Added', 'INSERT', 'regions')
-            else:
-                flash('Failed to add region', 'danger')
+                if response.json().get('backend_status') == 200:
+                    flash('Region added successfully', 'success')
+                    functions.create_log(session['user_id'], 'Region Added', 'CREATE', 'regions')
+                else:
+                    raise Exception(response.json().get('message'))
+            elif response.status_code == 500:
+                raise Exception('Failed to add region')
         except Exception as e:
             flash(str(e), 'danger')
         return redirect(url_for('regions.regions'))
@@ -51,20 +59,31 @@ def add_region():
 def update_region(region_id):
     if request.method == 'POST':
         try:  
-            response = requests.put(f'http://localhost:8080/api/regions/{region_id}',
+            response = requests.put(f'http://localhost:8080/api/region/{region_id}',
                                     params={'region_id': region_id, 'region_name': request.form['region_name']})
             if response.status_code == 200:
-                flash('Region updated successfully', 'success')
-                functions.create_log(session['user_id'], 'Region Updated', 'UPDATE', 'regions')
+                if response.json().get('backend_status') == 200:
+                    flash('Region updated successfully', 'success')
+                    functions.create_log(session['user_id'], 'Region Updated', 'UPDATE', 'regions')
+                else:
+                    raise Exception(response.json().get('message'))
             else:
-                flash('Failed to update region', 'danger')
+                raise Exception('Failed to update region')
         except Exception as e:  
             flash(str(e), 'danger')  
         return redirect(url_for('regions.regions'))  
     try:
-        response = requests.get(f'http://localhost:8080/api/regions/{region_id}')
+        response = requests.get(f'http://localhost:8080/api/region/{region_id}')
         if response.status_code == 200:
-            region = RegionEntity(response.json().get('region_id'), response.json().get('region_name'))
+            if response.json().get('backend_status') == 200:
+                region = RegionEntity(
+                    response.json().get('region').get('region_id'),
+                    response.json().get('region').get('region_name')
+                )
+            else:
+                raise Exception(response.json().get('message'))
+        elif response.status_code == 500:
+            raise Exception('Failed to retrieve region')
         return render_template(
             'regions/form_regions.html',  
             region=region
@@ -78,13 +97,15 @@ def update_region(region_id):
 @restriction.admin_required  
 def delete_region(region_id):
     try:  
-        response = requests.delete(f'http://localhost:8080/api/regions/{region_id}')
-
+        response = requests.delete(f'http://localhost:8080/api/region/{region_id}')
         if response.status_code == 200:
-            flash('Region deleted successfully', 'success')
-            functions.create_log(session['user_id'], 'Region Deleted', 'DELETE', 'regions')
-        else:
-            flash('Failed to delete region', 'danger')
+            if response.json().get('backend_status') == 200:
+                flash('Region Deleted Successfully', 'success')
+                functions.create_log(session['user_id'], 'Region Deleted', 'DELETE', 'regions')
+            else:
+                raise Exception(response.json().get('message'))
+        elif response.status_code == 500:
+            raise Exception('Failed to delete region')
     except Exception as e:  
         flash(str(e), 'danger')  
     return redirect(url_for('regions.regions'))  
@@ -94,18 +115,25 @@ def delete_region(region_id):
 @restriction.admin_required  
 def bulk_delete_region():
     data = request.get_json()  
-    regions_ids = data.get('items_ids', [])  
+    regions_ids = data.get('items_ids', [])
+    regions_ids = [int(region_id) for region_id in regions_ids]
     try:
-        flag = 0  
-        for region_id in regions_ids:  
-            requests.delete(f'http://localhost:8080/api/regions/{region_id}')
-            flag += 1  
-        flash(f'{flag} Regions Deleted Successfully', 'success')  
-        functions.create_log(session['user_id'], f'{flag} Regions Deleted', 'DELETE', 'regions')  
-        return jsonify({'message': 'Regions deleted successfully'}), 200  
+        response = requests.delete('http://localhost:8080/api/regions/bulk/',
+                                   json={'regions_ids': regions_ids})
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                flag = response.json().get('count_flag')
+                flash(f'{flag} Regions Deleted Successfully', 'success')
+                functions.create_log(session['user_id'], 'Bulk Regions Deleted', 'DELETE', 'regions')
+
+                return jsonify({'message': f'{flag} regions deleted successfully'}), 200
+            else:
+                raise Exception(response.json().get('message'))
+        elif response.status_code == 500:
+            return jsonify({'message': 'Failed to delete regions'}), 500
     except Exception as e:  
         flash(str(e), 'danger')  
-        return jsonify({'message': 'Failed to delete regions', 'error': str(e)}), 500  
+        return jsonify({'message': 'Failed to delete regions', 'error': str(e)}), 500
 
 @regions_bp.route('/delete/all', methods=['POST'])
 @restriction.login_required  
@@ -114,11 +142,14 @@ def delete_all_regions():
     try:  
         response = requests.delete('http://localhost:8080/api/regions/')
         if response.status_code == 200:
-            flash('All Regions Deleted Successfully', 'success')
-            functions.create_log(session['user_id'], 'All Regions Deleted', 'DELETE', 'regions')
-            return jsonify({'message': 'Regions deleted successfully'}), 200
-        else:
-            flash('Failed to delete regions', 'danger')
+            if response.json().get('backend_status') == 200:
+                flash('All Regions Deleted Successfully', 'success')
+                functions.create_log(session['user_id'], 'All Regions Deleted', 'DELETE', 'regions')
+
+                return jsonify({'message': 'All regions deleted successfully'}), 200
+            else:
+                raise Exception(response.json().get('message'))
+        elif response.status_code == 500:
             return jsonify({'message': 'Failed to delete regions'}), 500
     except Exception as e:  
         flash(str(e), 'danger')  

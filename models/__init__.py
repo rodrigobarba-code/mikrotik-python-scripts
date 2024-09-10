@@ -13,7 +13,7 @@ def init_models():
     from models.ip_management.models import IPSegment
 
 Base = declarative_base()
-engine = create_engine(DatabaseConfig.SQLALCHEMY_DATABASE_URI, echo=True)
+engine = create_engine(DatabaseConfig.SQLALCHEMY_DATABASE_URI)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base.metadata.create_all(bind=engine)

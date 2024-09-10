@@ -38,10 +38,9 @@ class ThreadingManager:
             elif type in ['w', 'wx']:
                 func(session, object) if type == 'w' else func(session)
                 session.commit()
+                session.close()
         except Exception as e:
             print(f"{'Writing' if type in ['w', 'wx'] else 'Reading'} Thread: {e} Error")
             session.rollback()
-            raise e
-        finally:
-            print(f"{'Writing' if type in ['w', 'wx'] else 'Reading'} Thread: {func.__name__} Closing")
             session.close()
+            raise e

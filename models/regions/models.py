@@ -1,5 +1,5 @@
 from .. import Base
-from sqlalchemy import func
+from sqlalchemy import func, delete
 from sqlalchemy import Column, Integer, String
 
 from models.sites.models import Site
@@ -83,6 +83,24 @@ class Region(Base):
             raise e  
         except RegionNotFound as e:
             raise e  
+        except Exception as e:
+            raise RegionError()
+
+    @staticmethod
+    def bulk_delete_regions(session, region_ids):
+        try:
+            if not session.query(Region).filter(Region.region_id.in_(region_ids)).all():
+                raise RegionOnBulkDeleteNotFound()
+            else:
+                if session.query(Site).filter(Site.fk_region_id.in_(region_ids)).first():
+                    raise RegionOnBulkDeleteIsAssociatedWithSite()
+                else:
+                    stmt = delete(Region).where(Region.region_id.in_(region_ids))
+                    session.execute(stmt)
+        except RegionAssociatedWithSite as e:
+            raise e
+        except RegionNotFound as e:
+            raise e
         except Exception as e:
             raise RegionError()
 
