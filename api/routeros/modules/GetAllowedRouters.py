@@ -5,11 +5,11 @@ from flask import current_app
 # Importing necessary modules
 
 # Importing Necessary Entities
-from app.blueprints.routers.entities import RouterEntity
+from entities.router import RouterEntity
 # Importing Necessary Entities
 
 # Importing Necessary Modules
-from app.blueprints.routers.models import Router
+from models.routers.models import Router
 # Importing Necessary Modules
 
 # Class to Get Allowed Routers

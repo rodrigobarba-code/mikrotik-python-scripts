@@ -1,19 +1,19 @@
 # Importing Flask, Configurations and App Extensions
 from flask import Flask
+from app.config import AppConfig
 from app.functions import functions
-from app.extensions import db, migrate
-from app.config import DatabaseConfig, AppConfig
+from websockets import init_socketio
 # Importing Flask, Configurations and App Extensions
 
 # Importing Blueprints
 from app.blueprints.home import home_bp
 from app.blueprints.auth import auth_bp
-from app.blueprints.router_scan import scan_bp
 from app.blueprints.sites import sites_bp
 from app.blueprints.users import users_bp
 from app.blueprints.routers import routers_bp
 from app.blueprints.regions import regions_bp
 from app.blueprints.profile import profile_bp
+from app.blueprints.router_scan import scan_bp
 from app.blueprints.settings import settings_bp
 from app.blueprints.dashboard import dashboard_bp
 from app.blueprints.ip_management import ip_management_bp
@@ -24,10 +24,7 @@ def create_app():
     app = Flask(__name__)  # Creating the app instance
 
     app.config.from_object(AppConfig)  # Setting the application configurations
-    app.config.from_object(DatabaseConfig)  # Setting the database configurations
-
-    db.init_app(app)  # Initializing the database
-    migrate.init_app(app, db)  # Initializing the migration
+    init_socketio(app)  # Initializing the socketio
 
     # Registering the blueprints
     app.register_blueprint(home_bp, url_prefix='/')  # Registering the home blueprint

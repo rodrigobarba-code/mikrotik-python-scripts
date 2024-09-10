@@ -8,11 +8,11 @@ from flask import render_template, request, redirect, url_for, flash, session, j
 # Importing necessary modules
 
 # Importing Required Local Modules
-from app.blueprints.users.functions import users_functions as functions  # Import the users functions object
+from models.users.functions import users_functions as functions  # Import the users functions object
 # Importing Required Local Modules
 
 # Importing Router API
-from app.api.api import RouterAPI
+from api.routeros.api import RouterAPI
 # Importing Router API
 
 # Importing Required Decorators
@@ -24,8 +24,8 @@ from app.decorators import RequirementsDecorators as restriction
 # Importing necessary entities
 
 # Importing necessary models
-from app.blueprints.router_scan.models import ARP, ARPTags
-from app.blueprints.ip_management.models import IPSegment
+from models.router_scan.models import ARP, ARPTags
+from models.ip_management.models import IPSegment
 # Importing necessary models
 
 from . import scan_bp  # Importing the blueprint instance

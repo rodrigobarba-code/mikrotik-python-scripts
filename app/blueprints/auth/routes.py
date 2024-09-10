@@ -1,20 +1,18 @@
 # Importing necessary modules
-from fileinput import filename
 
 import bcrypt, os
 from datetime import timedelta  # Importing the timedelta module from the datetime module to set the session timeout
 from app.functions import get_local_ip, get_public_ip
-from app.blueprints.users.functions import users_functions as functions
+from models.users.functions import users_functions as functions
 from flask import render_template, redirect, url_for, flash, request, session, current_app
 from dotenv import load_dotenv
 # Importing necessary modules
 
 # Importing necessary decorators
-from app.decorators import RequirementsDecorators as restriction
 # Importing necessary decorators
 
 # Importing necessary models
-from app.blueprints.users.models import User
+from models.users.models import User
 # Importing necessary models
 
 from . import auth_bp  # Importing the blueprint instance

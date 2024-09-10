@@ -1,30 +1,28 @@
 # Description: File to handle the Router OS API
 
 # Importing Necessary Libraries
-import json
 import ros_api
-from app.blueprints.routers.models import Router
-from app.blueprints.router_scan.functions import ARPFunctions
+from models.router_scan.functions import ARPFunctions
 # Importing Necessary Libraries
 
 # Importing Necessary Modules
 from app.extensions import db
-from app.api.modules.FindIPSegment import FindIPSegment
-from app.api.modules.GetAllowedRouters import GetAllowedRouters
+from api.routeros.modules.FindIPSegment import FindIPSegment
+from api.routeros.modules.GetAllowedRouters import GetAllowedRouters
 # Importing Necessary Modules
 
 # Importing Necessary Entities
-from app.blueprints.router_scan.entities import ARPEntity, ARPTag
-from app.blueprints.ip_management.entities import IPSegmentEntity
+from entities.arp import ARPEntity
+from entities.ip_segment import IPSegmentEntity
 # Importing Necessary Entities
 
 # Importing Necessary Modules
-from app.blueprints.router_scan.models import ARP, ARPTags
-from app.blueprints.ip_management.models import IPSegment
+from models.router_scan.models import ARP, ARPTags
+from models.ip_management.models import IPSegment
 # Importing Necessary Modules
 
 # Importing Necessary Functions
-from app.blueprints.ip_management.functions import IPAddressesFunctions
+from models.ip_management.functions import IPAddressesFunctions
 # Importing Necessary Functions
 
 # Class to handle the Router OS API

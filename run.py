@@ -1,39 +1,24 @@
-# Importing Eventlet
-import eventlet.wsgi  # Importing eventlet.wsgi
-eventlet.monkey_patch()  # Patching the eventlet
-# Importing Eventlet
-
-# Importing main application constructor
 from app import create_app
-from flask_caching import Cache
-from app.blueprints.router_scan.routes import socketio
+from threading import Thread
+from websockets import socketio
+
 from app.config import AppConfig, UserJobs, Sidebar
-# Importing main application constructor
 
-el = eventlet  # Assigning eventlet to el
-app = create_app()  # Creating application instance
-socketio.init_app(app)  # Initializing the socketio
-cache = Cache(app, config={'CACHE_TYPE': 'simple'})  # Initializing the cache
+flask_app = create_app()
 
-# Injecting global variables into the context
-@app.context_processor
-@cache.cached(timeout=600)
+@flask_app.context_processor
 def injects():
     return dict(
-        metadata=AppConfig.METADATA,  # Injecting metadata into the context
-        menu_items=Sidebar.menu_items,  # Injecting menu items into the context
-        job_display=UserJobs.job_display,  # Injecting user jobs into the context
-        profile_menu_items=Sidebar.profile_menu_items  # Injecting profile menu items into the context
-    )
-# Injecting global variables into the context
+        metadata=AppConfig.METADATA, menu_items=Sidebar.menu_items,
+        job_display=UserJobs.job_display, profile_menu_items=Sidebar.profile_menu_items)
 
-# Running application
-if __name__ == '__main__':
-    socketio.run(
-        app,  # Running the application
-        port=AppConfig.PORT,  # Running the app on the specified port
-        debug=AppConfig.DEBUG,  # Running the app in debug mode
-        allow_unsafe_werkzeug=True  # Allowing unsafe werkzeug
-    )
-# Running application
+def start_flask():
+    socketio.run(flask_app,
+                 host="0.0.0.0", port=AppConfig.PORT,
+                 debug=AppConfig.DEBUG, use_reloader=False,
+                 allow_unsafe_werkzeug=True)
 
+if __name__ == "__main__":
+    flask_thread = Thread(target=start_flask)
+    flask_thread.start()
+    flask_thread.join()

@@ -2,7 +2,7 @@
 
 # Importing Required Local Modules
 from . import sites_bp  # Import the sites Blueprint
-from app.blueprints.users.functions import users_functions as functions  # Import the users functions object
+from models.users.functions import users_functions as functions  # Import the users functions object
 # Importing Required Local Modules
 
 # Importing Required Libraries
@@ -14,13 +14,13 @@ from app.decorators import RequirementsDecorators as restriction
 # Importing Required Decorators
 
 # Importing Required Entities
-from app.blueprints.sites.entities import SiteEntity
+from entities.site import SiteEntity
 # Importing Required Entities
 
 # Importing Required Models
-from app.blueprints.sites.models import Site
-from app.blueprints.regions.models import Region
-from app.blueprints.routers.models import Router
+from models.sites.models import Site
+from models.regions.models import Region
+from models.routers.models import Router
 # Importing Required Models
 
 # Sites Main Route

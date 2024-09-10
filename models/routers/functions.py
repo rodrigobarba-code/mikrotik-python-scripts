@@ -3,11 +3,11 @@
 # Importing Necessary Libraries
 import re
 import ipaddress
-from app.extensions import func
+from sqlalchemy import func
 # Importing Necessary Libraries
 
 # Importing Required Exceptions
-from app.blueprints.routers.exceptions import *
+from models.routers.exceptions import *
 # Importing Required Exceptions
 
 # Class for Routers Functions
