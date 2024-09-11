@@ -76,9 +76,10 @@ def update_region(region_id):
         response = requests.get(f'http://localhost:8080/api/region/{region_id}')
         if response.status_code == 200:
             if response.json().get('backend_status') == 200:
+                region_object = response.json().get('region')
                 region = RegionEntity(
-                    response.json().get('region').get('region_id'),
-                    response.json().get('region').get('region_name')
+                    region_object.get('region_id'),
+                    region_object.get('region_name')
                 )
             else:
                 raise Exception(response.json().get('message'))

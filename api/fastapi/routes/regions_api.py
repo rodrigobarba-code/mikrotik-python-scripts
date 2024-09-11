@@ -102,7 +102,7 @@ async def delete_region(region_id: int):
 async def bulk_delete_regions(request: RegionBulkDeleteBase):
     try:
         region_ids = request.regions_ids
-        request = ThreadingManager().run_thread(Region.bulk_delete_regions, 'w', region_ids)
+        ThreadingManager().run_thread(Region.bulk_delete_regions, 'w', region_ids)
         return {
             'message': "Bulk delete regions successful",
             'count_flag': len(region_ids),

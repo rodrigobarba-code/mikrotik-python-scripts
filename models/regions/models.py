@@ -97,9 +97,9 @@ class Region(Base):
                 else:
                     stmt = delete(Region).where(Region.region_id.in_(region_ids))
                     session.execute(stmt)
-        except RegionAssociatedWithSite as e:
+        except RegionOnBulkDeleteIsAssociatedWithSite as e:
             raise e
-        except RegionNotFound as e:
+        except RegionOnBulkDeleteNotFound as e:
             raise e
         except Exception as e:
             raise RegionError()

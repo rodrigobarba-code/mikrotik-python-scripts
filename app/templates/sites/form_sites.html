@@ -47,7 +47,12 @@
                         <label class="mb-2" for="site_name">Site's Segment</label>
                         <input value="{{ site.site_segment if site is not none }}" type="number"
                                class="form-control mb-2"
-                               id="site_segment" name="site_segment" placeholder="Enter site's name" maxlength="10"
+                               id="site_segment"
+                               name="site_segment"
+                               placeholder="Enter site's segment"
+                               max="9999999999"
+                               min="1"
+                               maxlength="10"
                                required>
                     </div>
                 </div>

@@ -63,7 +63,7 @@
                 <tr>
                     <th scope="col"></th>
                     <th scope="col">#</th>
-                    <th scope="col">Sites's Name</th>
+                    <th scope="col">Name</th>
                     <th scope="col">Region</th>
                     <th scope="col">Segment</th>
                     <th scope="col">Actions</th>
@@ -77,7 +77,7 @@
                         </td>
                         <th scope="row">{{ site.site_id }}</th>
                         <td>{{ site.site_name }}</td>
-                        <td>{{ region_functions.get_region(site.fk_region_id).region_name }}</td>
+                        <td>{{ site.region_name }}</td>
                         <td>{{ site.site_segment }}</td>
                         <td>
                             <a href="{{ url_for('sites.update_site', site_id=site.site_id) }}" type="button"

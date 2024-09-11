@@ -1,18 +1,19 @@
-from sqlalchemy import func
-from .. import Base, SessionLocal
+from .. import Base
+from sqlalchemy import func, delete
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy import Column, Integer, String, ForeignKey
 
 from entities.site import SiteEntity
 from models.sites.exceptions import *
+from models.routers.models import Router
 
 class Site(Base):
     __tablename__ = 'sites'
     
     site_id = Column(Integer, primary_key=True, autoincrement=True)  
-    fk_region_id = Column(Integer, ForeignKey('regions.region_id'), nullable=False)  
-    site_name = Column(String(128), nullable=False)  
-    site_segment = Column(Integer, nullable=False)  
+    fk_region_id = Column(Integer, ForeignKey('regions.region_id'), nullable=False)
+    site_name = Column(String(128), nullable=False)
+    site_segment = Column(Integer, nullable=False)
 
     region = relationship('Region', backref=backref('sites', lazy=True))  
 
@@ -28,18 +29,16 @@ class Site(Base):
         }
 
     @staticmethod
-    def add_site(site):
-        session = SessionLocal()
+    def add_site(session, site):
         try:
-            if Site.query.filter(func.lower(Site.site_name) == func.lower(site.site_name)).first():
+            if session.query(Site).filter(func.lower(Site.site_name) == func.lower(site.site_name)).first():
                 raise SiteAlreadyExists(
-                    site_id=Site.query.filter(func.lower(Site.site_name) == func.lower(site.site_name)).first().site_id,  
+                    site_id=session.query(Site).filter(func.lower(Site.site_name) == func.lower(site.site_name)).first().site_id,
                     site_name=site.site_name  
                 )
-            elif Site.query.filter(Site.site_segment == site.site_segment).first():
-                
+            elif session.query(Site).filter(Site.site_segment == site.site_segment).first():
                 raise SiteSameSegment(
-                    site_id=Site.query.filter(Site.site_segment == site.site_segment).first().site_id,  
+                    site_id=session.query(Site).filter(Site.site_segment == site.site_segment).first().site_id,
                 )
             else:
                 new_site = Site(
@@ -47,137 +46,132 @@ class Site(Base):
                     site_name=site.site_name,  
                     site_segment=site.site_segment  
                 )
-                session.add(new_site)  
-                session.commit()  
-        except SiteSameSegment as e:  
-            session.rollback()  
+                session.add(new_site)
+        except SiteSameSegment as e:
             raise e  
-        except SiteAlreadyExists as e:  
-            session.rollback()  
+        except SiteAlreadyExists as e:
             raise e  
-        except Exception as e:  
-            session.rollback()  
+        except Exception as e:
             raise SiteError()
     
     @staticmethod
-    def update_site(new_site):
-        session = SessionLocal()
+    def update_site(session, new_site):
         try:
-            if not Site.query.get(new_site.site_id):
+            if not session.query(Site).get(new_site.site_id):
                 raise SiteNotFound(
                     new_site.site_id  
                 )
-            elif Site.query.filter(Site.site_segment == new_site.site_segment).first() and \
-                    Site.query.filter(Site.site_segment == new_site.site_segment).first().site_id != new_site.site_id:
+            elif session.query(Site).filter(Site.site_segment == new_site.site_segment).first() and \
+                    session.query(Site).filter(Site.site_segment == new_site.site_segment).first().site_id != new_site.site_id:
                 raise SiteSameSegment(
-                    site_id=Site.query.filter(Site.site_segment == new_site.site_segment).first().site_id,  
+                    site_id=session.query(Site).filter(Site.site_segment == new_site.site_segment).first().site_id,
                 )
             else:
                 old_site = session.query(Site).get(new_site.site_id)
                 if old_site.site_name != new_site.site_name:
-                    if Site.query.filter(func.lower(Site.site_name) == func.lower(new_site.site_name)).first() and \
-                            Site.query.filter(func.lower(Site.site_name) == func.lower(new_site.site_name)).first().site_id != new_site.site_id:
+                    if session.query(Site).filter(func.lower(Site.site_name) == func.lower(new_site.site_name)).first() and \
+                            session.query(Site).filter(func.lower(Site.site_name) == func.lower(new_site.site_name)).first().site_id != new_site.site_id:
                         raise SiteAlreadyExists(
-                            site_id=Site.query.filter(func.lower(Site.site_name) == func.lower(new_site.site_name)).first().site_id,
-                            
+                            site_id=session.query(Site).filter(func.lower(Site.site_name) == func.lower(new_site.site_name)).first().site_id,
                             site_name=new_site.site_names
                         )
                     else:
                         old_site.site_name = new_site.site_name  
                         old_site.fk_region_id = new_site.fk_region_id  
                         old_site.site_segment = new_site.site_segment  
-                        session.add(old_site)  
-                        session.commit()
-        except SiteSameSegment as e:  
-            session.rollback()  
+                        session.add(old_site)
+        except SiteSameSegment as e:
             raise e  
-        except SiteAlreadyExists as e:  
-            session.rollback()  
+        except SiteAlreadyExists as e:
             raise e  
         except SiteNotFound as e:
-            session.rollback()  
             raise e  
-        except Exception as e:  
-            session.rollback()  
+        except Exception as e:
             raise SiteError()  
 
     @staticmethod
-    def delete_site(site_id, model):
-        session = SessionLocal()
+    def delete_site(session, site_id):
         try:
-            if not Site.query.get(site_id):
+            if not session.query(Site).get(site_id):
                 raise SiteNotFound(site_id)
             else:
-                if session.query(model).filter(model.fk_site_id == site_id).first():
+                if session.query(Router).filter(Router.fk_site_id == site_id).first():
                     raise SiteAssociatedWithRouters(
                         site_id=site_id  
                     )
                 else:
-                    site = Site.query.get(site_id)  
-                    session.delete(site)  
-                    session.commit()
-        except SiteAssociatedWithRouters as e:  
-            session.rollback()  
+                    site = session.query(Site).get(site_id)
+                    session.delete(site)
+        except SiteAssociatedWithRouters as e:
             raise e  
-        except SiteNotFound as e:  
-            session.rollback()  
+        except SiteNotFound as e:
             raise e  
-        except Exception as e:  
-            session.rollback()  
+        except Exception as e:
             raise SiteError()
 
     @staticmethod
-    def delete_all_sites(model):
-        session = SessionLocal()
+    def bulk_delete_sites(session, site_ids):
         try:
-            for site in Site.query.all():
-                if session.query(model).filter(model.fk_site_id == site.site_id).first():
-                    raise SiteAssociatedWithRouters(
-                        site_id=site.site_id  
-                    )
+            if not session.query(Site).filter(Site.site_id.in_(site_ids)).all():
+                raise SiteOnBulkDeleteNotFound()
+            else:
+                if session.query(Router).filter(Router.fk_site_id.in_(site_ids)).first():
+                    raise SiteOnBulkDeleteAssociatedWithRouters
                 else:
-                    session.delete(site)  
-                    session.commit()
+                    stmt = delete(Site).where(Site.site_id.in_(site_ids))
+                    session.execute(stmt)
+        except SiteOnBulkDeleteAssociatedWithRouters as e:
+            raise e
+        except SiteOnBulkDeleteNotFound as e:
+            raise e
         except Exception as e:
-            session.rollback()  
+            raise SiteError()
+
+    @staticmethod
+    def delete_sites(session):
+        try:
+            session.query(Site).delete()
+        except Exception as e:
             return SiteError()  
 
     @staticmethod
-    def get_site(site_id):
+    def get_site(session, site_id):
         try:
-            if not Site.query.get(site_id):
+            from models.regions.models import Region
+            if not session.query(Site).get(site_id):
                 raise SiteNotFound(site_id)
             else:
-                tmp = Site.query.get_or_404(
-                    site_id).to_dict()  
-                site = SiteEntity(
-                    int(tmp['site_id']),  
-                    int(tmp['fk_region_id']),  
-                    tmp['site_name'],  
-                    int(tmp['site_segment'])  
-                )  
-                site.validate()  
-                return site
+                join = session.query(Site, Region).join(Site, Site.fk_region_id == Region.region_id).filter(Site.site_id == site_id).first()
+                site_object = SiteEntity(
+                    site_id=site_id,
+                    fk_region_id=join.Region.region_id,
+                    region_name=join.Region.region_name,
+                    site_name=join.Site.site_name,
+                    site_segment=join.Site.site_segment
+                )
+                site_object.validate()
+                return site_object
         except SiteNotFound as e:  
-            raise e  
+            raise e
         except Exception as e:  
             raise SiteError()
 
     @staticmethod
-    def get_sites():
+    def get_sites(session):
         try:
-            r_list = []  
-            sites = Site.query.all()  
-            for site in sites:  
-                tmp = site.to_dict()  
+            site_list = []
+            from models.regions.models import Region
+            join = session.query(Site, Region).join(Site, Site.fk_region_id == Region.region_id).all()
+            for site in join:
                 obj = SiteEntity(
-                    int(tmp['site_id']),  
-                    int(tmp['fk_region_id']),  
-                    tmp['site_name'],  
-                    int(tmp['site_segment'])  
-                )  
+                    site_id=site.Site.site_id,
+                    fk_region_id=site.Region.region_id,
+                    region_name=site.Region.region_name,
+                    site_name=site.Site.site_name,
+                    site_segment=site.Site.site_segment
+                )
                 obj.validate()  
-                r_list.append(obj)  
-            return r_list  
-        except Exception as e:  
-            raise SiteError()  
+                site_list.append(obj)
+            return site_list
+        except Exception as e:
+            raise SiteError()
