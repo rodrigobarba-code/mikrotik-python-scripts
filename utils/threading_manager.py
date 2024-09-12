@@ -3,7 +3,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 class ThreadingManager:
-    DB_URI = 'sqlite:///seven_suite.db'
+    DB_URI = 'mariadb+mariadbconnector://sevensuiteuser:development-sevensuiteapp@localhost:3306/sevensuite'
 
     def __init__(self):
         self.engine = create_engine(self.DB_URI)
