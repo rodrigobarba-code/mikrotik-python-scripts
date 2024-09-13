@@ -20,6 +20,6 @@ fastapi_app = FastAPI(
 )
 
 (
-    fastapi_app.include_router(sites_router, prefix='/api', tags=['Sites']),
-    fastapi_app.include_router(regions_router, prefix='/api', tags=['Regions'])
+    fastapi_app.include_router(sites_router, prefix='/private/api', tags=['Sites']),
+    fastapi_app.include_router(regions_router, prefix='/private/api', tags=['Regions'])
 )

@@ -1,6 +1,7 @@
 from typing import List
-from fastapi import APIRouter
+from ..auth import verify_jwt
 from pydantic import BaseModel
+from fastapi import APIRouter, Depends
 
 from entities.region import RegionEntity
 from models.regions.models import Region
@@ -12,7 +13,7 @@ class RegionBulkDeleteBase(BaseModel):
     regions_ids: List[int]
 
 @regions_router.get("/regions/")
-async def get_regions():
+async def get_regions(token: dict = Depends(verify_jwt)):
     try:
         request = ThreadingManager().run_thread(Region.get_regions, 'r')
         region_list = [
