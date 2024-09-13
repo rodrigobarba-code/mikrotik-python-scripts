@@ -1,8 +1,8 @@
-from .. import Base, SessionLocal
+from .. import Base
 from entities.router import RouterEntity
 from sqlalchemy.orm import relationship, backref
 from models.routers.functions import RoutersFunctions
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey, delete
 
 class Router(Base):
     __tablename__ = 'routers'  
@@ -40,12 +40,11 @@ class Router(Base):
         }
 
     @staticmethod
-    def add_router(router: RouterEntity):
+    def add_router(session, router: RouterEntity):
         model_r = Router
-        session = SessionLocal()
         v_router = RoutersFunctions()  
         try:
-            if v_router.validate_router(router, 'insert', model_r):
+            if v_router.validate_router(session, router, 'insert', model_r):
                 new_router = Router(
                     router_name=router.router_name,  
                     router_description=router.router_description,  
@@ -58,22 +57,19 @@ class Router(Base):
                     router_password=router.router_password,  
                     allow_scan=router.allow_scan  
                 )
-                session.add(new_router)  
-                session.commit()
+                session.add(new_router)
             else:  
                 raise Exception()  
-        except Exception as e:  
-            session.rollback()  
+        except Exception as e:
             raise e  
 
     @staticmethod
-    def update_router(new_router: RouterEntity):
+    def update_router(session, new_router: RouterEntity):
         model_r = Router
-        session = SessionLocal()
         v_router = RoutersFunctions()  
         try:
-            if v_router.validate_router(new_router, 'update', model_r):
-                old_router = Router.query.get(new_router.router_id)
+            if v_router.validate_router(session, new_router, 'update', model_r):
+                old_router = session.query(Router).get(new_router.router_id)
                 old_router.router_name = new_router.router_name  
                 old_router.router_description = new_router.router_description  
                 old_router.router_brand = new_router.router_brand  
@@ -83,21 +79,19 @@ class Router(Base):
                 old_router.router_mac = new_router.router_mac  
                 old_router.router_username = new_router.router_username  
                 old_router.router_password = new_router.router_password  
-                old_router.allow_scan = new_router.allow_scan  
-                session.commit()
+                old_router.allow_scan = new_router.allow_scan
             else:  
                 raise Exception()  
-        except Exception as e:  
-            session.rollback()  
+        except Exception as e:
             raise e  
 
     @staticmethod
-    def delete_router(router_id):
+    def delete_router(session, router_id):
         model_r = Router
-        session = SessionLocal()
         v_router = RoutersFunctions()  
         try:
             if v_router.validate_router(
+                    session,
                     RouterEntity(
                         router_id=router_id,  
                         router_name=str(),  
@@ -114,31 +108,38 @@ class Router(Base):
                     'delete',  
                     model_r  
             ):
-                router = Router.query.get(router_id)
-                session.delete(router)  
-                session.commit()
+                router = session.query(Router).get(router_id)
+                session.delete(router)
             else:  
                 raise Exception()  
-        except Exception as e:  
-            session.rollback()  
-            raise e  
+        except Exception as e:
+            raise e
 
     @staticmethod
-    def delete_all_routers():
-        session = SessionLocal()
+    def bulk_delete_routers(session, router_ids):
+        model_r = Router
+        v_router = RoutersFunctions()
         try:
-            Router.query.delete()  
-            session.commit()  
-        except Exception as e:  
-            session.rollback()  
+            if v_router.validate_bulk_delete(session, model_r, router_ids):
+                stmt = delete(Router).where(Router.router_id.in_(router_ids))
+                session.execute(stmt)
+        except Exception as e:
+            raise e
+
+    @staticmethod
+    def delete_routers(session):
+        try:
+            session.query(Router).delete()
+        except Exception as e:
             raise e
     
     @staticmethod
-    def get_router(router_id):
+    def get_router(session, router_id):
         model_r = Router
         v_router = RoutersFunctions()  
         try:
             if v_router.validate_router(
+                    session,
                     RouterEntity(
                         router_id=router_id,  
                         router_name=str(),  
@@ -155,7 +156,7 @@ class Router(Base):
                     'get',  
                     model_r  
             ):
-                router = Router.query.get(router_id)
+                router = session.query(Router).get(router_id)
                 return router
             else:
                 raise Exception()  
@@ -163,9 +164,9 @@ class Router(Base):
             raise e  
 
     @staticmethod
-    def get_all_routers():
+    def get_routers(session):
         r_list = []  
-        routers = Router.query.all()  
+        routers = session.query(Router).all()
         for router in routers:
             tmp = RouterEntity(
                 router_id=router.router_id,  
