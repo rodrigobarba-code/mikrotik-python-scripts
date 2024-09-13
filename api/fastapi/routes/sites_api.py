@@ -1,6 +1,7 @@
 from typing import List
-from fastapi import APIRouter
+from ..auth import verify_jwt
 from pydantic import BaseModel
+from fastapi import APIRouter, Depends
 
 from entities.site import SiteEntity
 from models.sites.models import Site
@@ -12,7 +13,7 @@ class SiteBulkDeleteBase(BaseModel):
     sites_ids: List[int]
 
 @sites_router.get("/sites/")
-async def get_sites():
+async def get_sites(token: dict = Depends(verify_jwt)):
     try:
         request = ThreadingManager().run_thread(Site.get_sites, 'r')
         site_list = [
@@ -37,7 +38,7 @@ async def get_sites():
         }
 
 @sites_router.get("/site/{site_id}")
-async def get_site(site_id: int):
+async def get_site(site_id: int, token: dict = Depends(verify_jwt)):
     try:
         request = ThreadingManager().run_thread(Site.get_site, 'rx', site_id)
         return {
@@ -58,7 +59,7 @@ async def get_site(site_id: int):
         }
 
 @sites_router.post("/site/")
-async def add_site(fk_region_id: int, site_name: str, site_segment: int):
+async def add_site(fk_region_id: int, site_name: str, site_segment: int, token: dict = Depends(verify_jwt)):
     try:
         site = SiteEntity(
             site_id=int(),
@@ -79,7 +80,7 @@ async def add_site(fk_region_id: int, site_name: str, site_segment: int):
         }
 
 @sites_router.put("/site/{site_id}")
-async def update_site(site_id: int, fk_region_id: int, site_name: str, site_segment: int):
+async def update_site(site_id: int, fk_region_id: int, site_name: str, site_segment: int, token: dict = Depends(verify_jwt)):
     try:
         site = SiteEntity(
             site_id=site_id,
@@ -100,7 +101,7 @@ async def update_site(site_id: int, fk_region_id: int, site_name: str, site_segm
         }
 
 @sites_router.delete("/site/{site_id}")
-async def delete_site(site_id: int):
+async def delete_site(site_id: int, token: dict = Depends(verify_jwt)):
     try:
         ThreadingManager().run_thread(Site.delete_site, 'w', site_id)
         return {
@@ -114,7 +115,7 @@ async def delete_site(site_id: int):
         }
 
 @sites_router.delete("/sites/bulk/")
-async def bulk_delete_sites(request: SiteBulkDeleteBase):
+async def bulk_delete_sites(request: SiteBulkDeleteBase, token: dict = Depends(verify_jwt)):
     try:
         site_ids = request.sites_ids
         ThreadingManager().run_thread(Site.bulk_delete_sites, 'w', site_ids)
@@ -129,7 +130,7 @@ async def bulk_delete_sites(request: SiteBulkDeleteBase):
         }
 
 @sites_router.delete("/sites/")
-async def delete_all_sites():
+async def delete_all_sites(token: dict = Depends(verify_jwt)):
     try:
         ThreadingManager().run_thread(Site.delete_sites, 'wx')
         return {

@@ -1,14 +1,23 @@
+import os
 import requests
 from . import sites_bp
+from dotenv import load_dotenv
 from entities.site import SiteEntity
 from entities.region import RegionEntity
 from models.users.functions import users_functions as functions
 from app.decorators import RequirementsDecorators as restriction
 from flask import render_template, redirect, url_for, flash, request, jsonify, session
 
+load_dotenv()
+token = os.getenv('JWT_TOKEN')
+
+headers = {
+    'Authorization': f'Bearer {token}'
+}
+
 def get_available_regions() -> list[RegionEntity]:
     region_list = []
-    response = requests.get('http://localhost:8080/api/regions/')
+    response = requests.get('http://localhost:8080/api/private/regions/', headers=headers)
     if response.status_code == 200:
         if response.json().get('backend_status') == 200:
             region_list = [
@@ -28,7 +37,7 @@ def get_available_regions() -> list[RegionEntity]:
 @restriction.login_required  
 def sites():
     try:
-        response = requests.get('http://localhost:8080/api/sites/')
+        response = requests.get('http://localhost:8080/api/private/sites/', headers=headers)
         if response.status_code == 200:
             if response.json().get('backend_status') == 200:
                 site_list = [
@@ -60,12 +69,12 @@ def sites():
 def add_site():
     if request.method == 'POST':  
         try:
-            response = requests.post('http://localhost:8080/api/site/',
+            response = requests.post('http://localhost:8080/api/private/site/',
                                      params={
                                          'fk_region_id': int(request.form['fk_region_id']),
                                          'site_name': request.form['site_name'],
                                          'site_segment': int(request.form['site_segment'])
-                                     })
+                                     }, headers=headers)
             if response.status_code == 200:
                 if response.json().get('backend_status') == 200:
                     flash('Site added successfully', 'success')
@@ -93,7 +102,7 @@ def add_site():
 @restriction.admin_required  
 def update_site(site_id):
     try:
-        response = requests.get(f'http://localhost:8080/api/site/{site_id}')
+        response = requests.get(f'http://localhost:8080/api/private/site/{site_id}', headers=headers)
         if response.status_code == 200:
             if response.json().get('backend_status') == 200:
                 site_obj = response.json().get('site')
@@ -115,13 +124,13 @@ def update_site(site_id):
 
     if request.method == 'POST':
         try:
-            response = requests.put(f'http://localhost:8080/api/site/{site_id}',
+            response = requests.put(f'http://localhost:8080/api/private/site/{site_id}',
                                     params={
                                         'site_id': site_id,
                                         'fk_region_id': int(request.form['fk_region_id']),
                                         'site_name': request.form['site_name'],
                                         'site_segment': int(request.form['site_segment'])
-                                    })
+                                    }, headers=headers)
             if response.status_code == 200:
                 if response.json().get('backend_status') == 200:
                     flash('Site updated successfully', 'success')
@@ -149,7 +158,7 @@ def update_site(site_id):
 @restriction.admin_required  
 def delete_site(site_id):
     try:
-        response = requests.delete(f'http://localhost:8080/api/site/{site_id}')
+        response = requests.delete(f'http://localhost:8080/api/private/site/{site_id}', headers=headers)
         if response.status_code == 200:
             if response.json().get('backend_status') == 200:
                 flash('Site deleted successfully', 'success')
@@ -169,8 +178,8 @@ def bulk_delete_site():
     data = request.get_json()
     sites_ids = data.get('items_ids', [])
     try:
-        response = requests.delete('http://localhost:8080/api/sites/bulk/',
-                                   json={'sites_ids': sites_ids})
+        response = requests.delete('http://localhost:8080/api/private/sites/bulk/',
+                                   json={'sites_ids': sites_ids}, headers=headers)
         if response.status_code == 200:
             if response.json().get('backend_status') == 200:
                 flag = response.json().get('count_flag')
@@ -191,7 +200,7 @@ def bulk_delete_site():
 @restriction.admin_required  
 def delete_all_sites():
     try:  
-        response = requests.delete('http://localhost:8080/api/sites/')
+        response = requests.delete('http://localhost:8080/api/private/sites/', headers=headers)
         if response.status_code == 200:
             if response.json().get('backend_status') == 200:
                 flash('All Sites Deleted Successfully', 'success')

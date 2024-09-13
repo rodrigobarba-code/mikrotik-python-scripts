@@ -4,19 +4,15 @@ from jose import jwt
 from dotenv import load_dotenv
 from jose.exceptions import JWTError
 from fastapi.security import HTTPBearer
+from fastapi import Depends, HTTPException
 from starlette.status import HTTP_403_FORBIDDEN
-from fastapi import Depends, HTTPException, Security
 
-def load_env():
-    env = os.getenv("ENV", ".config")
-    if env == ".config":
-        load_dotenv(dotenv_path=".config")
-    elif env == ".env":
-        load_dotenv(dotenv_path=".env")
+load_dotenv()
 
-AUTH0_DOMAIN = "sevensuiteapp.us.auth0.com"
-API_AUDIENCE = "https://fastapi-auth0-sevensuite.com"
-ALGORITHMS = ["RS256"]
+AUTH0_DOMAIN = os.getenv("DOMAIN")
+API_AUDIENCE = os.getenv("API_AUDIENCE")
+ISSUER = os.getenv("ISSUER")
+ALGORITHMS = os.getenv("ALGORITHMS")
 
 security = HTTPBearer()
 

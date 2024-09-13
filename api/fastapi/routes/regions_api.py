@@ -32,7 +32,7 @@ async def get_regions(token: dict = Depends(verify_jwt)):
         }
 
 @regions_router.get("/region/{region_id}")
-async def get_region(region_id: int):
+async def get_region(region_id: int, token: dict = Depends(verify_jwt)):
     try:
         request = ThreadingManager().run_thread(Region.get_region, 'rx', region_id)
         return {
@@ -50,7 +50,7 @@ async def get_region(region_id: int):
         }
 
 @regions_router.post("/region/")
-async def add_region(region_name: str):
+async def add_region(region_name: str, token: dict = Depends(verify_jwt)):
     try:
         region = RegionEntity(
             region_id=int(),
@@ -68,7 +68,7 @@ async def add_region(region_name: str):
         }
 
 @regions_router.put("/region/{region_id}")
-async def update_region(region_id: int, region_name: str):
+async def update_region(region_id: int, region_name: str, token: dict = Depends(verify_jwt)):
     try:
         region = RegionEntity(
             region_id=region_id,
@@ -86,7 +86,7 @@ async def update_region(region_id: int, region_name: str):
         }
 
 @regions_router.delete("/region/{region_id}")
-async def delete_region(region_id: int):
+async def delete_region(region_id: int, token: dict = Depends(verify_jwt)):
     try:
         ThreadingManager().run_thread(Region.delete_region, 'w', region_id)
         return {
@@ -100,7 +100,7 @@ async def delete_region(region_id: int):
         }
 
 @regions_router.delete("/regions/bulk/")
-async def bulk_delete_regions(request: RegionBulkDeleteBase):
+async def bulk_delete_regions(request: RegionBulkDeleteBase, token: dict = Depends(verify_jwt)):
     try:
         region_ids = request.regions_ids
         ThreadingManager().run_thread(Region.bulk_delete_regions, 'w', region_ids)
@@ -116,7 +116,7 @@ async def bulk_delete_regions(request: RegionBulkDeleteBase):
         }
 
 @regions_router.delete("/regions/")
-async def delete_all_regions():
+async def delete_all_regions(token: dict = Depends(verify_jwt)):
     try:
         ThreadingManager().run_thread(Region.delete_all_regions, 'wx')
         return {
