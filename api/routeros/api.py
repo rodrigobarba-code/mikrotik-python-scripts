@@ -89,6 +89,21 @@ class RouterAPI:
         return router.talk(command)  # Retrieve data via command talk from the Router OS API
     # Method to retrieve data via command talk from the Router OS API
 
+    @staticmethod
+    def verify_router_connection(host, user, password):
+        try:
+            router = ros_api.Api(  # Set the API object
+                host,
+                user,
+                password,
+                port=7372,
+                use_ssl=True
+            )
+            router.talk('/system/identity/print')
+            return True
+        except Exception as e:
+            return False
+
     # Method to get IP address data from the Router OS API and save it to the database
     # Also check that the information don't already exist in the database
     @staticmethod

@@ -99,6 +99,9 @@
                                     class="btn btn-sm btn-primary show-details-button" type="button"
                                     onclick="routerDetails.show('{{ router.router_id }}')"><i
                                     class="fa-solid fa-eye"></i></button>
+                            <button id="verify-router-connection" data-id="{{ router.router_id }}" class="btn btn-sm btn-success show-details-button" type="button">
+                                <i class="fa-solid fa-cloud-check"></i>
+                            </button>
                         </td>
                     </tr>
                 {% endfor %}

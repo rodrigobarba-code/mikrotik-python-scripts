@@ -11,9 +11,6 @@ from flask import render_template, request, redirect, url_for, flash, session, j
 from models.users.functions import users_functions as functions  # Import the users functions object
 # Importing Required Local Modules
 
-# Importing Router API
-from api.routeros.api import RouterAPI
-# Importing Router API
 
 # Importing Required Decorators
 from app.decorators import RequirementsDecorators as restriction

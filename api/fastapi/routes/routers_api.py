@@ -70,6 +70,34 @@ async def get_router(router_id: int, token: dict = Depends(verify_jwt)):
             'backend_status': 400
         }
 
+@routers_router.get("/router/verify/{router_id}")
+async def verify_router(router_id: int, token: dict = Depends(verify_jwt)):
+    from ...routeros.api import RouterAPI
+    try:
+        request = ThreadingManager().run_thread(Router.get_router, 'rx', router_id)
+        is_connected = RouterAPI().verify_router(
+            request.router_ip,
+            request.router_username,
+            request.router_password
+        )
+        if is_connected:
+            return {
+                'message': "Router established a connection",
+                'is_connected': 1,
+                'backend_status': 200
+            }
+        else:
+            return {
+                'message': "Router failed to establish a connection",
+                'is_connected': 0,
+                'backend_status': 200
+            }
+    except Exception as e:
+        return {
+            'message': f"Failed to verify router: {str(e)}",
+            'backend_status': 400
+        }
+
 @routers_router.post("/router/")
 async def add_router(
         router_name: str,
