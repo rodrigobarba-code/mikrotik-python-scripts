@@ -1,4 +1,6 @@
 from typing import List
+
+from models.routers.exceptions import RouterError
 from ..auth import verify_jwt
 from pydantic import BaseModel
 from fastapi import APIRouter, Depends
@@ -75,26 +77,106 @@ async def verify_router(router_id: int, token: dict = Depends(verify_jwt)):
     from ...routeros.api import RouterAPI
     try:
         request = ThreadingManager().run_thread(Router.get_router, 'rx', router_id)
-        is_connected = RouterAPI().verify_router(
+        router = RouterAPI(
             request.router_ip,
             request.router_username,
             request.router_password
         )
+        router.set_api()
+        is_connected = RouterAPI.verify_router_connection(router.get_api())
         if is_connected:
             return {
-                'message': "Router established a connection",
+                'message': f"Router with ID {router_id} verified successfully",
                 'is_connected': 1,
                 'backend_status': 200
             }
         else:
             return {
-                'message': "Router failed to establish a connection",
+                'message': f"Router with ID {router_id} could not be verified",
                 'is_connected': 0,
                 'backend_status': 200
             }
     except Exception as e:
         return {
-            'message': f"Failed to verify router: {str(e)}",
+            'message': f"Failed to verify router with ID {router_id}: {str(e)}",
+            'backend_status': 400
+        }
+
+@routers_router.get("/router/verify-credentials/")
+async def verify_router_credentials(
+        router_ip: str,
+        router_username: str,
+        router_password: str,
+        token: dict = Depends(verify_jwt)
+    ):
+    from ...routeros.api import RouterAPI
+    try:
+        router = RouterAPI(
+            router_ip,
+            router_username,
+            router_password
+        )
+        router.set_api()
+        is_connected = RouterAPI.verify_router_connection(router.get_api())
+        if is_connected:
+            return {
+                'message': "Router credentials verified successfully",
+                'is_connected': 1,
+                'backend_status': 200
+            }
+        else:
+            return {
+                'message': "Router credentials could not be verified",
+                'is_connected': 0,
+                'backend_status': 200
+            }
+    except Exception as e:
+        return {
+            'message': f"Failed to verify router credentials: {str(e)}",
+            'backend_status': 400
+        }
+
+@routers_router.get("/router/verify/all/")
+async def verify_all_routers(token: dict = Depends(verify_jwt)):
+    from ...routeros.api import RouterAPI
+    try:
+        flag_error = False
+        request = ThreadingManager().run_thread(Router.get_routers, 'r')
+        routers = [
+            {
+                "router_id": router.router_id,
+                "router_object": RouterAPI(
+                    router.router_ip,
+                    router.router_username,
+                    router.router_password
+                )
+            }
+            for router in request
+        ]
+        for router in routers:
+            router['router_object'].set_api()
+            flag = RouterAPI.verify_router_connection(router['router_object'].get_api())
+            if not flag:
+                router_id = router['router_id']
+                flag_error = True
+                break
+
+        if not flag_error:
+            return {
+                'message': "All routers established connection successfully",
+                'is_connected': 1,
+                'backend_status': 200
+            }
+        else:
+            return {
+                'message': "A router could not be verified, check the logs",
+                'is_connected': 0,
+                'router_id': router_id,
+                'backend_status': 200
+            }
+    except Exception as e:
+        return {
+            'message': f"Failed to verify routers: {str(e)}",
             'backend_status': 400
         }
 

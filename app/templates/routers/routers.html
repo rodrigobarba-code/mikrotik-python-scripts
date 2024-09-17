@@ -31,10 +31,13 @@
     <section class="routers-database pt-3">
         <div class="container w-100 align-items-center">
             <div class="row">
-                <div class="col-8 text-left">
+                <div class="col-7 text-left">
                     <h2 class="routers-database-title"><b>Available</b> Routers</h2>
                 </div>
-                <div class="col-12 col-md-4 d-flex justify-content-end">
+                <div class="col-12 col-md-5 d-flex justify-content-end">
+                    <button type="button" id="verify-all-routers-connection-button" class="btn btn-md btn-success me-2">
+                        <i class="fa-solid fa-cloud-check"></i>&nbsp; Verify Routers
+                    </button>
                     <button type="button" class="btn btn-md btn-danger me-2" data-bs-toggle="modal" id="delete-select"
                             data-bs-target="#delete-select-modal">
                         <i class="fa-solid fa-square-minus"></i>&nbsp; Delete Selected
@@ -81,7 +84,11 @@
                         <td>{{ router.router_name }}</td>
                         <td>{{ router.router_description }}</td>
                         <td>
-                            <h5><span class="badge rounded-pill bg-{{ 'success' if router.allow_scan == 1 else 'secondary'}}">{{ "Enable" if router.allow_scan == 1 else "Disable" }}</span></h5>
+                            <h5>
+                                <span class="badge rounded-pill bg-{{ 'success' if router.allow_scan == 1 else 'secondary' }} {{ 'blinking-green' if router.allow_scan == 1 else '' }}">
+                                    {{ "Online" if router.allow_scan == 1 else "Offline" }}
+                                </span>
+                            </h5>
                         </td>
                         <td>
                             <a href="{{ url_for('routers.update_router', router_id=router.router_id) }}" type="button"

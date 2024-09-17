@@ -1,6 +1,7 @@
 # Description: File to handle the Router OS API
 
 # Importing Necessary Libraries
+import asyncio
 import ros_api
 from models.router_scan.functions import ARPFunctions
 # Importing Necessary Libraries
@@ -89,19 +90,15 @@ class RouterAPI:
         return router.talk(command)  # Retrieve data via command talk from the Router OS API
     # Method to retrieve data via command talk from the Router OS API
 
-    @staticmethod
-    def verify_router_connection(host, user, password):
+    # Method to verify the connection to the Router OS
+    async def talk_with_timeout(router, command):
+        return router.talk(command)
+
+    async def verify_router_connection(router):
         try:
-            router = ros_api.Api(  # Set the API object
-                host,
-                user,
-                password,
-                port=7372,
-                use_ssl=True
-            )
-            router.talk('/system/identity/print')
+            await asyncio.wait_for(RouterAPI.talk_with_timeout(router, '/system/identity/print'), timeout=10.0)
             return True
-        except Exception as e:
+        except (Exception, asyncio.TimeoutError) as e:
             return False
 
     # Method to get IP address data from the Router OS API and save it to the database
