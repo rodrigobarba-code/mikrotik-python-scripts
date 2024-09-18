@@ -1,45 +1,53 @@
-# Importing Necessary Libraries
-import socket, platform
+import os
+import socket
 import requests as r
+from dotenv import load_dotenv
 
-
-# Importing Necessary Libraries
-
-# Get Public IP Address Function
 def get_public_ip():
-    endpoint = 'https://ipinfo.io/json'  # Endpoint to get the public IP address
-    response = r.get(endpoint, verify=True)  # Send a GET request to the endpoint
+    endpoint = 'https://ipinfo.io/json'  
+    response = r.get(endpoint, verify=True)
+    if response.status_code != 200:  
+        return 'Status:', response.status_code, 'Problem with the request. Exiting.'
+    data = response.json()  
+    return data['ip']  
 
-    if response.status_code != 200:  # Check if the request was successful
-        return 'Status:', response.status_code, 'Problem with the request. Exiting.'  # Return an error message
-
-    data = response.json()  # Get the JSON data from the response
-    return data['ip']  # Return the public IP address
-
-
-# Get Public IP Address Function
-
-
-# Get Local IP Address Function
 def get_local_ip():
     try:
-        # Create a socket and connect to an external IP address
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.connect(('8.8.8.8', 80))
         local_ip = s.getsockname()[0]
         s.close()
-        return local_ip  # Return the local IP address
+        return local_ip  
     except Exception as e:
         print(f"Error: {e}")
-        return None  # Return None if there is an error
-# Get Local IP Address Function
+        return None
 
+def get_verified_jwt_header() -> dict:
+    import json
+    import http.client
 
-# Get Local IP Address Function
+    load_dotenv()
 
-# Create object for global functions
+    conn = http.client.HTTPSConnection(os.getenv('APP_AUTH0_DOMAIN'))
+    payload = "{\"client_id\":\"" + os.getenv('APP_AUTH0_CLIENT_ID') + "\",\"client_secret\":\"" + os.getenv('APP_AUTH0_CLIENT_SECRET') + "\",\"audience\":\"" + os.getenv('APP_AUTH0_AUDIENCE') + "\",\"grant_type\":\"client_credentials\"}"
+    headers = {'content-type': "application/json"}
+    conn.request("POST", "/oauth/token", payload, headers)
+
+    res = conn.getresponse()
+    data = res.read()
+    data = json.loads(data.decode("utf-8"))
+
+    access_token = data['access_token']
+    token_type = data['token_type']
+    return {'Authorization': f'{token_type} {access_token}'}
+
 functions = {
-    'get_public_ip': get_public_ip,  # Get the public IP address
-    'get_local_ip': get_local_ip  # Get the local IP address
+    'get_public_ip': get_public_ip,
+    'get_jwt_token': get_verified_jwt_header,
+    'get_local_ip': get_local_ip,
 }
-# Create object for global functions
+
+if __name__ == '__main__':
+    print(get_public_ip())
+    print(get_local_ip())
+    print(get_verified_jwt_header())

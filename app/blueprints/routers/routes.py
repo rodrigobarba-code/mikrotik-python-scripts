@@ -1,24 +1,15 @@
-import os
 import requests
 from . import routers_bp
-from dotenv import load_dotenv
-from models.sites.models import Site
 from entities.site import SiteEntity
 from entities.router import RouterEntity
+from app.functions import get_verified_jwt_header
 from models.users.functions import users_functions as functions
 from app.decorators import RequirementsDecorators as restriction
 from flask import render_template, redirect, url_for, flash, request, jsonify, session
 
-load_dotenv()
-token = os.getenv('JWT_TOKEN')
-
-headers = {
-    'Authorization': f'Bearer {token}'
-}
-
 def get_available_sites() -> list[SiteEntity]:
     site_list = []
-    response = requests.get('http://localhost:8080/api/private/sites/', headers=headers)
+    response = requests.get('http://localhost:8080/api/private/sites/', headers=get_verified_jwt_header())
     if response.status_code == 200:
         if response.json().get('backend_status') == 200:
             site_list = [
@@ -41,7 +32,7 @@ def get_available_sites() -> list[SiteEntity]:
 @restriction.login_required  
 def routers():
     try:
-        response = requests.get('http://localhost:8080/api/private/routers/', headers=headers)
+        response = requests.get('http://localhost:8080/api/private/routers/', headers=get_verified_jwt_header())
         if response.status_code == 200:
             if response.json().get('backend_status') == 200:
                 router_list = [
@@ -91,7 +82,7 @@ def add_router():
                                             'router_username': request.form['router_username'],
                                             'router_password': request.form['router_password'],
                                             'allow_scan': 1 if request.form.get('allow_scan') else 0
-                                        }, headers=headers)
+                                        }, headers=get_verified_jwt_header())
             if response.status_code == 200:
                 if response.json().get('backend_status') == 200:
                     flash('Router added successfully', 'success')
@@ -120,7 +111,7 @@ def add_router():
 @restriction.admin_required  
 def update_router(router_id):
     try:
-        response = requests.get(f'http://localhost:8080/api/private/router/{router_id}', headers=headers)
+        response = requests.get(f'http://localhost:8080/api/private/router/{router_id}', headers=get_verified_jwt_header())
         if response.status_code == 200:
             if response.json().get('backend_status') == 200:
                 router_obj = response.json().get('router')
@@ -161,7 +152,7 @@ def update_router(router_id):
                                         'router_username': request.form['router_username'],
                                         'router_password': request.form['router_password'],
                                         'allow_scan': 1 if request.form.get('allow_scan') else 0
-                                    }, headers=headers)
+                                    }, headers=get_verified_jwt_header())
             if response.status_code == 200:
                 if response.json().get('backend_status') == 200:
                     flash('Router updated successfully', 'success')
@@ -189,7 +180,7 @@ def update_router(router_id):
 @restriction.admin_required  
 def delete_router(router_id):
     try:  
-        response = requests.delete(f'http://localhost:8080/api/private/router/{router_id}', headers=headers)
+        response = requests.delete(f'http://localhost:8080/api/private/router/{router_id}', headers=get_verified_jwt_header())
         if response.status_code == 200:
             if response.json().get('backend_status') == 200:
                 flash('Router deleted successfully', 'success')
@@ -210,7 +201,7 @@ def bulk_delete_router():
     routers_ids = data.get('items_ids', [])  
     try:
         response = requests.delete('http://localhost:8080/api/private/routers/bulk/',
-                                json={'routers_ids': routers_ids}, headers=headers)
+                                json={'routers_ids': routers_ids}, headers=get_verified_jwt_header())
         if response.status_code == 200:
             if response.json().get('backend_status') == 200:
                 flag = response.json().get('count_flag')
@@ -231,7 +222,7 @@ def bulk_delete_router():
 @restriction.admin_required  
 def delete_all_routers():
     try:  
-        response = requests.delete('http://localhost:8080/api/private/routers/', headers=headers)
+        response = requests.delete('http://localhost:8080/api/private/routers/', headers=get_verified_jwt_header())
         if response.status_code == 200:
             if response.json().get('backend_status') == 200:
                 flash('All Routers deleted successfully', 'success')
@@ -254,7 +245,7 @@ def get_router_details():
         data = request.get_json()
         router_id = data.get('router_id', None)
 
-        response = requests.get(f'http://localhost:8080/api/private/router/{router_id}', headers=headers)
+        response = requests.get(f'http://localhost:8080/api/private/router/{router_id}', headers=get_verified_jwt_header())
         if response.status_code == 200:
             if response.json().get('backend_status') == 200:
                 router = response.json().get('router')

@@ -8,8 +8,11 @@ flask_app = create_app()
 @flask_app.context_processor
 def injects():
     return dict(
-        metadata=AppConfig.METADATA, menu_items=Sidebar.menu_items,
-        job_display=UserJobs.job_display, profile_menu_items=Sidebar.profile_menu_items)
+        metadata=AppConfig.METADATA,
+        menu_items=Sidebar.menu_items,
+        job_display=UserJobs.job_display,
+        profile_menu_items=Sidebar.profile_menu_items
+    )
 
 def start_flask():
     socketio.run(flask_app,

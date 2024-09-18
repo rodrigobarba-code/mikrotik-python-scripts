@@ -47,16 +47,14 @@ class RouterDetails {
 // Class for handling router details
 
 $(document).ready(() => {
-    $('#verify-router-connection').on('click', () => {
+    $('#verify-router-connection').on('click', async () => {
+        let token = await getVerifiedJWTCredentials()
         let router_id = $('#verify-router-connection').data('id');
-        let token = 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Ik9na2NpWXk3dEhyeVdhS0pONUpTSyJ9.eyJpc3MiOiJodHRwczovL3NldmVuc3VpdGVhcHAudXMuYXV0aDAuY29tLyIsInN1YiI6IkZ6TkRUMEJ3MDF6Nlp3ZHVCaDZUSWRiUG1XSUZWc09hQGNsaWVudHMiLCJhdWQiOiJodHRwczovL2Zhc3RhcGktYXV0aDAtc2V2ZW5zdWl0ZS5jb20iLCJpYXQiOjE3MjY1NDQ0ODEsImV4cCI6MTcyNjYzMDg4MSwiZ3R5IjoiY2xpZW50LWNyZWRlbnRpYWxzIiwiYXpwIjoiRnpORFQwQncwMXo2WndkdUJoNlRJZGJQbVdJRlZzT2EifQ.lnRBb0-FP5PxKFuiHkArHl3vOUlGq8pB0c0v4ci0BwgRabK9y7ygdaHV_6Q7VlLvVef0DLhrFMgFvW5gX1GBomZDRcutKG9Zxx4PLAImUpO0bAYmahWj5BpLcFW1oY7oMPhT8ZMsRVUWujNNLvr_SLQUU2NC2sHEHRDVDpbF4Eyvhu3r7ZhDTKRlcJx5dP5-3xf-uUCFZrVwn8v1zEvnLaGuOFkKTS5Lbzg8oZREWl74MX2vWDy3iOlLOJ1qiI3h1Kr6dP-M6z5muVRvFV1sXyn8rZCAFyAKV156-VHNcYIFDxwatm6NiXsONleKqATdzMFlVY9cX82UYKoXLyrhJg';
         $.ajax({
             url: `http://localhost:8080/api/private/router/verify/${router_id}`,
             type: 'GET',
             contentType: 'application/json',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-            },
+            headers: token,
             success: (data) => {
                 if (data.backend_status === 200) {
                     Swal.fire({
@@ -82,15 +80,13 @@ $(document).ready(() => {
         });
     });
 
-    $('#verify-all-routers-connection-button').on('click', () => {
-        let token = 'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Ik9na2NpWXk3dEhyeVdhS0pONUpTSyJ9.eyJpc3MiOiJodHRwczovL3NldmVuc3VpdGVhcHAudXMuYXV0aDAuY29tLyIsInN1YiI6IkZ6TkRUMEJ3MDF6Nlp3ZHVCaDZUSWRiUG1XSUZWc09hQGNsaWVudHMiLCJhdWQiOiJodHRwczovL2Zhc3RhcGktYXV0aDAtc2V2ZW5zdWl0ZS5jb20iLCJpYXQiOjE3MjY1NDQ0ODEsImV4cCI6MTcyNjYzMDg4MSwiZ3R5IjoiY2xpZW50LWNyZWRlbnRpYWxzIiwiYXpwIjoiRnpORFQwQncwMXo2WndkdUJoNlRJZGJQbVdJRlZzT2EifQ.lnRBb0-FP5PxKFuiHkArHl3vOUlGq8pB0c0v4ci0BwgRabK9y7ygdaHV_6Q7VlLvVef0DLhrFMgFvW5gX1GBomZDRcutKG9Zxx4PLAImUpO0bAYmahWj5BpLcFW1oY7oMPhT8ZMsRVUWujNNLvr_SLQUU2NC2sHEHRDVDpbF4Eyvhu3r7ZhDTKRlcJx5dP5-3xf-uUCFZrVwn8v1zEvnLaGuOFkKTS5Lbzg8oZREWl74MX2vWDy3iOlLOJ1qiI3h1Kr6dP-M6z5muVRvFV1sXyn8rZCAFyAKV156-VHNcYIFDxwatm6NiXsONleKqATdzMFlVY9cX82UYKoXLyrhJg';
+    $('#verify-all-routers-connection-button').on('click', async () => {
+        let token = await getVerifiedJWTCredentials()
         $.ajax({
             url: `http://localhost:8080/api/private/router/verify/all/`,
             type: 'GET',
             contentType: 'application/json',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-            },
+            headers: token,
             success: (data) => {
                 if (data.backend_status === 200) {
                     if (data.is_connected === 1) {
@@ -124,3 +120,69 @@ $(document).ready(() => {
         });
     });
 });
+
+$('#router-form').on('submit', async function(event) {
+    event.preventDefault();  // Evita que el formulario se envíe automáticamente
+
+    let loadingMessage = Swal.fire({
+        title: 'Verifying credentials',
+        text: 'Wait a moment',
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
+
+    try {
+        let token = await getVerifiedJWTCredentials();
+
+        let router_ip = $('#router-ip').val();
+        let router_username = $('#router-username').val();
+        let router_password = $('#router-password').val();
+
+        $.ajax({
+            url: 'http://localhost:8080/api/private/router/verify-credentials/',
+            type: 'GET',
+            contentType: 'application/json',
+            headers: token,
+            data: JSON.stringify({
+                router_ip: router_ip,
+                router_username: router_username,
+                router_password: router_password
+            }),
+            success: (data) => {
+                if (data.backend_status === 200) {
+                    console.log(data);
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Connection successful',
+                        text: 'Credentials are valid.'
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'question',
+                        title: 'Credentials are not valid',
+                        text: data.message,
+                    });
+                }
+            },
+            error: () => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Failed to verify credentials',
+                });
+            }
+        });
+
+    } catch (error) {
+        // Maneja errores de obtener el token
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Failed to get JWT token',
+        });
+        console.error('Error obtaining JWT token:', error);
+    }
+});
+

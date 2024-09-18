@@ -1,24 +1,16 @@
-import os
 import requests
 from . import regions_bp
-from dotenv import load_dotenv
 from entities.region import RegionEntity
+from app.functions import get_verified_jwt_header
 from models.users.functions import users_functions as functions
 from app.decorators import RequirementsDecorators as restriction
 from flask import render_template, redirect, url_for, flash, request, jsonify, session
-
-load_dotenv()
-token = os.getenv('JWT_TOKEN')
-
-headers = {
-    'Authorization': f'Bearer {token}'
-}
 
 @regions_bp.route('/', methods=['GET'])
 @restriction.login_required  
 def regions():
     try:
-        response = requests.get('http://localhost:8080/api/private/regions/', headers=headers)
+        response = requests.get('http://localhost:8080/api/private/regions/', headers=get_verified_jwt_header())
         if response.status_code == 200:
             if response.json().get('backend_status') == 200:
                 region_list = [
@@ -45,7 +37,7 @@ def add_region():
     if request.method == 'POST':  
         try:
             response = requests.post('http://localhost:8080/api/private/region/',
-                                     params={'region_name': request.form['region_name']}, headers=headers)
+                                     params={'region_name': request.form['region_name']}, headers=get_verified_jwt_header())
             if response.status_code == 200:
                 if response.json().get('backend_status') == 200:
                     flash('Region added successfully', 'success')
@@ -69,7 +61,7 @@ def update_region(region_id):
     if request.method == 'POST':
         try:  
             response = requests.put(f'http://localhost:8080/api/private/region/{region_id}',
-                                    params={'region_id': region_id, 'region_name': request.form['region_name']}, headers=headers)
+                                    params={'region_id': region_id, 'region_name': request.form['region_name']}, headers=get_verified_jwt_header())
             if response.status_code == 200:
                 if response.json().get('backend_status') == 200:
                     flash('Region updated successfully', 'success')
@@ -82,7 +74,7 @@ def update_region(region_id):
             flash(str(e), 'danger')  
         return redirect(url_for('regions.regions'))  
     try:
-        response = requests.get(f'http://localhost:8080/api/private/region/{region_id}', headers=headers)
+        response = requests.get(f'http://localhost:8080/api/private/region/{region_id}', headers=get_verified_jwt_header())
         if response.status_code == 200:
             if response.json().get('backend_status') == 200:
                 region_object = response.json().get('region')
@@ -107,7 +99,7 @@ def update_region(region_id):
 @restriction.admin_required  
 def delete_region(region_id):
     try:  
-        response = requests.delete(f'http://localhost:8080/api/private/region/{region_id}', headers=headers)
+        response = requests.delete(f'http://localhost:8080/api/private/region/{region_id}', headers=get_verified_jwt_header())
         if response.status_code == 200:
             if response.json().get('backend_status') == 200:
                 flash('Region Deleted Successfully', 'success')
@@ -129,7 +121,7 @@ def bulk_delete_region():
     regions_ids = [int(region_id) for region_id in regions_ids]
     try:
         response = requests.delete('http://localhost:8080/api/private/regions/bulk/',
-                                   json={'regions_ids': regions_ids}, headers=headers)
+                                   json={'regions_ids': regions_ids}, headers=get_verified_jwt_header())
         if response.status_code == 200:
             if response.json().get('backend_status') == 200:
                 flag = response.json().get('count_flag')
@@ -150,7 +142,7 @@ def bulk_delete_region():
 @restriction.admin_required  
 def delete_all_regions():
     try:  
-        response = requests.delete('http://localhost:8080/api/private/regions/', headers=headers)
+        response = requests.delete('http://localhost:8080/api/private/regions/', headers=get_verified_jwt_header())
         if response.status_code == 200:
             if response.json().get('backend_status') == 200:
                 flash('All Regions Deleted Successfully', 'success')
