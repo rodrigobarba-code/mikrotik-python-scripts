@@ -1,6 +1,4 @@
 from typing import List
-
-from models.routers.exceptions import RouterError
 from ..auth import verify_jwt
 from pydantic import BaseModel
 from fastapi import APIRouter, Depends
@@ -83,16 +81,16 @@ async def verify_router(router_id: int, token: dict = Depends(verify_jwt)):
             request.router_password
         )
         router.set_api()
-        is_connected = RouterAPI.verify_router_connection(router.get_api())
+        is_connected = await RouterAPI.verify_router_connection(router.get_api())
         if is_connected:
             return {
-                'message': f"Router with ID {router_id} verified successfully",
+                'message': f"Router with name {request.router_name} verified successfully",
                 'is_connected': 1,
                 'backend_status': 200
             }
         else:
             return {
-                'message': f"Router with ID {router_id} could not be verified",
+                'message': f"Router with name {request.router_name} could not be verified",
                 'is_connected': 0,
                 'backend_status': 200
             }
@@ -117,7 +115,7 @@ async def verify_router_credentials(
             router_password
         )
         router.set_api()
-        is_connected = RouterAPI.verify_router_connection(router.get_api())
+        is_connected = await RouterAPI.verify_router_connection(router.get_api())
         if is_connected:
             return {
                 'message': "Router credentials verified successfully",
@@ -155,7 +153,7 @@ async def verify_all_routers(token: dict = Depends(verify_jwt)):
         ]
         for router in routers:
             router['router_object'].set_api()
-            flag = RouterAPI.verify_router_connection(router['router_object'].get_api())
+            flag = await RouterAPI.verify_router_connection(router['router_object'].get_api())
             if not flag:
                 router_id = router['router_id']
                 flag_error = True
@@ -177,6 +175,34 @@ async def verify_all_routers(token: dict = Depends(verify_jwt)):
     except Exception as e:
         return {
             'message': f"Failed to verify routers: {str(e)}",
+            'backend_status': 400
+        }
+
+@routers_router.get("/routers/allow-scan/")
+async def allow_scan_all_routers(token: dict = Depends(verify_jwt)):
+    try:
+        ThreadingManager().run_thread(Router.allow_scan_all, 'wx')
+        return {
+            'message': "All routers are allowed to scan",
+            'backend_status': 200
+        }
+    except Exception as e:
+        return {
+            'message': f"Failed to allow scan on routers: {str(e)}",
+            'backend_status': 400
+        }
+
+@routers_router.get("/routers/deny-scan/")
+async def deny_scan_all_routers(token: dict = Depends(verify_jwt)):
+    try:
+        ThreadingManager().run_thread(Router.deny_scan_all, 'wx')
+        return {
+            'message': "All routers are denied to scan",
+            'backend_status': 200
+        }
+    except Exception as e:
+        return {
+            'message': f"Failed to deny scan on routers: {str(e)}",
             'backend_status': 400
         }
 

@@ -7,6 +7,8 @@ from models.users.functions import users_functions as functions
 from app.decorators import RequirementsDecorators as restriction
 from flask import render_template, redirect, url_for, flash, request, jsonify, session
 
+switch_scan_status = {'enable': True}
+
 def get_available_sites() -> list[SiteEntity]:
     site_list = []
     response = requests.get('http://localhost:8080/api/private/sites/', headers=get_verified_jwt_header())
@@ -56,9 +58,10 @@ def routers():
         elif response.status_code == 500:
             raise Exception('Failed to retrieve routers')
         return render_template(
-            'routers/routers.html',  
-            router_list=router_list,  
-            router=None  
+            'routers/routers.html',
+            switch_scan_status=switch_scan_status['enable'],
+            router_list=router_list,
+            router=None,
         )
     except Exception as e:  
         flash(str(e), 'danger')  
@@ -268,3 +271,12 @@ def get_router_details():
             raise Exception('Failed to get router data')
     except Exception as e:
         return jsonify({'message': 'Failed to get router data', 'error': str(e)}), 500
+
+@routers_bp.route('/toggle/switch/scan/status/', methods=['GET'])
+@restriction.login_required
+def toggle_switch_scan_status():
+    try:
+        switch_scan_status['enable'] = not switch_scan_status['enable']
+        return jsonify({'status': switch_scan_status['enable']}), 200
+    except Exception as e:
+        return jsonify({'message': 'Failed to toggle scan status', 'error': str(e)}), 500

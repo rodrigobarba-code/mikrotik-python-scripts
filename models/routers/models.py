@@ -183,3 +183,19 @@ class Router(Base):
             )
             r_list.append(tmp)  
         return r_list
+
+    @staticmethod
+    def allow_scan_all(session):
+        try:
+            for router in session.query(Router).all():
+                router.allow_scan = 1
+        except Exception as e:
+            raise e
+
+    @staticmethod
+    def deny_scan_all(session):
+        try:
+            for router in session.query(Router).all():
+                router.allow_scan = 0
+        except Exception as e:
+            raise e

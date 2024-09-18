@@ -118,7 +118,7 @@ $(document).ready(() => {
                     } else {
                         Swal.fire({
                             icon: 'question',
-                            title: 'A router wit ID ' + data.router_id + ' failed to connect, please try again',
+                            title: 'A router with ID ' + data.router_id + ' failed to connect, please try again',
                             text: data.message,
                         });
                     }
@@ -147,11 +147,12 @@ $(document).ready(() => {
 
         try {
             let token = await getToken();
-            let formData = await getCredentialsData();
+            let credentialsData = await getCredentialsData();
 
-            let connectionStatus = await verifyRouterCredentials(token, formData);
+            let connectionStatus = await verifyRouterCredentials(token, credentialsData);
 
             if (connectionStatus.is_connected === 1) {
+                let formData = $(this).serialize();
                 handleSuccessfulConnection(formData, token);
             } else {
                 showAlert('question', 'Credentials are not valid', connectionStatus.message);
@@ -199,23 +200,21 @@ $(document).ready(() => {
             cancelButtonColor: '#d33',
         }).then((result) => {
             if (result.isConfirmed) {
-                processRouterAddition(formData, token);
+                processRouterAction(formData, token);
             }
         });
     }
 
-    function processRouterAddition(formData, token) {
+    function processRouterAction(formData, token) {
         showLoadingMessage('Processing...', 'Wait a moment');
 
-        let addURL = $('#router-form').data('url');
+        let actionURL = $('#router-form').data('url');
         let returnURL = $('#router-form').data('reload');
 
         $.ajax({
-            url: addURL,
+            url: actionURL,
             type: 'POST',
             data: formData,
-            processData: false,
-            contentType: false,
             headers: token,
             success: function(response) {
                 let action = $('#router-form').data('result-action');
@@ -252,4 +251,76 @@ $(document).ready(() => {
             text: text
         });
     }
+
+    async function allowScan(token) {
+        $.ajax({
+            url: 'http://localhost:8080/api/private/routers/allow-scan/',
+            type: 'GET',
+            headers: token,
+            success: function(response) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: 'Switched allow scan',
+                    timer: 1000
+                });
+                location.reload();
+            },
+            error: function(error) {
+                showAlert('error', 'Error', 'Failed to switch allow scan');
+            }
+        });
+    }
+
+    async function denyScan(token) {
+        $.ajax({
+            url: 'http://localhost:8080/api/private/routers/deny-scan/',
+            type: 'GET',
+            contentType: 'application/json',
+            headers: token,
+            success: function(response) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: 'Switched deny scan',
+                    timer: 1000
+                });
+                location.reload();
+            },
+            error: function(error) {
+                showAlert('error', 'Error', 'Failed to switch deny scan');
+            }
+        });
+    }
+
+    async function toggleAllowScan(token, url) {
+        $.ajax({
+            url: url,
+            type: 'GET',
+            contentType: 'application/json',
+            headers: token,
+            success: function(response) {},
+            error: function(error) {
+                showAlert('error', 'Error', 'Failed to toggle allow scan');
+            }
+        });
+    }
+
+    $('#switch-allow-scan').on('click', async function() {
+        showLoadingMessage('Switching scan', 'Wait a moment');
+
+        let token = await getToken();
+        let url = $('#switch-allow-scan').data('url');
+        let flag = $('#switch-allow-scan').data('flag');
+
+        if (flag === 'True') {
+            toggleAllowScan(token, url).then(() => {
+                denyScan(token);
+            });
+        } else {
+            toggleAllowScan(token, url).then(() => {
+                allowScan(token);
+            });
+        }
+    });
 });

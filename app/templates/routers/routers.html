@@ -17,7 +17,6 @@
     <section class="routers-jumbotron">
         <div class="p-5 mb-4 base-jumbotron">
             <div class="container-fluid py-5">
-
                 <h1 class="display-5 fw-bold">Routers</h1>
                 <p class="col-md-8 fs-4">Lorem Ipsum</p>
                 <a href="{{ url_for('routers.add_router') }}" class="btn btn-primary btn-lg" type="button"><i
@@ -35,16 +34,19 @@
                     <h2 class="routers-database-title"><b>Available</b> Routers</h2>
                 </div>
                 <div class="col-12 col-md-5 d-flex justify-content-end">
+                    <button data-flag="{{ 'True' if switch_scan_status else 'False' }}" data-url="{{ url_for('routers.toggle_switch_scan_status') }}" type="button" id="switch-allow-scan" class="btn btn-md btn-{{ 'success' if switch_scan_status else 'secondary' }} {{ 'blinking-green' if switch_scan_status else '' }} me-2">
+                        <i style="font-size: large" class="fa-solid fa-light-switch"></i>
+                    </button>
                     <button type="button" id="verify-all-routers-connection-button" class="btn btn-md btn-success me-2">
-                        <i class="fa-solid fa-cloud-check"></i>&nbsp; Verify Routers
+                        <i style="font-size: large" class="fa-solid fa-cloud-check"></i>
                     </button>
                     <button type="button" class="btn btn-md btn-danger me-2" data-bs-toggle="modal" id="delete-select"
                             data-bs-target="#delete-select-modal">
-                        <i class="fa-solid fa-square-minus"></i>&nbsp; Delete Selected
+                        <i style="font-size: large" class="fa-solid fa-trash-can-plus"></i>
                     </button>
                     <button type="button" class="btn btn-md btn-dark" data-bs-toggle="modal" id="delete-all"
                             data-bs-target="#delete-all-modal">
-                        <i class="fa-solid fa-trash"></i>&nbsp; Delete All
+                        <i style="font-size: large" class="fa-solid fa-trash-can-xmark"></i>
                     </button>
                 </div>
             </div>
