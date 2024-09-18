@@ -46,8 +46,3 @@ functions = {
     'get_jwt_token': get_verified_jwt_header,
     'get_local_ip': get_local_ip,
 }
-
-if __name__ == '__main__':
-    print(get_public_ip())
-    print(get_local_ip())
-    print(get_verified_jwt_header())

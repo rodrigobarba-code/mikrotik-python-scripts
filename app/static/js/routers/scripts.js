@@ -48,13 +48,23 @@ class RouterDetails {
 
 $(document).ready(() => {
     $('#verify-router-connection').on('click', async () => {
-        let token = await getVerifiedJWTCredentials()
+        Swal.fire({
+            title: 'Verifying router connection',
+            icon: 'info',
+            text: 'Wait a moment',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        let token = await getVerifiedJWTCredentials();
         let router_id = $('#verify-router-connection').data('id');
         $.ajax({
             url: `http://localhost:8080/api/private/router/verify/${router_id}`,
             type: 'GET',
             contentType: 'application/json',
-            headers: token,
+            headers: token.jwt,
             success: (data) => {
                 if (data.backend_status === 200) {
                     Swal.fire({
@@ -81,12 +91,22 @@ $(document).ready(() => {
     });
 
     $('#verify-all-routers-connection-button').on('click', async () => {
+        Swal.fire({
+            title: 'Verifying all routers connection',
+            icon: 'info',
+            text: 'Wait a moment',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
         let token = await getVerifiedJWTCredentials()
         $.ajax({
             url: `http://localhost:8080/api/private/router/verify/all/`,
             type: 'GET',
             contentType: 'application/json',
-            headers: token,
+            headers: token.jwt,
             success: (data) => {
                 if (data.backend_status === 200) {
                     if (data.is_connected === 1) {
@@ -119,70 +139,117 @@ $(document).ready(() => {
             }
         });
     });
-});
 
-$('#router-form').on('submit', async function(event) {
-    event.preventDefault();  // Evita que el formulario se envíe automáticamente
+    $('#router-form').on('submit', async function(event) {
+        event.preventDefault();
 
-    let loadingMessage = Swal.fire({
-        title: 'Verifying credentials',
-        text: 'Wait a moment',
-        allowOutsideClick: false,
-        didOpen: () => {
-            Swal.showLoading();
+        showLoadingMessage('Verifying credentials', 'Wait a moment');
+
+        try {
+            let token = await getToken();
+            let formData = await getCredentialsData();
+
+            let connectionStatus = await verifyRouterCredentials(token, formData);
+
+            if (connectionStatus.is_connected === 1) {
+                handleSuccessfulConnection(formData, token);
+            } else {
+                showAlert('question', 'Credentials are not valid', connectionStatus.message);
+            }
+        } catch (error) {
+            showAlert('error', 'Error', 'Failed to get JWT token');
         }
     });
 
-    try {
+    async function getToken() {
         let token = await getVerifiedJWTCredentials();
+        return token.jwt;
+    }
 
-        let router_ip = $('#router-ip').val();
-        let router_username = $('#router-username').val();
-        let router_password = $('#router-password').val();
+    function getCredentialsData() {
+        return {
+            router_ip: $('#router_ip').val(),
+            router_username: $('#router_username').val(),
+            router_password: $('#router_password').val()
+        };
+    }
 
-        $.ajax({
-            url: 'http://localhost:8080/api/private/router/verify-credentials/',
-            type: 'GET',
-            contentType: 'application/json',
-            headers: token,
-            data: JSON.stringify({
-                router_ip: router_ip,
-                router_username: router_username,
-                router_password: router_password
-            }),
-            success: (data) => {
-                if (data.backend_status === 200) {
-                    console.log(data);
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Connection successful',
-                        text: 'Credentials are valid.'
-                    });
-                } else {
-                    Swal.fire({
-                        icon: 'question',
-                        title: 'Credentials are not valid',
-                        text: data.message,
-                    });
-                }
-            },
-            error: () => {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Failed to verify credentials',
-                });
+    async function verifyRouterCredentials(token, formData) {
+        try {
+            return await $.ajax({
+                url: 'http://localhost:8080/api/private/router/verify-credentials/',
+                type: 'GET',
+                headers: token,
+                data: formData
+            });
+        } catch (error) {
+            showAlert('error', 'Error', 'Failed to verify credentials');
+            throw error;
+        }
+    }
+
+    function handleSuccessfulConnection(formData, token) {
+        Swal.fire({
+            icon: 'success',
+            title: 'Connection successful',
+            text: 'Credentials are valid. You can now continue.',
+            showCancelButton: true,
+            confirmButtonText: 'Continue',
+            cancelButtonText: 'Cancel',
+            cancelButtonColor: '#d33',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                processRouterAddition(formData, token);
             }
         });
+    }
 
-    } catch (error) {
-        // Maneja errores de obtener el token
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'Failed to get JWT token',
+    function processRouterAddition(formData, token) {
+        showLoadingMessage('Processing...', 'Wait a moment');
+
+        let addURL = $('#router-form').data('url');
+        let returnURL = $('#router-form').data('reload');
+
+        $.ajax({
+            url: addURL,
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            headers: token,
+            success: function(response) {
+                let action = $('#router-form').data('result-action');
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: action,
+                    timer: 1500
+                });
+                window.location.href = returnURL;
+            },
+            error: function(error) {
+                showAlert('error', 'Error', 'Failed to add router');
+            }
         });
-        console.error('Error obtaining JWT token:', error);
+    }
+
+    function showLoadingMessage(title, text) {
+        Swal.fire({
+            title: title,
+            icon: 'info',
+            text: text,
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+    }
+
+    function showAlert(icon, title, text) {
+        Swal.fire({
+            icon: icon,
+            title: title,
+            text: text
+        });
     }
 });
-

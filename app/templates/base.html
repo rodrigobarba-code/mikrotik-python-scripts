@@ -125,7 +125,7 @@
 
 <!-- API Credentials -->
 <script>
-    function getVerifiedJWTCredentials() {
+    async function getVerifiedJWTCredentials() {
         let url = "{{ url_for('auth.get_jwt') }}";
         return new Promise((resolve, reject) => {
             $.ajax({
