@@ -1,3 +1,7 @@
+.html, body {
+
+}
+
 /* Main Body */
 .main-body {
     padding: 15px;
@@ -5,23 +9,39 @@
 
 /* Navigation Link */
 .nav-link {
-    color: #4a5568;
+    color: var(--text-color);
     border-radius: 30px ! important;
     margin-top: 2px;
     margin-bottom: 2px ! important;
 }
 
+.nav-link:hover {
+    color: var(--accent);
+    background-color: var(--nav-items);
+}
+
+/* Navigation Link Active */
+.nav-link.active {
+    color: var(--text-color-active) !important;
+    background-color: var(--accent) !important;
+}
+
+
 /* Card Styles */
 .card {
-    background-color: #fff;
     border-radius: 20px;
     border: 0 solid rgba(0, 0, 0, 0.125);
     display: flex;
     flex-direction: column;
     word-wrap: break-word;
     position: relative;
-    background-color: hsla(0, 0%, 100%, 0.32) !important;
+    background-color: var(--sidebar-color) !important; /* Semi-transparent background */
     backdrop-filter: saturate(200%) blur(25px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+}
+
+.tab-pane {
+    color: var(--text-color);
 }
 
 .card-header {
@@ -38,7 +58,7 @@
 .form-control {
     border-width: 2px;
     border-radius: 20px;
-    color: #000000;
+    color: var(--text-color);
     background-color: transparent;
     width: 100%;
     padding: 10px;
@@ -75,4 +95,3 @@
 
 .shadow-none {
 }
-

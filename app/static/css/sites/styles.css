@@ -10,3 +10,8 @@
     min-height: 300px;
     z-index: 2;
 }
+
+.text {
+    color: var(--text-color);
+    transition: var(--tran-03);
+}

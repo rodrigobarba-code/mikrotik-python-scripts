@@ -130,6 +130,8 @@
 #user-timeline-body {
     height: max-content;
     max-height: 80vh;
+    border: none;
+    background: transparent;
 }
 
 @media (max-width: 767px) {
@@ -145,4 +147,9 @@
 
 .hide-scroll {
     overflow: hidden;
+}
+
+.text {
+    color: var(--text-color);
+    transition: var(--tran-03);
 }

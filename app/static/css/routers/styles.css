@@ -22,3 +22,7 @@
     100% { box-shadow: 0 0 10px 5px rgba(40, 167, 69, 1); }
 }
 
+.text {
+    color: var(--text-color);
+    transition: var(--tran-03);
+}
