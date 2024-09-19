@@ -4,31 +4,35 @@
         <div class="logo-details">
             <a class="a-logo" href="{{ url_for('home.home') }}" id="logo-link">
                 <img class="logo-icon" alt="Seven Suite Logo"
-                     src="{{ url_for('static', filename='img/seven_suite_icon.svg') }}">
+                     src="{{ url_for('static', filename='img/seven_suite_icon.svg') }}"
+                >
                 <span class="logo_name">Seven&nbsp;Suite</span>
             </a>
         </div>
+        <img id="toggle-sidebar" class="toggle" src="{{ url_for('static', filename='img/svg/toggle-button.svg') }}"
+             alt="Toggle">
+        <!-- Navigation -->
         <ul class="nav-links">
             {% for item in menu_items %}
                 {% if item == 'separator' %}
-                    <hr class="w-75" style="color: white">
+                    <hr class="w-75 text">
                 {% elif item.submenu %}
-                    <li>
+                    <li class="">
                         <div class="iocn-link">
                             <a {% if item.endpoint != '#' %} href="{{ url_for(item.endpoint) }}" {% endif %}>
-                                <i class="{{ item.icon }}"></i>
+                                <i class="{{ item.icon }}" style="{{ item.style }}"></i>
                                 {% if item.marquee %}
                                     <marquee direction="left" scrollamount="4"><span class="link_name">{{ item.name }}</span></marquee>
                                 {% else %}
                                     <span class="link_name">{{ item.name }}</span>
                                 {% endif %}
                             </a>
-                            <i class='bx bxs-chevron-down arrow'></i>
+                            <i class='bx bxs-chevron-down arrow text'></i>
                         </div>
                         <ul class="sub-menu">
                             {% for sub_item in item.submenu %}
                                 {% if sub_item == 'separator' %}
-                                    <hr class="w-75" style="color: white">
+                                    <hr class="w-75 text">
                                 {% else %}
                                     <li><a href="{{ url_for(sub_item.endpoint) }}">{{ sub_item.name }}</a></li>
                                 {% endif %}
@@ -53,14 +57,27 @@
                 {% endif %}
             {% endfor %}
         </ul>
+
         <div class="user-actions">
-            <ul class="bg-dark dropdown-menu position-relative d-flex gap-1 p-2 rounded-3" data-bs-theme="dark">
+            <ul class="dropdown-menu position-relative d-flex gap-1 p-2">
                 {% for item in profile_menu_items %}
-                    <li>
+                    <li class="">
                         {% if item == 'separator' %}
-                            <hr class="dropdown-divider">
+                            <hr class="dropdown-divider text">
+                        {% elif item.name == 'Theme Switch' %}
+                            <div class="d-flex align-items-center">
+                                <a id="{{ item.name | lower | replace(' ', '-') }}-button"
+                                   class="dropdown-item rounded-3 text"
+                                        {% if item.endpoint != '#' %} href="{{ url_for(item.endpoint) }}" {% endif %}>
+                                    <i class="{{ item.icon }}"></i>&nbsp; {{ item.name }}
+                                </a>
+                                <div class="toggle-switch">
+                                    <span class="switch"></span>
+                                </div>
+                            </div>
                         {% else %}
-                            <a id="{{ item.name | lower | replace(' ', '-') }}-button" class="dropdown-item rounded-2"
+                            <a id="{{ item.name | lower | replace(' ', '-') }}-button"
+                               class="dropdown-item rounded-3 text"
                                     {% if item.endpoint != '#' %} href="{{ url_for(item.endpoint) }}" {% endif %}>
                                 <i class="{{ item.icon }}"></i>&nbsp; {{ item.name }}
                             </a>
@@ -74,8 +91,8 @@
                 <img src="{{ session['user_avatar'] }}" alt="profileImg">
             </div>
             <div class="name-job">
-                <div class="profile_name">{{ session['user_name'] }} {{ session['user_lastname'] }}</div>
-                <div class="job">{{ job_display[session['user_privileges']] }}</div>
+                <div class="profile_name text">{{ session['user_name'] }} {{ session['user_lastname'] }}</div>
+                <div class="job text">{{ job_display[session['user_privileges']] }}</div>
             </div>
         </div>
     </div>
@@ -224,15 +241,16 @@
 <!-- Macros for recyclable components -->
 <!-- Macro for the search bar -->
 {% macro search_bar_with_checkbox(col, col_md, col_lg, type, section, data) %}
-    <div class="col-{{col}} col-md-{{col_md}} col-lg-{{col_lg}}">
+    <div class="col-{{ col }} col-md-{{ col_md }} col-lg-{{ col_lg }}">
         <div class="form-group position-relative">
-            <select id="searchbar-{{section}}-{{type}}" class="form-control select2 searchbar" placeholder="Search by {{type}}" style="width: 100%; border-radius: 10px;">
+            <select id="searchbar-{{ section }}-{{ type }}" class="form-control select2 searchbar"
+                    placeholder="Search by {{ type }}" style="width: 100%; border-radius: 10px;">
                 <option value=""></option>
                 {% for item in data %}
                     <option value="{{ item['value'] }}">{{ item['value'] }}</option>
                 {% endfor %}
             </select>
-            <div id="float-container-{{section}}-{{type}}" class="list-group mt-1 float-container"></div>
+            <div id="float-container-{{ section }}-{{ type }}" class="list-group mt-1 float-container"></div>
         </div>
     </div>
     <script> initializeSearchBar('{{ section }}', '{{ type }}') </script>
