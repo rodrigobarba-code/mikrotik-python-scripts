@@ -9,6 +9,16 @@ from flask import render_template, redirect, url_for, flash, request, jsonify, s
 
 switch_scan_status = {'enable': True}
 
+async def get_site_name(site_id: int) -> str:
+    response = requests.get(f'http://localhost:8080/api/private/site/{site_id}', headers=get_verified_jwt_header())
+    if response.status_code == 200:
+        if response.json().get('backend_status') == 200:
+            return response.json().get('site').get('site_name')
+        else:
+            raise Exception(response.json().get('message'))
+    elif response.status_code == 500:
+        raise Exception('Failed to retrieve site name')
+
 def get_available_sites() -> list[SiteEntity]:
     site_list = []
     response = requests.get('http://localhost:8080/api/private/sites/', headers=get_verified_jwt_header())
@@ -240,40 +250,37 @@ def delete_all_routers():
         flash(str(e), 'danger')  
         return jsonify({'message': 'Failed to delete routers', 'error': str(e)}), 500
 
-@routers_bp.route('/get_router_details', methods=['POST'])
-@restriction.login_required  
-@restriction.admin_required  
-def get_router_details():
+@routers_bp.route('/get_router_details/', methods=['GET'])
+async def get_router_details():
     try:
-        data = request.get_json()
-        router_id = data.get('router_id', None)
-
+        router_id = request.args.get('id')
         response = requests.get(f'http://localhost:8080/api/private/router/{router_id}', headers=get_verified_jwt_header())
         if response.status_code == 200:
             if response.json().get('backend_status') == 200:
-                router = response.json().get('router')
-                json_obj = {
-                    'router_name': router['router_name'],
-                    'router_description': router['router_description'],
-                    'router_brand': router['router_brand'],
-                    'router_model': router['router_model'],
-                    'fk_site_id': router['fk_site_id'],
-                    'router_ip': router['router_ip'],
-                    'router_mac': router['router_mac'],
-                    'router_username': router['router_username'],
-                    'router_password': router['router_password'],
-                    'allow_scan': "Yes" if router['allow_scan'] == 1 else "No"
-                }
-                return jsonify(json_obj), 200
+                site_name = await get_site_name(response.json().get('router').get('fk_site_id'))
+                router_obj = response.json().get('router')
+                return jsonify([{
+                    'id': ["Identifier", router_obj.get('router_id')],
+                    'name': ["Router Name", router_obj.get('router_name')],
+                    'description': ["Router Description", router_obj.get('router_description')],
+                    'brand': ["Router Brand", router_obj.get('router_brand')],
+                    'model': ["Router Model", router_obj.get('router_model')],
+                    'site': ["Router Site", site_name],
+                    'ip': ["Router IP", router_obj.get('router_ip')],
+                    'mac': ["Router MAC", router_obj.get('router_mac')],
+                    'username': ["Router Username", router_obj.get('router_username')],
+                    'allow_scan': ["Allow Scan", True if router_obj.get('allow_scan') else False]
+                }]), 200
             else:
-                raise Exception(response.json().get('message'))
+                return jsonify({'message': response.json().get('message')}), 500
         elif response.status_code == 500:
-            raise Exception('Failed to get router data')
+            return jsonify({'message': 'Failed to get router details'}), 500
     except Exception as e:
-        return jsonify({'message': 'Failed to get router data', 'error': str(e)}), 500
+        return jsonify({'message': 'Failed to get router details', 'error': str(e)}), 500
 
 @routers_bp.route('/toggle/switch/scan/status/', methods=['GET'])
 @restriction.login_required
+@restriction.admin_required
 def toggle_switch_scan_status():
     try:
         switch_scan_status['enable'] = not switch_scan_status['enable']

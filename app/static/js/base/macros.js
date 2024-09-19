@@ -178,7 +178,16 @@ function initializePagination(size, command) {
  * @param {string} url - The url to fetch the item data.
  * @param {string} type - The type of the item.
  */
-function fetchItemsData(id, url, type) {
+async function fetchItemsData(id, url, type) {
+    Swal.fire({
+        title: 'Fetching Item Details',
+        icon: 'info',
+        text: 'Please wait...',
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
     // Try to fetch the item data.
     $.ajax({
         url: url,  // The url to fetch the item data.
