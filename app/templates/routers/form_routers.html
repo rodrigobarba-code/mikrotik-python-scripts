@@ -19,7 +19,7 @@
     <!-- Routers Jumbotron -->
 
     <!-- Routers Forms -->
-    <section class="routers-forms">
+    <section class="routers-forms text">
         <div class="container-fluid w-75 pb-3">
             <form id="router-form"
                 data-url="{{ url_for('routers.add_router') if router is none else url_for('routers.update_router', router_id=router.router_id) }}"
@@ -32,14 +32,16 @@
                         <div class="form-group">
                             <label for="router_name">Router Name</label>
                             <input type="text" class="form-control" id="router_name" name="router_name"
-                                   value="{{ router.router_name if router is not none else '' }}" maxlength="128" required>
+                                   value="{{ router.router_name if router is not none else '' }}" maxlength="128"
+                                   required>
                         </div>
                     </div>
                     <div class="col-6">
                         <div class="form-group">
                             <label for="router_description">Router Description</label>
                             <input type="text" class="form-control" id="router_description" name="router_description"
-                                   value="{{ router.router_description if router is not none else '' }}" maxlength="256" required>
+                                   value="{{ router.router_description if router is not none else '' }}" maxlength="256"
+                                   required>
                         </div>
                     </div>
                 </div>
@@ -55,7 +57,8 @@
                         <div class="form-group">
                             <label for="router_model">Router Model</label>
                             <input type="text" class="form-control" id="router_model" name="router_model"
-                                   value="{{ router.router_model if router is not none else '' }}" maxlength="128" required>
+                                   value="{{ router.router_model if router is not none else '' }}" maxlength="128"
+                                   required>
                         </div>
                     </div>
                 </div>
@@ -67,7 +70,8 @@
                                 <option value="" selected disabled>Select a Site</option>
                                 {% for site in site_list %}
                                     <option value="{{ site.site_id }}"
-                                            {% if router is not none and router.fk_site_id == site.site_id %} selected {% endif %}>
+                                            {% if router is not none and router.fk_site_id == site.site_id %}
+                                            selected {% endif %}>
                                         {{ site.site_name }}
                                     </option>
                                 {% endfor %}
@@ -82,14 +86,16 @@
                         <div class="form-group">
                             <label for="router_ip">Router IP Address</label>
                             <input type="text" class="form-control" id="router_ip" name="router_ip"
-                                   value="{{ router.router_ip if router is not none else '' }}" maxlength="16" pattern="^([0-9]{1,3}\.){3}[0-9]{1,3}$" required>
+                                   value="{{ router.router_ip if router is not none else '' }}" maxlength="16"
+                                   pattern="^([0-9]{1,3}\.){3}[0-9]{1,3}$" required>
                         </div>
                     </div>
                     <div class="col-6">
                         <div class="form-group">
                             <label for="router_mac">Router MAC Address</label>
                             <input type="text" class="form-control" id="router_mac" name="router_mac"
-                                   value="{{ router.router_mac if router is not none else '' }}" maxlength="17" pattern="^([0-9A-Fa-f]{2}[:]){5}([0-9A-Fa-f]{2})$" required>
+                                   value="{{ router.router_mac if router is not none else '' }}" maxlength="17"
+                                   pattern="^([0-9A-Fa-f]{2}[:]){5}([0-9A-Fa-f]{2})$" required>
                         </div>
                     </div>
                 </div>
@@ -98,34 +104,39 @@
                         <div class="form-group">
                             <label for="router_username">Router Username</label>
                             <input type="text" class="form-control" id="router_username" name="router_username"
-                                   value="{{ router.router_username if router is not none else '' }}" maxlength="128" required>
+                                   value="{{ router.router_username if router is not none else '' }}" maxlength="128"
+                                   required>
                         </div>
                     </div>
                     <div class="col-6">
                         <div class="form-group">
                             <label for="router_password">Router Password</label>
                             <input type="password" class="form-control" id="router_password" name="router_password"
-                                   value="{{ router.router_password if router is not none else '' }}" maxlength="128" required>
+                                   value="{{ router.router_password if router is not none else '' }}" maxlength="128"
+                                   required>
                         </div>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-12 pt-2 pb-2">
                         <div class="form-check form-switch">
-                          <input class="form-check-input" type="checkbox" id="allow_scan" name="allow_scan" {% if router is not none and router.allow_scan == 1 %} checked {% endif %}>
-                          <label class="form-check-label" for="allow_scan">Allow Remote Scan</label>
+                            <input class="form-check-input" type="checkbox" id="allow_scan" name="allow_scan"
+                                    {% if router is not none and router.allow_scan == 1 %} checked {% endif %}>
+                            <label class="form-check-label" for="allow_scan">Allow Remote Scan</label>
                         </div>
                     </div>
                 </div>
                 <div class="mb-3 form-check">
                     <input type="checkbox" class="form-check-input" id="condition-check">
-                    <label class="form-check-label" for="condition-check">I've read and accept that the data provided will be
+                    <label class="form-check-label" for="condition-check">I've read and accept that the data provided
+                        will be
                         used to create or update a new router.</label>
                 </div>
                 <div class="row">
                     <div class="col-12">
                         <button type="button" class="btn btn-secondary" onclick="window.history.back()">Cancel</button>
-                        <button type="submit" class="btn btn-primary">{{ "Add Router" if router is none else "Update Router" }}</button>
+                        <button type="submit"
+                                class="btn btn-primary">{{ "Add Router" if router is none else "Update Router" }}</button>
                     </div>
                 </div>
             </form>

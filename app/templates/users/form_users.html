@@ -19,7 +19,7 @@
     <!-- Users Jumbotron -->
 
     <!-- Users Forms -->
-    <section class="users-forms">
+    <section class="users-forms text">
         <div class="container-fluid w-75">
             <form action="{{ url_for('users.add_user') if user is none else url_for('users.update_user', user_id=user.user_id) }}"
                   method="POST">
@@ -93,13 +93,15 @@
                 </div>
                 <div class="mb-3 form-check">
                     <input type="checkbox" class="form-check-input" id="condition-check">
-                    <label class="form-check-label" for="condition-check">I've read and accept that the data provided will
+                    <label class="form-check-label" for="condition-check">I've read and accept that the data provided
+                        will
                         be used to create or update a new user.</label>
                 </div>
                 <div class="row">
                     <div class="col-12">
                         <button type="button" class="btn btn-secondary" onclick="window.history.back()">Cancel</button>
-                        <button type="submit" class="btn btn-primary">{{ "Add User" if user is none else "Update User" }}</button>
+                        <button type="submit"
+                                class="btn btn-primary">{{ "Add User" if user is none else "Update User" }}</button>
                     </div>
                 </div>
             </form>

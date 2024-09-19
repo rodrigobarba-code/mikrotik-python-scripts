@@ -19,7 +19,7 @@
     <!-- Regions Jumbotron -->
 
     <!-- Regions Forms -->
-    <section class="regions-forms">
+    <section class="regions-forms text">
         <div class="container-fluid w-75">
             <form action="{{ url_for('regions.add_region') if region is none else url_for('regions.update_region', region_id=region.region_id) }}"
                   method="POST">
@@ -30,8 +30,9 @@
                 </div>
                 <div class="mb-3 form-check">
                     <input type="checkbox" class="form-check-input" id="condition-check">
-                    <label class="form-check-label" for="condition-check">I've read and accept that the data provided
-                        will be used to create or update a new region.</label>
+                    <label class="form-check-label for=" condition-check">I've read and accept that the data
+                    provided
+                    will be used to create or update a new region.</label>
                 </div>
                 <button type="submit" class="btn btn-primary">Save</button>
                 <a href="{{ url_for('regions.regions') }}" class="btn btn-secondary">Cancel</a>

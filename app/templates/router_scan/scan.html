@@ -25,17 +25,20 @@
                         <h3 class="form-label mt-2">Scanning Progress ...</h3>
                         <div class="col">
                             <div class="d-flex justify-content-between align-items-center">
-                                <div class="progress flex-grow-1" role="progressbar" aria-label="Default striped example" aria-valuemax="100">
-                                    <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%">
+                                <div class="progress flex-grow-1" role="progressbar"
+                                     aria-label="Default striped example" aria-valuemax="100">
+                                    <div id="progress-bar"
+                                         class="progress-bar progress-bar-striped progress-bar-animated"
+                                         style="width: 100%">
                                     </div>
                                 </div>
-                                    <a class="p-2" type="button" style="font-size: 1.5rem">
-                                        <i class="fa-solid fa-xmark"></i>
-                                    </a>
-                                </div>
+                                <a class="p-2" type="button" style="font-size: 1.5rem">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </a>
                             </div>
                         </div>
-                        <p class="form-label mt-2">(Only the routers that are allowed to be scanned will be displayed)</p>
+                    </div>
+                    <p class="form-label mt-2">(Only the routers that are allowed to be scanned will be displayed)</p>
                 </div>
             </div>
         </div>
@@ -43,7 +46,7 @@
     <!-- Router Scan Jumbotron -->
 
     <!-- Router Scan Database -->
-    <section class="scan-database pt-3">
+    <section class="scan-database pt-3 text">
         <div class="container w-75">
             <div class="row">
                 <div class="col-12 col-md-8 text-left">
@@ -65,7 +68,7 @@
     <!-- Router Scan Database -->
 
     <!-- Router Scan Separator -->
-    <section class="scan-separator">
+    <section class="scan-separator text">
         <div class="container w-75">
             <hr>
         </div>
@@ -73,9 +76,9 @@
     <!-- Router Scan Separator -->
 
     <!-- Router Scan Table -->
-    <section class="regions-table hide-scroll pt-3 pb-3">
+    <section class="regions-table hide-scroll pt-3 pb-3 text">
         <div class="container w-75" id="regions-table-c">
-            <table class="table table-responsive" id="datatable-object">
+            <table class="table table-responsive text" id="datatable-object">
                 <thead>
                 <tr>
                     <th scope="col"></th>
@@ -90,42 +93,42 @@
                 </tr>
                 </thead>
                 <tbody>
-                    {% for arp in arp_list %}
-                        <tr>
-                            <td class="text-center"><label for="scan-{{ arp['id'] }}"></label>
-                                <input type="checkbox" class="form-check-input" id="scan-{{ arp['id'] }}">
-                            </td>
-                            <td>{{ arp['id'] }}</td>
-                            <td>
-                                {% if arp['alias'] == '' %}
-                                    <i class="text-secondary">No alias provided</i>
-                                {% else %}
-                                    {{ arp['alias'] }}
+                {% for arp in arp_list %}
+                    <tr>
+                        <td class="text-center"><label for="scan-{{ arp['id'] }}"></label>
+                            <input type="checkbox" class="form-check-input" id="scan-{{ arp['id'] }}">
+                        </td>
+                        <td>{{ arp['id'] }}</td>
+                        <td>
+                            {% if arp['alias'] == '' %}
+                                <i class="text-secondary">No alias provided</i>
+                            {% else %}
+                                {{ arp['alias'] }}
+                            {% endif %}
+                        </td>
+                        <td>{{ arp['ip'] }}</td>
+                        <td>{{ arp['segment'] }}</td>
+                        <td>{{ arp['mac'] }}</td>
+                        <td>{{ arp['interface'] }}</td>
+                        <td>
+                            {% for tag in arp['tag'] %}
+                                {% set bg_color = '#213A57' %}
+                                {% if tag == 'Public IP' %}
+                                    {% set bg_color = '#0B6477' %}
+                                {% elif tag == 'Private IP' %}
+                                    {% set bg_color = '#14919B' %}
+                                {% elif tag == 'Internal Connection' %}
+                                    {% set bg_color = '#0AD1C8' %}
+                                {% elif tag == 'Duplicated IP' %}
+                                    {% set bg_color = '#EF476F' %}
                                 {% endif %}
-                            </td>
-                            <td>{{ arp['ip'] }}</td>
-                            <td>{{ arp['segment'] }}</td>
-                            <td>{{ arp['mac'] }}</td>
-                            <td>{{ arp['interface'] }}</td>
-                            <td>
-                                {% for tag in arp['tag'] %}
-                                    {% set bg_color = '#213A57' %}
-                                    {% if tag == 'Public IP' %}
-                                        {% set bg_color = '#0B6477' %}
-                                    {% elif tag == 'Private IP' %}
-                                        {% set bg_color = '#14919B' %}
-                                    {% elif tag == 'Internal Connection' %}
-                                        {% set bg_color = '#0AD1C8' %}
-                                    {% elif tag == 'Duplicated IP' %}
-                                        {% set bg_color = '#EF476F' %}
-                                    {% endif %}
 
-                                    <span class="badge" style="background-color: {{ bg_color }}">{{ tag }}</span>
-                                {% endfor %}
-                            </td>
-                            <td class="text-center">
-                                {{ show_details_button(arp['id'], url_for('router_scan.get_scan_details'), 'ARP') }}
-                                <button type="button" id="delete-button-scan-{{ arp['id'] }}"
+                                <span class="badge" style="background-color: {{ bg_color }}">{{ tag }}</span>
+                            {% endfor %}
+                        </td>
+                        <td class="text-center">
+                            {{ show_details_button(arp['id'], url_for('router_scan.get_scan_details'), 'ARP') }}
+                            <button type="button" id="delete-button-scan-{{ arp['id'] }}"
                                     class="btn btn-sm btn-danger"
                                     data-bs-toggle="modal"
                                     data-bs-target="#delete-modal"
@@ -133,10 +136,10 @@
                                     data-type="scan"
                                     data-url="{{ url_for('router_scan.delete_arp_ip', arp_id=arp['id']) }}"
                                     data-name="{{ arp['alias'] }}"
-                                ><i class="fa-solid fa-trash"></i></button>
-                            </td>
-                        </tr>
-                    {% endfor %}
+                            ><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                {% endfor %}
                 </tbody>
             </table>
         </div>

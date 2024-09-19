@@ -19,7 +19,7 @@
     <!-- Sites Jumbotron -->
 
     <!-- Sites Forms -->
-    <section class="sites-forms">
+    <section class="sites-forms text">
         <div class="container-fluid w-75 pb-3">
             <form action="{{ url_for('sites.add_site') if site is none else url_for('sites.update_site', site_id=site.site_id) }}"
                   method="POST">
@@ -58,13 +58,15 @@
                 </div>
                 <div class="mb-3 form-check">
                     <input type="checkbox" class="form-check-input" id="condition-check">
-                    <label class="form-check-label" for="condition-check">I've read and accept that the data provided will be
+                    <label class="form-check-label" for="condition-check">I've read and accept that the data provided
+                        will be
                         used to create or update a new site.</label>
                 </div>
                 <div class="row">
                     <div class="col-12">
                         <button type="button" class="btn btn-secondary" onclick="window.history.back()">Cancel</button>
-                        <button type="submit" class="btn btn-primary">{{ "Add Site" if site is none else "Update Site" }}</button>
+                        <button type="submit"
+                                class="btn btn-primary">{{ "Add Site" if site is none else "Update Site" }}</button>
                     </div>
                 </div>
             </form>

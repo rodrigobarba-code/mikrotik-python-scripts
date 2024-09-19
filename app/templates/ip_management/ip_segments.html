@@ -18,7 +18,8 @@
         <div class="container-fluid py-5 d-flex flex-column flex-md-row">
             <div class="d-flex col-md-1 order-md-1 order-2 text-md-start text-center my-md-0 my-3 justify-content-center align-items-center">
                 <button class="btn btn-c-return">
-                    <a href="{{ url_for('ip_management.ip_management_options_by_site', site_id=site_id) }}" class="text-decoration-none text-dark" style="font-size: 2.5rem">
+                    <a href="{{ url_for('ip_management.ip_management_options_by_site', site_id=site_id) }}"
+                       class="text-decoration-none text-dark" style="font-size: 2.5rem">
                         <i class="fa-solid fa-backward" style="color: white"></i>
                     </a>
                 </button>
@@ -32,7 +33,7 @@
     <!-- IP Segments Jumbotron -->
 
     <!-- IP Segments Database -->
-    <section class="segments-database pt-3">
+    <section class="segments-database pt-3 text">
         <div class="container w-75">
             <div class="row">
                 <div class="col-12 col-md-8 text-left">
@@ -54,7 +55,7 @@
     <!-- IP Segments Database -->
 
     <!-- IP Segments Separator -->
-    <section class="segments-separator">
+    <section class="segments-separator text">
         <div class="container w-75">
             <hr>
         </div>
@@ -62,9 +63,9 @@
     <!-- IP Segments Separator -->
 
     <!-- IP Segments Table -->
-    <section class="segments-table hide-scroll pt-3 pb-3">
+    <section class="segments-table hide-scroll pt-3 pb-3 text">
         <div class="container w-75" id="regions-table-c">
-            <table class="table table-responsive" id="datatable-object">
+            <table class="table table-responsive text" id="datatable-object">
                 <thead>
                 <tr>
                     <th scope="col"></th>
@@ -81,7 +82,8 @@
                     {% for ip_segment in ip_segment_list %}
                         <tr>
                             <td class="text-center"><label for="segment-{{ ip_segment.ip_segment_id }}"></label>
-                                <input type="checkbox" class="form-check-input" id="segment-{{ ip_segment.ip_segment_id }}">
+                                <input type="checkbox" class="form-check-input"
+                                       id="segment-{{ ip_segment.ip_segment_id }}">
                             </td>
                             <th scope="row">{{ ip_segment.ip_segment_id }}</th>
                             <td>{{ ip_segment.ip_segment_ip }}</td>
@@ -111,7 +113,8 @@
                                         data-url="{{ url_for('ip_management.delete_segment', segment_id=ip_segment.ip_segment_id) }}"
                                         data-name="{{ ip_segment.ip_segment_ip }}"
                                 ><i class="fa-solid fa-trash"></i></button>
-                                <button id="show-segment-details" type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal"
+                                <button id="show-segment-details" type="button" class="btn btn-sm btn-primary"
+                                        data-bs-toggle="modal"
                                         data-bs-target="#arp-details-modal" data-id="{{ ip_segment.id }}"
                                         onclick="segmentDetails.show('{{ ip_segment.ip_segment_id }}')">
                                     <i class="fa-solid fa-eye"></i>
@@ -164,22 +167,27 @@
                                     <p><strong>Interface: </strong> <span id="ip-segment-interface-d"></span></p>
                                 </div>
                                 <div class="col-12">
-                                    <p><strong>Actual Interface: </strong> <span id="ip-segment-actual-iface-d"></span></p>
+                                    <p><strong>Actual Interface: </strong> <span id="ip-segment-actual-iface-d"></span>
+                                    </p>
                                 </div>
                                 <div class="col-12">
                                     <p><strong>Segment Tag: </strong> <span id="ip-segment-tag-d"></span></p>
                                 </div>
                                 <div class="col-12">
-                                    <p><strong>Segment Description: </strong> <span id="ip-segment-comment-d"></span></p>
+                                    <p><strong>Segment Description: </strong> <span id="ip-segment-comment-d"></span>
+                                    </p>
                                 </div>
                                 <div class="col-12">
-                                    <p><strong>Segment is Invalid: </strong> <span id="ip-segment-is_invalid-d"></span></p>
+                                    <p><strong>Segment is Invalid: </strong> <span id="ip-segment-is_invalid-d"></span>
+                                    </p>
                                 </div>
                                 <div class="col-12">
-                                    <p><strong>Segment is Dynamic: </strong> <span id="ip-segment-is_dynamic-d"></span></p>
+                                    <p><strong>Segment is Dynamic: </strong> <span id="ip-segment-is_dynamic-d"></span>
+                                    </p>
                                 </div>
                                 <div class="col-12">
-                                    <p><strong>Segment is Disabled: </strong> <span id="ip-segment-is_disabled-d"></span></p>
+                                    <p><strong>Segment is Disabled: </strong> <span
+                                            id="ip-segment-is_disabled-d"></span></p>
                                 </div>
                             </div>
                         </div>

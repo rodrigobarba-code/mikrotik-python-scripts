@@ -23,7 +23,7 @@
     <!-- User Log Jumbotron -->
 
     <!-- User Log Search Box -->
-    <div class="container mt-3">
+    <div class="container mt-3 text">
         <div class="row">
             <div class="col-md-4">
                 <div class="mb-3">
@@ -87,7 +87,7 @@
     <!-- User Log Search Box -->
 
     <!-- User Log Timeline -->
-    <div class="container">
+    <div class="container text">
         <div class="row">
             <div class="col-md-12 mb-3">
                 <div class="card" id="user-timeline-body" style="border-radius: 15px">
@@ -120,14 +120,16 @@
                                                 </strong>
                                             {% else %}
                                                 {% if log.user_log_action == 'LOGIN' %}
-                                                    <p>It has occurred a login, by user {{ log.rk_user_username }}, name:
+                                                    <p>It has occurred a login, by user {{ log.rk_user_username }},
+                                                        name:
                                                         {{ log.rk_user_name }} {{ log.rk_user_lastname }}</p>
                                                     <strong>
                                                         <p>The Public IP Address is {{ log.user_log_public_ip }}</p>
                                                         <p>The Local IP Address is {{ log.user_log_local_ip }}</p>
                                                     </strong>
                                                 {% else %}
-                                                    <p>It has occurred a logout, by user {{ log.rk_user_username }}, name:
+                                                    <p>It has occurred a logout, by user {{ log.rk_user_username }},
+                                                        name:
                                                         {{ log.rk_user_name }} {{ log.rk_user_lastname }}</p>
                                                     <strong>
                                                         <p>The Public IP Address is {{ log.user_log_public_ip }}</p>
