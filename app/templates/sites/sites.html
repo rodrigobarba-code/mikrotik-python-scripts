@@ -30,7 +30,7 @@
         <div class="container w-75">
             <div class="row">
                 <div class="col-12 col-md-8 text-left">
-                    <h2 class="sites-database-title"><b>Available</b> Sites</h2>
+                    <h2 class="sites-database-title text"><b class="">Available</b> Sites</h2>
                 </div>
                 <div class="col-12 col-md-4 d-flex justify-content-end">
                     <button type="button" class="btn btn-md btn-danger me-2" data-bs-toggle="modal" id="delete-select"
@@ -50,16 +50,16 @@
     <!-- Sites Separator -->
     <section class="sites-separator">
         <div class="container w-75">
-            <hr>
+            <hr class="text">
         </div>
     </section>
     <!-- Sites Separator -->
 
     <!-- Sites Table -->
-    <section class="sites-table hide-scroll pt-3 pb-3">
+    <section class="sites-table hide-scroll pt-3 pb-3 text">
         <div class="container w-75" id="sites-table-c">
             <table class="table table-responsive" id="datatable-object">
-                <thead>
+                <thead class="text">
                 <tr>
                     <th scope="col"></th>
                     <th scope="col">#</th>
@@ -69,7 +69,7 @@
                     <th scope="col">Actions</th>
                 </tr>
                 </thead>
-                <tbody>
+                <tbody class="text">
                 {% for site in site_list %}
                     <tr>
                         <td class="text-center"><label for="site-{{ site.site_id }}"></label>
