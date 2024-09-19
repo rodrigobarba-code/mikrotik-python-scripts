@@ -66,12 +66,13 @@
     <!-- JQuery -->
 
     <!-- Select 2 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@x.x.x/dist/select2-bootstrap4.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@x.x.x/dist/select2-bootstrap4.min.css">
     <!-- Select 2 CSS -->
 
     <!-- Pagination CSS & Java Script -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/paginationjs/2.1.5/pagination.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/paginationjs/2.1.5/pagination.css"/>
     <script src="{{ url_for('static', filename='js/base/macros.js') }}"></script>
     <!-- Pagination CSS & Java Script -->
 
@@ -99,8 +100,40 @@
     {% block head %}
     {% endblock %}
     <!-- Custom External CSS -->
+
+
+    <link
+            rel="stylesheet"
+            href="https://site-assets.fontawesome.com/releases/v6.6.0/css/all.css"
+    >
+
+    <link
+            rel="stylesheet"
+            href="https://site-assets.fontawesome.com/releases/v6.6.0/css/sharp-duotone-solid.css"
+    >
+
+    <link
+            rel="stylesheet"
+            href="https://site-assets.fontawesome.com/releases/v6.6.0/css/sharp-thin.css"
+    >
+
+    <link
+            rel="stylesheet"
+            href="https://site-assets.fontawesome.com/releases/v6.6.0/css/sharp-solid.css"
+    >
+
+    <link
+            rel="stylesheet"
+            href="https://site-assets.fontawesome.com/releases/v6.6.0/css/sharp-regular.css"
+    >
+
+    <link
+            rel="stylesheet"
+            href="https://site-assets.fontawesome.com/releases/v6.6.0/css/sharp-light.css"
+    >
 </head>
 <body>
+
 {% from "macros.html" import sidebar, messages %}
 
 <!-- Sidebar -->
@@ -113,13 +146,16 @@
         <i class='bx bx-menu'></i>
         <span id="top-link" class="text"></span>
     </div>
+
     <!-- Messages -->
     {{ messages() }}
     <!-- Messages -->
 
     <!-- Content -->
-    {% block content %} {% endblock %}
+    {% block content %}  {% endblock %}
     <!-- Content -->
+
+
 </div>
 <!-- Content -->
 
