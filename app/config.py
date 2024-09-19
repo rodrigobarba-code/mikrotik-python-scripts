@@ -22,13 +22,13 @@ class Sidebar:
     menu_items = [
         {
             'name': 'Dashboard',  # Name of the menu item
-            'icon': 'fa-solid fa-gauge',  # Icon of the menu item
+            'icon': 'bx bx-tachometer bx-sm icon',  # Icon of the menu item
             'endpoint': 'dashboard.dashboard',  # Endpoint of the menu item
             'submenu': None  # Submenu of the menu item
         },
         {
             'name': 'Databases',  # Name of the menu item
-            'icon': 'fa-solid fa-database',  # Icon of the menu item
+            'icon': 'fa-regular fa-database icon',  # Icon of the menu item
             'endpoint': '#',  # Endpoint of the menu item, if endpoint is # then it is a dropdown menu
             'submenu': [  # Submenu of the menu item
                 {'name': 'Regions', 'endpoint': 'regions.regions'},  # Name and endpoint of the submenu item
@@ -39,7 +39,7 @@ class Sidebar:
         },
         {
             'name': 'Users',  # Name of the menu item
-            'icon': 'fa-solid fa-users',  # Icon of the menu item
+            'icon': 'fa-regular fa-circle-user icon',  # Icon of the menu item
             'endpoint': '#',  # Endpoint of the menu item, if endpoint is # then it is a dropdown menu
             'submenu': [  # Submenu of the menu item
                 {'name': 'Users', 'endpoint': 'users.users'},  # Name and endpoint of the submenu item
@@ -47,16 +47,17 @@ class Sidebar:
             ]
         },
         {
-            'name': 'Router Scan',  # Name of the menu item
-            'icon': 'fa-solid fa-satellite-dish',  # Icon of the menu item
+            'name': 'Router Scan',  # Name of the menu item
+            'icon': 'fa-regular fa-satellite-dish icon',  # Icon of the menu item
             'endpoint': 'router_scan.scan',  # Endpoint of the menu item
             'submenu': None  # Submenu of the menu item
         },
         {
-            'name': 'IP Management',  # Name of the menu item
-            'icon': 'fa-solid fa-ethernet',  # Icon of the menu item
+            'name': 'IP Management',  # Name of the menu item
+            'icon': 'fa-regular fa-ethernet icon',  # Icon of the menu item
             'marquee': False,  # Marquee menu item
-            'endpoint': 'ip_management.ip_management',  # Endpoint of the menu item, if endpoint is # then it is a dropdown menu
+            'endpoint': 'ip_management.ip_management',
+            # Endpoint of the menu item, if endpoint is # then it is a dropdown menu
             'submenu': None  # Submenu of the menu item
         }
     ]
@@ -66,21 +67,28 @@ class Sidebar:
     profile_menu_items = [
         {
             'name': 'Profile',  # Name of the menu item
-            'icon': 'fa-solid fa-address-card',  # Icon of the menu item
+            'icon': 'fa-solid fa-address-card icon',  # Icon of the menu item
             'endpoint': 'profile.profile',  # Endpoint of the menu item blank if endpoint is #
             'profile': True  # Profile menu item
         },
         'separator',  # Separator for the profile menu items
         {
             'name': 'Settings',  # Name of the menu item
-            'icon': 'fa-solid fa-cog',  # Icon of the menu item
+            'icon': 'fa-solid fa-cog icon',  # Icon of the menu item
             'endpoint': 'settings.settings',  # Endpoint of the menu item
             'profile': True  # Profile menu item
         },
         'separator',  # Separator for the profile menu items
         {
-            'name': 'Log Out',  # Name of the menu item
-            'icon': 'fa-solid fa-right-from-bracket',  # Icon of the menu item
+            'name': 'Theme Switch',  # Name of the menu item
+            'icon': 'fa-solid fa-moon icon',  # Icon of the menu item
+            'endpoint': '#',  # Endpoint of the menu item
+            'profile': True  # Profile menu item
+        },
+        'separator',  # Separator for the profile menu items
+        {
+            'name': 'Log Out',  # Name of the menu item
+            'icon': 'fa-solid fa-right-from-bracket icon',  # Icon of the menu item
             'endpoint': 'auth.logout',  # Endpoint of the menu item
             'profile': True  # Profile menu item
         }
