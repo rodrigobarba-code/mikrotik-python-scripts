@@ -1,3 +1,30 @@
+const body = document.querySelector('body');
+const modeSwitch = body.querySelector(".toggle-switch");
+
+// Variable para almacenar el tema
+let currentTheme = localStorage.getItem("theme") || "light"; // Valor predeterminado es "light"
+
+// Función para aplicar el tema
+function applyTheme(theme) {
+    body.className = theme; // Cambia la clase del cuerpo directamente
+}
+
+// Aplicar el tema inicial basado en la variable
+applyTheme(currentTheme);
+
+// Manejo del cambio de tema con el interruptor
+modeSwitch.addEventListener("click", () => {
+    // Alternar el tema
+    currentTheme = currentTheme === "dark" ? "light" : "dark";
+
+    // Aplicar el tema nuevo
+    applyTheme(currentTheme);
+
+    // Guardar el tema en localStorage
+    localStorage.setItem("theme", currentTheme);
+});
+
+
 document.addEventListener('DOMContentLoaded', () => {
     const sidebar = document.querySelector('.sidebar');
     const userActions = document.querySelector('.user-actions');
