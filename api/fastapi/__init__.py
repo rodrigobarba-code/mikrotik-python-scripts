@@ -2,6 +2,8 @@ from .metadata import app_metadata
 from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 
+from .routes.logs_api import logs_router
+from .routes.users_api import users_router
 from .routes.sites_api import sites_router
 from .routes.regions_api import regions_router
 from .routes.routers_api import routers_router
@@ -16,7 +18,9 @@ fastapi_app.add_middleware(
     allow_headers=["*"],
 )
 
-private_router = APIRouter(prefix='/private', tags=['Private API'])
+private_router = APIRouter(prefix='/private')
+private_router.include_router(logs_router, tags=['Logs'])
+private_router.include_router(users_router, tags=['Users'])
 private_router.include_router(sites_router, tags=['Sites'])
 private_router.include_router(regions_router, tags=['Regions'])
 private_router.include_router(routers_router, tags=['Routers'])

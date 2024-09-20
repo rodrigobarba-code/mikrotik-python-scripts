@@ -1,17 +1,15 @@
 import bcrypt
+from .. import Base
 from datetime import datetime
-from .. import Base, SessionLocal
-from sqlalchemy import Column, Integer, String
-
 from entities.user import UserEntity
 from entities.user_log import UserLogEntity
-
+from sqlalchemy import Column, Integer, String
 from models.users.functions import UsersFunctions
 
 class User(Base):
     __tablename__ = 'users'  
 
-    user_id = Column(Integer, primary_key=True, autoincrement=True)  
+    user_id = Column(Integer, primary_key=True, autoincrement=True)
     user_username = Column(String(128), nullable=False)  
     user_password = Column(String(128), nullable=False)  
     user_name = Column(String(128), nullable=False)  
@@ -34,12 +32,11 @@ class User(Base):
         }
 
     @staticmethod
-    def add_user(user: UserEntity):
+    def add_user(session, user: UserEntity):
         model_u = User
-        session = SessionLocal()
         v_user = UsersFunctions()  
         try:
-            if v_user.validate_user(user, "insert", model_u):
+            if v_user.validate_user(session, user, "insert", model_u):
                 hashed_password = bcrypt.hashpw(user.user_password.encode('utf-8'), bcrypt.gensalt())
                 new_user = User(  
                     user_id=None,  
@@ -50,21 +47,18 @@ class User(Base):
                     user_privileges=str(user.user_privileges),  
                     user_state=str(user.user_state)  
                 )
-                session.add(new_user)  
-                session.commit()
+                session.add(new_user)
             else:  
                 raise Exception()  
-        except Exception as e:  
-            session.rollback()  
+        except Exception as e:
             raise e  
 
     @staticmethod
-    def update_user(new_user: UserEntity):
-        session = SessionLocal()
+    def update_user(session, new_user: UserEntity):
         try:
             model_u = User  
             v_user = UsersFunctions()
-            if v_user.validate_user(new_user, "update", model_u):
+            if v_user.validate_user(session, new_user, "update", model_u):
                 hashed_password = bcrypt.hashpw(new_user.user_password.encode('utf-8'), bcrypt.gensalt())  
                 old_user = User.query.get(new_user.user_id)  
                 old_user.user_username = new_user.user_username  
@@ -73,21 +67,19 @@ class User(Base):
                 old_user.user_name = new_user.user_name  
                 old_user.user_lastname = new_user.user_lastname  
                 old_user.user_privileges = new_user.user_privileges  
-                old_user.user_state = new_user.user_state  
-                session.commit()  
+                old_user.user_state = new_user.user_state
             else:  
                 raise Exception()  
-        except Exception as e:  
-            session.rollback()  
+        except Exception as e:
             raise e  
 
     @staticmethod
-    def delete_user(user_id: int):
+    def delete_user(session, user_id: int):
         model_u = User
-        session = SessionLocal()
         v_user = UsersFunctions()  
         try:
             if v_user.validate_user(
+                    session,
                     UserEntity(
                         user_id=user_id,  
                         user_username=str(),  
@@ -101,30 +93,40 @@ class User(Base):
                     model_u  
             ):
                 user = User.query.get(user_id)
-                session.delete(user)  
-                session.commit()  
+                session.delete(user)
             else:  
                 raise Exception()  
-        except Exception as e:  
-            session.rollback()  
-            raise e  
+        except Exception as e:
+            raise e
 
     @staticmethod
-    def delete_all_users():
-        session = SessionLocal()
+    def bulk_delete_users(session, user_ids):
+        model_u = User
+        v_user = UsersFunctions()
         try:
-            User.query.delete()  
-            session.commit()  
-        except Exception as e:  
-            session.rollback()  
+            if v_user.validate_bulk_delete(session, model_u, user_ids):
+                for user_id in user_ids:
+                    user = session.query(User).get(user_id)
+                    session.delete(user)
+            else:
+                raise Exception()
+        except Exception as e:
+            raise
+
+    @staticmethod
+    def delete_all_users(session):
+        try:
+            session.query(User).delete()
+        except Exception as e:
             raise e
     
     @staticmethod
-    def get_user(user_id: int):
+    def get_user(session, user_id: int):
         model_u = User  
         v_user = UsersFunctions()  
         try:
             if v_user.validate_user(
+                    session,
                     UserEntity(
                         user_id=user_id,  
                         user_username=str(),  
@@ -137,7 +139,7 @@ class User(Base):
                     "get",  
                     model_u  
             ):
-                user = User.query.get(user_id)
+                user = session.query(User).get(user_id)
                 obj = UserEntity(  
                     user_id=user.user_id,  
                     user_username=user.user_username,  
@@ -155,16 +157,15 @@ class User(Base):
             raise e  
 
     @staticmethod
-    def get_users():
+    def get_users(session):
         try:
             r_list = []  
-            users = User.query.all()  
+            users = session.query(User).all()
             for user in users:  
                 obj = UserEntity(  
                     user_id=user.user_id,  
                     user_username=user.user_username,  
                     user_password=bcrypt.hashpw(user.user_password, bcrypt.gensalt()).decode('utf-8'),
-                    
                     user_name=user.user_name,  
                     user_lastname=user.user_lastname,  
                     user_privileges=user.user_privileges,  
@@ -172,7 +173,7 @@ class User(Base):
                 )
                 obj.validate()  
                 r_list.append(obj)  
-            return r_list  
+            return r_list
         except Exception as e:  
             raise e  
 
@@ -210,8 +211,7 @@ class UserLog(Base):
         }
 
     @staticmethod
-    def add_user_log(user_log: UserLogEntity):
-        session = SessionLocal()
+    def add_user_log(session, user_log: UserLogEntity):
         from models.users.exceptions import UserLogDatabaseError  
         try:
             new_user_log = UserLog(  
@@ -227,16 +227,13 @@ class UserLog(Base):
                 user_log_public_ip=user_log.user_log_public_ip,  
                 user_log_local_ip=user_log.user_log_local_ip  
             )
-            session.add(new_user_log)  
-            session.commit()  
+            session.add(new_user_log)
             return user_log  
-        except Exception as e:  
-            session.rollback()  
+        except Exception as e:
             raise UserLogDatabaseError()  
 
     @staticmethod
-    def delete_from_date_user_log(date_str):
-        session = SessionLocal()
+    def delete_from_date_user_log(session, date_str):
         from models.users.exceptions import UserLogDatabaseError  
         try:
             flag = int()
@@ -245,31 +242,26 @@ class UserLog(Base):
             for user_log in UserLog.query.all():
                 user_log_date = datetime.strptime(user_log.user_log_date, '%d/%m/%Y %H:%M:%S')
                 if user_log_date <= from_date:  
-                    session.delete(user_log)  
-                    session.commit()  
+                    session.delete(user_log)
                     flag += 1
             return flag  
-        except Exception as e:  
-            session.rollback()  
+        except Exception as e:
             raise UserLogDatabaseError()
 
     @staticmethod
-    def delete_all_user_log():
-        session = SessionLocal()
+    def delete_all_user_log(session):
         from models.users.exceptions import UserLogDatabaseError  
         try:
-            UserLog.query.delete()  
-            session.commit()  
-        except Exception as e:  
-            session.rollback()  
+            session.query(UserLog).delete()
+        except Exception as e:
             raise UserLogDatabaseError()  
 
     @staticmethod
-    def get_user_logs():
+    def get_user_logs(session):
         from models.users.exceptions import UserLogError  
         try:
             r_list = []  
-            user_logs = UserLog.query.order_by(UserLog.user_log_date.desc()).all()  
+            user_logs = session.query(UserLog).order_by(UserLog.user_log_date.desc()).all()
             for user_log in user_logs:  
                 obj = UserLogEntity(  
                     user_log_id=user_log.user_log_id,  
@@ -288,4 +280,4 @@ class UserLog(Base):
                 r_list.append(obj)  
             return r_list  
         except Exception as e:
-            raise UserLogError()  
+            raise UserLogError()
