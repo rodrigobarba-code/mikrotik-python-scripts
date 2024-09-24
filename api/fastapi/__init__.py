@@ -13,9 +13,9 @@ fastapi_app = FastAPI(**app_metadata)
 fastapi_app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    allow_credentials=True,
 )
 
 private_router = APIRouter(prefix='/private')
@@ -24,4 +24,5 @@ private_router.include_router(users_router, tags=['Users'])
 private_router.include_router(sites_router, tags=['Sites'])
 private_router.include_router(regions_router, tags=['Regions'])
 private_router.include_router(routers_router, tags=['Routers'])
+
 fastapi_app.include_router(private_router, prefix='/api')
