@@ -60,7 +60,7 @@ class User(Base):
             v_user = UsersFunctions()
             if v_user.validate_user(session, new_user, "update", model_u):
                 hashed_password = bcrypt.hashpw(new_user.user_password.encode('utf-8'), bcrypt.gensalt())  
-                old_user = User.query.get(new_user.user_id)  
+                old_user = session.query(User).get(new_user.user_id)
                 old_user.user_username = new_user.user_username  
                 if new_user.user_password != old_user.user_password and new_user.user_password != '':  
                     old_user.user_password = hashed_password  
@@ -92,7 +92,7 @@ class User(Base):
                     "delete",  
                     model_u  
             ):
-                user = User.query.get(user_id)
+                user = session.query(User).get(user_id)
                 session.delete(user)
             else:  
                 raise Exception()  
@@ -143,7 +143,7 @@ class User(Base):
                 obj = UserEntity(  
                     user_id=user.user_id,  
                     user_username=user.user_username,  
-                    user_password=bcrypt.hashpw(user.user_password, bcrypt.gensalt()).decode('utf-8'),  
+                    user_password=str(),
                     user_name=user.user_name,  
                     user_lastname=user.user_lastname,  
                     user_privileges=user.user_privileges,  
@@ -165,7 +165,7 @@ class User(Base):
                 obj = UserEntity(  
                     user_id=user.user_id,  
                     user_username=user.user_username,  
-                    user_password=bcrypt.hashpw(user.user_password, bcrypt.gensalt()).decode('utf-8'),
+                    user_password=str(),
                     user_name=user.user_name,  
                     user_lastname=user.user_lastname,  
                     user_privileges=user.user_privileges,  
@@ -175,7 +175,17 @@ class User(Base):
                 r_list.append(obj)  
             return r_list
         except Exception as e:  
-            raise e  
+            raise e
+
+    @staticmethod
+    def verify_user_identifier(session, user_id: int) -> bool:
+        try:
+            user = session.query(User).get(user_id)
+            if user is None:
+                return False
+            return True
+        except Exception as e:
+            raise e
 
 class UserLog(Base):
     __tablename__ = 'users_log'  
@@ -239,14 +249,14 @@ class UserLog(Base):
             flag = int()
             date_tmp = datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S')  
             from_date = datetime(date_tmp.year, date_tmp.month, date_tmp.day, date_tmp.hour, date_tmp.minute, date_tmp.second)
-            for user_log in UserLog.query.all():
+            for user_log in session.query(UserLog).all():
                 user_log_date = datetime.strptime(user_log.user_log_date, '%d/%m/%Y %H:%M:%S')
                 if user_log_date <= from_date:  
                     session.delete(user_log)
                     flag += 1
             return flag  
         except Exception as e:
-            raise UserLogDatabaseError()
+            raise e
 
     @staticmethod
     def delete_all_user_log(session):

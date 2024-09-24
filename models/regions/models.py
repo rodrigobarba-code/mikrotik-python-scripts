@@ -108,7 +108,6 @@ class Region(Base):
     def delete_all_regions(session):
         try:
             session.query(Region).delete()
-            session.commit()  
         except Exception as e:
             raise RegionError()
     

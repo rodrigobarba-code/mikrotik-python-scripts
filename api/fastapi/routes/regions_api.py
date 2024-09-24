@@ -1,30 +1,42 @@
 from typing import List
 from ..auth import verify_jwt
 from pydantic import BaseModel
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 
+from ..functions import APIFunctions
 from entities.region import RegionEntity
 from models.regions.models import Region
 from utils.threading_manager import ThreadingManager
 
 regions_router = APIRouter()
+regions_functions = APIFunctions()
 
 class RegionBulkDeleteBase(BaseModel):
     regions_ids: List[int]
 
 @regions_router.get("/regions/")
-async def get_regions(token: dict = Depends(verify_jwt)):
+async def get_regions(user_id: int, metadata: Request, token: dict = Depends(verify_jwt)):
     try:
-        request = ThreadingManager().run_thread(Region.get_regions, 'r')
-        region_list = [
-            {"region_id": region.region_id, "region_name": region.region_name}
-            for region in request
-        ]
-        return {
-            'message': "Regions retrieved successfully",
-            'regions': region_list,
-            'backend_status': 200
-        }
+        if regions_functions.verify_user_existence(user_id):
+            request = ThreadingManager().run_thread(Region.get_regions, 'r')
+            region_list = [
+                {"region_id": region.region_id, "region_name": region.region_name}
+                for region in request
+            ]
+            regions_functions.create_transaction_log(
+                action="GET",
+                table="regions",
+                user_id=int(user_id),
+                description="Regions retrieved successfully",
+                public=str(str(metadata.client.host) + ':' + str(metadata.client.port))
+            )
+            return {
+                'message': "Regions retrieved successfully",
+                'regions': region_list,
+                'backend_status': 200
+            }
+        else:
+            raise Exception("User not registered in the system")
     except Exception as e:
         return {
             'message': f"Failed to retrieve regions: {str(e)}",
@@ -32,17 +44,28 @@ async def get_regions(token: dict = Depends(verify_jwt)):
         }
 
 @regions_router.get("/region/{region_id}")
-async def get_region(region_id: int, token: dict = Depends(verify_jwt)):
+async def get_region(user_id: int, metadata: Request, region_id: int, token: dict = Depends(verify_jwt)):
     try:
-        request = ThreadingManager().run_thread(Region.get_region, 'rx', region_id)
-        return {
-            'message': "Region retrieved successfully",
-            'region': {
+        if regions_functions.verify_user_existence(user_id):
+            request = ThreadingManager().run_thread(Region.get_region, 'rx', region_id)
+            region = {
                 "region_id": request.region_id,
                 "region_name": request.region_name
-            },
-            'backend_status': 200
-        }
+            }
+            regions_functions.create_transaction_log(
+                action="GET",
+                table="regions",
+                user_id=int(user_id),
+                description="Region retrieved successfully",
+                public=str(str(metadata.client.host) + ':' + str(metadata.client.port))
+            )
+            return {
+                'message': "Region retrieved successfully",
+                'region': region,
+                'backend_status': 200
+            }
+        else:
+            raise Exception("User not registered in the system")
     except Exception as e:
         return {
             'message': f"Failed to retrieve region: {str(e)}",
@@ -50,17 +73,27 @@ async def get_region(region_id: int, token: dict = Depends(verify_jwt)):
         }
 
 @regions_router.post("/region/")
-async def add_region(region_name: str, token: dict = Depends(verify_jwt)):
+async def add_region(user_id: int, metadata: Request, region_name: str, token: dict = Depends(verify_jwt)):
     try:
-        region = RegionEntity(
-            region_id=int(),
-            region_name=region_name
-        )
-        ThreadingManager().run_thread(Region.add_region, 'w', region)
-        return {
-            'message': "Region added successfully",
-            'backend_status': 200
-        }
+        if regions_functions.verify_user_existence(user_id):
+            region = RegionEntity(
+                region_id=int(),
+                region_name=region_name
+            )
+            ThreadingManager().run_thread(Region.add_region, 'w', region)
+            regions_functions.create_transaction_log(
+                action="POST",
+                table="regions",
+                user_id=int(user_id),
+                description="Region added successfully",
+                public=str(str(metadata.client.host) + ':' + str(metadata.client.port))
+            )
+            return {
+                'message': "Region added successfully",
+                'backend_status': 200
+            }
+        else:
+            raise Exception("User not registered in the system")
     except Exception as e:
         return {
             'message': f"Failed to add region: {str(e)}",
@@ -68,17 +101,27 @@ async def add_region(region_name: str, token: dict = Depends(verify_jwt)):
         }
 
 @regions_router.put("/region/{region_id}")
-async def update_region(region_id: int, region_name: str, token: dict = Depends(verify_jwt)):
+async def update_region(user_id: int, metadata: Request, region_id: int, region_name: str, token: dict = Depends(verify_jwt)):
     try:
-        region = RegionEntity(
-            region_id=region_id,
-            region_name=region_name
-        )
-        ThreadingManager().run_thread(Region.update_region, 'w', region)
-        return {
-            'message': "Region updated successfully",
-            'backend_status': 200
-        }
+        if regions_functions.verify_user_existence(user_id):
+            region = RegionEntity(
+                region_id=region_id,
+                region_name=region_name
+            )
+            ThreadingManager().run_thread(Region.update_region, 'w', region)
+            regions_functions.create_transaction_log(
+                action="PUT",
+                table="regions",
+                user_id=int(user_id),
+                description="Region updated successfully",
+                public=str(str(metadata.client.host) + ':' + str(metadata.client.port))
+            )
+            return {
+                'message': "Region updated successfully",
+                'backend_status': 200
+            }
+        else:
+            raise Exception("User not registered in the system")
     except Exception as e:
         return {
             'message': f"Failed to update region: {str(e)}",
@@ -86,13 +129,23 @@ async def update_region(region_id: int, region_name: str, token: dict = Depends(
         }
 
 @regions_router.delete("/region/{region_id}")
-async def delete_region(region_id: int, token: dict = Depends(verify_jwt)):
+async def delete_region(user_id: str, metadata: Request, region_id: int, token: dict = Depends(verify_jwt)):
     try:
-        ThreadingManager().run_thread(Region.delete_region, 'w', region_id)
-        return {
-            'message': "Region deleted successfully",
-            'backend_status': 200
-        }
+        if regions_functions.verify_user_existence(user_id):
+            ThreadingManager().run_thread(Region.delete_region, 'w', region_id)
+            regions_functions.create_transaction_log(
+                action="DELETE",
+                table="regions",
+                user_id=int(user_id),
+                description="Region deleted successfully",
+                public=str(str(metadata.client.host) + ':' + str(metadata.client.port))
+            )
+            return {
+                'message': "Region deleted successfully",
+                'backend_status': 200
+            }
+        else:
+            raise Exception("User not registered in the system")
     except Exception as e:
         return {
             'message': f"Failed to delete region: {str(e)}",
@@ -100,15 +153,23 @@ async def delete_region(region_id: int, token: dict = Depends(verify_jwt)):
         }
 
 @regions_router.delete("/regions/bulk/")
-async def bulk_delete_regions(request: RegionBulkDeleteBase, token: dict = Depends(verify_jwt)):
+async def bulk_delete_regions(user_id: str, metadata: Request, request: RegionBulkDeleteBase, token: dict = Depends(verify_jwt)):
     try:
-        region_ids = request.regions_ids
-        ThreadingManager().run_thread(Region.bulk_delete_regions, 'w', region_ids)
-        return {
-            'message': "Bulk delete regions successful",
-            'count_flag': len(region_ids),
-            'backend_status': 200
-        }
+        if regions_functions.verify_user_existence(user_id):
+            ThreadingManager().run_thread(Region.bulk_delete_regions, 'w', request.regions_ids)
+            regions_functions.create_transaction_log(
+                action="DELETE",
+                table="regions",
+                user_id=int(user_id),
+                description="Regions deleted successfully",
+                public=str(str(metadata.client.host) + ':' + str(metadata.client.port))
+            )
+            return {
+                'message': "Regions deleted successfully",
+                'backend_status': 200
+            }
+        else:
+            raise Exception("User not registered in the system")
     except Exception as e:
         return {
             'message': f"Failed to bulk delete regions: {str(e)}",
@@ -116,13 +177,23 @@ async def bulk_delete_regions(request: RegionBulkDeleteBase, token: dict = Depen
         }
 
 @regions_router.delete("/regions/")
-async def delete_all_regions(token: dict = Depends(verify_jwt)):
+async def delete_all_regions(user_id: int, metadata: Request, token: dict = Depends(verify_jwt)):
     try:
-        ThreadingManager().run_thread(Region.delete_all_regions, 'wx')
-        return {
-            'message': "All regions deleted successfully",
-            'backend_status': 200
-        }
+        if regions_functions.verify_user_existence(user_id):
+            ThreadingManager().run_thread(Region.delete_all_regions, 'wx')
+            regions_functions.create_transaction_log(
+                action="DELETE",
+                table="regions",
+                user_id=int(user_id),
+                description="All regions deleted successfully",
+                public=str(str(metadata.client.host) + ':' + str(metadata.client.port))
+            )
+            return {
+                'message': "All regions deleted successfully",
+                'backend_status': 200
+            }
+        else:
+            raise Exception("User not registered in the system")
     except Exception as e:
         return {
             'message': f"Failed to delete all regions: {str(e)}",
