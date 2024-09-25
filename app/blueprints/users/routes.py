@@ -126,7 +126,7 @@ def update_user(user_id):
                     'user_name': request.form['user_name'],
                     'user_lastname': request.form['user_lastname'],
                     'user_privileges': request.form['user_privileges'],
-                    'user_state': (1 if request.form['user_state'] == 'active' else 0) if session.get('user_id') == user_id else 1
+                    'user_state': (1 if request.form['user_state'] == 'active' else 0) if session.get('user_id') != user_id else 1
                 }
             )
             if response.status_code == 200:

@@ -187,6 +187,31 @@ class User(Base):
         except Exception as e:
             raise e
 
+    @staticmethod
+    def validate_credentials(session, credentials: dict) -> dict:
+        try:
+            user_db = session.query(User).filter(User.user_username == credentials['user_username']).first()
+
+            if user_db is None:
+                return {
+                    'authenticated': False
+                }
+
+            hashed_password = user_db.user_password.encode('utf-8') if isinstance(user_db.user_password, str) else user_db.user_password
+            authenticated = bcrypt.checkpw(credentials['user_password'].encode('utf-8'), hashed_password)
+
+            if authenticated:
+                return {
+                    'user_id': int(user_db.user_id),
+                    'authenticated': authenticated,
+                }
+
+            return {
+                'authenticated': authenticated,
+            }
+        except Exception as e:
+            return e
+
 class UserLog(Base):
     __tablename__ = 'users_log'  
 

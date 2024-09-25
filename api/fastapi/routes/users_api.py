@@ -83,6 +83,46 @@ def get_user(user_idx: int, metadata: Request, user_id: int, token: dict = Depen
             'backend_status': 400
         }
 
+@users_router.get("/user/auth/")
+def authenticate_user(metadata: Request, user_username: str, user_password: str, token: dict = Depends(verify_jwt)):
+    try:
+        credentials = {"user_username": user_username, "user_password": user_password}
+        request = ThreadingManager().run_thread(User.validate_credentials, 'rx', credentials)
+        if request['authenticated']:
+            user_data = ThreadingManager().run_thread(User.get_user, 'rx', request['user_id'])
+            user = {
+                "user_id": user_data.user_id,
+                "user_username": user_data.user_username,
+                "user_name": user_data.user_name,
+                "user_lastname": user_data.user_lastname,
+                "user_privileges": user_data.user_privileges,
+                "user_state": user_data.user_state
+            }
+            users_functions.create_transaction_log(
+                action="GET",
+                table="users",
+                user_id=int(user_data.user_id),
+                description="User authenticated successfully",
+                public=str(str(metadata.client.host) + ':' + str(metadata.client.port))
+            )
+            return {
+                'message': "User authenticated successfully",
+                'backend_status': 200,
+                'authenticated': True,
+                'user': user
+            }
+        else:
+            return {
+                'message': "Invalid credentials",
+                'backend_status': 200,
+                'authenticated': False
+            }
+    except Exception as e:
+        return {
+            'message': f"Failed to authenticate user: {str(e)}",
+            'backend_status': 400
+        }
+
 @users_router.post("/user/")
 def add_user(
     user_idx: int,

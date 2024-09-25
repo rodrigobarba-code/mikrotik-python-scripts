@@ -86,10 +86,10 @@
                                 <label for="status" class="form-label">Status</label>
                                 <select class="form-select" id="status" name="user_state" required>
                                     <option value="">Select a status</option>
-                                    <option value="active" {% if user.user_status == 1 %} selected {% endif %}>
+                                    <option value="active" {% if user.user_state == 1 %} selected {% endif %}>
                                         Active
                                     </option>
-                                    <option value="inactive" {% if user.user_status == 1 %} selected {% endif %}>
+                                    <option value="inactive" {% if user.user_state == 0 %} selected {% endif %}>
                                         Inactive
                                     </option>
                                 </select>
