@@ -5,7 +5,6 @@ from dotenv import load_dotenv
 from models.users.models import User
 from app.functions import get_verified_jwt_header
 from app.functions import get_local_ip, get_public_ip
-from models.users.functions import users_functions as functions
 from flask import render_template, redirect, url_for, flash, request, session, current_app, jsonify
 
 load_dotenv()
@@ -24,7 +23,6 @@ def login():
         session['user_state'] = os.getenv('SUPER_ADMIN_STATE')
         session['user_public_ip'] = str(get_public_ip())  
         session['user_local_ip'] = str(get_local_ip())
-        functions.create_log(session['user_id'], 'Super Admin logged in', 'LOGIN', 'users')
         return render_template("home/home.html")
     else:
         if request.method == 'POST':  
@@ -53,7 +51,6 @@ def login():
                 elif user.user_privileges == 'guest':  
                     session['user_avatar'] = url_for('static',
                                                      filename='img/user_avatars/guest_avatar.svg')
-                functions.create_log(session['user_id'], 'User logged in', 'LOGIN', 'users')  
                 flash('Welcome back ' + user.user_name + ' ' + user.user_lastname + '!',
                       'success')
                 if remember_me:  
@@ -74,7 +71,6 @@ def login():
 
 @auth_bp.route('/logout')
 def logout():
-    functions.create_log(session['user_id'], 'User logged out', 'LOGOUT', 'users')  
 
     session.pop('user_id', None)  
     session.pop('user_privileges', None)  
