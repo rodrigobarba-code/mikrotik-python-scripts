@@ -51,15 +51,15 @@ def add_user():
             response = requests.post(
                 'http://localhost:8080/api/private/user/',
                 headers=get_verified_jwt_header(),
-                json={
+                params={
+                    'user_idx': session.get('user_id'),
                     'user_username': request.form['user_username'],
                     'user_password': request.form['user_password'],
                     'user_name': request.form['user_name'],
                     'user_lastname': request.form['user_lastname'],
                     'user_privileges': request.form['user_privileges'],
-                    'user_state': request.form['user_state']
-                },
-                params={'user_idx': session.get('user_id')}
+                    'user_state': 1 if request.form['user_state'] == 'active' else 0
+                }
             )
             if response.status_code == 200:
                 if response.json().get('backend_status') == 200:
@@ -119,14 +119,14 @@ def update_user(user_id):
                 headers=get_verified_jwt_header(),
                 params={
                     'user_idx': session.get('user_id'),
-                    'user_id': '',
+                    'user_id': user_id,
                     'user_username': request.form['user_username'],
                     'user_username': request.form['user_username'],
                     'user_password': request.form['user_password'],
                     'user_name': request.form['user_name'],
                     'user_lastname': request.form['user_lastname'],
                     'user_privileges': request.form['user_privileges'],
-                    'user_state': request.form['user_state']
+                    'user_state': (1 if request.form['user_state'] == 'active' else 0) if session.get('user_id') == user_id else 1
                 }
             )
             if response.status_code == 200:
