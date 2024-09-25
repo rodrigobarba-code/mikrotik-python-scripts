@@ -53,7 +53,7 @@ async def get_logs(user_id: int, metadata: Request, token: dict = Depends(verify
 async def delete_logs_by_date(user_id: int, metadata: Request, date: str, token: dict = Depends(verify_jwt)):
     try:
         if logs_functions.verify_user_existence(user_id):
-            ThreadingManager().run_thread(UserLog.delete_from_date_user_log, 'w', date)
+            flag = ThreadingManager().run_thread(UserLog.delete_from_date_user_log, 'w', date)
             logs_functions.create_transaction_log(
                 action="DELETE",
                 table="logs",
@@ -63,7 +63,8 @@ async def delete_logs_by_date(user_id: int, metadata: Request, date: str, token:
             )
             return {
                 'message': "Logs deleted successfully",
-                'backend_status': 200
+                'backend_status': 200,
+                'flag': flag
             }
         else:
             raise Exception("User not registered in the system")

@@ -1,13 +1,13 @@
 class UserEntity:
     def __init__(
         self,
-        user_id,  
-        user_username,  
-        user_password,  
-        user_name,  
-        user_lastname,  
-        user_privileges,  
-        user_state  
+        user_id: int,
+        user_username: str = None,
+        user_password: str = None,
+        user_name: str = None,
+        user_lastname: str = None,
+        user_privileges: str = 'employee',
+        user_state: int = 1
     ):
         self.user_id = user_id
         self.user_username = user_username

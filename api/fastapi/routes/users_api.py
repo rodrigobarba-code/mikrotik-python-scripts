@@ -206,6 +206,7 @@ def bulk_delete_users(user_idx: int, metadata: Request, request: UserBulkDeleteB
             )
             return {
                 'message': "Users deleted successfully",
+                'count_flag': len(request.users_ids),
                 'backend_status': 200
             }
         else:
