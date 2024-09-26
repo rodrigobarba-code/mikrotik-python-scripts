@@ -10,10 +10,10 @@ class ARPFunctions:
         pass
 
     @staticmethod
-    def validate_arp_exists(arp_ip, arp_mac):
+    def validate_arp_exists(session, arp_ip, arp_mac):
         try:
             from models.router_scan.models import ARP
-            arp = ARP.query.filter(
+            arp = session.query(ARP).filter(
                 ARP.arp_ip == arp_ip,  
                 ARP.arp_mac == arp_mac  
             ).first()
