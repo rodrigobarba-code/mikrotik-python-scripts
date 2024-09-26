@@ -33,8 +33,11 @@ class ThreadingManager:
         try:
             print(f"{'Writing' if type in ['w', 'wx'] else 'Reading'} Thread: {func.__name__} Running")
 
-            if type in ['r', 'rx']:
-                result[0] = func(session, object) if type == 'rx' else func(session)
+            if type in ['r', 'rx', 'rxc']:
+                result[0] = func(session, object) if type in ['rx', 'rxc'] else func(session)
+                if type == 'rxc':
+                    session.commit()
+                    session.close()
             elif type in ['w', 'wx']:
                 func(session, object) if type == 'w' else func(session)
                 session.commit()

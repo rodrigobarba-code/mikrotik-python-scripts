@@ -1,5 +1,6 @@
 import bcrypt
 from .. import Base
+from dateutil import parser
 from datetime import datetime
 from entities.user import UserEntity
 from entities.user_log import UserLogEntity
@@ -265,20 +266,24 @@ class UserLog(Base):
             session.add(new_user_log)
             return user_log  
         except Exception as e:
-            raise UserLogDatabaseError()  
+            raise UserLogDatabaseError()
 
     @staticmethod
     def delete_from_date_user_log(session, date_str):
         try:
             flag = 0
-            date_tmp = datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S')  
-            from_date = datetime(date_tmp.year, date_tmp.month, date_tmp.day, date_tmp.hour, date_tmp.minute, date_tmp.second)
+            date_tmp = parser.parse(date_str)
+            from_date = datetime(date_tmp.year, date_tmp.month, date_tmp.day, date_tmp.hour, date_tmp.minute,
+                                 date_tmp.second)
+
             for user_log in session.query(UserLog).all():
                 user_log_date = datetime.strptime(user_log.user_log_date, '%d/%m/%Y %H:%M:%S')
-                if user_log_date <= from_date:  
+
+                if user_log_date <= from_date:
                     session.delete(user_log)
                     flag += 1
-            return flag  
+
+            return flag
         except Exception as e:
             raise e
 
