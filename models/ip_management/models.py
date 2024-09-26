@@ -85,6 +85,26 @@ class IPSegment(Base):
             raise e
 
     @staticmethod
+    def bulk_add_ip_segments(session, ip_segments: list[IPSegmentEntity]) -> None:
+        try:
+            bulk_list = [IPSegment(
+                fk_router_id=ip_segment.fk_router_id,
+                ip_segment_ip=ip_segment.ip_segment_ip,
+                ip_segment_mask=ip_segment.ip_segment_mask,
+                ip_segment_network=ip_segment.ip_segment_network,
+                ip_segment_interface=ip_segment.ip_segment_interface,
+                ip_segment_actual_iface=ip_segment.ip_segment_actual_iface,
+                ip_segment_tag=ip_segment.ip_segment_tag,
+                ip_segment_comment=ip_segment.ip_segment_comment,
+                ip_segment_is_invalid=ip_segment.ip_segment_is_invalid,
+                ip_segment_is_dynamic=ip_segment.ip_segment_is_dynamic,
+                ip_segment_is_disabled=ip_segment.ip_segment_is_disabled
+            ) for ip_segment in ip_segments]
+            session.bulk_save_objects(bulk_list)
+        except Exception as e:
+            raise e
+
+    @staticmethod
     def delete_ip_segment(session, ip_segment_id):
         try:  
             ip_segment = session.query(IPSegment).get(ip_segment_id)

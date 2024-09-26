@@ -121,11 +121,12 @@ class RouterAPI:
         return ip_list  
 
     @staticmethod
-    async def add_ip_data(ip_list):
+    async def add_ip_data(ip_list: list[IPSegmentEntity]) -> None:
         try:
             for ip in ip_list:
                 ip.validate_ip_segment()
-            pass
+
+            await ThreadingManager().run_thread(IPSegment.bulk_add_ip_segments, 'w', ip_list)
         except Exception as e:  
             raise e
 
