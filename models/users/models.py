@@ -269,9 +269,8 @@ class UserLog(Base):
 
     @staticmethod
     def delete_from_date_user_log(session, date_str):
-        from models.users.exceptions import UserLogDatabaseError  
         try:
-            flag = int()
+            flag = 0
             date_tmp = datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S')  
             from_date = datetime(date_tmp.year, date_tmp.month, date_tmp.day, date_tmp.hour, date_tmp.minute, date_tmp.second)
             for user_log in session.query(UserLog).all():

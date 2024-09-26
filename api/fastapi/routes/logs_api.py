@@ -53,7 +53,7 @@ async def get_logs(user_id: int, metadata: Request, token: dict = Depends(verify
 async def delete_logs_by_date(user_id: int, metadata: Request, date: str, token: dict = Depends(verify_jwt)):
     try:
         if logs_functions.verify_user_existence(user_id):
-            flag = ThreadingManager().run_thread(UserLog.delete_from_date_user_log, 'w', date)
+            flag = ThreadingManager().run_thread(UserLog.delete_from_date_user_log, 'rx', date)
             logs_functions.create_transaction_log(
                 action="DELETE",
                 table="logs",
