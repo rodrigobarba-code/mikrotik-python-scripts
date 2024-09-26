@@ -1,9 +1,9 @@
 from typing import List
-from ..auth import verify_jwt
+from ...auth import verify_jwt
 from pydantic import BaseModel
 from fastapi import APIRouter, Depends, Request
 
-from ..functions import APIFunctions
+from ...functions import APIFunctions
 from entities.region import RegionEntity
 from models.regions.models import Region
 from utils.threading_manager import ThreadingManager

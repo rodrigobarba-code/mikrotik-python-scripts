@@ -1,8 +1,8 @@
-from ..auth import verify_jwt
+from ...auth import verify_jwt
 from fastapi import APIRouter, Depends, Request
 from utils.threading_manager import ThreadingManager
 
-from..functions import APIFunctions
+from ...functions import APIFunctions
 from models.users.models import UserLog
 
 logs_router = APIRouter()

@@ -1,8 +1,8 @@
-from ..auth import verify_jwt
+from ...auth import verify_jwt
 from fastapi import APIRouter, Depends, Request
 from utils.threading_manager import ThreadingManager
 
-from ..functions import APIFunctions
+from ...functions import APIFunctions
 from models.router_scan.models import ARP
 
 arps_router = APIRouter()

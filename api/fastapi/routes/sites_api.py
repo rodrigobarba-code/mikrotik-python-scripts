@@ -1,11 +1,11 @@
 from typing import List
-from ..auth import verify_jwt
+from ...auth import verify_jwt
 from pydantic import BaseModel
 from fastapi import APIRouter, Depends, Request
 
 from entities.site import SiteEntity
 from models.sites.models import Site
-from .. functions import APIFunctions
+from ...functions import APIFunctions
 from utils.threading_manager import ThreadingManager
 
 sites_router = APIRouter()
