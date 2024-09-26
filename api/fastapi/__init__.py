@@ -7,6 +7,7 @@ from .routes.sites_api import sites_router
 from .routes.regions_api import regions_router
 from .routes.routers_api import routers_router
 from .routes.arptags_api import arptags_router
+from .routes.segments_api import segments_router
 
 private_router = APIRouter(prefix='/private', tags=['Seven Suite API'])
 
@@ -17,3 +18,4 @@ private_router.include_router(sites_router, tags=['Sites'])
 private_router.include_router(regions_router, tags=['Regions'])
 private_router.include_router(routers_router, tags=['Routers'])
 private_router.include_router(arptags_router, tags=['ARP Tags'])
+private_router.include_router(segments_router, tags=['Segments'])

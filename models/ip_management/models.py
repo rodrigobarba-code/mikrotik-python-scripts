@@ -1,11 +1,8 @@
-from .. import Base, SessionLocal
-from sqlalchemy import Column, Integer, String, Boolean, Enum, ForeignKey
-
-from entities.ip_segment import IPSegmentTag, IPSegmentEntity
-
+from .. import Base
 from models.routers.models import Router
-
+from entities.ip_segment import IPSegmentTag, IPSegmentEntity
 from models.ip_management.functions import IPAddressesFunctions
+from sqlalchemy import Column, Integer, String, Boolean, Enum, ForeignKey
 
 class IPSegment(Base):
     __tablename__ = 'ip_segment'
@@ -43,11 +40,11 @@ class IPSegment(Base):
         }
 
     @staticmethod
-    def add_ip_segment(ip_segment: IPSegmentEntity):
-        session = SessionLocal()  
+    def add_ip_segment(session, ip_segment: IPSegmentEntity):
         try:  
             
             if (IPAddressesFunctions.validate_ip_segment_exists(
+                session,
                 ip_segment.ip_segment_ip,
                 ip_segment.ip_segment_mask,
                 ip_segment.ip_segment_interface
@@ -67,12 +64,10 @@ class IPSegment(Base):
                     ip_segment_is_dynamic=ip_segment.ip_segment_is_dynamic,  
                     ip_segment_is_disabled=ip_segment.ip_segment_is_disabled  
                 )
-                session.add(ip_segment_obj)  
-                session.commit()  
-            
+                session.add(ip_segment_obj)
             else:
                 ip_segment.validate_ip_segment()  
-                ip_segment_obj = IPSegment.query.filter(
+                ip_segment_obj = session.query(IPSegment).filter(
                     IPSegment.ip_segment_ip == ip_segment.ip_segment_ip,  
                     IPSegment.ip_segment_mask == ip_segment.ip_segment_mask,  
                     IPSegment.ip_segment_interface == ip_segment.ip_segment_interface  
@@ -85,37 +80,29 @@ class IPSegment(Base):
                 ip_segment_obj.ip_segment_comment = ip_segment.ip_segment_comment  
                 ip_segment_obj.ip_segment_is_invalid = ip_segment.ip_segment_is_invalid  
                 ip_segment_obj.ip_segment_is_dynamic = ip_segment.ip_segment_is_dynamic  
-                ip_segment_obj.ip_segment_is_disabled = ip_segment.ip_segment_is_disabled  
-                session.commit()  
+                ip_segment_obj.ip_segment_is_disabled = ip_segment.ip_segment_is_disabled
         except Exception as e:  
-            session.rollback()  
-            print(e)
+            raise e
 
     @staticmethod
-    def delete_ip_segment(ip_segment_id):
-        session = SessionLocal()  
+    def delete_ip_segment(session, ip_segment_id):
         try:  
-            ip_segment = IPSegment.query.get(ip_segment_id)  
-            session.delete(ip_segment)  
-            session.commit()  
+            ip_segment = session.query(IPSegment).get(ip_segment_id)
+            session.delete(ip_segment)
         except Exception as e:  
-            session.rollback()  
-            print(e)
+            raise e
 
     @staticmethod
-    def delete_all_ip_segments():
-        session = SessionLocal()  
+    def delete_all_ip_segments(session):
         try:  
-            IPSegment.query.delete()  
-            session.commit()  
+            session.query(IPSegment).delete()
         except Exception as e:
-            session.rollback()
-            print(e)
+            raise e
 
     @staticmethod
-    def get_ip_segment(ip_segment_id):
+    def get_ip_segment(session, ip_segment_id):
         try:  
-            ip_segment = IPSegment.query.get(ip_segment_id)  
+            ip_segment = session.query(IPSegment).get(ip_segment_id)
             obj = IPSegmentEntity(  
                 ip_segment_id=ip_segment.ip_segment_id,  
                 fk_router_id=ip_segment.fk_router_id,  
@@ -132,12 +119,12 @@ class IPSegment(Base):
             )
             return obj  
         except Exception as e:  
-            print(e)
+            raise e
 
     @staticmethod
-    def get_ip_segments():
+    def get_ip_segments(session):
         try:  
-            ip_segments = IPSegment.query.all()  
+            ip_segments = session.query(IPSegment).all()
             ip_segment_list = []  
             for ip_segment in ip_segments:  
                 obj = IPSegmentEntity(  
@@ -157,13 +144,13 @@ class IPSegment(Base):
                 ip_segment_list.append(obj)  
             return ip_segment_list  
         except Exception as e:  
-            print(e)
+            raise e
 
     @staticmethod
-    def get_ip_segments_by_site_id(site_id):
+    def get_ip_segments_by_site_id(session, site_id):
         try:  
-            router = Router.query.filter_by(fk_site_id=site_id).first()  
-            ip_segments = IPSegment.query.filter_by(fk_router_id=router.router_id).all()  
+            router = session.query(Router).filter_by(fk_site_id=site_id).first()
+            ip_segments = session.query(IPSegment).filter_by(fk_router_id=router.router_id).all()
             ip_segment_list = []  
             for ip_segment in ip_segments:  
                 obj = IPSegmentEntity(  
@@ -183,12 +170,12 @@ class IPSegment(Base):
                 ip_segment_list.append(obj)  
             return ip_segment_list  
         except Exception as e:  
-            print(e)
+            raise e
 
     @staticmethod
-    def get_ip_segments_by_router_id(router_id):
+    def get_ip_segments_by_router_id(session, router_id):
         try:  
-            ip_segments = IPSegment.query.filter_by(fk_router_id=router_id).all()  
+            ip_segments = session.query(IPSegment).filter_by(fk_router_id=router_id).all()
             ip_segment_list = []  
             for ip_segment in ip_segments:  
                 obj = IPSegmentEntity(  
@@ -208,4 +195,4 @@ class IPSegment(Base):
                 ip_segment_list.append(obj)  
             return ip_segment_list  
         except Exception as e:  
-            print(e)
+            raise e
