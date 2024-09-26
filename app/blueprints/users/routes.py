@@ -269,8 +269,10 @@ def delete_from_date_user_log():
         response = requests.delete(
             'http://localhost:8080/api/private/logs/date/',
             headers=get_verified_jwt_header(),
-            json={'date': date},
-            params={'user_id': session.get('user_id')}
+            params={
+                'date': date,
+                'user_id': session.get('user_id')
+            }
         )
         if response.status_code == 200:
             if response.json().get('backend_status') == 200:
@@ -283,8 +285,10 @@ def delete_from_date_user_log():
                     return jsonify({'message': 'User Logs deleted successfully'}), 200
             else:
                 raise Exception(response.json().get('message'))
+                return jsonify({'message': response.json().get('message')})
         elif response.status_code == 500:
             raise Exception('User Logs Failed to Delete')
+            return jsonify({'message': 'User Logs Failed to Delete'})
     except Exception as e:  
         flash(str(e), 'danger')  
-        return jsonify({'message': 'User Logs Failed to Delete', 'error': str(e)}), 500  
+        return jsonify({'message': 'User Logs Failed to Delete', 'error': str(e)})
