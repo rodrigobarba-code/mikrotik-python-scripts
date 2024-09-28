@@ -38,6 +38,7 @@ async def get_segments(user_id: int, metadata: Request, token: dict = Depends(ve
             return {
                 'message': "Segments table retrieved successfully",
                 'segments': segments,
+                'lenght': len(segments),
                 'backend_status': 200
             }
         else:
@@ -169,7 +170,7 @@ async def get_segments_by_router(user_id: int, metadata: Request, router_id: int
 async def delete_segments(user_id: int, metadata: Request, token: dict = Depends(verify_jwt)):
     try:
         if segments_functions.verify_user_existence(user_id):
-            ThreadingManager().run_thread(IPSegment.delete_all_ip_segments, 'r')
+            ThreadingManager().run_thread(IPSegment.delete_all_ip_segments, 'wx')
             segments_functions.create_transaction_log(
                 action="DELETE",
                 table="segments",

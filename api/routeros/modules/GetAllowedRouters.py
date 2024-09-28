@@ -2,19 +2,11 @@ from entities.router import RouterEntity
 from models.routers.models import Router
 
 class GetAllowedRouters:
-    def __init__(
-        self,  
-        session=None
-    ):
-        self.session = session
-
-    def set_session(self, session):
-        self.session = session
-
-    async def get(self, session=None):
+    @staticmethod
+    def get(session):
         try:
             routers_list = []
-            routers = self.session.query(Router).filter(Router.allow_scan == 1).all()
+            routers = session.query(Router).filter(Router.allow_scan == 1).all()
 
             for router in routers:
                 router_entity = RouterEntity(

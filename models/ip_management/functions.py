@@ -14,17 +14,17 @@ class IPAddressesFunctions:
                 if str(ip_segment.ip_segment_ip) + "/" + str(ip_segment.ip_segment_mask) + "@" + str(ip_segment.ip_segment_interface) not in router_segment_list_p:
                     session.delete(ip_segment)
         except Exception as e:  
-            raise e
+            print('Error on deleting IP segments: ' + str(e))
 
     @staticmethod
-    def determine_ip_segment_tag(session=None, ip_segment_ip: str = None) -> str:
+    def determine_ip_segment_tag(ip_segment_ip: str) -> str:
         try:
             from entities.ip_segment import IPSegmentTag
             from models.ip_management.models import IPSegment
 
             if ip_segment_ip.startswith("10."):
-                return IPSegmentTag.PRIVATE_IP  
+                return IPSegmentTag.PRIVATE_IP.value
             else:
-                return IPSegmentTag.PUBLIC_IP
+                return IPSegmentTag.PUBLIC_IP.value
         except Exception as e:  
-            raise e
+            raise Exception('Error on determining IP segment tag: ' + str(e))

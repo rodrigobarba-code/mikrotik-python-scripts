@@ -1,8 +1,3 @@
-import json
-from .. import SessionLocal
-from collections import Counter
-
-from entities.arp import ARPTag
 from models.ip_management.models import IPSegment
 
 class ARPFunctions:
@@ -27,21 +22,22 @@ class ARPFunctions:
             print(str(e))  
 
     @staticmethod
-    def delete_arps(router_arp_list, fk_router_id, model):
-        session = SessionLocal()  
+    def delete_arps(session, router_metadata: dict) -> None:
+        from utils.threading_manager import ThreadingManager
         try:
-            router_arp_list_p = [str(router_arp.arp_ip) + "@" + str(router_arp.arp_mac) for router_arp in router_arp_list]
+            router_arp_list_p = [str(router_arp.arp_ip) + "@" + str(router_arp.arp_mac) for router_arp in router_metadata['arp_region_list']]
             from models.router_scan.models import ARP
             arps = session.query(IPSegment, ARP).join(ARP, IPSegment.ip_segment_id == ARP.fk_ip_address_id).filter(
-                IPSegment.fk_router_id == fk_router_id  
+                IPSegment.fk_router_id == router_metadata['router_id']
             ).all()
             for ip, arp in arps:
-                model.delete_arp_tags(arp.arp_id)
+                ThreadingManager().run_thread(router_metadata['model'].delete_arp_tags, 'w', arp.arp_id)
                 if str(arp.arp_ip) + "@" + str(arp.arp_mac) not in router_arp_list_p:
                     session.delete(arp)  
         except Exception as e:  
-            print("Error in delete_arps: " + str(e))  
+            print(str("Error in delete_arps: " + str(e)))
 
+    """
     @staticmethod
     def detect_ip_duplicated():
         session = SessionLocal()  
@@ -58,7 +54,8 @@ class ARPFunctions:
                             arp.arp_tag = json.dumps(array)
             session.commit()  
         except Exception as e:  
-            print(str(e))  
+            print(str(e))
+    """
 
     @staticmethod
     def assign_alias(arp_ip: str, queue_list: dict) -> str:

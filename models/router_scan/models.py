@@ -83,6 +83,26 @@ class ARP(Base):
             raise e
 
     @staticmethod
+    def bulk_add_arp(session, arps: list[ARPEntity]) -> None:
+        try:
+            bulk_list = [ARP(
+                fk_ip_address_id=arp.fk_ip_address_id,
+                arp_ip=arp.arp_ip,
+                arp_mac=arp.arp_mac,
+                arp_alias=arp.arp_alias,
+                arp_interface=arp.arp_interface,
+                arp_is_dhcp=arp.arp_is_dhcp,
+                arp_is_invalid=arp.arp_is_invalid,
+                arp_is_dynamic=arp.arp_is_dynamic,
+                arp_is_complete=arp.arp_is_complete,
+                arp_is_disabled=arp.arp_is_disabled,
+                arp_is_published=arp.arp_is_published
+            ) for arp in arps]
+            session.bulk_save_objects(bulk_list)
+        except Exception as e:
+            raise e
+
+    @staticmethod
     def delete_arp(session, arp_id):
         try:  
             arp = session.query(ARP).get(arp_id)
@@ -93,6 +113,7 @@ class ARP(Base):
     @staticmethod
     def delete_all_arps(session):
         try:
+            session.query(ARPTags).delete()
             session.query(ARP).delete()
         except Exception as e:  
             raise e
@@ -214,6 +235,7 @@ class ARPTags(Base):
 
     @staticmethod
     def assign_first_tag(session):
+        from utils.threading_manager import ThreadingManager
         try:
             arp_tags = ARPTag.get_tags()
             arps = session.query(ARP).all()
@@ -224,7 +246,7 @@ class ARPTags(Base):
                         fk_arp_id=arp.arp_id,  
                         arp_tag_value=arp_tags['INTERNAL_CONNECTION']  
                     )
-                    ARPTags.add_arp_tag(arp_temp)  
+                    ThreadingManager().run_thread(ARPTags.add_arp_tag, 'w', arp_temp)
                     arp_item = arp_tags['PRIVATE_IP']  
                 else:
                     arp_item = arp_tags['PUBLIC_IP']
@@ -233,6 +255,6 @@ class ARPTags(Base):
                     fk_arp_id=arp.arp_id,  
                     arp_tag_value=arp_item  
                 )
-                ARPTags.add_arp_tag(arp_tag)
+                ThreadingManager().run_thread(ARPTags.add_arp_tag, 'w', arp_tag)
         except Exception as e:  
             raise e

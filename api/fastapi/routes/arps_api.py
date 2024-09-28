@@ -40,6 +40,7 @@ async def get_arps(user_id: int, metadata: Request, token: dict = Depends(verify
             return {
                 'message': "ARP table retrieved successfully",
                 'arps': arps,
+                'lenght': len(arps),
                 'backend_status': 200
             }
         else:

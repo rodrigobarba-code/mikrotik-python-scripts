@@ -13,7 +13,6 @@ from models.ip_management.functions import IPAddressesFunctions
 
 from api.routeros.modules.FindIPSegment import FindIPSegment
 from api.routeros.modules.GetAllowedRouters import GetAllowedRouters
-from api.routeros.modules.ConvertObjectToDict import ConvertObjectToDict
 
 class RouterAPI:
     router = None  
@@ -32,10 +31,10 @@ class RouterAPI:
             'password': password
         }
 
-    async def get_credentials(self):
+    def get_credentials(self):
         return self.credentials  
 
-    async def set_credentials(
+    def set_credentials(
         self,  
         host=None,  
         user=None,  
@@ -47,10 +46,10 @@ class RouterAPI:
             'password': password
         }
 
-    async def get_api(self):
+    def get_api(self):
         return self.router  
 
-    async def set_api(self):
+    def set_api(self):
         self.router = ros_api.Api(  
             self.credentials['host'],  
             self.credentials['user'],  
@@ -60,11 +59,11 @@ class RouterAPI:
         )
 
     @staticmethod
-    async def retrieve_data(router, command) -> dict:
+    def retrieve_data(router, command) -> dict:
         return router.talk(command)  
 
     async def talk_with_timeout(router, command) -> dict:
-        return router.talk(command)
+        return await router.talk(command)
 
     async def verify_router_connection(router) -> bool:
         try:
@@ -77,8 +76,7 @@ class RouterAPI:
     async def get_ip_data() -> list:
         ip_list = []  
 
-        routers_instance = ThreadingManager().run_thread(GetAllowedRouters.set_session, 'r')
-        routers = ThreadingManager().run_thread(routers_instance.get, 'r')
+        routers = ThreadingManager().run_thread(GetAllowedRouters.get, 'r')
 
         for router in routers:  
             router_api = RouterAPI(  
@@ -86,10 +84,10 @@ class RouterAPI:
                 router.router_username,  
                 router.router_password  
             )
-            await router_api.set_api()
+            router_api.set_api()
 
             router_id = router.router_id  
-            ip_data = RouterAPI.retrieve_data(await router_api.get_api(), '/ip/address/print')
+            ip_data = RouterAPI.retrieve_data(router_api.get_api(), '/ip/address/print')
 
             for ip in ip_data:
                 comment = "None"
@@ -106,7 +104,7 @@ class RouterAPI:
                     ip_segment_network=ip['network'],  
                     ip_segment_interface=ip['interface'],  
                     ip_segment_actual_iface=ip['actual-interface'],  
-                    ip_segment_tag=await ThreadingManager().run_thread(IPAddressesFunctions.determine_ip_segment_tag, 'r', ip_tmp[0]),
+                    ip_segment_tag=IPAddressesFunctions.determine_ip_segment_tag(ip_tmp[0]),
                     ip_segment_comment=comment,  
                     ip_segment_is_invalid=True if ip['invalid'] == 'true' else False,  
                     ip_segment_is_dynamic=True if ip['dynamic'] == 'true' else False,  
@@ -117,57 +115,53 @@ class RouterAPI:
                 ip_list.append(ip_obj)  
 
             ip_data = {'ip_list': ip_list, 'router_id': router.router_id}
-            await ThreadingManager().run_thread(IPAddressesFunctions.delete_ip_segments, 'w', ip_data)
+            ThreadingManager().run_thread(IPAddressesFunctions.delete_ip_segments, 'w', ip_data)
         return ip_list  
 
     @staticmethod
-    async def add_ip_data(ip_list: list[IPSegmentEntity]) -> None:
+    def add_ip_data(ip_list: list[IPSegmentEntity]) -> None:
         try:
             for ip in ip_list:
                 ip.validate_ip_segment()
-
-            await ThreadingManager().run_thread(IPSegment.bulk_add_ip_segments, 'w', ip_list)
+            ThreadingManager().run_thread(IPSegment.bulk_add_ip_segments, 'w', ip_list)
         except Exception as e:  
-            raise e
+            raise str('Error on adding IP data: ' + str(e))
 
-"""
     @staticmethod
-    def get_arp_data() -> list:
-        arp_list = []  
-        routers = GetAllowedRouters(db).get()  
+    async def get_arp_data() -> list:
+        arp_list = []
+
+        routers = ThreadingManager().run_thread(GetAllowedRouters.get, 'r')
+
         for router in routers:  
             router_api = RouterAPI(  
                 router.router_ip,  
                 router.router_username,  
                 router.router_password  
             )
-            arp_region_list = []  
-            router_api.set_api()  
+            router_api.set_api()
 
+            arp_region_list = []
             router_id = router.router_id  
-            ip_segments_by_router = IPSegment.get_ip_segments_by_router_id(router_id)  
-            arp_data = RouterAPI.retrieve_data(router_api.get_api(), '/ip/arp/print')  
+            ip_segments_by_router = ThreadingManager().run_thread(IPSegment.get_ip_segments_by_router_id, 'rx', router_id)
+            arp_data = RouterAPI.retrieve_data(router_api.get_api(), '/ip/arp/print')
 
-            
-            queue_data = RouterAPI.retrieve_data(router_api.get_api(), '/queue/simple/print')
-            
-            
             queue_dict = {}
+            queue_data = RouterAPI.retrieve_data(router_api.get_api(), '/queue/simple/print')
             for queue in queue_data:
                 name = queue['name']
                 ip = queue['target'].split('/')[0]
                 queue_dict[ip] = name
-            
 
             for arp in arp_data:
-                ip_segment = FindIPSegment.find(ip_segments_by_router, arp['address'])  
+                ip_segment = FindIPSegment.find(ip_segments_by_router, arp['address'])
                 if ip_segment[0] is True:  
                     arp_obj = ARPEntity(  
                         arp_id=int(),  
                         fk_ip_address_id=int(ip_segment[1]),  
                         arp_ip=arp['address'],  
                         arp_mac="" if 'mac-address' not in arp else arp['mac-address'],  
-                        arp_alias=ARPFunctions.assign_alias(str(arp['address']), queue_dict),  
+                        arp_alias=ARPFunctions.assign_alias(str(arp['address']), queue_dict),
                         arp_interface=arp['interface'],  
                         arp_is_dhcp=True if arp['dynamic'] == 'true' else False,  
                         arp_is_invalid=True if arp['invalid'] == 'true' else False,  
@@ -176,30 +170,33 @@ class RouterAPI:
                         arp_is_disabled=True if arp['disabled'] == 'true' else False,  
                         arp_is_published=True if arp['published'] == 'true' else False  
                     )
-                    arp_obj.validate_arp()  
+                    arp_obj.validate_arp()
                     arp_region_list.append(arp_obj)  
                 else:
                     pass
-            
-            ARPFunctions.delete_arps(arp_region_list, router.router_id, ARPTags)
+
+            router_metadata = {'arp_region_list': arp_region_list, 'router_id': router.router_id, 'model': ARPTags}
+            ThreadingManager().run_thread(ARPFunctions.delete_arps, 'w', router_metadata)
             
             arp_list.extend(arp_region_list)  
-        return arp_list  
+        return arp_list
 
     @staticmethod
-    def add_arp_data(arp_list):
+    def add_arp_data(arp_list: list[ARPEntity]) -> None:
         try:
-            for arp in arp_list:  
-                try:  
-                    ARP.add_arp(arp)  
-                except Exception as e:  
-                    print(str(e))  
-            ARPTags.assign_first_tag()  
+            for arp in arp_list:
+                arp.validate_arp()
+            ThreadingManager().run_thread(ARP.bulk_add_arp, 'w', arp_list)
+            ThreadingManager().run_thread(ARPTags.assign_first_tag, 'wx')
         except Exception as e:  
-            print(str(e))  
+            print(str('Error on adding ARP data: ' + str(e)))
 
     @staticmethod
-    def arp_scan():
-        RouterAPI.add_ip_data(RouterAPI.get_ip_data())  
-        RouterAPI.add_arp_data(RouterAPI.get_arp_data())
-"""
+    async def arp_scan():
+        try:
+            ip_data = await RouterAPI.get_ip_data()
+            RouterAPI.add_ip_data(ip_data)
+            arp_data = await RouterAPI.get_arp_data()
+            RouterAPI.add_arp_data(arp_data)
+        except Exception as e:
+            raise e
