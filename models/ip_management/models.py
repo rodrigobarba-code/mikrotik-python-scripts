@@ -40,51 +40,6 @@ class IPSegment(Base):
         }
 
     @staticmethod
-    def add_ip_segment(session, ip_segment: IPSegmentEntity):
-        try:  
-            
-            if (IPAddressesFunctions.validate_ip_segment_exists(
-                session,
-                ip_segment.ip_segment_ip,
-                ip_segment.ip_segment_mask,
-                ip_segment.ip_segment_interface
-            )):
-                
-                ip_segment.validate_ip_segment()  
-                ip_segment_obj = IPSegment(  
-                    fk_router_id=ip_segment.fk_router_id,  
-                    ip_segment_ip=ip_segment.ip_segment_ip,  
-                    ip_segment_mask=ip_segment.ip_segment_mask,  
-                    ip_segment_network=ip_segment.ip_segment_network,  
-                    ip_segment_interface=ip_segment.ip_segment_interface,  
-                    ip_segment_actual_iface=ip_segment.ip_segment_actual_iface,  
-                    ip_segment_tag=ip_segment.ip_segment_tag,  
-                    ip_segment_comment=ip_segment.ip_segment_comment,  
-                    ip_segment_is_invalid=ip_segment.ip_segment_is_invalid,  
-                    ip_segment_is_dynamic=ip_segment.ip_segment_is_dynamic,  
-                    ip_segment_is_disabled=ip_segment.ip_segment_is_disabled  
-                )
-                session.add(ip_segment_obj)
-            else:
-                ip_segment.validate_ip_segment()  
-                ip_segment_obj = session.query(IPSegment).filter(
-                    IPSegment.ip_segment_ip == ip_segment.ip_segment_ip,  
-                    IPSegment.ip_segment_mask == ip_segment.ip_segment_mask,  
-                    IPSegment.ip_segment_interface == ip_segment.ip_segment_interface  
-                ).first()
-                ip_segment_obj.fk_router_id = ip_segment.fk_router_id  
-                ip_segment_obj.ip_segment_network = ip_segment.ip_segment_network  
-                ip_segment_obj.ip_segment_interface = ip_segment.ip_segment_interface  
-                ip_segment_obj.ip_segment_actual_iface = ip_segment.ip_segment_actual_iface  
-                ip_segment_obj.ip_segment_tag = ip_segment.ip_segment_tag  
-                ip_segment_obj.ip_segment_comment = ip_segment.ip_segment_comment  
-                ip_segment_obj.ip_segment_is_invalid = ip_segment.ip_segment_is_invalid  
-                ip_segment_obj.ip_segment_is_dynamic = ip_segment.ip_segment_is_dynamic  
-                ip_segment_obj.ip_segment_is_disabled = ip_segment.ip_segment_is_disabled
-        except Exception as e:  
-            raise e
-
-    @staticmethod
     def bulk_add_ip_segments(session, ip_segments: list[IPSegmentEntity]) -> None:
         try:
             bulk_list = [IPSegment(
@@ -100,7 +55,35 @@ class IPSegment(Base):
                 ip_segment_is_dynamic=ip_segment.ip_segment_is_dynamic,
                 ip_segment_is_disabled=ip_segment.ip_segment_is_disabled
             ) for ip_segment in ip_segments]
-            session.bulk_save_objects(bulk_list)
+
+            to_add = []
+
+            for ip_segment in bulk_list:
+                if (IPAddressesFunctions.validate_ip_segment_exists(
+                    session,
+                    ip_segment.ip_segment_ip,
+                    ip_segment.ip_segment_mask,
+                    ip_segment.ip_segment_interface
+                )):
+                    to_add.append(ip_segment)
+                else:
+                    ip_segment = session.query(IPSegment).filter(
+                        IPSegment.ip_segment_ip == ip_segment.ip_segment_ip,
+                        IPSegment.ip_segment_mask == ip_segment.ip_segment_mask,
+                        IPSegment.ip_segment_interface == ip_segment.ip_segment_interface
+                    ).first()
+                    ip_segment.fk_router_id = ip_segment.fk_router_id
+                    ip_segment.ip_segment_network = ip_segment.ip_segment_network
+                    ip_segment.ip_segment_interface = ip_segment.ip_segment_interface
+                    ip_segment.ip_segment_actual_iface = ip_segment.ip_segment_actual_iface
+                    ip_segment.ip_segment_tag = ip_segment.ip_segment_tag
+                    ip_segment.ip_segment_comment = ip_segment.ip_segment_comment
+                    ip_segment.ip_segment_is_invalid = ip_segment.ip_segment_is_invalid
+                    ip_segment.ip_segment_is_dynamic = ip_segment.ip_segment_is_dynamic
+                    ip_segment.ip_segment_is_disabled = ip_segment.ip_segment_is_disabled
+
+            if to_add:
+                session.bulk_save_objects(to_add)
         except Exception as e:
             raise e
 

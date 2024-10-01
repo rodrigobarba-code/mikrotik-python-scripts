@@ -320,3 +320,5 @@ class UserLog(Base):
             return r_list  
         except Exception as e:
             raise UserLogError()
+
+

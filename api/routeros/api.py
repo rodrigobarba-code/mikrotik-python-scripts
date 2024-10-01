@@ -15,8 +15,11 @@ from api.routeros.modules.FindIPSegment import FindIPSegment
 from api.routeros.modules.GetAllowedRouters import GetAllowedRouters
 
 class RouterAPI:
+    SCAN_STATUS = ['IDLE', 'IN PROGRESS']
+
     router = None  
-    credentials = None  
+    credentials = None
+    scan_status = {'status': SCAN_STATUS[0]}
 
     def __init__(
         self,  
@@ -60,7 +63,7 @@ class RouterAPI:
 
     @staticmethod
     def retrieve_data(router, command) -> dict:
-        return router.talk(command)  
+        return router.talk(command)
 
     async def talk_with_timeout(router, command) -> dict:
         return await router.talk(command)
@@ -74,19 +77,19 @@ class RouterAPI:
 
     @staticmethod
     async def get_ip_data() -> list:
-        ip_list = []  
+        ip_list = []
 
         routers = ThreadingManager().run_thread(GetAllowedRouters.get, 'r')
 
-        for router in routers:  
-            router_api = RouterAPI(  
-                router.router_ip,  
-                router.router_username,  
-                router.router_password  
+        for router in routers:
+            router_api = RouterAPI(
+                router.router_ip,
+                router.router_username,
+                router.router_password
             )
             router_api.set_api()
 
-            router_id = router.router_id  
+            router_id = router.router_id
             ip_data = RouterAPI.retrieve_data(router_api.get_api(), '/ip/address/print')
 
             for ip in ip_data:
@@ -96,27 +99,27 @@ class RouterAPI:
 
                 ip_tmp = ip['address'].split('/')
 
-                ip_obj = IPSegmentEntity(  
-                    ip_segment_id=int(),  
-                    fk_router_id=router_id,  
-                    ip_segment_ip=ip_tmp[0],  
-                    ip_segment_mask=ip_tmp[1],  
-                    ip_segment_network=ip['network'],  
-                    ip_segment_interface=ip['interface'],  
-                    ip_segment_actual_iface=ip['actual-interface'],  
+                ip_obj = IPSegmentEntity(
+                    ip_segment_id=int(),
+                    fk_router_id=router_id,
+                    ip_segment_ip=ip_tmp[0],
+                    ip_segment_mask=ip_tmp[1],
+                    ip_segment_network=ip['network'],
+                    ip_segment_interface=ip['interface'],
+                    ip_segment_actual_iface=ip['actual-interface'],
                     ip_segment_tag=IPAddressesFunctions.determine_ip_segment_tag(ip_tmp[0]),
-                    ip_segment_comment=comment,  
-                    ip_segment_is_invalid=True if ip['invalid'] == 'true' else False,  
-                    ip_segment_is_dynamic=True if ip['dynamic'] == 'true' else False,  
-                    ip_segment_is_disabled=True if ip['disabled'] == 'true' else False  
+                    ip_segment_comment=comment,
+                    ip_segment_is_invalid=True if ip['invalid'] == 'true' else False,
+                    ip_segment_is_dynamic=True if ip['dynamic'] == 'true' else False,
+                    ip_segment_is_disabled=True if ip['disabled'] == 'true' else False
                 )
 
-                ip_obj.validate_ip_segment()  
-                ip_list.append(ip_obj)  
+                ip_obj.validate_ip_segment()
+                ip_list.append(ip_obj)
 
             ip_data = {'ip_list': ip_list, 'router_id': router.router_id}
             ThreadingManager().run_thread(IPAddressesFunctions.delete_ip_segments, 'w', ip_data)
-        return ip_list  
+        return ip_list
 
     @staticmethod
     def add_ip_data(ip_list: list[IPSegmentEntity]) -> None:
@@ -194,9 +197,13 @@ class RouterAPI:
     @staticmethod
     async def arp_scan():
         try:
+            RouterAPI.scan_status = {'status': RouterAPI.SCAN_STATUS[1]}
+
             ip_data = await RouterAPI.get_ip_data()
             RouterAPI.add_ip_data(ip_data)
             arp_data = await RouterAPI.get_arp_data()
             RouterAPI.add_arp_data(arp_data)
+
+            RouterAPI.scan_status = {'status': RouterAPI.SCAN_STATUS[0]}
         except Exception as e:
             raise e
