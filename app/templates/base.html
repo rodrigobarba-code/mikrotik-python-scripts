@@ -13,38 +13,38 @@
 
     <!-- Font Awesome -->
     <script
-    src="https://kit.fontawesome.com/8562bd2fa0.js"
-    crossorigin="anonymous"
+            src="https://kit.fontawesome.com/8562bd2fa0.js"
+            crossorigin="anonymous"
     ></script>
 
     <link
-    rel="stylesheet"
-    href="https://site-assets.fontawesome.com/releases/v6.6.0/css/all.css"
+            rel="stylesheet"
+            href="https://site-assets.fontawesome.com/releases/v6.6.0/css/all.css"
     >
 
     <link
-    rel="stylesheet"
-    href="https://site-assets.fontawesome.com/releases/v6.6.0/css/sharp-duotone-solid.css"
+            rel="stylesheet"
+            href="https://site-assets.fontawesome.com/releases/v6.6.0/css/sharp-duotone-solid.css"
     >
 
     <link
-    rel="stylesheet"
-    href="https://site-assets.fontawesome.com/releases/v6.6.0/css/sharp-thin.css"
+            rel="stylesheet"
+            href="https://site-assets.fontawesome.com/releases/v6.6.0/css/sharp-thin.css"
     >
 
     <link
-    rel="stylesheet"
-    href="https://site-assets.fontawesome.com/releases/v6.6.0/css/sharp-solid.css"
+            rel="stylesheet"
+            href="https://site-assets.fontawesome.com/releases/v6.6.0/css/sharp-solid.css"
     >
 
     <link
-    rel="stylesheet"
-    href="https://site-assets.fontawesome.com/releases/v6.6.0/css/sharp-regular.css"
+            rel="stylesheet"
+            href="https://site-assets.fontawesome.com/releases/v6.6.0/css/sharp-regular.css"
     >
 
     <link
-    rel="stylesheet"
-    href="https://site-assets.fontawesome.com/releases/v6.6.0/css/sharp-light.css"
+            rel="stylesheet"
+            href="https://site-assets.fontawesome.com/releases/v6.6.0/css/sharp-light.css"
     >
     <!-- Font Awesome -->
 
@@ -94,6 +94,7 @@
     <!-- Assets CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='assets/sweetalert2/css/sweetalert2.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='assets/pagination/pagination.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/notyf/css/notyf.css') }}">
     <!-- Assets CSS -->
 
     <!-- Custom External CSS -->
@@ -143,7 +144,7 @@
 <!-- Content -->
 <div class="home-section">
     <div class="home-content" id="home-content">
-        <span id="top-link" class="text"></span>
+        <div id="top-link" class="text"></div>
     </div>
 
     <!-- Messages -->
@@ -166,10 +167,10 @@
             $.ajax({
                 type: "GET",
                 url: url,
-                success: function(data) {
+                success: function (data) {
                     resolve(data);
                 },
-                error: function(error) {
+                error: function (error) {
                     reject(error);
                 }
             });
