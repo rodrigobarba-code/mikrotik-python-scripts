@@ -27,6 +27,9 @@
     --accent: #0870b6;
     --toggle-color: #DDD;
 
+    /* ====== Dimensions ====== */
+    --vh: 100vh;
+
     /* ====== Transition ====== */
     --tran-02: all 0.2s ease;
     --tran-03: all 0.3s ease;
@@ -46,7 +49,6 @@ body.dark {
     --toggle-color: #fff;
     --text-color: #fbf7ef;
     --text-color-active: #fff;
-    --logo: url(app/static/img/seven_suite_icon.svg);
 }
 
 ::selection {
@@ -93,7 +95,6 @@ html, body {
     background-size: contain;
     background-repeat: no-repeat;
     padding-left: 15px;
-    background-image: var(--logo);
     transition: var(--tran-05);
 }
 
@@ -458,7 +459,7 @@ html, body {
 }
 
 .user-actions ul {
-    background-color: var(--nav-items);
+    background-color: var(--hover-color);
     border-radius: 20px;
     transition: var(--tran-03);
 }
@@ -499,7 +500,6 @@ html, body {
 .sidebar .user-actions .toggle-switch {
     position: absolute;
     right: 0;
-    height: 100%;
     min-width: 60px;
     display: flex;
     align-items: center;
@@ -535,64 +535,6 @@ body.dark .switch::before {
     left: 20px;
 }
 
-@media (max-width: 768px) {
-    .sidebar {
-        width: 260px;
-        height: 100vh;
-        position: fixed;
-        left: 0;
-        overflow: hidden;
-    }
-
-    .home-section {
-        position: relative;
-        left: 0;
-    }
-
-    .home-section .home-content.sidebar.scrolled {
-        overflow: hidden;
-
-    }
-
-    .home-section .home-content.sidebar.scrolled #top-link {
-        display: none;
-    }
-
-    .home-section .home-content.sidebar #top-link {
-        display: none;
-    }
-
-
-    .sidebar .home-section {
-        padding-left: 78px;
-    }
-
-    .profile-content {
-        height: auto;
-    }
-
-    .profile-details {
-        height: auto;
-    }
-
-    .sidebar .nav-links {
-        overflow-x: hidden;
-        overflow-y: scroll;
-    }
-
-    .user-actions {
-        height: auto;
-    }
-
-    .user-actions.visible {
-        opacity: 1;
-        transform: translateY(0);
-        pointer-events: auto;
-    }
-
-    #toggle-sidebar {
-    }
-}
 
 .home-section {
     position: relative;
@@ -616,6 +558,7 @@ body.dark .switch::before {
     background-color: transparent;
     padding-left: 40px;
     transition: all 0.5s ease;
+    overflow: hidden;
 }
 
 .home-section .home-content.sidebar {
@@ -648,4 +591,94 @@ body.dark .switch::before {
     transform: translate(0px, 0px);
     transition: all 0.5s ease;
 
+}
+
+#top-link {
+    display: inline-block;
+    position: relative;
+    white-space: nowrap;
+    transform: translateX(0); /* Comienza en su posición original */
+    animation: none; /* La animación será aplicada por JS */
+}
+
+
+@keyframes scroll {
+    0% {
+        transform: translateX(0); /* Comienza en su posición original */
+    }
+    100% {
+        transform: translateX(-100%); /* Termina fuera del contenedor a la izquierda */
+    }
+}
+
+@keyframes return {
+    0% {
+        transform: translateX(-100%); /* Comienza fuera del contenedor a la izquierda */
+    }
+    100% {
+        transform: translateX(0); /* Regresa a su posición original */
+    }
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        width: 260px;
+        height: calc(var(--vh, 1vh) * 100); /* Use the CSS variable for dynamic height */
+        position: fixed;
+        left: 0;
+        overflow: visible;
+    }
+
+
+    .home-section {
+        position: relative;
+        left: 0;
+    }
+
+    .home-section .home-content {
+        padding-left: 40px;
+    }
+
+    .home-section .home-content.sidebar.scrolled {
+        overflow: hidden;
+
+    }
+
+    .home-section .home-content.sidebar.scrolled {
+        display: none;
+    }
+
+    .home-section .home-content.sidebar #top-link {
+        display: none;
+    }
+
+    .home-section .home-content.sidebar {
+    }
+
+    .sidebar .home-section {
+        padding-left: 78px;
+    }
+
+    .profile-content {
+        height: auto;
+    }
+
+    .profile-details {
+        height: auto;
+    }
+
+    .sidebar .nav-links {
+        overflow-x: hidden;
+        overflow-y: scroll;
+    }
+
+    .user-actions {
+        height: auto;
+    }
+
+    .user-actions.visible {
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: auto;
+    }
 }
