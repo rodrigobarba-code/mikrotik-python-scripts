@@ -12,7 +12,7 @@ scan_functions = APIFunctions()
 async def scan_routeros(user_id: str, metadata: Request):
     try:
         if scan_functions.verify_user_existence(user_id):
-            if RouterAPI.scan_status['status'] == RouterAPI.SCAN_STATUS[0]:
+            if True:
                 asyncio.create_task(RouterAPI.arp_scan())
                 scan_functions.create_transaction_log(
                     action='GET',
@@ -47,7 +47,7 @@ async def scan_status_routeros(user_id: str, metadata: Request, token: str = Dep
                 public=str(str(metadata.client.host) + ':' + str(metadata.client.port))
             )
             return {
-                'scan_status': RouterAPI.scan_status['status'],
+                'scan_status': RouterAPI.get_scan_status(),
                 'backend_status': 200
             }
         else:
