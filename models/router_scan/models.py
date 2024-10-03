@@ -1,4 +1,4 @@
-from .. import Base, SessionLocal
+from .. import Base
 from entities.arp import ARPEntity, ARPTag
 from sqlalchemy.orm import relationship, backref
 from models.router_scan.functions import ARPFunctions
@@ -42,10 +42,10 @@ class ARP(Base):
         }
 
     @staticmethod
-    def add_arp(arp: ARPEntity):
-        session = SessionLocal()
+    def add_arp(session, arp: ARPEntity):
         try:
             if (ARPFunctions.validate_arp_exists(
+                session,
                 arp.arp_ip,  
                 arp.arp_mac  
             )):
@@ -63,13 +63,12 @@ class ARP(Base):
                     arp_is_disabled=arp.arp_is_disabled,  
                     arp_is_published=arp.arp_is_published  
                 )
-                session.add(arp_obj)  
-                session.commit()
+                session.add(arp_obj)
             else:
                 arp.validate_arp()  
-                arp_obj = ARP.query.filter(
-                    ARP.arp_ip == arp.arp_ip,  
-                    ARP.arp_mac == arp.arp_mac  
+                arp_obj = session.query(ARP).filter(
+                    ARP.arp_ip == arp.arp_ip,
+                    ARP.arp_mac == arp.arp_mac
                 ).first()
                 arp_obj.fk_ip_address_id = arp.fk_ip_address_id  
                 arp_obj.arp_alias = arp.arp_alias  
@@ -79,38 +78,94 @@ class ARP(Base):
                 arp_obj.arp_is_dynamic = arp.arp_is_dynamic  
                 arp_obj.arp_is_complete = arp.arp_is_complete  
                 arp_obj.arp_is_disabled = arp.arp_is_disabled  
-                arp_obj.arp_is_published = arp.arp_is_published  
-                session.commit()  
+                arp_obj.arp_is_published = arp.arp_is_published
         except Exception as e:  
-            session.rollback()  
-            print(str(e))  
+            raise e
 
     @staticmethod
-    def delete_arp(arp_id):
-        session = SessionLocal()
-        try:  
-            arp = ARP.query.get(arp_id)  
-            session.delete(arp)  
-            session.commit()  
-        except Exception as e:  
-            session.rollback()  
-            print(str(e))  
+    def bulk_add_arp(session, arps: list[ARPEntity]) -> None:
+        """
+        Bulk add ARP objects to the database
+        :param session: Database session
+        :param arps: List of ARP objects to add to the database
+        :return: None
+        """
 
-    @staticmethod
-    def delete_all_arps():
-        session = SessionLocal()
         try:
-            ARP.query.delete()  
-            session.commit()  
-        except Exception as e:  
-            session.rollback()  
-            print(str(e))  
+            # Create a list of ARP objects obtained from the router
+            bulk_list = [ARP(
+                fk_ip_address_id=arp.fk_ip_address_id,
+                arp_ip=arp.arp_ip,
+                arp_mac=arp.arp_mac,
+                arp_alias=arp.arp_alias,
+                arp_interface=arp.arp_interface,
+                arp_is_dhcp=arp.arp_is_dhcp,
+                arp_is_invalid=arp.arp_is_invalid,
+                arp_is_dynamic=arp.arp_is_dynamic,
+                arp_is_complete=arp.arp_is_complete,
+                arp_is_disabled=arp.arp_is_disabled,
+                arp_is_published=arp.arp_is_published
+            ) for arp in arps]
+
+            # Create a list of ARP objects to add to the database
+            to_add = []
+
+            # Iterate on the bulk list and check if the ARP object already exists in the database
+            for arp in bulk_list:
+                # Verify if the ARP object already exists in the database, based on the IP and MAC address
+                if (ARPFunctions.validate_arp_exists(
+                    session,
+                    arp.arp_ip,
+                    arp.arp_mac
+                )):
+                    # If the ARP object does not exist in the database, add it to the list of objects to add
+                    to_add.append(arp)
+                else:
+                    # If it exists, update the ARP object in the database
+
+                    # Get the ARP object from the database
+                    arp_obj = session.query(ARP).filter(
+                        ARP.arp_ip == arp.arp_ip,
+                        ARP.arp_mac == arp.arp_mac
+                    ).first()
+
+                    # Update the ARP object with the new values
+                    arp_obj.fk_ip_address_id = arp.fk_ip_address_id
+                    arp_obj.arp_alias = arp.arp_alias
+                    arp_obj.arp_interface = arp.arp_interface
+                    arp_obj.arp_is_dhcp = arp.arp_is_dhcp
+                    arp_obj.arp_is_invalid = arp.arp_is_invalid
+                    arp_obj.arp_is_dynamic = arp.arp_is_dynamic
+                    arp_obj.arp_is_complete = arp.arp_is_complete
+                    arp_obj.arp_is_disabled = arp.arp_is_disabled
+                    arp_obj.arp_is_published = arp.arp_is_published
+
+            # If there are ARP objects to add, add them to the database
+            if to_add:
+                session.bulk_save_objects(to_add)
+        except Exception as e:
+            raise e
 
     @staticmethod
-    def get_arp(arp_id):
-        session = SessionLocal()
+    def delete_arp(session, arp_id):
         try:  
-            arp = ARP.query.get(arp_id)  
+            arp = session.query(ARP).get(arp_id)
+            session.delete(arp)
+        except Exception as e:  
+            raise e
+
+    @staticmethod
+    def delete_all_arps(session):
+        try:
+            session.query(ARPTags).delete()
+            session.query(ARP).delete()
+        except Exception as e:  
+            raise e
+
+    @staticmethod
+    def get_arp(session, arp_id):
+        try:  
+            arp = session.query(ARP).get(arp_id)
             obj = ARPEntity(  
                 arp_id=arp.arp_id,  
                 fk_ip_address_id=arp.fk_ip_address_id,  
@@ -127,13 +182,12 @@ class ARP(Base):
             )
             return obj  
         except Exception as e:  
-            print(str(e))  
+            raise e
 
     @staticmethod
-    def get_arps():
-        session = SessionLocal()
+    def get_arps(session):
         try:  
-            arps = ARP.query.all()  
+            arps = session.query(ARP).all()
             obj_list = []  
             for arp in arps:  
                 obj = ARPEntity(  
@@ -153,7 +207,7 @@ class ARP(Base):
                 obj_list.append(obj)  
             return obj_list  
         except Exception as e:  
-            print(str(e))
+            raise e
 
 class ARPTags(Base):
     __tablename__ = 'arp_tag'  
@@ -175,11 +229,9 @@ class ARPTags(Base):
         }
 
     @staticmethod
-    def add_arp_tag(arp_tag: ARPTag):
-        session = SessionLocal()
-        try:  
-            
-            if (ARPTags.query.filter(
+    def add_arp_tag(session, arp_tag: ARPTag):
+        try:
+            if (session.query(ARPTags).filter(
                 ARPTags.fk_arp_id == arp_tag.fk_arp_id,  
                 ARPTags.arp_tag_value == arp_tag.arp_tag_value  
             ).first() is None):
@@ -187,80 +239,86 @@ class ARPTags(Base):
                     fk_arp_id=arp_tag.fk_arp_id,  
                     arp_tag_value=arp_tag.arp_tag_value  
                 )
-                session.add(arp_tag_obj)  
-                session.commit()  
+                session.add(arp_tag_obj)
         except Exception as e:  
-            session.rollback()  
-            print(str(e))  
+            raise e
 
     @staticmethod
-    def delete_arp_tag(arp_tag_id):
-        session = SessionLocal()
+    def delete_arp_tag(session, arp_tag_id):
         try:  
-            arp_tag = ARPTags.query.get(arp_tag_id)  
-            session.delete(arp_tag)  
-            session.commit()  
+            arp_tag = session.query(ARPTags).get(arp_tag_id)
+            session.delete(arp_tag)
         except Exception as e:  
-            session.rollback()  
-            print(str(e))  
+            raise e
 
     @staticmethod
-    def delete_all_arp_tags():
-        session = SessionLocal()
+    def delete_all_arp_tags(session):
         try:  
-            ARPTags.query.delete()  
-            session.commit()  
+            session.query(ARPTags).delete()
         except Exception as e:
-            session.rollback()
-            print(str(e))
+            raise e
 
     @staticmethod
-    def delete_arp_tags(arp_id):
-        session = SessionLocal()
+    def delete_arp_tags(session, arp_id):
         try:  
-            ARPTags.query.filter(ARPTags.fk_arp_id == arp_id).delete()  
-            session.commit()  
+            session.query(ARPTags).filter(ARPTags.fk_arp_id == arp_id).delete()
         except Exception as e:  
-            session.rollback()  
-            print(str(e))  
+            raise e
 
     @staticmethod
-    def get_arp_tags(arp_id):
+    def get_arp_tags(session, arp_id):
         try:  
-            arp_tags = ARPTags.query.filter(ARPTags.fk_arp_id == arp_id).all()  
+            arp_tags = session.query(ARPTags).filter(ARPTags.fk_arp_id == arp_id).all()
             obj_list = []  
             for arp_tag in arp_tags:  
                 obj_list.append(arp_tag.arp_tag_value)  
             return obj_list  
         except Exception as e:  
-            print(str(e))  
+            raise e
 
     @staticmethod
-    def assign_first_tag():
-        session = SessionLocal()
+    def assign_first_tag(session) -> None:
+        """
+        Assign the first tag to the ARP objects
+        :param session: Database session
+        :return: None
+        """
+
         try:
+            # Create a list of ARP objects to add
+            to_add = []
+
+            # Get available ARP tags defined in the system
             arp_tags = ARPTag.get_tags()
-            arps = ARP.query.all()
+
+            # Get all ARP objects from the database
+            arps = session.query(ARP).all()
+
+            # Iterate on the ARP objects and assign the first tag to each ARP object
             for arp in arps:
-                arp_item = ""
+                # Verify if the ARP object has any tags assigned
                 if arp.arp_ip.startswith("10."):
-                    arp_temp = ARPTag(
+                    # Because it is an internal connection, assign the INTERNAL_CONNECTION tag and the PRIVATE_IP tag
+                    arp_temp = ARPTags(
                         arp_tag_id=int(),  
                         fk_arp_id=arp.arp_id,  
                         arp_tag_value=arp_tags['INTERNAL_CONNECTION']  
                     )
-                    ARPTags.add_arp_tag(arp_temp)  
+                    to_add.append(arp_temp)
                     arp_item = arp_tags['PRIVATE_IP']  
                 else:
+                    # Because it is an external connection, assign the PUBLIC_IP tag
                     arp_item = arp_tags['PUBLIC_IP']
-                arp_tag = ARPTag(
+
+                # Otherwise, assign the missing tag to the ARP object
+                arp_tag = ARPTags(
                     arp_tag_id=int(),  
                     fk_arp_id=arp.arp_id,  
                     arp_tag_value=arp_item  
                 )
-                ARPTags.add_arp_tag(arp_tag)
-        except Exception as e:  
-            session.rollback()  
-            print(str(e))  
-    
+                to_add.append(arp_tag)
 
+            # Add the ARP tags to the database
+            session.bulk_save_objects(to_add)
+        except Exception as e:  
+            raise e

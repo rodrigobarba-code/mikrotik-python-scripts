@@ -1,7 +1,6 @@
 import re
 import ipaddress
 from sqlalchemy import func
-
 from models.routers.exceptions import *
 
 class RoutersFunctions:

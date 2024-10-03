@@ -3,14 +3,17 @@ from . import routers_bp
 from entities.site import SiteEntity
 from entities.router import RouterEntity
 from app.functions import get_verified_jwt_header
-from models.users.functions import users_functions as functions
 from app.decorators import RequirementsDecorators as restriction
 from flask import render_template, redirect, url_for, flash, request, jsonify, session
 
 switch_scan_status = {'enable': True}
 
 async def get_site_name(site_id: int) -> str:
-    response = requests.get(f'http://localhost:8080/api/private/site/{site_id}', headers=get_verified_jwt_header())
+    response = requests.get(
+        f'http://localhost:8080/api/private/site/{site_id}',
+        headers=get_verified_jwt_header(),
+        params={'user_id': session.get('user_id')}
+    )
     if response.status_code == 200:
         if response.json().get('backend_status') == 200:
             return response.json().get('site').get('site_name')
@@ -21,7 +24,11 @@ async def get_site_name(site_id: int) -> str:
 
 def get_available_sites() -> list[SiteEntity]:
     site_list = []
-    response = requests.get('http://localhost:8080/api/private/sites/', headers=get_verified_jwt_header())
+    response = requests.get(
+        'http://localhost:8080/api/private/sites/',
+        headers=get_verified_jwt_header(),
+        params={'user_id': session.get('user_id')}
+    )
     if response.status_code == 200:
         if response.json().get('backend_status') == 200:
             site_list = [
@@ -44,7 +51,11 @@ def get_available_sites() -> list[SiteEntity]:
 @restriction.login_required  
 def routers():
     try:
-        response = requests.get('http://localhost:8080/api/private/routers/', headers=get_verified_jwt_header())
+        response = requests.get(
+            'http://localhost:8080/api/private/routers/',
+            headers=get_verified_jwt_header(),
+            params={'user_id': session.get('user_id')}
+        )
         if response.status_code == 200:
             if response.json().get('backend_status') == 200:
                 router_list = [
@@ -83,23 +94,26 @@ def routers():
 def add_router():
     if request.method == 'POST':  
         try:  
-            response = requests.post('http://localhost:8080/api/private/router/',
-                                        params={
-                                            'router_name': request.form['router_name'],
-                                            'router_description': request.form['router_description'],
-                                            'router_brand': 'Mikrotik',
-                                            'router_model': request.form['router_model'],
-                                            'fk_site_id': int(request.form['fk_site_id']),
-                                            'router_ip': request.form['router_ip'],
-                                            'router_mac': request.form['router_mac'],
-                                            'router_username': request.form['router_username'],
-                                            'router_password': request.form['router_password'],
-                                            'allow_scan': 1 if request.form.get('allow_scan') else 0
-                                        }, headers=get_verified_jwt_header())
+            response = requests.post(
+                'http://localhost:8080/api/private/router/',
+                headers=get_verified_jwt_header(),
+                params={
+                    'user_id': session.get('user_id'),
+                    'router_name': request.form['router_name'],
+                    'router_description': request.form['router_description'],
+                    'router_brand': 'Mikrotik',
+                    'router_model': request.form['router_model'],
+                    'fk_site_id': int(request.form['fk_site_id']),
+                    'router_ip': request.form['router_ip'],
+                    'router_mac': request.form['router_mac'],
+                    'router_username': request.form['router_username'],
+                    'router_password': request.form['router_password'],
+                    'allow_scan': 1 if request.form.get('allow_scan') else 0
+                }
+            )
             if response.status_code == 200:
                 if response.json().get('backend_status') == 200:
                     flash('Router added successfully', 'success')
-                    functions.create_log(session['user_id'], 'Router Added', 'CREATE', 'routers')
                     return redirect(url_for('routers.routers'))
                 else:
                     raise Exception(response.json().get('message'))
@@ -107,7 +121,8 @@ def add_router():
                 raise Exception('Failed to add router')
         except Exception as e:  
             flash(str(e), 'danger')  
-        return redirect(url_for('routers.routers'))  
+        return redirect(url_for('routers.routers'))
+
     try:
         site_list = get_available_sites()
         return render_template(
@@ -124,7 +139,11 @@ def add_router():
 @restriction.admin_required  
 def update_router(router_id):
     try:
-        response = requests.get(f'http://localhost:8080/api/private/router/{router_id}', headers=get_verified_jwt_header())
+        response = requests.get(
+            f'http://localhost:8080/api/private/router/{router_id}',
+            headers=get_verified_jwt_header(),
+            params={'user_id': session.get('user_id')}
+        )
         if response.status_code == 200:
             if response.json().get('backend_status') == 200:
                 router_obj = response.json().get('router')
@@ -152,24 +171,27 @@ def update_router(router_id):
 
     if request.method == 'POST':  
         try:  
-            response = requests.put(f'http://localhost:8080/api/private/router/{router_id}',
-                                    params={
-                                        ''
-                                        'router_name': request.form['router_name'],
-                                        'router_description': request.form['router_description'],
-                                        'router_brand': 'Mikrotik',
-                                        'router_model': request.form['router_model'],
-                                        'fk_site_id': int(request.form['fk_site_id']),
-                                        'router_ip': request.form['router_ip'],
-                                        'router_mac': request.form['router_mac'],
-                                        'router_username': request.form['router_username'],
-                                        'router_password': request.form['router_password'],
-                                        'allow_scan': 1 if request.form.get('allow_scan') else 0
-                                    }, headers=get_verified_jwt_header())
+            response = requests.put(
+                f'http://localhost:8080/api/private/router/{router_id}',
+                headers=get_verified_jwt_header(),
+                params={
+                    'user_id': session.get('user_id'),
+                    ''
+                    'router_name': request.form['router_name'],
+                    'router_description': request.form['router_description'],
+                    'router_brand': 'Mikrotik',
+                    'router_model': request.form['router_model'],
+                    'fk_site_id': int(request.form['fk_site_id']),
+                    'router_ip': request.form['router_ip'],
+                    'router_mac': request.form['router_mac'],
+                    'router_username': request.form['router_username'],
+                    'router_password': request.form['router_password'],
+                    'allow_scan': 1 if request.form.get('allow_scan') else 0
+                }
+            )
             if response.status_code == 200:
                 if response.json().get('backend_status') == 200:
                     flash('Router updated successfully', 'success')
-                    functions.create_log(session['user_id'], 'Router Updated', 'UPDATE', 'routers')
                 else:
                     raise Exception(response.json().get('message'))
             elif response.status_code == 500:
@@ -177,6 +199,7 @@ def update_router(router_id):
         except Exception as e:  
             flash(str(e), 'danger')
         return redirect(url_for('routers.routers'))
+
     try:
         site_list = get_available_sites()
         return render_template(  
@@ -193,11 +216,14 @@ def update_router(router_id):
 @restriction.admin_required  
 def delete_router(router_id):
     try:  
-        response = requests.delete(f'http://localhost:8080/api/private/router/{router_id}', headers=get_verified_jwt_header())
+        response = requests.delete(
+            f'http://localhost:8080/api/private/router/{router_id}',
+            headers=get_verified_jwt_header(),
+            params={'user_id': session.get('user_id')}
+        )
         if response.status_code == 200:
             if response.json().get('backend_status') == 200:
                 flash('Router deleted successfully', 'success')
-                functions.create_log(session['user_id'], 'Router Deleted', 'DELETE', 'routers')
             else:
                 raise Exception(response.json().get('message'))
         elif response.status_code == 500:
@@ -213,13 +239,16 @@ def bulk_delete_router():
     data = request.get_json()  
     routers_ids = data.get('items_ids', [])  
     try:
-        response = requests.delete('http://localhost:8080/api/private/routers/bulk/',
-                                json={'routers_ids': routers_ids}, headers=get_verified_jwt_header())
+        response = requests.delete(
+            'http://localhost:8080/api/private/routers/bulk/',
+            json={'routers_ids': routers_ids},
+            headers=get_verified_jwt_header(),
+            params={'user_id': session.get('user_id')}
+        )
         if response.status_code == 200:
             if response.json().get('backend_status') == 200:
                 flag = response.json().get('count_flag')
                 flash(f'{flag} Routers deleted successfully', 'success')
-                functions.create_log(session['user_id'], 'Routers Deleted', 'DELETE', 'routers')
 
                 return jsonify({'message': f'{flag} routers deleted successfully'}), 200
             else:
@@ -235,11 +264,14 @@ def bulk_delete_router():
 @restriction.admin_required  
 def delete_all_routers():
     try:  
-        response = requests.delete('http://localhost:8080/api/private/routers/', headers=get_verified_jwt_header())
+        response = requests.delete(
+            'http://localhost:8080/api/private/routers/',
+            headers=get_verified_jwt_header(),
+            params={'user_id': session.get('user_id')}
+        )
         if response.status_code == 200:
             if response.json().get('backend_status') == 200:
                 flash('All Routers deleted successfully', 'success')
-                functions.create_log(session['user_id'], 'All Routers Deleted', 'DELETE', 'routers')
 
                 return jsonify({'message': 'All routers deleted successfully'}), 200
             else:
@@ -254,7 +286,11 @@ def delete_all_routers():
 async def get_router_details():
     try:
         router_id = request.args.get('id')
-        response = requests.get(f'http://localhost:8080/api/private/router/{router_id}', headers=get_verified_jwt_header())
+        response = requests.get(
+            f'http://localhost:8080/api/private/router/{router_id}',
+            headers=get_verified_jwt_header(),
+            params={'user_id': session.get('user_id')}
+        )
         if response.status_code == 200:
             if response.json().get('backend_status') == 200:
                 site_name = await get_site_name(response.json().get('router').get('fk_site_id'))

@@ -1,11 +1,8 @@
-from .. import Base, SessionLocal
-from sqlalchemy import Column, Integer, String, Boolean, Enum, ForeignKey
-
-from entities.ip_segment import IPSegmentTag, IPSegmentEntity
-
+from .. import Base
 from models.routers.models import Router
-
+from entities.ip_segment import IPSegmentTag, IPSegmentEntity
 from models.ip_management.functions import IPAddressesFunctions
+from sqlalchemy import Column, Integer, String, Boolean, Enum, ForeignKey
 
 class IPSegment(Base):
     __tablename__ = 'ip_segment'
@@ -43,79 +40,90 @@ class IPSegment(Base):
         }
 
     @staticmethod
-    def add_ip_segment(ip_segment: IPSegmentEntity):
-        session = SessionLocal()  
-        try:  
-            
-            if (IPAddressesFunctions.validate_ip_segment_exists(
-                ip_segment.ip_segment_ip,
-                ip_segment.ip_segment_mask,
-                ip_segment.ip_segment_interface
-            )):
-                
-                ip_segment.validate_ip_segment()  
-                ip_segment_obj = IPSegment(  
-                    fk_router_id=ip_segment.fk_router_id,  
-                    ip_segment_ip=ip_segment.ip_segment_ip,  
-                    ip_segment_mask=ip_segment.ip_segment_mask,  
-                    ip_segment_network=ip_segment.ip_segment_network,  
-                    ip_segment_interface=ip_segment.ip_segment_interface,  
-                    ip_segment_actual_iface=ip_segment.ip_segment_actual_iface,  
-                    ip_segment_tag=ip_segment.ip_segment_tag,  
-                    ip_segment_comment=ip_segment.ip_segment_comment,  
-                    ip_segment_is_invalid=ip_segment.ip_segment_is_invalid,  
-                    ip_segment_is_dynamic=ip_segment.ip_segment_is_dynamic,  
-                    ip_segment_is_disabled=ip_segment.ip_segment_is_disabled  
-                )
-                session.add(ip_segment_obj)  
-                session.commit()  
-            
-            else:
-                ip_segment.validate_ip_segment()  
-                ip_segment_obj = IPSegment.query.filter(
-                    IPSegment.ip_segment_ip == ip_segment.ip_segment_ip,  
-                    IPSegment.ip_segment_mask == ip_segment.ip_segment_mask,  
-                    IPSegment.ip_segment_interface == ip_segment.ip_segment_interface  
-                ).first()
-                ip_segment_obj.fk_router_id = ip_segment.fk_router_id  
-                ip_segment_obj.ip_segment_network = ip_segment.ip_segment_network  
-                ip_segment_obj.ip_segment_interface = ip_segment.ip_segment_interface  
-                ip_segment_obj.ip_segment_actual_iface = ip_segment.ip_segment_actual_iface  
-                ip_segment_obj.ip_segment_tag = ip_segment.ip_segment_tag  
-                ip_segment_obj.ip_segment_comment = ip_segment.ip_segment_comment  
-                ip_segment_obj.ip_segment_is_invalid = ip_segment.ip_segment_is_invalid  
-                ip_segment_obj.ip_segment_is_dynamic = ip_segment.ip_segment_is_dynamic  
-                ip_segment_obj.ip_segment_is_disabled = ip_segment.ip_segment_is_disabled  
-                session.commit()  
-        except Exception as e:  
-            session.rollback()  
-            print(e)
+    def bulk_add_ip_segments(session, ip_segments: list[IPSegmentEntity]) -> None:
+        """
+        Add a list of IP segments to the database in bulk
+        :arg session: The database session
+        :arg ip_segments: The list of IP segments to possibly add to the database
+        :return: None
+        """
 
-    @staticmethod
-    def delete_ip_segment(ip_segment_id):
-        session = SessionLocal()  
-        try:  
-            ip_segment = IPSegment.query.get(ip_segment_id)  
-            session.delete(ip_segment)  
-            session.commit()  
-        except Exception as e:  
-            session.rollback()  
-            print(e)
+        try:
+            # Create a list of IPSegment objects obtained from router
+            bulk_list = [IPSegment(
+                fk_router_id=ip_segment.fk_router_id,
+                ip_segment_ip=ip_segment.ip_segment_ip,
+                ip_segment_mask=ip_segment.ip_segment_mask,
+                ip_segment_network=ip_segment.ip_segment_network,
+                ip_segment_interface=ip_segment.ip_segment_interface,
+                ip_segment_actual_iface=ip_segment.ip_segment_actual_iface,
+                ip_segment_tag=ip_segment.ip_segment_tag,
+                ip_segment_comment=ip_segment.ip_segment_comment,
+                ip_segment_is_invalid=ip_segment.ip_segment_is_invalid,
+                ip_segment_is_dynamic=ip_segment.ip_segment_is_dynamic,
+                ip_segment_is_disabled=ip_segment.ip_segment_is_disabled
+            ) for ip_segment in ip_segments]
 
-    @staticmethod
-    def delete_all_ip_segments():
-        session = SessionLocal()  
-        try:  
-            IPSegment.query.delete()  
-            session.commit()  
+            # Create a list of IPSegment objects to add to the database
+            to_add = []
+
+            # Iterate on the bulk list and check if the IP segment exists in the database
+            for ip_segment in bulk_list:
+                # Verify if the IP segment exists in the database, based on the IP address, mask and interface
+                if (IPAddressesFunctions.validate_ip_segment_exists(
+                    session,
+                    ip_segment.ip_segment_ip,
+                    ip_segment.ip_segment_mask,
+                    ip_segment.ip_segment_interface
+                )):
+                    # If it does not exist, add it to the list
+                    to_add.append(ip_segment)
+                else:
+                    # If it exists, update the IP segment in the database
+
+                    # Get the IP segment from the database based on the IP address, mask and interface
+                    ip_segment = session.query(IPSegment).filter(
+                        IPSegment.ip_segment_ip == ip_segment.ip_segment_ip,
+                        IPSegment.ip_segment_mask == ip_segment.ip_segment_mask,
+                        IPSegment.ip_segment_interface == ip_segment.ip_segment_interface
+                    ).first()
+
+                    # Update the IP segment in the database
+                    ip_segment.fk_router_id = ip_segment.fk_router_id
+                    ip_segment.ip_segment_network = ip_segment.ip_segment_network
+                    ip_segment.ip_segment_interface = ip_segment.ip_segment_interface
+                    ip_segment.ip_segment_actual_iface = ip_segment.ip_segment_actual_iface
+                    ip_segment.ip_segment_tag = ip_segment.ip_segment_tag
+                    ip_segment.ip_segment_comment = ip_segment.ip_segment_comment
+                    ip_segment.ip_segment_is_invalid = ip_segment.ip_segment_is_invalid
+                    ip_segment.ip_segment_is_dynamic = ip_segment.ip_segment_is_dynamic
+                    ip_segment.ip_segment_is_disabled = ip_segment.ip_segment_is_disabled
+
+            # if there are IP segments to add, add them to the database in bulk
+            if to_add:
+                session.bulk_save_objects(to_add)
         except Exception as e:
-            session.rollback()
-            print(e)
+            raise e
 
     @staticmethod
-    def get_ip_segment(ip_segment_id):
+    def delete_ip_segment(session, ip_segment_id):
         try:  
-            ip_segment = IPSegment.query.get(ip_segment_id)  
+            ip_segment = session.query(IPSegment).get(ip_segment_id)
+            session.delete(ip_segment)
+        except Exception as e:  
+            raise e
+
+    @staticmethod
+    def delete_all_ip_segments(session):
+        try:  
+            session.query(IPSegment).delete()
+        except Exception as e:
+            raise e
+
+    @staticmethod
+    def get_ip_segment(session, ip_segment_id):
+        try:  
+            ip_segment = session.query(IPSegment).get(ip_segment_id)
             obj = IPSegmentEntity(  
                 ip_segment_id=ip_segment.ip_segment_id,  
                 fk_router_id=ip_segment.fk_router_id,  
@@ -132,12 +140,12 @@ class IPSegment(Base):
             )
             return obj  
         except Exception as e:  
-            print(e)
+            raise e
 
     @staticmethod
-    def get_ip_segments():
+    def get_ip_segments(session):
         try:  
-            ip_segments = IPSegment.query.all()  
+            ip_segments = session.query(IPSegment).all()
             ip_segment_list = []  
             for ip_segment in ip_segments:  
                 obj = IPSegmentEntity(  
@@ -157,13 +165,13 @@ class IPSegment(Base):
                 ip_segment_list.append(obj)  
             return ip_segment_list  
         except Exception as e:  
-            print(e)
+            raise e
 
     @staticmethod
-    def get_ip_segments_by_site_id(site_id):
+    def get_ip_segments_by_site_id(session, site_id):
         try:  
-            router = Router.query.filter_by(fk_site_id=site_id).first()  
-            ip_segments = IPSegment.query.filter_by(fk_router_id=router.router_id).all()  
+            router = session.query(Router).filter_by(fk_site_id=site_id).first()
+            ip_segments = session.query(IPSegment).filter_by(fk_router_id=router.router_id).all()
             ip_segment_list = []  
             for ip_segment in ip_segments:  
                 obj = IPSegmentEntity(  
@@ -183,14 +191,26 @@ class IPSegment(Base):
                 ip_segment_list.append(obj)  
             return ip_segment_list  
         except Exception as e:  
-            print(e)
+            raise e
 
     @staticmethod
-    def get_ip_segments_by_router_id(router_id):
-        try:  
-            ip_segments = IPSegment.query.filter_by(fk_router_id=router_id).all()  
-            ip_segment_list = []  
-            for ip_segment in ip_segments:  
+    def get_ip_segments_by_router_id(session, router_id: int) -> list[IPSegmentEntity]:
+        """
+        Get IP segments by router ID
+        :param session: The database session
+        :param router_id: The router ID
+        :return: List of IP segments
+        """
+        try:
+            # List of IP segments
+            ip_segment_list = []
+
+            # Obtain all IP segments from the database based on the router ID
+            ip_segments = session.query(IPSegment).filter_by(fk_router_id=router_id).all()
+
+            # Iterate on the IP segments and create a list of IP segments
+            for ip_segment in ip_segments:
+                # Create the IP segment object
                 obj = IPSegmentEntity(  
                     ip_segment_id=ip_segment.ip_segment_id,  
                     fk_router_id=ip_segment.fk_router_id,  
@@ -205,7 +225,8 @@ class IPSegment(Base):
                     ip_segment_is_dynamic=ip_segment.ip_segment_is_dynamic,  
                     ip_segment_is_disabled=ip_segment.ip_segment_is_disabled  
                 )
+                # Append the IP segment object to the list
                 ip_segment_list.append(obj)  
             return ip_segment_list  
         except Exception as e:  
-            print(e)
+            raise e

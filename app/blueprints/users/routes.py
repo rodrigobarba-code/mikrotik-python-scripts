@@ -1,196 +1,294 @@
-# Description: Users Routes for the Users Blueprint
-
-# Importing Required Local Modules
-from . import users_bp  # Import the sites Blueprint
-# Importing Required Local Modules
-
-# Importing Required Libraries
-from flask import render_template, redirect, url_for, flash, request, jsonify, session
-# Importing Required Libraries
-
-# Importing Required Decorators
-from app.decorators import RequirementsDecorators as restriction
-# Importing Required Decorators
-
-# Importing Required Entities
+import requests
+from . import users_bp
 from entities.user import UserEntity
-# Importing Required Entities
+from entities.user_log import UserLogEntity
+from app.functions import get_verified_jwt_header
+from app.decorators import RequirementsDecorators as restriction
+from flask import render_template, redirect, url_for, flash, request, jsonify, session
 
-# Importing Required Models
-from models.users.models import User
-from models.users.models import UserLog
-# Importing Required Models
-
-# Importing Required Functions
-from models.users.functions import users_functions as functions
-# Importing Required Functions
-
-# Users Main Route
 @users_bp.route('/')
-@restriction.login_required  # Need to be logged in
-@restriction.admin_required  # Need to be an admin
+@restriction.login_required  
+@restriction.admin_required  
 def users():
     try:
-        return render_template(  # Render the users template
-            'users/users.html',  # Render the users template
-            user_list=User.get_users(),  # Pass the user list to the template
-            user=None  # Pass None to the template
+        response = requests.get(
+            'http://localhost:8080/api/private/users/',
+            headers=get_verified_jwt_header(),
+            params={'user_idx': session.get('user_id')}
         )
-    except Exception as e:  # If an exception occurs
-        flash(str(e), 'danger')  # Flash an error message
-        return redirect(url_for('users.users'))  # Redirect to the sites route
-# Users Main Route
+        if response.status_code == 200:
+            if response.json().get('backend_status'):
+                users_list = [
+                    UserEntity(
+                        user_id=user['user_id'],
+                        user_username=user['user_username'],
+                        user_name=user['user_name'],
+                        user_lastname=user['user_lastname'],
+                        user_privileges=user['user_privileges'],
+                        user_state=user['user_state']
+                    )
+                    for user in response.json().get('users')
+                ]
+            else:
+                raise Exception(response.json().get('message'))
+        elif response.status_code == 500:
+            raise Exception('Failed to retrieve routers')
+        return render_template(
+            'users/users.html',
+            user_list=users_list,
+            user=None
+        )
+    except Exception as e:  
+        flash(str(e), 'danger')  
+        return redirect(url_for('users.users'))
 
-# Users Add Route
 @users_bp.route('/add', methods=['GET', 'POST'])
-@restriction.login_required  # Need to be logged in
-@restriction.admin_required  # Need to be an admin
+@restriction.login_required  
+@restriction.admin_required  
 def add_user():
-    if request.method == 'POST':  # If the request method is POST
-        try:  # Try to add the user
-            user = UserEntity(
-                user_id=None,  # Set the id to None
-                user_username=request.form['user_username'],  # Set the username
-                user_password=request.form['user_password'],  # Set the password
-                user_name=request.form['user_name'],  # Set the name
-                user_lastname=request.form['user_lastname'],  # Set the lastname
-                user_privileges=request.form['user_privileges'],  # Set the privileges
-                user_state=request.form['user_state']  # Set the status
+    if request.method == 'POST':  
+        try:  
+            response = requests.post(
+                'http://localhost:8080/api/private/user/',
+                headers=get_verified_jwt_header(),
+                params={
+                    'user_idx': session.get('user_id'),
+                    'user_username': request.form['user_username'],
+                    'user_password': request.form['user_password'],
+                    'user_name': request.form['user_name'],
+                    'user_lastname': request.form['user_lastname'],
+                    'user_privileges': request.form['user_privileges'],
+                    'user_state': 1 if request.form['user_state'] == 'active' else 0
+                }
             )
-            User.add_user(user)  # Add the user
-            flash('User added successfully', 'success')  # Flash a success message
-            functions.create_log(session['user_id'], 'User added', 'INSERT', 'users')  # Create a log
-        except Exception as e:  # If an exception occurs
-            flash(str(e), 'danger')  # Flash the exception message
-        return redirect(url_for('users.users'))  # Redirect to the users route
+            if response.status_code == 200:
+                if response.json().get('backend_status') == 200:
+                    flash('User added successfully', 'success')
+                    return redirect(url_for('users.users'))
+                else:
+                    raise Exception(response.json().get('message'))
+            elif response.status_code == 500:
+                raise Exception('Failed to add user')
+        except Exception as e:
+            flash(str(e), 'danger')
+        return redirect(url_for('users.users'))
+
     try:
         return render_template(
-            'users/form_users.html',  # Render the users template
-            user_list=User.get_users(),  # Pass the user list to the template
-            user=None  # Pass None to the
+            'users/form_users.html',
+            user=None  
         )
-    except Exception as e:  # If an exception occurs
-        flash(str(e), 'danger')  # Flash an error message
-        return redirect(url_for('users.users'))  # Redirect to the users route
-# Users Add Route
+    except Exception as e:  
+        flash(str(e), 'danger')  
+        return redirect(url_for('users.users'))
 
-# Users Update Route
 @users_bp.route('/update/<user_id>', methods=['GET', 'POST'])
-@restriction.login_required  # Need to be logged in
-@restriction.admin_required  # Need to be an admin
+@restriction.login_required
+@restriction.admin_required
 def update_user(user_id):
-    if request.method == 'POST':  # If the request method is POST
-        try:  # Try to update the user
-            user = UserEntity(
-                user_id=user_id,  # Set the id
-                user_username=request.form['user_username'],  # Set the username
-                user_password=request.form['user_password'],  # Set the password
-                user_name=request.form['user_name'],  # Set the name
-                user_lastname=request.form['user_lastname'],  # Set the lastname
-                user_privileges=request.form['user_privileges'],  # Set the privileges
-                user_state=request.form['user_state']  # Set the status
-            )
-            User.update_user(user)  # Update the user
-            flash('User updated successfully', 'success')  # Flash a success message
-            functions.create_log(session['user_id'], 'User updated', 'UPDATE', 'users')  # Create a log
-        except Exception as e:  # If an exception occurs
-            flash(str(e), 'danger')  # Flash an error message
-        return redirect(url_for('users.users'))  # Redirect to the users route
     try:
-        user_list = User.get_users()  # Get the user list
-        user = User.get_user(user_id)  # Get the user
-        return render_template(
-            'users/form_users.html',  # Render the users template
-            user_list=user_list,  # Pass the user list to the template
-            user=user  # Pass the user to the template
+        response = requests.get(
+            f'http://localhost:8080/api/private/user/{user_id}',
+            headers=get_verified_jwt_header(),
+            params={'user_idx': session.get('user_id')}
         )
-    except Exception as e:  # If an exception occurs
-        flash(str(e), 'danger')  # Flash an error message
-        return redirect(url_for('users.users'))  # Redirect to the sites route
-# Users Update Route
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                user_obj = response.json().get('user')
+                user = UserEntity(
+                    user_id=user_obj['user_id'],
+                    user_username=user_obj['user_username'],
+                    user_name=user_obj['user_name'],
+                    user_lastname=user_obj['user_lastname'],
+                    user_privileges=user_obj['user_privileges'],
+                    user_state=user_obj['user_state']
+                )
+            else:
+                flash(response.json().get('message'), 'danger')
+                return redirect(url_for('users.users'))
+        elif response.status_code == 500:
+            flash('Failed to retrieve user', 'danger')
+            return redirect(url_for('users.users'))
+    except Exception as e:
+        flash(str(e), 'danger')
 
-# Users Delete Route
-@users_bp.route('/delete/<int:user_id>', methods=['GET'])
-@restriction.login_required  # Need to be logged in
-@restriction.admin_required  # Need to be an admin
-def delete_user(user_id):
-    try:  # Try to delete the user
-        User.delete_user(user_id)  # Delete the user
-        flash('User deleted successfully', 'success')  # Flash a success message
-        functions.create_log(session['user_id'], 'User deleted', 'DELETE', 'users')  # Create a log
-    except Exception as e:  # If an exception occurs
-        flash(str(e), 'danger')  # Flash an error message
-    return redirect(url_for('users.users'))  # Redirect to the users route
-# User Delete Route
+    if request.method == 'POST':  
+        try:
+            response = requests.put(
+                f'http://localhost:8080/api/private/user/{user_id}',
+                headers=get_verified_jwt_header(),
+                params={
+                    'user_idx': session.get('user_id'),
+                    'user_id': user_id,
+                    'user_username': request.form['user_username'],
+                    'user_username': request.form['user_username'],
+                    'user_password': request.form['user_password'],
+                    'user_name': request.form['user_name'],
+                    'user_lastname': request.form['user_lastname'],
+                    'user_privileges': request.form['user_privileges'],
+                    'user_state': (1 if request.form['user_state'] == 'active' else 0) if session.get('user_id') != user_id else 1
+                }
+            )
+            if response.status_code == 200:
+                if response.json().get('backend_status') == 200:
+                    flash('User updated successfully', 'success')
+                else:
+                    raise Exception(response.json().get('message'))
+            elif response.status_code == 500:
+                raise Exception('Failed to update user')
+        except Exception as e:
+            flash(str(e), 'danger')
+        return redirect(url_for('users.users'))
 
-# Users Bulk Delete Route
-@users_bp.route('/delete/bulk', methods=['POST'])
-@restriction.login_required  # Need to be logged in
-@restriction.admin_required  # Need to be an admin
-def bulk_delete_user():
-    data = request.get_json()  # Get the JSON data
-    user_ids = data.get('items_ids', [])  # Get the user IDs
     try:
-        flag = 0  # Set the flag to 0
-        for user_id in user_ids:  # For each user ID
-            User.delete_user(user_id)  # Delete the user
-            flag += 1  # Increment the flag
-        flash(f'{flag} Users deleted successfully', 'success')  # Flash a success message
-        functions.create_log(session['user_id'], f'{flag} Users deleted', 'DELETE', 'users')  # Create a log
-        return jsonify({'message': 'Users deleted successfully'}), 200  # Return a success message
-    except Exception as e:  # If an exception occurs
-        flash(str(e), 'danger')  # Flash an error message
-        return jsonify({'message': 'Failed to delete users', 'error': str(e)}), 500  # Return an error message
-# Users Bulk Delete Route
+        return render_template(
+            'users/form_users.html',
+            user=user  
+        )
+    except Exception as e:  
+        flash(str(e), 'danger')  
+        return redirect(url_for('users.users'))
 
-# Users Delete All Route
+@users_bp.route('/delete/<int:user_id>', methods=['GET'])
+@restriction.login_required  
+@restriction.admin_required  
+def delete_user(user_id):
+    try:  
+        response = requests.delete(
+            f'http://localhost:8080/api/private/user/{user_id}',
+            headers=get_verified_jwt_header(),
+            params={'user_idx': session.get('user_id')}
+        )
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                flash('User deleted successfully', 'success')
+            else:
+                flash(response.json().get('message'), 'danger')
+        elif response.status_code == 500:
+            flash('Failed to delete user', 'danger')
+    except Exception as e:  
+        flash(str(e), 'danger')  
+    return redirect(url_for('users.users'))  
+
+@users_bp.route('/delete/bulk', methods=['POST'])
+@restriction.login_required  
+@restriction.admin_required  
+def bulk_delete_user():
+    data = request.get_json()  
+    users_ids = data.get('items_ids', [])
+    try:
+        response = requests.delete(
+            'http://localhost:8080/api/private/users/bulk/',
+            headers=get_verified_jwt_header(),
+            json={'users_ids': users_ids},
+            params={'user_idx': session.get('user_id')}
+        )
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                flag = response.json().get('count_flag')
+                flash('Users deleted successfully', 'success')
+                return jsonify({'message': f'{flag} Users deleted successfully'}), 200
+            else:
+                flash(response.json().get('message'), 'danger')
+        elif response.status_code == 500:
+            raise Exception('Failed to delete users')
+    except Exception as e:  
+        flash(str(e), 'danger')  
+        return jsonify({'message': 'Failed to delete users', 'error': str(e)}), 500  
+
 @users_bp.route('/delete_all_users', methods=['POST'])
-@restriction.login_required  # Need to be logged in
-@restriction.admin_required  # Need to be an admin
+@restriction.login_required  
+@restriction.admin_required  
 def delete_all_users():
-    try:  # Try to delete all users
-        User.delete_all_users()  # Delete all users
-        flash('All Routers Deleted Successfully', 'success')  # Flash a success message
-        functions.create_log(session['user_id'], 'All Users deleted', 'DELETE', 'users')  # Create a log
-        return jsonify({'message': 'Routers deleted successfully'}), 200  # Return a success message
-    except Exception as e:  # If an exception occurs
-        flash(str(e), 'danger')  # Flash an error message
-        return jsonify({'message': 'Failed to delete routers', 'error': str(e)}), 500  # Return an error message
-# Users Delete All Route
+    try:  
+        response = requests.delete(
+            'http://localhost:8080/api/private/users/',
+            headers=get_verified_jwt_header(),
+            params={'user_idx': session.get('user_id')}
+        )
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                flash('All Users deleted successfully', 'success')
+                return jsonify({'message': 'All Users deleted successfully'}), 200
+            else:
+                raise Exception(response.json().get('message'))
+        elif response.status_code == 500:
+            raise Exception('Failed to delete users')
+    except Exception as e:  
+        flash(str(e), 'danger')  
+        return jsonify({'message': 'Failed to delete routers', 'error': str(e)}), 500  
 
-# Users Log Route
 @users_bp.route('/log', methods=['GET'])
-@restriction.login_required  # Need to be logged in
-@restriction.admin_required  # Need to be an admin
+@restriction.login_required  
+@restriction.admin_required  
 def log():
     try:
-        return render_template(  # Render the log template
-            'users/log.html',  # Render the log template
-            user_log_list=UserLog.get_user_logs(),  # Pass the user log list to the template
-            user_log=None  # Pass None to the template
+        response = requests.get(
+            'http://localhost:8080/api/private/logs/',
+            headers=get_verified_jwt_header(),
+            params={'user_id': session.get('user_id')}
         )
-    except Exception as e:  # If an exception occurs
-        flash(str(e), 'danger')  # Flash an error message
-        return redirect(url_for('users.log'))  # Redirect to the log route
-# Users Log Route
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                logs_list = [
+                    UserLogEntity(
+                        user_log_id=log['user_log_id'],
+                        rk_user_id=log['rk_user_id'],
+                        rk_user_username=log['rk_user_username'],
+                        rk_user_name=log['rk_user_name'],
+                        rk_user_lastname=log['rk_user_lastname'],
+                        user_log_description=log['user_log_description'],
+                        user_log_action=log['user_log_action'],
+                        user_log_table=log['user_log_table'],
+                        user_log_date=log['user_log_date'],
+                        user_log_public_ip=log['user_log_public_ip'],
+                        user_log_local_ip=log['user_log_local_ip']
+                    )
+                    for log in response.json().get('logs')
+                ]
+            else:
+                raise Exception(response.json().get('message'))
+        elif response.status_code == 500:
+            raise Exception('Failed to retrieve logs')
+        return render_template(
+            'users/log.html',
+            user_log_list=logs_list
+        )
+    except Exception as e:  
+        flash(str(e), 'danger')  
+        return redirect(url_for('users.log'))  
 
-# Users Delete By Date Users Log Route
 @users_bp.route('/delete_from_date_user_log', methods=['POST'])
-@restriction.login_required  # Need to be logged in
-@restriction.admin_required  # Need to be an admin
+@restriction.login_required  
+@restriction.admin_required  
 def delete_from_date_user_log():
-    data = request.get_json()  # Get the JSON data
-    date = data.get('date', None)  # Get the date
-    date += ' 23:59:59'  # Add the time
+    data = request.get_json()  
+    date = data.get('date', None)  
+    date += ' 23:59:59'  
     try:
-        flag = UserLog.delete_from_date_user_log(date)  # Delete the user logs
-        if flag == 0:  # If no user logs were deleted
-            flash('No User Logs Found', 'danger')  # Flash a warning message
-            return jsonify({'message': 'No User Logs Found'}), 200  # Return a warning message
-        else:
-            flash(f'{flag} User Logs deleted successfully', 'success')  # Flash a success message
-            return jsonify({'message': 'User Logs deleted successfully'}), 200  # Return a success message
-    except Exception as e:  # If an exception occurs
-        flash(str(e), 'danger')  # Flash an error message
-        return jsonify({'message': 'User Logs Failed to Delete', 'error': str(e)}), 500  # Return an error message
-# Users Delete By Date Users Log Route
+        response = requests.delete(
+            'http://localhost:8080/api/private/logs/date/',
+            headers=get_verified_jwt_header(),
+            params={
+                'date': date,
+                'user_id': session.get('user_id')
+            }
+        )
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                flag = response.json().get('flag')
+                if flag == 0:
+                    flash('No User Logs Found', 'danger')
+                    return jsonify({'message': 'No User Logs Found'}), 200
+                else:
+                    flash(f'{flag} User Logs deleted successfully', 'success')
+                    return jsonify({'message': 'User Logs deleted successfully'}), 200
+            else:
+                raise Exception(response.json().get('message'))
+                return jsonify({'message': response.json().get('message')})
+        elif response.status_code == 500:
+            raise Exception('User Logs Failed to Delete')
+            return jsonify({'message': 'User Logs Failed to Delete'})
+    except Exception as e:  
+        flash(str(e), 'danger')  
+        return jsonify({'message': 'User Logs Failed to Delete', 'error': str(e)})

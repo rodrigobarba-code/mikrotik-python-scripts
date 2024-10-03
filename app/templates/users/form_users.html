@@ -81,14 +81,20 @@
                         </div>
                     </div>
                     <div class="col-6">
-                        <div class="mb-3">
-                            <label for="state" class="form-label">State</label>
-                            <select class="form-select" id="state" name="user_state" required>
-                                <option value="">Select a state</option>
-                                <option value="1" {% if user.user_state == 1 %} selected {% endif %}>Active</option>
-                                <option value="0" {% if user.user_state == 0 %} selected {% endif %}>Inactive</option>
-                            </select>
-                        </div>
+                        {% if user.user_id != session['user_id'] %}
+                            <div class="mb-3">
+                                <label for="status" class="form-label">Status</label>
+                                <select class="form-select" id="status" name="user_state" required>
+                                    <option value="">Select a status</option>
+                                    <option value="active" {% if user.user_state == 1 %} selected {% endif %}>
+                                        Active
+                                    </option>
+                                    <option value="inactive" {% if user.user_state == 0 %} selected {% endif %}>
+                                        Inactive
+                                    </option>
+                                </select>
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
                 <div class="mb-3 form-check">

@@ -25,7 +25,7 @@ def start_hypercorn():
 
     command = [
         "hypercorn",
-        "api.fastapi:fastapi_app",
+        "api:fastapi_app",
         "--bind", "0.0.0.0:8080",
         "--workers", "4",
         "--reload"

@@ -43,11 +43,10 @@
                     <div class="input-group">
                         <select id="selectbox-user-log" class="form-select" aria-label="">
                             <option selected value="all">All</option>
-                            <option value="insert">Insert</option>
-                            <option value="update">Update</option>
-                            <option value="delete">Delete</option>
-                            <option value="login">Login</option>
-                            <option value="logout">Logout</option>
+                            <option value="get">GET</option>
+                            <option value="post">POST</option>
+                            <option value="put">PUT</option>
+                            <option value="delete">DELETE</option>
                         </select>
                     </div>
                     <div class="form-text">If you want to sort by a specific badge.</div>
@@ -101,42 +100,26 @@
                             {% else %}
                                 <ul class="timeline">
                                     {% for log in user_log_list %}
-                                        <script>
+                                        <li class="event" data-date="{{ log.user_log_date }}" data-datetime="{{ log.user_log_date }}">
+                                            {% set bg_color = 'secondary' %}
 
-                                        </script>
-                                        <li class="event" data-date="" data-datetime="{{ log.user_log_date }}">
-                                            <h6>It has been done a <span
-                                                    class="badge bg-{% if log.user_log_action == 'INSERT' %}success{% elif log.user_log_action == 'UPDATE' %}warning{% elif log.user_log_action == 'DELETE' %}danger{% elif log.user_log_action == 'LOGIN' %}primary{% else %}secondary{% endif %}">{{ log.user_log_action }}</span>
-                                            </h6>
-                                            {% if log.user_log_action in ['INSERT', 'UPDATE', 'DELETE'] %}
-                                                <p>On the table {{ log.user_log_table }}, by
-                                                    Username: {{ log.rk_user_username }},
-                                                    With
-                                                    Name: {{ log.rk_user_name }} {{ log.rk_user_lastname }}</p>
-                                                <p>Description: {{ log.user_log_description }}</p>
-                                                <strong>
-                                                    <p>The Public IP Address is {{ log.user_log_public_ip }}</p>
-                                                    <p>The Local IP Address is {{ log.user_log_local_ip }}</p>
-                                                </strong>
-                                            {% else %}
-                                                {% if log.user_log_action == 'LOGIN' %}
-                                                    <p>It has occurred a login, by user {{ log.rk_user_username }},
-                                                        name:
-                                                        {{ log.rk_user_name }} {{ log.rk_user_lastname }}</p>
-                                                    <strong>
-                                                        <p>The Public IP Address is {{ log.user_log_public_ip }}</p>
-                                                        <p>The Local IP Address is {{ log.user_log_local_ip }}</p>
-                                                    </strong>
-                                                {% else %}
-                                                    <p>It has occurred a logout, by user {{ log.rk_user_username }},
-                                                        name:
-                                                        {{ log.rk_user_name }} {{ log.rk_user_lastname }}</p>
-                                                    <strong>
-                                                        <p>The Public IP Address is {{ log.user_log_public_ip }}</p>
-                                                        <p>The Local IP Address is {{ log.user_log_local_ip }}</p>
-                                                    </strong>
-                                                {% endif %}
+                                            {% if log.user_log_action == 'GET' %}
+                                                {% set bg_color = 'primary' %}
+                                            {% elif log.user_log_action == 'POST' %}
+                                                {% set bg_color = 'success' %}
+                                            {% elif log.user_log_action == 'PUT' %}
+                                                {% set bg_color = 'warning' %}
+                                            {% elif log.user_log_action == 'DELETE' %}
+                                                {% set bg_color = 'danger' %}
                                             {% endif %}
+
+                                            <h6> An API request has been made with <span class="badge bg-{{ bg_color }}">{{ log.user_log_action }}</span></h6>
+
+                                            <p>On the table {{ log.user_log_table }}, by Username: {{ log.rk_user_username }}, with name: {{ log.rk_user_name }} {{ log.rk_user_lastname }}</p>
+                                            <p>Description: {{ log.user_log_description }}</p>
+                                            <strong>
+                                                <p>The Public IP Address is {{ log.user_log_public_ip }}</p>
+                                            </strong>
                                         </li>
                                     {% endfor %}
                                 </ul>

@@ -1,6 +1,6 @@
 from .config import DatabaseConfig
-from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy import func, event, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 
 def init_models():
@@ -13,7 +13,13 @@ def init_models():
     from models.ip_management.models import IPSegment
 
 Base = declarative_base()
-engine = create_engine(DatabaseConfig.SQLALCHEMY_DATABASE_URI)
+engine = create_engine(
+    DatabaseConfig.SQLALCHEMY_DATABASE_URI,
+    pool_size=5,
+    max_overflow=10,
+    pool_timeout=30,
+    pool_recycle=1800
+)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base.metadata.create_all(bind=engine)
