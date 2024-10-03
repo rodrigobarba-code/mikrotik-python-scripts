@@ -17,6 +17,8 @@ async def get_segments(user_id: int, metadata: Request, token: dict = Depends(ve
                 {
                     "ip_segment_id": segment.ip_segment_id,
                     "fk_router_id": segment.fk_router_id,
+                    "ip_segment_ip": segment.ip_segment_ip,
+                    "ip_segment_mask": segment.ip_segment_mask,
                     "ip_segment_network": segment.ip_segment_network,
                     "ip_segment_interface": segment.ip_segment_interface,
                     "ip_segment_actual_iface": segment.ip_segment_actual_iface,
@@ -57,6 +59,8 @@ async def get_segment(user_id: int, metadata: Request, segment_id: int, token: d
             segment = {
                 "ip_segment_id": request.ip_segment_id,
                 "fk_router_id": request.fk_router_id,
+                "ip_segment_ip": segment.ip_segment_ip,
+                "ip_segment_mask": segment.ip_segment_mask,
                 "ip_segment_network": request.ip_segment_network,
                 "ip_segment_interface": request.ip_segment_interface,
                 "ip_segment_actual_iface": request.ip_segment_actual_iface,

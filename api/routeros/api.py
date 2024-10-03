@@ -248,7 +248,8 @@ class RouterAPI:
                         arp_region_list.append(arp_obj)
                     else:
                         # If there is no match, don't add the ARP data to the list
-                        print(arp['address'] + ' not found in the IP segments')
+                        # print(arp['address'] + ' not found in the IP segments')
+                        pass
 
                 # Create a dictionary with the ARP list, the router ID and the model
                 router_metadata = {'arp_region_list': arp_region_list, 'router_id': router['id']}
