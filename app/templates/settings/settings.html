@@ -36,37 +36,36 @@
                             <div class="tab-pane fade show active" id="profile" role="tabpanel">
                                 <h6>Profile Information</h6>
                                 <hr>
-                                <form>
-                                    <div class="form-group">
-                                        <label for="fullName">Full Name</label>
-                                        <input type="text" class="form-control" id="fullName"
-                                               aria-describedby="fullNameHelp" placeholder="Enter your fullname"
-                                               value="Kenneth Valdez">
-                                        <small id="fullNameHelp" class="form-text text-muted">Your name may appear
-                                            around here where you are mentioned. You can change or remove it at any
-                                            time.</small>
+                                <form action="{{ url_for('settings.update_settings') }}"
+                                      method="POST">
+                                    <div class="form-group p-2">
+                                        <label for="name">Name</label>
+                                        <input type="text" class="form-control" id="name" name="user_name"
+                                               aria-describedby="nameHelp" placeholder="Enter your name"
+                                               value="{{ session.user_name }}">
                                     </div>
-                                    <div class="form-group">
-                                        <label for="bio">Your Bio</label>
-                                        <textarea class="form-control autosize" id="bio"
-                                                  placeholder="Write something about you"
-                                                  style="overflow: hidden; overflow-wrap: break-word; resize: none; height: 62px;">A front-end developer that focus more on user interface design, a web interface wizard, a connector of awesomeness.</textarea>
+                                    <div class="form-group p-2">
+                                        <label for="lastname">Last name</label>
+                                        <input type="text" class="form-control" id="lastname" name="user_lastname"
+                                               aria-describedby="lastnameHelp" placeholder="Enter your lastname"
+                                               value="{{ session.user_lastname }}">
                                     </div>
-                                    <div class="form-group">
-                                        <label for="url">URL</label>
-                                        <input type="text" class="form-control" id="url"
-                                               placeholder="Enter your website address"
-                                               value="http://benije.ke/pozzivkij">
+                                    <div class="d-flex justify-content-center">
+                                        <hr class="rounded opacity-25" style="width: 90%">
                                     </div>
-                                    <div class="form-group pb-3">
-                                        <label for="location">Location</label>
-                                        <input type="text" class="form-control" id="location"
-                                               placeholder="Enter your location" value="Bay Area, San Francisco, CA">
+                                    <div class=" form-group p-2
+                                        ">
+                                        <label for="username">Username</label>
+                                        <input type="text" class="form-control" id="username" name="user_username"
+                                               aria-describedby="usernameHelp" placeholder="Usename"
+                                               value="{{ session.user_username }}">
                                     </div>
-                                    <div class="form-group small text-muted">
+                                    <div class="d-flex flex-row mb-3 mt-3 justify-content-start">
+                                        <div class="p-2">
+                                            <button type="submit" class="btn btn-outline-light pr-2">Update Profile
+                                            </button>
+                                        </div>
                                     </div>
-                                    <button type="button" class="btn btn-primary">Update Profile</button>
-                                    <button type="reset" class="btn btn-light">Reset Changes</button>
                                 </form>
                             </div>
                             <div class="tab-pane fade" id="account" role="tabpanel">
