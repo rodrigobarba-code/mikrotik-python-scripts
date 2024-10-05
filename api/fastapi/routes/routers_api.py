@@ -118,7 +118,7 @@ async def verify_router(user_id: int, metadata: Request, router_id: int, token: 
                 router['router_password']
             )
             router_object.set_api()
-            is_connected = await RouterAPI.verify_router_connection(router_object.get_api())
+            is_connected = RouterAPI.verify_router_connection(router_object.get_api())
             if is_connected:
                 routers_functions.create_transaction_log(
                     action="GET",
@@ -169,8 +169,8 @@ async def verify_router_credentials(
         if routers_functions.verify_user_existence(user_id):
             router = RouterAPI(router_ip, router_username, router_password)
             router.set_api()
-            is_connected = await RouterAPI.verify_router_connection(router.get_api())
-            if is_connected:
+            is_connected = RouterAPI.verify_router_connection(router.get_api())
+            if is_connected is True:
                 routers_functions.create_transaction_log(
                     action="GET",
                     table="routers",
@@ -180,28 +180,16 @@ async def verify_router_credentials(
                 )
                 return {
                     'message': "Router credentials verified successfully",
-                    'is_connected': 1,
-                    'backend_status': 200
-                }
-            else:
-                routers_functions.create_transaction_log(
-                    action="GET",
-                    table="routers",
-                    user_id=int(user_id),
-                    description="Router credentials could not be verified",
-                    public=str(str(metadata.client.host) + ':' + str(metadata.client.port))
-                )
-                return {
-                    'message': "Router credentials could not be verified",
-                    'is_connected': 0,
-                    'backend_status': 200
+                    'backend_status': 200,
+                    'is_connected': 1
                 }
         else:
             raise Exception("User not registered in the system")
     except Exception as e:
         return {
-            'message': f"Failed to verify router credentials: {str(e)}",
-            'backend_status': 400
+            'message': f"Could not establish connection with router: {str(e)}",
+            'backend_status': 200,
+            'is_connected': 0
         }
 
 @routers_router.get("/router/verify/all/")
@@ -217,7 +205,7 @@ async def verify_all_routers(user_id: int, metadata: Request, token: dict = Depe
                     router.router_password
                 )
                 router_object.set_api()
-                is_connected = await RouterAPI.verify_router_connection(router_object.get_api())
+                is_connected = RouterAPI.verify_router_connection(router_object.get_api())
                 if is_connected:
                     routers_functions.create_transaction_log(
                         action="GET",
@@ -319,6 +307,7 @@ async def add_router(
     try:
         if routers_functions.verify_user_existence(user_id):
             router = RouterEntity(
+                router_id=1,
                 router_name=router_name,
                 router_description=router_description,
                 router_brand=router_brand,

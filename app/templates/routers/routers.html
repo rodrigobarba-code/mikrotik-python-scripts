@@ -105,7 +105,7 @@
                                     data-name="{{ router.router_name }}"
                             ><i class="fa-solid fa-trash"></i></button>
                             {{ show_details_button(router.router_id, url_for('routers.get_router_details'), 'Router') }}
-                            <button id="verify-router-connection" data-id="{{ router.router_id }}" class="btn btn-sm btn-success show-details-button" type="button">
+                            <button id="verify-router-connection-{{ router.router_id }}" data-id="{{ router.router_id }}" class="btn btn-sm btn-success verify-router-connection" type="button">
                                 <i class="fa-solid fa-cloud-check"></i>
                             </button>
                         </td>

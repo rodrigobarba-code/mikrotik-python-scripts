@@ -14,7 +14,7 @@ async def login():
     dev_mode = os.getenv('DEVELOPMENT_MODE', 'True').lower() in ['true', '1', 't']
 
     if dev_mode:  
-        session['user_id'] = 1  
+        session['user_id'] = os.getenv('SUPER_ADMIN_ID')
         session['user_username'] = os.getenv('SUPER_ADMIN_USER')  
         session['user_privileges'] = os.getenv('SUPER_ADMIN_PRIVILEGES')  
         session['user_name'] = os.getenv('SUPER_ADMIN_NAME')  

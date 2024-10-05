@@ -47,7 +47,10 @@ class RouterDetails {
 // Class for handling router details
 
 $(document).ready(() => {
-    $('#verify-router-connection').on('click', async () => {
+    $('.verify-router-connection').on('click', async function () {
+        const id = $(this).attr('id');
+        let router_id = parseInt(id.split('-')[3]);
+
         Swal.fire({
             title: 'Verifying router connection',
             icon: 'info',
@@ -59,12 +62,11 @@ $(document).ready(() => {
         });
 
         let token = await getVerifiedJWTCredentials();
-        let router_id = $('#verify-router-connection').data('id');
+
         $.ajax({
-            url: `http://localhost:8080/api/private/router/verify/${router_id}`,
-            type: 'GET',
+            url: `/routers/verify/${router_id}`,
             contentType: 'application/json',
-            headers: token.jwt,
+            type: 'GET',
             success: (data) => {
                 if (data.backend_status === 200) {
                     Swal.fire({
@@ -103,10 +105,9 @@ $(document).ready(() => {
 
         let token = await getVerifiedJWTCredentials()
         $.ajax({
-            url: `http://localhost:8080/api/private/router/verify/all/`,
+            url: `/routers/verify/all`,
             type: 'GET',
             contentType: 'application/json',
-            headers: token.jwt,
             success: (data) => {
                 if (data.backend_status === 200) {
                     if (data.is_connected === 1) {
@@ -147,15 +148,15 @@ $(document).ready(() => {
 
         try {
             let token = await getToken();
-            let credentialsData = await getCredentialsData();
+            let credentialsData = getCredentialsData();
 
             let connectionStatus = await verifyRouterCredentials(token, credentialsData);
 
-            if (connectionStatus.is_connected === 1) {
+            if (connectionStatus['is_connected'] === 1) {
                 let formData = $(this).serialize();
                 handleSuccessfulConnection(formData, token);
             } else {
-                showAlert('question', 'Credentials are not valid', connectionStatus.message);
+                showAlert('question', 'Credentials are not valid', connectionStatus['message']);
             }
         } catch (error) {
             showAlert('error', 'Error', 'Failed to get JWT token');
@@ -178,10 +179,10 @@ $(document).ready(() => {
     async function verifyRouterCredentials(token, formData) {
         try {
             return await $.ajax({
-                url: 'http://localhost:8080/api/private/router/verify-credentials/',
+                url: '/routers/verify/credentials/',
                 type: 'GET',
-                headers: token,
-                data: formData
+                data: formData,
+                contentType: 'application/json',
             });
         } catch (error) {
             showAlert('error', 'Error', 'Failed to verify credentials');

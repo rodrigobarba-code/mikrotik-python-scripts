@@ -72,15 +72,12 @@ class RouterAPI:
     def retrieve_data(router, command) -> dict:
         return router.talk(command)
 
-    async def talk_with_timeout(router, command) -> dict:
-        return await router.talk(command)
-
-    async def verify_router_connection(router) -> bool:
+    def verify_router_connection(router) -> bool:
         try:
-            await asyncio.wait_for(RouterAPI.talk_with_timeout(router, '/system/identity/print'), timeout=10.0)
+            router.talk('/system/resource/print')
             return True
         except (Exception, asyncio.TimeoutError) as e:
-            return False
+            raise e
 
     @staticmethod
     async def get_ip_data() -> list:
