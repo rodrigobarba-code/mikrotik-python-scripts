@@ -1,0 +1,43 @@
+version: '3.7'
+services:
+  mariadb-database:
+    build:
+      context: ./database
+      dockerfile: Dockerfile
+    container_name: mariadb_database
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: sevensuite
+      MYSQL_USER: sevensuiteuser
+      MYSQL_PASSWORD: development-sevensuiteapp
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    networks:
+      mariadb_network:
+        ipv4_address: 192.168.1.5
+
+  phpmyadmin-mariadb:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin_mariadb
+    depends_on:
+      - db
+    environment:
+      PMA_HOST: db
+      PMA_USER: sevensuiteuser
+      PMA_PASSWORD: development-sevensuiteapp
+    ports:
+      - "81:80"
+    networks:
+      mariadb_network:
+        ipv4_address: 192.168.1.10
+
+volumes:
+  mariadb_data:
+
+networks:
+  mariadb_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.1.0/24

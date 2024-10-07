@@ -1,8 +1,12 @@
 import os
-from dotenv import load_dotenv
 
-load_dotenv()
+user = os.environ.get('DB_USER', 'sevensuiteuser')
+password = os.environ.get('DB_PASSWORD', 'development-sevensuiteapp')
+host = os.environ.get('DB_HOST', 'db')
+database = os.environ.get('DB_NAME', 'sevensuite')
+
+connection_string = f'mariadb+mariadbconnector://{user}:{password}@{host}/{database}'
 
 class DatabaseConfig:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or os.getenv('MARIADB_CONNECTION_STRING')
+    SQLALCHEMY_DATABASE_URI = connection_string
