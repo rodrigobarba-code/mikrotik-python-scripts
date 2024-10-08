@@ -17,8 +17,8 @@ def start_hypercorn():
     except subprocess.CalledProcessError as e:
         print(f"Error occurred while starting Hypercorn: {e}")
 
-# Function to start the FastAPI server in a separate thread
-def start():
-    hypercorn_thread = Thread(target=start_hypercorn)
-    hypercorn_thread.start()
-    hypercorn_thread.join()
+# Start the FastAPI server using Hypercorn in a separate thread
+if __name__ == "__main__":
+    thread = Thread(target=start_hypercorn)
+    thread.start()
+    thread.join()

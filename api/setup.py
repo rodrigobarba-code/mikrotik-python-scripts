@@ -15,7 +15,7 @@ def replace_line_in_file(file_path, variable_name, new_line):
 if __name__ == "__main__":
     user = os.environ.get('DB_USER', 'sevensuiteuser')
     password = os.environ.get('DB_PASSWORD', 'development-sevensuiteapp')
-    host = os.environ.get('DB_HOST', 'db')
+    host = os.environ.get('DB_HOST', 'localhost:3307')
     database = os.environ.get('DB_NAME', 'sevensuite')
 
     connection_string = f'mariadb+mariadbconnector://{user}:{password}@{host}/{database}'

@@ -28,8 +28,8 @@ def start_flask():
         host="0.0.0.0", port=AppConfig.PORT
     )
 
-# Function to start the Flask app in a separate thread
-def start():
-    flask_thread = Thread(target=start_flask)
-    flask_thread.start()
-    flask_thread.join()
+# Start the Flask app in a separate thread
+if __name__ == "__main__":
+    thread = Thread(target=start_flask)
+    thread.start()
+    thread.join()
