@@ -148,10 +148,28 @@ class ARP(Base):
 
     @staticmethod
     def delete_arp(session, arp_id):
-        try:  
+        try:
             arp = session.query(ARP).get(arp_id)
+            arp_tags = session.query(ARPTags).filter(ARPTags.fk_arp_id == arp_id).all()
+
+            for arp_tag in arp_tags:
+                session.delete(arp_tag)
+
             session.delete(arp)
         except Exception as e:  
+            raise e
+
+    @staticmethod
+    def bulk_delete_arps(session, arp_ids):
+        from models.router_scan.models import ARPTags
+
+        model = ARP
+        v_arp = ARPFunctions()
+        try:
+            if v_arp.validate_bulk_delete(session, model, arp_ids):
+                session.query(ARPTags).filter(ARPTags.fk_arp_id.in_(arp_ids)).delete(synchronize_session='fetch')
+                session.query(ARP).filter(ARP.arp_id.in_(arp_ids)).delete(synchronize_session='fetch')
+        except Exception as e:
             raise e
 
     @staticmethod
@@ -207,6 +225,15 @@ class ARP(Base):
                 obj_list.append(obj)  
             return obj_list  
         except Exception as e:  
+            raise e
+
+    @staticmethod
+    def get_segment(session, segment_id) -> str:
+        try:
+            from models.ip_management.models import IPSegment
+            segment = session.query(IPSegment).get(segment_id)
+            return f'{segment.ip_segment_ip}/{segment.ip_segment_mask}'
+        except Exception as e:
             raise e
 
 class ARPTags(Base):
