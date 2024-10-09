@@ -13,7 +13,7 @@ async def scan_routeros(user_id: str, metadata: Request):
     try:
         if scan_functions.verify_user_existence(user_id):
             if True:
-                asyncio.create_task(RouterAPI.arp_scan())
+                await asyncio.create_task(RouterAPI.arp_scan())
                 scan_functions.create_transaction_log(
                     action='GET',
                     table='scan',
@@ -22,7 +22,7 @@ async def scan_routeros(user_id: str, metadata: Request):
                     public=str(str(metadata.client.host) + ':' + str(metadata.client.port))
                 )
                 return {
-                    'message': 'RouterOS scan initiated',
+                    'message': 'RouterOS scan finished',
                     'backend_status': 200
                 }
             else:
