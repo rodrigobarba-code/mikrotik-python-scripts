@@ -28,3 +28,79 @@
     background-color: #f1f1f1;
     cursor: pointer;
 }
+
+.notyf {
+    border-radius: 40px !important;
+    width: 100% !important;
+}
+
+.notyf__toast {
+    border-radius: 40px !important;
+    width: 100% !important;
+    max-width: 70% !important;
+}
+
+.notyf__ripple {
+    width: 120% !important;
+}
+
+/* Custom styles for Notyf icons */
+.notyf__icon {
+    display: flex;
+    align-items: center; /* Aligns the icon vertically with the content */
+    justify-content: center; /* Centers the icon horizontally */
+    margin-right: 8px; /* Add space between the icon and the text */
+}
+
+.notyf__icon i {
+    font-size: 24px; /* Adjust the size of the Material Icon */
+    vertical-align: middle; /* Ensures the icon aligns with the text vertically */
+    line-height: 1; /* Adjusts the line height to prevent spacing issues */
+}
+
+/* Media Queries for Responsive Design */
+@media (max-width: 768px) {
+
+    .notyf {
+        padding-top: 10% !important;
+        padding-left: 10% !important;
+        padding-right: 5% !important;
+    }
+}
+
+
+.swal2-popup {
+    background-color: var(--sidebar-color); /* Cambia a tu color deseado */
+}
+
+.swal2-html {
+    color: var(--text-color); /* Cambia a tu color deseado */
+}
+
+.swal2-title {
+    color: var(--text-color); /* Cambia a tu color deseado */
+}
+
+.swal2-content {
+    color: var(--text-color); /* Cambia a tu color deseado */
+}
+
+.swal2-text {
+    color: var(--text-color); /* Cambia a tu color deseado */
+}
+
+/* Cambia los estilos de los botones */
+.swal2-confirm {
+    background-color: var(--accent); /* Cambia a tu color deseado */
+    color: white;
+}
+
+.swal2-cancel {
+    background-color: var(--primary-color); /* Cambia a tu color deseado */
+    color: white;
+}
+
+/* Cambia el borde del modal */
+.swal2-popup {
+    border-radius: 30px; /* Cambia a tu valor deseado */
+}

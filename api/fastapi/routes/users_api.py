@@ -11,8 +11,10 @@ from utils.threading_manager import ThreadingManager
 users_router = APIRouter()
 users_functions = APIFunctions()
 
+
 class UserBulkDeleteBase(BaseModel):
     users_ids: List[int]
+
 
 @users_router.get("/users/")
 async def get_users(user_idx: int, metadata: Request, token: dict = Depends(verify_jwt)):
@@ -50,6 +52,7 @@ async def get_users(user_idx: int, metadata: Request, token: dict = Depends(veri
             'backend_status': 400
         }
 
+
 @users_router.get("/user/{user_id}")
 def get_user(user_idx: int, metadata: Request, user_id: int, token: dict = Depends(verify_jwt)):
     try:
@@ -82,6 +85,7 @@ def get_user(user_idx: int, metadata: Request, user_id: int, token: dict = Depen
             'message': f"Failed to retrieve user: {str(e)}",
             'backend_status': 400
         }
+
 
 @users_router.get("/user/auth/")
 def authenticate_user(metadata: Request, user_username: str, user_password: str, token: dict = Depends(verify_jwt)):
@@ -123,17 +127,18 @@ def authenticate_user(metadata: Request, user_username: str, user_password: str,
             'backend_status': 400
         }
 
+
 @users_router.post("/user/")
 def add_user(
-    user_idx: int,
-    metadata: Request,
-    user_username: str,
-    user_password: str,
-    user_name: str,
-    user_lastname: str,
-    user_privileges: str,
-    user_state: int,
-    token: dict = Depends(verify_jwt)
+        user_idx: int,
+        metadata: Request,
+        user_username: str,
+        user_password: str,
+        user_name: str,
+        user_lastname: str,
+        user_privileges: str,
+        user_state: int,
+        token: dict = Depends(verify_jwt)
 ):
     try:
         if users_functions.verify_user_existence(user_idx):
@@ -164,18 +169,19 @@ def add_user(
             'backend_status': 400
         }
 
+
 @users_router.put("/user/{user_id}")
 def update_user(
-    user_idx: int,
-    metadata: Request,
-    user_id: int,
-    user_username: str,
-    user_password: str,
-    user_name: str,
-    user_lastname: str,
-    user_privileges: str,
-    user_state: int,
-    token: dict = Depends(verify_jwt)
+        user_idx: int,
+        metadata: Request,
+        user_id: int,
+        user_username: str,
+        user_password: str,
+        user_name: str,
+        user_lastname: str,
+        user_privileges: str,
+        user_state: int,
+        token: dict = Depends(verify_jwt)
 ):
     try:
         if users_functions.verify_user_existence(user_idx):
@@ -208,6 +214,7 @@ def update_user(
             'backend_status': 400
         }
 
+
 @users_router.delete("/user/{user_id}")
 def delete_user(user_idx: int, metadata: Request, user_id: int, token: dict = Depends(verify_jwt)):
     try:
@@ -231,6 +238,7 @@ def delete_user(user_idx: int, metadata: Request, user_id: int, token: dict = De
             'message': f"Failed to delete user: {str(e)}",
             'backend_status': 400
         }
+
 
 @users_router.delete("/users/bulk/")
 def bulk_delete_users(user_idx: int, metadata: Request, request: UserBulkDeleteBase, token: dict = Depends(verify_jwt)):
@@ -256,6 +264,7 @@ def bulk_delete_users(user_idx: int, metadata: Request, request: UserBulkDeleteB
             'message': f"Failed to bulk delete users: {str(e)}",
             'backend_status': 400
         }
+
 
 @users_router.delete("/users/")
 def delete_users(user_idx: int, metadata: Request, token: dict = Depends(verify_jwt)):

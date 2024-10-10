@@ -9,26 +9,28 @@ from flask import render_template, redirect, url_for, flash, request, session, c
 
 load_dotenv()
 
+
 @auth_bp.route('/login', methods=['GET', 'POST'])
 async def login():
+    session.clear()
     dev_mode = os.getenv('DEVELOPMENT_MODE', 'True').lower() in ['true', '1', 't']
 
-    if dev_mode:  
-        session['user_id'] = os.getenv('SUPER_ADMIN_ID')
-        session['user_username'] = os.getenv('SUPER_ADMIN_USER')  
-        session['user_privileges'] = os.getenv('SUPER_ADMIN_PRIVILEGES')  
-        session['user_name'] = os.getenv('SUPER_ADMIN_NAME')  
-        session['user_lastname'] = os.getenv('SUPER_ADMIN_LASTNAME')  
-        session['user_avatar'] = url_for('static', filename=str(
-            os.getenv('SUPER_ADMIN_AVATAR')))  
-        session['user_state'] = os.getenv('SUPER_ADMIN_STATE')
-        session['user_public_ip'] = str(get_public_ip())  
-        session['user_local_ip'] = str(get_local_ip())
-        return render_template("home/home.html")
+if dev_mode:
+    session['user_id'] = os.getenv('SUPER_ADMIN_ID')
+    session['user_username'] = os.getenv('SUPER_ADMIN_USER')
+    session['user_privileges'] = os.getenv('SUPER_ADMIN_PRIVILEGES')
+    session['user_name'] = os.getenv('SUPER_ADMIN_NAME')
+    session['user_lastname'] = os.getenv('SUPER_ADMIN_LASTNAME')
+    session['user_avatar'] = url_for('static', filename=str(
+        os.getenv('SUPER_ADMIN_AVATAR')))
+    session['user_state'] = os.getenv('SUPER_ADMIN_STATE')
+    session['user_public_ip'] = str(get_public_ip())
+    session['user_local_ip'] = str(get_local_ip())
+    return render_template("home/home.html")
 
     else:
-        if request.method == 'POST':  
-            username = request.form.get('username')  
+        if request.method == 'POST':
+            username = request.form.get('username')
             password = request.form.get('password')
             remember_me = request.form.get('logged')
 
@@ -85,21 +87,23 @@ async def login():
                 flash('API Error: An error occurred, please try again later', 'error')
                 return redirect(url_for('auth.login'))
 
-        if request.method == 'GET':  
-            if 'user_id' in session:  
-                return redirect(url_for('home.home'))  
-        return render_template('auth/login.html')  
+        if request.method == 'GET':
+            if 'user_id' in session:
+                return redirect(url_for('home.home'))
+        return render_template('auth/login.html')
+
 
 @auth_bp.route('/logout')
 def logout():
-    session.pop('user_id', None)  
-    session.pop('user_privileges', None)  
-    session.pop('user_username', None)  
-    session.pop('user_name', None)  
-    session.pop('user_lastname', None)  
+    session.pop('user_id', None)
+    session.pop('user_privileges', None)
+    session.pop('user_username', None)
+    session.pop('user_name', None)
+    session.pop('user_lastname', None)
     session.pop('user_avatar', None)
 
     return redirect(url_for('auth.login'))
+
 
 @auth_bp.route('/get/jwt', methods=['GET'])
 def get_jwt():

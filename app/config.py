@@ -1,5 +1,6 @@
 import os  # Importing OS module to generate a random secret key
 
+
 # Config class to store all the configurations of the application
 class AppConfig:
     PORT = 5000  # Port number for the app
@@ -71,21 +72,18 @@ class Sidebar:
             'endpoint': 'profile.profile',  # Endpoint of the menu item blank if endpoint is #
             'profile': True  # Profile menu item
         },
-        'separator',  # Separator for the profile menu items
         {
             'name': 'Settings',  # Name of the menu item
             'icon': 'fa-solid fa-cog icon',  # Icon of the menu item
             'endpoint': 'settings.settings',  # Endpoint of the menu item
             'profile': True  # Profile menu item
         },
-        'separator',  # Separator for the profile menu items
         {
             'name': 'Theme Switch',  # Name of the menu item
             'icon': 'fa-solid fa-moon icon',  # Icon of the menu item
             'endpoint': '#',  # Endpoint of the menu item
             'profile': True  # Profile menu item
         },
-        'separator',  # Separator for the profile menu items
         {
             'name': 'Log Out',  # Name of the menu item
             'icon': 'fa-solid fa-right-from-bracket icon',  # Icon of the menu item
