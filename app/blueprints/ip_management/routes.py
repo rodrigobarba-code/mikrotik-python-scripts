@@ -312,7 +312,7 @@ def get_ip_segment_details():
                 'network': ['Network', segment.ip_segment_network],
                 'interface': ['Interface', segment.ip_segment_interface],
                 'actual_iface': ['Actual Interface', segment.ip_segment_actual_iface],
-                'tag': ['Tag', segment.ip_segment_tag],
+                'tags': [segment.ip_segment_tag],
                 'comment': ['Comment', segment.ip_segment_comment],
                 'is_invalid': ['Is Invalid', segment.ip_segment_is_invalid],
                 'is_dynamic': ['Is Dynamic', segment.ip_segment_is_dynamic],

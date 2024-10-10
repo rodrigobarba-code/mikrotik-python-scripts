@@ -87,18 +87,22 @@
                             <td>{{ ip_segment.ip_segment_mask }}</td>
                             <td>{{ ip_segment.ip_segment_network }}</td>
 
-                            {% if ip_segment.ip_segment_tag.value == 'Public IP' %}
-                                {% set badge_class = 'primary' %}
-                            {% elif ip_segment.ip_segment_tag.value == 'Private IP' %}
-                                {% set badge_class = 'success' %}
-                            {% elif ip_segment.ip_segment_tag.value == '' %}
-                                {% set badge_class = 'warning' %}
+                            {% if ip_segment.ip_segment_tag == 'Public IP' %}
+                                {% set badge_color = '#0B6477' %}
+                                {% set badge_text = 'Public' %}
+                            {% elif ip_segment.ip_segment_tag == 'Private IP' %}
+                                {% set badge_color = '#0AD1C8' %}
+                                {% set badge_text = 'Private' %}
+                            {% elif ip_segment.ip_segment_tag == '' %}
+                                {% set badge_color = '#80ED99' %}
+                                {% set badge_text = 'No Tag' %}
                             {% else %}
-                                {% set badge_class = 'secondary' %}
+                                {% set badge_color = '#213A57' %}
+                                {% set badge_text = 'Unknown' %}
                             {% endif %}
 
                             <td>
-                                <span class="badge bg-{{ badge_class }}">{{ ip_segment.ip_segment_tag.value }}</span>
+                                <span class="badge" style="background-color: {{ badge_color }}">{{ badge_text }}</span>
                             </td>
                             <td>
                                 <button type="button" id="delete-button-segment-{{ ip_segment.ip_segment_id }}"
