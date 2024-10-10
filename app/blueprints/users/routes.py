@@ -6,9 +6,10 @@ from app.functions import get_verified_jwt_header
 from app.decorators import RequirementsDecorators as restriction
 from flask import render_template, redirect, url_for, flash, request, jsonify, session
 
+
 @users_bp.route('/')
-@restriction.login_required  
-@restriction.admin_required  
+@restriction.login_required
+@restriction.admin_required
 def users():
     try:
         response = requests.get(
@@ -32,22 +33,23 @@ def users():
             else:
                 raise Exception(response.json().get('message'))
         elif response.status_code == 500:
-            raise Exception('Failed to retrieve routers')
+            raise Exception('Failed to retrieve users')
         return render_template(
             'users/users.html',
             user_list=users_list,
             user=None
         )
-    except Exception as e:  
-        flash(str(e), 'danger')  
+    except Exception as e:
+        flash(str(e), 'danger')
         return redirect(url_for('users.users'))
 
+
 @users_bp.route('/add', methods=['GET', 'POST'])
-@restriction.login_required  
-@restriction.admin_required  
+@restriction.login_required
+@restriction.admin_required
 def add_user():
-    if request.method == 'POST':  
-        try:  
+    if request.method == 'POST':
+        try:
             response = requests.post(
                 'http://localhost:8080/api/private/user/',
                 headers=get_verified_jwt_header(),
@@ -76,11 +78,12 @@ def add_user():
     try:
         return render_template(
             'users/form_users.html',
-            user=None  
+            user=None
         )
-    except Exception as e:  
-        flash(str(e), 'danger')  
+    except Exception as e:
+        flash(str(e), 'danger')
         return redirect(url_for('users.users'))
+
 
 @users_bp.route('/update/<user_id>', methods=['GET', 'POST'])
 @restriction.login_required
@@ -112,7 +115,7 @@ def update_user(user_id):
     except Exception as e:
         flash(str(e), 'danger')
 
-    if request.method == 'POST':  
+    if request.method == 'POST':
         try:
             response = requests.put(
                 f'http://localhost:8080/api/private/user/{user_id}',
@@ -126,7 +129,8 @@ def update_user(user_id):
                     'user_name': request.form['user_name'],
                     'user_lastname': request.form['user_lastname'],
                     'user_privileges': request.form['user_privileges'],
-                    'user_state': (1 if request.form['user_state'] == 'active' else 0) if session.get('user_id') != user_id else 1
+                    'user_state': (1 if request.form['user_state'] == 'active' else 0) if session.get(
+                        'user_id') != user_id else 1
                 }
             )
             if response.status_code == 200:
@@ -143,17 +147,18 @@ def update_user(user_id):
     try:
         return render_template(
             'users/form_users.html',
-            user=user  
+            user=user
         )
-    except Exception as e:  
-        flash(str(e), 'danger')  
+    except Exception as e:
+        flash(str(e), 'danger')
         return redirect(url_for('users.users'))
 
+
 @users_bp.route('/delete/<int:user_id>', methods=['GET'])
-@restriction.login_required  
-@restriction.admin_required  
+@restriction.login_required
+@restriction.admin_required
 def delete_user(user_id):
-    try:  
+    try:
         response = requests.delete(
             f'http://localhost:8080/api/private/user/{user_id}',
             headers=get_verified_jwt_header(),
@@ -166,15 +171,16 @@ def delete_user(user_id):
                 flash(response.json().get('message'), 'danger')
         elif response.status_code == 500:
             flash('Failed to delete user', 'danger')
-    except Exception as e:  
-        flash(str(e), 'danger')  
-    return redirect(url_for('users.users'))  
+    except Exception as e:
+        flash(str(e), 'danger')
+    return redirect(url_for('users.users'))
+
 
 @users_bp.route('/delete/bulk', methods=['POST'])
-@restriction.login_required  
-@restriction.admin_required  
+@restriction.login_required
+@restriction.admin_required
 def bulk_delete_user():
-    data = request.get_json()  
+    data = request.get_json()
     users_ids = data.get('items_ids', [])
     try:
         response = requests.delete(
@@ -192,15 +198,16 @@ def bulk_delete_user():
                 flash(response.json().get('message'), 'danger')
         elif response.status_code == 500:
             raise Exception('Failed to delete users')
-    except Exception as e:  
-        flash(str(e), 'danger')  
-        return jsonify({'message': 'Failed to delete users', 'error': str(e)}), 500  
+    except Exception as e:
+        flash(str(e), 'danger')
+        return jsonify({'message': 'Failed to delete users', 'error': str(e)}), 500
+
 
 @users_bp.route('/delete_all_users', methods=['POST'])
-@restriction.login_required  
-@restriction.admin_required  
+@restriction.login_required
+@restriction.admin_required
 def delete_all_users():
-    try:  
+    try:
         response = requests.delete(
             'http://localhost:8080/api/private/users/',
             headers=get_verified_jwt_header(),
@@ -214,13 +221,14 @@ def delete_all_users():
                 raise Exception(response.json().get('message'))
         elif response.status_code == 500:
             raise Exception('Failed to delete users')
-    except Exception as e:  
-        flash(str(e), 'danger')  
-        return jsonify({'message': 'Failed to delete routers', 'error': str(e)}), 500  
+    except Exception as e:
+        flash(str(e), 'danger')
+        return jsonify({'message': 'Failed to delete routers', 'error': str(e)}), 500
+
 
 @users_bp.route('/log', methods=['GET'])
-@restriction.login_required  
-@restriction.admin_required  
+@restriction.login_required
+@restriction.admin_required
 def log():
     try:
         response = requests.get(
@@ -254,17 +262,18 @@ def log():
             'users/log.html',
             user_log_list=logs_list
         )
-    except Exception as e:  
-        flash(str(e), 'danger')  
-        return redirect(url_for('users.log'))  
+    except Exception as e:
+        flash(str(e), 'danger')
+        return redirect(url_for('users.log'))
+
 
 @users_bp.route('/delete_from_date_user_log', methods=['POST'])
-@restriction.login_required  
-@restriction.admin_required  
+@restriction.login_required
+@restriction.admin_required
 def delete_from_date_user_log():
-    data = request.get_json()  
-    date = data.get('date', None)  
-    date += ' 23:59:59'  
+    data = request.get_json()
+    date = data.get('date', None)
+    date += ' 23:59:59'
     try:
         response = requests.delete(
             'http://localhost:8080/api/private/logs/date/',
@@ -289,6 +298,6 @@ def delete_from_date_user_log():
         elif response.status_code == 500:
             raise Exception('User Logs Failed to Delete')
             return jsonify({'message': 'User Logs Failed to Delete'})
-    except Exception as e:  
-        flash(str(e), 'danger')  
+    except Exception as e:
+        flash(str(e), 'danger')
         return jsonify({'message': 'User Logs Failed to Delete', 'error': str(e)})

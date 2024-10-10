@@ -67,3 +67,40 @@
         padding-right: 5% !important;
     }
 }
+
+
+.swal2-popup {
+    background-color: var(--sidebar-color); /* Cambia a tu color deseado */
+}
+
+.swal2-html {
+    color: var(--text-color); /* Cambia a tu color deseado */
+}
+
+.swal2-title {
+    color: var(--text-color); /* Cambia a tu color deseado */
+}
+
+.swal2-content {
+    color: var(--text-color); /* Cambia a tu color deseado */
+}
+
+.swal2-text {
+    color: var(--text-color); /* Cambia a tu color deseado */
+}
+
+/* Cambia los estilos de los botones */
+.swal2-confirm {
+    background-color: var(--accent); /* Cambia a tu color deseado */
+    color: white;
+}
+
+.swal2-cancel {
+    background-color: var(--primary-color); /* Cambia a tu color deseado */
+    color: white;
+}
+
+/* Cambia el borde del modal */
+.swal2-popup {
+    border-radius: 30px; /* Cambia a tu valor deseado */
+}
