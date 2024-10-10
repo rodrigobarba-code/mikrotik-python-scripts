@@ -1,5 +1,6 @@
 from .. import Base
 from models.routers.models import Router
+from sqlalchemy.orm import relationship, backref
 from entities.ip_segment import IPSegmentTag, IPSegmentEntity
 from models.ip_management.functions import IPAddressesFunctions
 from sqlalchemy import Column, Integer, String, Boolean, Enum, ForeignKey
@@ -283,3 +284,45 @@ class IPSegment(Base):
             return ip_segment_list  
         except Exception as e:  
             raise e
+
+class IPGroups(Base):
+    __tablename__ = 'ip_groups'
+
+    ip_group_id = Column(Integer, primary_key=True, nullable=False)
+    fk_ip_segment_id = Column(Integer, ForeignKey('ip_segment.ip_segment_id'), nullable=False)
+    ip_group_name = Column(Enum(['blacklist', 'authorized']), nullable=False)
+    ip_group_alias = Column(String(255), nullable=True)
+    ip_group_description = Column(String(255), nullable=True)
+    ip_group_ip = Column(String(15), nullable=False)
+    ip_group_mask = Column(String(15), nullable=False)
+    ip_group_mac = Column(String(17), nullable=True)
+    ip_group_mac_vendor = Column(String(255), nullable=True)
+    ip_group_interface = Column(String(255), nullable=False)
+    ip_group_comment = Column(String(255), nullable=True)
+    ip_is_dhcp = Column(Boolean, nullable=False)
+    ip_is_invalid = Column(Boolean, nullable=False)
+    ip_is_disabled = Column(Boolean, nullable=False)
+    ip_is_published = Column(Boolean, nullable=False)
+
+    ip_groups = relationship('IPSegment', backref=backref('ip_groups', lazy=True))
+
+    def __repr__(self):
+        return f'<IP Group {self.ip_group_id}>'
+
+    def __dict__(self):
+        return {
+            'ip_group_id': self.ip_group_id,
+            'fk_ip_segment_id': self.fk_ip_segment_id,
+            'ip_group_name': self.ip_group_name,
+            'ip_group_alias': self.ip_group_alias,
+            'ip_group_comment': self.ip_group_comment,
+            'ip_group_ip': self.ip_group_ip,
+            'ip_group_mask': self.ip_group_mask,
+            'ip_group_mac': self.ip_group_mac,
+            'ip_group_mac_vendor': self.ip_group_mac_vendor,
+            'ip_group_interface': self.ip_group_interface,
+            'ip_is_dhcp': self.ip_is_dhcp,
+            'ip_is_invalid': self.ip_is_invalid,
+            'ip_is_disabled': self.ip_is_disabled,
+            'ip_is_published': self.ip_is_published
+        }
