@@ -250,21 +250,30 @@ def delete_segment(segment_id, site_id):
 @restriction.login_required  
 @restriction.admin_required  
 def bulk_delete_segment():
-    """
-    data = request.get_json()  
-    segments_ids = data.get('items_ids', [])  
+    data = request.get_json()
+    segments_ids = data.get('items_ids', [])
     try:
-        flag = 0  
-        for segment_id in segments_ids:  
-            IPSegment.delete_ip_segment(segment_id)  
-            flag += 1  
-        flash(f'{flag} IP Segments deleted successfully', 'success')  
-        functions.create_log(session['user_id'], 'IP Segments Deleted', 'DELETE', 'ip_management')  
-        return jsonify({'message': 'IP Segments deleted successfully'}), 200  
-    except Exception as e:  
-        flash(str(e), 'danger')  
-        return jsonify({'message': 'Failed to delete IP Segments', 'error': str(e)}), 500  
-    """
+        response = requests.delete(
+            'http://localhost:8080/api/private/segments/bulk/',
+            json={'segments_ids': segments_ids},
+            headers=get_verified_jwt_header(),
+            params={
+                'user_id': session.get('user_id')
+            }
+        )
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                flag = response.json().get('count_flag')
+                flash(f'{flag} segments deleted successfully', 'success')
+
+                return jsonify({'message': f'{flag} segments deleted successfully'}), 200
+            else:
+                raise Exception(response.json().get('message'))
+        elif response.status_code == 500:
+            raise Exception('Failed to delete segments')
+    except Exception as e:
+        flash(str(e), 'danger')
+        return jsonify({'message': 'Failed to delete segments', 'error': str(e)}), 500
 
 @ip_management_bp.route('/segments/delete/all/<int:site_id>', methods=['POST'])
 @restriction.login_required  

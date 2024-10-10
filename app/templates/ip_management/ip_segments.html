@@ -8,7 +8,7 @@
     <script src="{{ url_for('static', filename='js/ip_management/scripts.js') }}"></script>
     <script>
         deleteAllModal("{{ url_for('ip_management.delete_segments', site_id=site_id) }}", "{{ url_for('ip_management.ip_segment', site_id=site_id) }}", 'segments');
-        deleteSelectModal("{{ url_for('ip_management.bulk_delete_segment') }}", "{{ url_for('ip_management.ip_management') }}", 'segment');
+        deleteSelectModal("{{ url_for('ip_management.bulk_delete_segment') }}", "{{ url_for('ip_management.ip_segment', site_id=site_id) }}", 'segment');
     </script>
 {% endblock %}
 {% block content %}
@@ -39,8 +39,7 @@
                     <h2 class="regions-database-title"><b>Available</b> IP Segments</h2>
                 </div>
                 <div class="col-12 col-md-4 d-flex justify-content-end">
-                    <button type="button" class="btn btn-md btn-danger me-2" data-bs-toggle="modal" id="delete-select"
-                            data-bs-target="#delete-select-modal">
+                    <button type="button" class="btn btn-md btn-danger me-2" id="delete-select">
                         <i class="fa-solid fa-square-minus"></i>&nbsp; Delete Selected
                     </button>
                     <button type="button" class="btn btn-md btn-dark" id="delete-all">

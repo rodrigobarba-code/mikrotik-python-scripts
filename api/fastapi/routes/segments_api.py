@@ -1,4 +1,6 @@
+from typing import List
 from ...auth import verify_jwt
+from pydantic import BaseModel
 from fastapi import APIRouter, Depends, Request
 from utils.threading_manager import ThreadingManager
 
@@ -7,6 +9,9 @@ from models.ip_management.models import IPSegment
 
 segments_router = APIRouter()
 segments_functions = APIFunctions()
+
+class SegmentBulkDeleteBase(BaseModel):
+    segments_ids: List[int]
 
 @segments_router.get("/segments/")
 async def get_segments(user_id: int, metadata: Request, token: dict = Depends(verify_jwt)):
@@ -243,5 +248,30 @@ async def delete_segment(user_id: int, metadata: Request, segment_id: int, token
     except Exception as e:
         return {
             'message': f"Failed to delete Segment {segment_id}: {str(e)}",
+            'backend_status': 400
+        }
+
+@segments_router.delete("/segments/bulk/")
+async def bulk_delete_segments(user_id: int, metadata: Request, request: SegmentBulkDeleteBase, token: dict = Depends(verify_jwt)):
+    try:
+        if segments_functions.verify_user_existence(user_id):
+            ThreadingManager().run_thread(IPSegment.bulk_delete_ip_segments, 'w', request.segments_ids)
+            segments_functions.create_transaction_log(
+                action="DELETE",
+                table="segments",
+                user_id=int(user_id),
+                description="Segments table deleted",
+                public=str(str(metadata.client.host) + ':' + str(metadata.client.port))
+            )
+            return {
+                'message': "Segments table deleted successfully",
+                'backend_status': 200,
+                'count_flag': len(request.segments_ids)
+            }
+        else:
+            raise Exception("User not registered in the system")
+    except Exception as e:
+        return {
+            'message': f"Failed to delete Segments table: {str(e)}",
             'backend_status': 400
         }

@@ -122,10 +122,7 @@ class IPSegment(Base):
             ip_segment = session.query(IPSegment).get(ip_segment_id)
             if ip_segment:
                 session.delete(ip_segment)
-
-            session.commit()
         except Exception as e:
-            session.rollback()
             raise e
 
     @staticmethod
@@ -158,6 +155,22 @@ class IPSegment(Base):
                 session.query(ARP).filter(ARP.arp_id.in_(arp_ids)).delete(synchronize_session=False)
 
             session.query(IPSegment).filter(IPSegment.ip_segment_id.in_(ip_segment_ids)).delete(synchronize_session=False)
+        except Exception as e:
+            raise e
+
+    @staticmethod
+    def bulk_delete_ip_segments(session, segments_ids):
+        try:
+            from models.router_scan.models import ARP, ARPTags
+
+            arps = session.query(ARP.arp_id).filter(ARP.fk_ip_address_id.in_(segments_ids)).all()
+            arp_ids = [arp.arp_id for arp in arps]
+
+            if arp_ids:
+                session.query(ARPTags).filter(ARPTags.fk_arp_id.in_(arp_ids)).delete(synchronize_session=False)
+                session.query(ARP).filter(ARP.arp_id.in_(arp_ids)).delete(synchronize_session=False)
+
+            session.query(IPSegment).filter(IPSegment.ip_segment_id.in_(segments_ids)).delete(synchronize_session=False)
         except Exception as e:
             raise e
 
