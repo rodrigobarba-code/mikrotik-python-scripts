@@ -207,7 +207,7 @@ async def delete_segments(user_id: int, metadata: Request, site_id:int, token: d
 async def delete_segments(user_id: int, metadata: Request, token: dict = Depends(verify_jwt)):
     try:
         if segments_functions.verify_user_existence(user_id):
-            ThreadingManager().run_thread(IPSegment.delete_all_ip_segments, 'wx')
+            ThreadingManager().run_thread(IPSegment.delete_ip_segments, 'wx')
             segments_functions.create_transaction_log(
                 action="DELETE",
                 table="segments",
