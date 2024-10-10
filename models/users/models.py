@@ -91,6 +91,20 @@ class User(Base):
             raise e
 
     @staticmethod
+    def update_password(session, new_user: UserEntity):
+        try:
+            model_u = User
+            v_user = UsersFunctions()
+            if v_user.validate_user(session, new_user, "update", model_u):
+                hashed_password = bcrypt.hashpw(new_user.user_password.encode('utf-8'), bcrypt.gensalt())
+                old_user = session.query(User).get(new_user.user_id)
+                old_user.user_password = hashed_password
+            else:
+                raise Exception()
+        except Exception as e:
+            raise e
+
+    @staticmethod
     def delete_user(session, user_id: int):
         model_u = User
         v_user = UsersFunctions()
