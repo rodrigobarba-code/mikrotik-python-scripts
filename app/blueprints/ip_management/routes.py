@@ -1,187 +1,314 @@
-# Description: IP Addresses Routes for the IP Addresses Blueprint
-
-# Importing Required Local Modules
-from . import ip_management_bp  # Import the IP Addresses Blueprint
-from models.users.functions import users_functions as functions  # Import the users functions object
-# Importing Required Local Modules
-
-# Importing Required Libraries
-from flask import render_template, redirect, url_for, flash, request, jsonify, session
-# Importing Required Libraries
-
-# Importing Required Decorators
+import requests
+from . import ip_management_bp
+from entities.site import SiteEntity
+from entities.region import RegionEntity
+from entities.ip_segment import IPSegmentEntity
+from app.functions import get_verified_jwt_header
 from app.decorators import RequirementsDecorators as restriction
-# Importing Required Decorators
+from flask import render_template, redirect, url_for, flash, request, jsonify, session
 
-# Importing Required Models
-from models.sites.models import Site
-from models.regions.models import Region
-from models.routers.models import Router
-from models.ip_management.models import IPSegment
-# Importing Required Models
+def get_regions() -> list:
+    try:
+        response = requests.get(
+            'http://localhost:8080/api/private/regions/',
+            headers=get_verified_jwt_header(),
+            params={'user_id': session.get('user_id')}
+        )
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                regions_list = [
+                    RegionEntity(
+                        region.get('region_id'),
+                        region.get('region_name')
+                    )
+                    for region in response.json().get('regions')
+                ]
+                return regions_list
+            else:
+                raise Exception(response.json().get('message'))
+        elif response.status_code == 500:
+            raise Exception('Failed to retrieve regions')
+    except Exception as e:
+        flash(str(e), 'danger')
 
-# IP Addresses Main Route
+def get_region_name_by_site(sites, regions, fk_region_id):
+    region_dict = {region.region_id: region.region_name for region in regions}
+
+    for site in sites:
+        if site.fk_region_id == fk_region_id:
+            return region_dict.get(fk_region_id)
+    return None
+
+def get_sites() -> list:
+    try:
+        response = requests.get(
+            'http://localhost:8080/api/private/sites/',
+            headers=get_verified_jwt_header(),
+            params={'user_id': session.get('user_id')}
+        )
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                sites_list = [
+                    SiteEntity(
+                        site.get('site_id'),
+                        site.get('fk_region_id'),
+                        '',
+                        site.get('site_name'),
+                        site.get('site_segment')
+                    )
+                    for site in response.json().get('sites')
+                ]
+                return sites_list
+            else:
+                raise Exception(response.json().get('message'))
+        elif response.status_code == 500:
+            raise Exception('Failed to retrieve sites')
+    except Exception as e:
+        flash(str(e), 'danger')
+
+def get_site_name(site_id, sites):
+    for site in sites:
+        if site.site_id == int(site_id):
+            return site.site_name
+    return None
+
+def get_segment(segment_id: int):
+    try:
+        response = requests.get(
+            f'http://localhost:8080/api/private/segment/{segment_id}',
+            headers=get_verified_jwt_header(),
+            params={
+                'user_id': session.get('user_id'),
+                'segment_id': segment_id
+            }
+        )
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                segment = response.json().get('segment')
+                return IPSegmentEntity(
+                        segment.get('ip_segment_id'),
+                        segment.get('fk_router_id'),
+                        segment.get('ip_segment_ip'),
+                        segment.get('ip_segment_mask'),
+                        segment.get('ip_segment_network'),
+                        segment.get('ip_segment_interface'),
+                        segment.get('ip_segment_actual_iface'),
+                        segment.get('ip_segment_tag'),
+                        segment.get('ip_segment_comment'),
+                        segment.get('ip_segment_is_invalid'),
+                        segment.get('ip_segment_is_dynamic'),
+                        segment.get('ip_segment_is_disabled')
+                )
+            else:
+                raise Exception(response.json().get('message'))
+        elif response.status_code == 500:
+            raise Exception('Failed to retrieve segment')
+    except Exception as e:
+        flash(str(e), 'danger')
+
+def get_segments_by_site(site_id) -> list:
+    try:
+        response = requests.get(
+            f'http://localhost:8080/api/private/segment/site/{site_id}',
+            headers=get_verified_jwt_header(),
+            params={
+                'user_id': session.get('user_id'),
+                'site_id': site_id
+            }
+        )
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                segments_list = [
+                    IPSegmentEntity(
+                        segment.get('ip_segment_id'),
+                        segment.get('fk_router_id'),
+                        segment.get('ip_segment_ip'),
+                        segment.get('ip_segment_mask'),
+                        segment.get('ip_segment_network'),
+                        segment.get('ip_segment_interface'),
+                        segment.get('ip_segment_actual_iface'),
+                        segment.get('ip_segment_tag'),
+                        segment.get('ip_segment_comment'),
+                        segment.get('ip_segment_is_invalid'),
+                        segment.get('ip_segment_is_dynamic'),
+                        segment.get('ip_segment_is_disabled')
+                    )
+                    for segment in response.json().get('segments')
+                ]
+                return segments_list
+            else:
+                raise Exception(response.json().get('message'))
+        elif response.status_code == 500:
+            raise Exception('Failed to retrieve segments')
+    except Exception as e:
+        flash(str(e), 'danger')
+
 @ip_management_bp.route('/', methods=['GET'])
-@restriction.login_required  # Need to be logged in
-@restriction.admin_required  # Need to be an admin
+@restriction.login_required  
+@restriction.admin_required  
 def ip_management():
     try:
-        available_sites_obj = Site.get_sites()  # Get the available sites
-        available_regions_obj = Region.get_regions()  # Get the available regions
+        available_sites_obj = get_sites()
+        available_regions_obj = get_regions()
 
-        available_sites = []  # Initialize the available sites list
-        available_regions = []  # Initialize the available regions list
-        available_segments = []  # Initialize the available segments list
+        available_sites = []  
+        available_regions = []  
+        available_segments = []  
 
-        # Loop through the available sites
         for site in available_sites_obj:
             available_sites.append({
-                'id': site.site_id,  # Site ID
-                'name': site.site_name,  # Site Name
-                'value': site.site_name,  # Site Value
-                'region': Region.get_region(site.fk_region_id).region_name,  # Region Name
-                'segment': site.site_segment,  # Site Segment
+                'id': site.site_id,  
+                'name': site.site_name,  
+                'value': site.site_name,  
+                'region': get_region_name_by_site(available_sites_obj, available_regions_obj, site.fk_region_id),
+                'segment': site.site_segment,  
                 'hidden': False
             })
 
             available_segments.append({
-                'value': site.site_segment,  # Site Value
-                'segment': site.site_segment  # Site Segment
+                'value': site.site_segment,  
+                'segment': site.site_segment  
             })
-        # Loop through the available sites
 
-        # Loop through the available regions
         for region in available_regions_obj:
             available_regions.append({
-                'id': region.region_id,  # Region ID
-                'name': region.region_name,  # Region Name
-                'value': region.region_name  # Region Value
+                'id': region.region_id,  
+                'name': region.region_name,  
+                'value': region.region_name  
             })
-        # Loop through the available regions
 
         return render_template(
-            'ip_management/ip_management.html',  # Render the IP Addresses template
-            available_segments=available_segments,  # Pass the available segments to the template
-            available_regions=available_regions,  # Pass the available regions to the template
-            available_sites=available_sites  # Pass the available sites to the template
+            'ip_management/ip_management.html',  
+            available_segments=available_segments,  
+            available_regions=available_regions,  
+            available_sites=available_sites  
         )
-    except Exception as e:  # If an exception occurs
-        flash(str(e), 'danger')  # Flash an error message
-        return redirect(url_for('ip_management.ip_management'))  # Redirect to the IP Addresses route
-# IP Addresses Main Route
+    except Exception as e:  
+        flash(str(e), 'danger')  
+        return redirect(url_for('ip_management.ip_management'))
 
-# IP Management Options by Site Route
-@ip_management_bp.route('/options/<int:site_id>', methods=['GET'])
-@restriction.login_required  # Need to be logged in
-@restriction.admin_required  # Need to be an admin
+@ip_management_bp.route('/options/<site_id>', methods=['GET'])
+@restriction.login_required  
+@restriction.admin_required  
 def ip_management_options_by_site(site_id):
     try:
-        site_id = site_id  # Get the Site ID
-        site_name = Site.get_site(site_id).site_name  # Get the Site Name
+        site_id = site_id  
+        site_name = get_site_name(site_id, get_sites())
         return render_template(
-            'ip_management/ip_management_options.html',  # Render the IP Addresses template
-            site_name=site_name,  # Pass the Site Name
-            site_id=site_id  # Pass the Site ID
+            'ip_management/ip_management_options.html',  
+            site_name=site_name,  
+            site_id=site_id  
         )
     except Exception as e:
-        flash(str(e), 'danger')  # Flash an error message
-        return redirect(url_for('ip_management.ip_management'))  # Redirect to the IP Addresses route
-# IP Management Options by Site Route
+        flash(str(e), 'danger')  
+        return redirect(url_for('ip_management.ip_management'))  
 
-# IP Addresses Main w/ID Route
 @ip_management_bp.route('/segments/<int:site_id>', methods=['GET'])
-@restriction.login_required  # Need to be logged in
-@restriction.admin_required  # Need to be an admin
+@restriction.login_required  
+@restriction.admin_required  
 def ip_segment(site_id):
     try:
-        site_id = site_id  # Get the Site ID
-        site_name = Site.get_site(site_id).site_name  # Get the Site Name
-        ip_segment_list = IPSegment.get_ip_segments_by_site_id(site_id)  # Get the IP Segments by Site ID
+        site_id = site_id  
+        site_name = get_site_name(site_id, get_sites())
+        ip_segment_list = get_segments_by_site(site_id)
         return render_template(
-            'ip_management/ip_segments.html',  # Render the IP Addresses template
-            ip_segment_list=ip_segment_list,  # Pass the IP Segments to the template
-            site_name=site_name,  # Pass the Site Name to the template
-            site_id=site_id  # Pass the Site ID to the template
+            'ip_management/ip_segments.html',  
+            ip_segment_list=ip_segment_list,  
+            site_name=site_name,  
+            site_id=site_id  
         )
-    except Exception as e:  # If an exception occurs
-        flash(str(e), 'danger')  # Flash an error message
-        return redirect(url_for('ip_management.ip_segment', site_id=site_id))  # Redirect to the IP Addresses route
-# IP Addresses Main w/ID Route
+    except Exception as e:  
+        flash(str(e), 'danger')  
+        return redirect(url_for('ip_management.ip_segment', site_id=site_id))
 
-# IP Addresses Delete Route
-@ip_management_bp.route('/segments/delete/<int:segment_id>', methods=['GET'])
-@restriction.login_required  # Need to be logged in
-@restriction.admin_required  # Need to be an admin
-def delete_segment(segment_id):
-    try:  # Try to delete the IP Segment
-        IPSegment.delete_ip_segment(segment_id)  # Delete the IP Segment
-        flash('IP Segment deleted successfully', 'success')  # Flash a success message
-        functions.create_log(session['user_id'], 'Router Deleted', 'DELETE', 'routers')  # Create a log
-        return redirect(url_for('ip_management.ip_management'))  # Redirect to the routers route
-    except Exception as e:  # If an exception occurs
-        flash(str(e), 'danger')  # Flash an error message
-        return redirect(url_for('ip_management.ip_management'))  # Redirect to the IP Addresses route
-# IP Addresses Delete Routes
+@ip_management_bp.route('/segments/delete/<int:segment_id>/<int:site_id>', methods=['GET'])
+@restriction.login_required  
+@restriction.admin_required  
+def delete_segment(segment_id, site_id):
+    try:  
+        response = requests.delete(
+            f'http://localhost:8080/api/private/segment/{segment_id}',
+            headers=get_verified_jwt_header(),
+            params={
+                'user_id': session.get('user_id'),
+                'segment_id': segment_id
+            }
+        )
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                flash('IP Segment deleted successfully', 'success')
+                return redirect(url_for('ip_management.ip_segment', site_id=site_id))
+            else:
+                raise Exception(response.json().get('message'))
+        elif response.status_code == 500:
+            raise Exception('Failed to delete IP Segment')
+    except Exception as e:  
+        flash(str(e), 'danger')  
+        return redirect(url_for('ip_management.ip_segment', site_id=site_id))
 
-# IP Addresses Delete Bulk Route
 @ip_management_bp.route('/segments/delete/bulk', methods=['POST'])
-@restriction.login_required  # Need to be logged in
-@restriction.admin_required  # Need to be an admin
+@restriction.login_required  
+@restriction.admin_required  
 def bulk_delete_segment():
-    data = request.get_json()  # Get the JSON data
-    segments_ids = data.get('items_ids', [])  # Get the routers IDs
+    """
+    data = request.get_json()  
+    segments_ids = data.get('items_ids', [])  
     try:
-        flag = 0  # Set the flag to 0
-        for segment_id in segments_ids:  # Loop through the routers IDs
-            IPSegment.delete_ip_segment(segment_id)  # Delete the IP Segment
-            flag += 1  # Set the flag to 1
-        flash(f'{flag} IP Segments deleted successfully', 'success')  # Flash a success message
-        functions.create_log(session['user_id'], 'IP Segments Deleted', 'DELETE', 'ip_management')  # Create a log
-        return jsonify({'message': 'IP Segments deleted successfully'}), 200  # Return a success message
-    except Exception as e:  # If an exception occurs
-        flash(str(e), 'danger')  # Flash an error message
-        return jsonify({'message': 'Failed to delete IP Segments', 'error': str(e)}), 500  # Return an error message
-# IP Addresses Delete Bulk Route
+        flag = 0  
+        for segment_id in segments_ids:  
+            IPSegment.delete_ip_segment(segment_id)  
+            flag += 1  
+        flash(f'{flag} IP Segments deleted successfully', 'success')  
+        functions.create_log(session['user_id'], 'IP Segments Deleted', 'DELETE', 'ip_management')  
+        return jsonify({'message': 'IP Segments deleted successfully'}), 200  
+    except Exception as e:  
+        flash(str(e), 'danger')  
+        return jsonify({'message': 'Failed to delete IP Segments', 'error': str(e)}), 500  
+    """
 
-# IP Addresses Delete All Route
-@ip_management_bp.route('/segments/delete/all', methods=['POST'])
-@restriction.login_required  # Need to be logged in
-@restriction.admin_required  # Need to be an admin
-def delete_all_segments():
-    try:  # Try to delete all IP Segments
-        IPSegment.delete_all_ip_segments()  # Delete all IP Segments
-        flash('All IP Segments deleted successfully', 'success')  # Flash a success message
-        functions.create_log(session['user_id'], 'All IP Segments Deleted', 'DELETE', 'ip_management')  # Create a log
-        return jsonify({'message': 'All IP Segments deleted successfully'}), 200  # Return a success message
-    except Exception as e:  # If an exception occurs
-        flash(str(e), 'danger')  # Flash an error message
-        return jsonify({'message': 'Failed to delete all IP Segments', 'error': str(e)}), 500  # Return an error message
-# IP Addresses Delete All Route
+@ip_management_bp.route('/segments/delete/all/<int:site_id>', methods=['POST'])
+@restriction.login_required  
+@restriction.admin_required  
+def delete_segments(site_id):
+    try:
+        response = requests.delete(
+            f'http://localhost:8080/api/private/segments/site/{site_id}',
+            headers=get_verified_jwt_header(),
+            params={'user_id': session.get('user_id')}
+        )
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                flash('All IP Segments deleted successfully', 'success')
+                return jsonify({'message': 'All IP Segments deleted successfully'}), 200
+            else:
+                raise Exception(response.json().get('message'))
+    except Exception as e:  
+        flash(str(e), 'danger')  
+        return jsonify({'message': 'Failed to delete all IP Segments', 'error': str(e)}), 500
 
-# IP Addresses Get IP Segments Details Route
-@ip_management_bp.route('/segments/get_ip_segment_details', methods=['POST'])
-@restriction.login_required  # Need to be logged in
-@restriction.admin_required  # Need to be an admin
+@ip_management_bp.route('/segment/details/', methods=['GET'])
+@restriction.login_required  
+@restriction.admin_required  
 def get_ip_segment_details():
     try:
-        data = request.get_json()  # Get the JSON data
-        segment_id = data.get('segment_id', None)  # Get the IP Segment ID
-        segment = IPSegment.get_ip_segment(segment_id)  # Get the IP Segment
-        json_obj = {
-            'id': segment.ip_segment_id,  # IP Segment
-            'router': Router.get_router(segment.fk_router_id).router_name,  # Router Name
-            'ip': segment.ip_segment_ip,  # IP Address
-            'mask': segment.ip_segment_mask,  # Subnet Mask
-            'network': segment.ip_segment_network,  # Network Address
-            'interface': segment.ip_segment_interface,  # Interface
-            'actual_iface': segment.ip_segment_actual_iface,  # Actual Interface
-            'tag': segment.ip_segment_tag.value,  # Tag
-            'comment': segment.ip_segment_comment,  # Comment
-            'is_invalid': segment.ip_segment_is_invalid,  # Is Invalid
-            'is_dynamic': segment.ip_segment_is_dynamic,  # Is Dynamic
-            'is_disabled': segment.ip_segment_is_disabled  # Is Disabled
-        }
-        return jsonify(json_obj), 200  # Return the IP Segment data
-    except Exception as e:  # If an exception occurs
-        return jsonify({'message': 'Failed to get router data', 'error': str(e)}), 500  # Return an error message
-# IP Addresses Get IP Segments Details Route
+        id = request.args.get('id')
+        segment = get_segment(int(id))
+
+        return jsonify(
+            [{
+                'id': ['Identifier', segment.ip_segment_id],
+                'router_id': ['Router ID', segment.fk_router_id],
+                'ip': ['IP', segment.ip_segment_ip],
+                'mask': ['Mask', segment.ip_segment_mask],
+                'network': ['Network', segment.ip_segment_network],
+                'interface': ['Interface', segment.ip_segment_interface],
+                'actual_iface': ['Actual Interface', segment.ip_segment_actual_iface],
+                'tag': ['Tag', segment.ip_segment_tag],
+                'comment': ['Comment', segment.ip_segment_comment],
+                'is_invalid': ['Is Invalid', segment.ip_segment_is_invalid],
+                'is_dynamic': ['Is Dynamic', segment.ip_segment_is_dynamic],
+                'is_disabled': ['Is Disabled', segment.ip_segment_is_disabled]
+            }]
+        ), 200
+    except Exception as e:  
+        return jsonify({'message': 'Failed to get router data', 'error': str(e)}), 500

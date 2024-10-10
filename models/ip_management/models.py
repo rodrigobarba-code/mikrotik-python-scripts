@@ -1,3 +1,4 @@
+from app.blueprints.ip_management.routes import ip_segment
 from .. import Base
 from models.routers.models import Router
 from entities.ip_segment import IPSegmentTag, IPSegmentEntity
@@ -107,16 +108,56 @@ class IPSegment(Base):
 
     @staticmethod
     def delete_ip_segment(session, ip_segment_id):
-        try:  
+        try:
+            from models.router_scan.models import ARP, ARPTags
+
+            arps = session.query(ARP.arp_id).filter_by(fk_ip_address_id=ip_segment_id).all()
+            arp_ids = [arp.arp_id for arp in arps]
+
+            if arp_ids:
+                session.query(ARPTags).filter(ARPTags.fk_arp_id.in_(arp_ids)).delete(synchronize_session=False)
+
+                session.query(ARP).filter(ARP.arp_id.in_(arp_ids)).delete(synchronize_session=False)
+
             ip_segment = session.query(IPSegment).get(ip_segment_id)
-            session.delete(ip_segment)
-        except Exception as e:  
+            if ip_segment:
+                session.delete(ip_segment)
+
+            session.commit()
+        except Exception as e:
+            session.rollback()
             raise e
 
     @staticmethod
-    def delete_all_ip_segments(session):
-        try:  
+    def delete_ip_segments(session):
+        try:
+            from models.router_scan.models import ARP, ARPTags
+
+            session.query(ARPTags).delete()
+            session.query(ARP).delete()
+
             session.query(IPSegment).delete()
+        except Exception as e:
+            raise e
+
+    @staticmethod
+    def delete_ip_segments_by_site(session, site_id):
+        try:
+            from models.router_scan.models import ARP, ARPTags
+
+            routers = session.query(Router).filter_by(fk_site_id=site_id).all()
+
+            ip_segments = session.query(IPSegment).filter(IPSegment.fk_router_id.in_([router.router_id for router in routers])).all()
+            ip_segment_ids = [ip_segment.ip_segment_id for ip_segment in ip_segments]
+
+            arps = session.query(ARP.arp_id).filter(ARP.fk_ip_address_id.in_(ip_segment_ids)).all()
+            arp_ids = [arp.arp_id for arp in arps]
+
+            if arp_ids:
+                session.query(ARPTags).filter(ARPTags.fk_arp_id.in_(arp_ids)).delete(synchronize_session=False)
+                session.query(ARP).filter(ARP.arp_id.in_(arp_ids)).delete(synchronize_session=False)
+
+            session.query(IPSegment).filter(IPSegment.ip_segment_id.in_(ip_segment_ids)).delete(synchronize_session=False)
         except Exception as e:
             raise e
 
@@ -168,7 +209,7 @@ class IPSegment(Base):
             raise e
 
     @staticmethod
-    def get_ip_segments_by_site_id(session, site_id):
+    def get_ip_segments_by_site_id(session, site_id: str):
         try:  
             router = session.query(Router).filter_by(fk_site_id=site_id).first()
             ip_segments = session.query(IPSegment).filter_by(fk_router_id=router.router_id).all()
