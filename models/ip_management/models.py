@@ -1,5 +1,6 @@
 from .. import Base
 from models.routers.models import Router
+from sqlalchemy.orm import relationship, backref
 from entities.ip_segment import IPSegmentTag, IPSegmentEntity
 from models.ip_management.functions import IPAddressesFunctions
 from sqlalchemy import Column, Integer, String, Boolean, Enum, ForeignKey
@@ -107,16 +108,69 @@ class IPSegment(Base):
 
     @staticmethod
     def delete_ip_segment(session, ip_segment_id):
-        try:  
+        try:
+            from models.router_scan.models import ARP, ARPTags
+
+            arps = session.query(ARP.arp_id).filter_by(fk_ip_address_id=ip_segment_id).all()
+            arp_ids = [arp.arp_id for arp in arps]
+
+            if arp_ids:
+                session.query(ARPTags).filter(ARPTags.fk_arp_id.in_(arp_ids)).delete(synchronize_session=False)
+
+                session.query(ARP).filter(ARP.arp_id.in_(arp_ids)).delete(synchronize_session=False)
+
             ip_segment = session.query(IPSegment).get(ip_segment_id)
-            session.delete(ip_segment)
-        except Exception as e:  
+            if ip_segment:
+                session.delete(ip_segment)
+        except Exception as e:
             raise e
 
     @staticmethod
-    def delete_all_ip_segments(session):
-        try:  
+    def delete_ip_segments(session):
+        try:
+            from models.router_scan.models import ARP, ARPTags
+
+            session.query(ARPTags).delete()
+            session.query(ARP).delete()
+
             session.query(IPSegment).delete()
+        except Exception as e:
+            raise e
+
+    @staticmethod
+    def delete_ip_segments_by_site(session, site_id):
+        try:
+            from models.router_scan.models import ARP, ARPTags
+
+            routers = session.query(Router).filter_by(fk_site_id=site_id).all()
+
+            ip_segments = session.query(IPSegment).filter(IPSegment.fk_router_id.in_([router.router_id for router in routers])).all()
+            ip_segment_ids = [ip_segment.ip_segment_id for ip_segment in ip_segments]
+
+            arps = session.query(ARP.arp_id).filter(ARP.fk_ip_address_id.in_(ip_segment_ids)).all()
+            arp_ids = [arp.arp_id for arp in arps]
+
+            if arp_ids:
+                session.query(ARPTags).filter(ARPTags.fk_arp_id.in_(arp_ids)).delete(synchronize_session=False)
+                session.query(ARP).filter(ARP.arp_id.in_(arp_ids)).delete(synchronize_session=False)
+
+            session.query(IPSegment).filter(IPSegment.ip_segment_id.in_(ip_segment_ids)).delete(synchronize_session=False)
+        except Exception as e:
+            raise e
+
+    @staticmethod
+    def bulk_delete_ip_segments(session, segments_ids):
+        try:
+            from models.router_scan.models import ARP, ARPTags
+
+            arps = session.query(ARP.arp_id).filter(ARP.fk_ip_address_id.in_(segments_ids)).all()
+            arp_ids = [arp.arp_id for arp in arps]
+
+            if arp_ids:
+                session.query(ARPTags).filter(ARPTags.fk_arp_id.in_(arp_ids)).delete(synchronize_session=False)
+                session.query(ARP).filter(ARP.arp_id.in_(arp_ids)).delete(synchronize_session=False)
+
+            session.query(IPSegment).filter(IPSegment.ip_segment_id.in_(segments_ids)).delete(synchronize_session=False)
         except Exception as e:
             raise e
 
@@ -168,7 +222,7 @@ class IPSegment(Base):
             raise e
 
     @staticmethod
-    def get_ip_segments_by_site_id(session, site_id):
+    def get_ip_segments_by_site_id(session, site_id: str):
         try:  
             router = session.query(Router).filter_by(fk_site_id=site_id).first()
             ip_segments = session.query(IPSegment).filter_by(fk_router_id=router.router_id).all()
@@ -230,3 +284,45 @@ class IPSegment(Base):
             return ip_segment_list  
         except Exception as e:  
             raise e
+
+class IPGroups(Base):
+    __tablename__ = 'ip_groups'
+
+    ip_group_id = Column(Integer, primary_key=True, nullable=False)
+    fk_ip_segment_id = Column(Integer, ForeignKey('ip_segment.ip_segment_id'), nullable=False)
+    ip_group_name = Column(Enum(['blacklist', 'authorized']), nullable=False)
+    ip_group_alias = Column(String(255), nullable=True)
+    ip_group_description = Column(String(255), nullable=True)
+    ip_group_ip = Column(String(15), nullable=False)
+    ip_group_mask = Column(String(15), nullable=False)
+    ip_group_mac = Column(String(17), nullable=True)
+    ip_group_mac_vendor = Column(String(255), nullable=True)
+    ip_group_interface = Column(String(255), nullable=False)
+    ip_group_comment = Column(String(255), nullable=True)
+    ip_is_dhcp = Column(Boolean, nullable=False)
+    ip_is_invalid = Column(Boolean, nullable=False)
+    ip_is_disabled = Column(Boolean, nullable=False)
+    ip_is_published = Column(Boolean, nullable=False)
+
+    ip_groups = relationship('IPSegment', backref=backref('ip_groups', lazy=True))
+
+    def __repr__(self):
+        return f'<IP Group {self.ip_group_id}>'
+
+    def __dict__(self):
+        return {
+            'ip_group_id': self.ip_group_id,
+            'fk_ip_segment_id': self.fk_ip_segment_id,
+            'ip_group_name': self.ip_group_name,
+            'ip_group_alias': self.ip_group_alias,
+            'ip_group_comment': self.ip_group_comment,
+            'ip_group_ip': self.ip_group_ip,
+            'ip_group_mask': self.ip_group_mask,
+            'ip_group_mac': self.ip_group_mac,
+            'ip_group_mac_vendor': self.ip_group_mac_vendor,
+            'ip_group_interface': self.ip_group_interface,
+            'ip_is_dhcp': self.ip_is_dhcp,
+            'ip_is_invalid': self.ip_is_invalid,
+            'ip_is_disabled': self.ip_is_disabled,
+            'ip_is_published': self.ip_is_published
+        }

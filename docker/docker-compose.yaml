@@ -1,0 +1,71 @@
+services:
+  mariadb-database:
+    build:
+      context: ./database
+      dockerfile: Dockerfile
+    container_name: mariadb_database
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: sevensuite
+      MYSQL_USER: sevensuiteuser
+      MYSQL_PASSWORD: development-sevensuiteapp
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    networks:
+      mariadb_network:
+        ipv4_address: 192.168.1.5
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  phpmyadmin-mariadb:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin_mariadb
+    depends_on:
+      - mariadb-database
+    environment:
+      PMA_HOST: mariadb-database
+      PMA_USER: sevensuiteuser
+      PMA_PASSWORD: development-sevensuiteapp
+    ports:
+      - "81:80"
+    networks:
+      mariadb_network:
+        ipv4_address: 192.168.1.10
+
+  sevensuite-api:
+    build:
+      context: ../
+      dockerfile: /docker/api/Dockerfile
+    environment:
+      DATABASE_URI: mariadb+mariadbconnector://sevensuiteuser:development-sevensuiteapp@mariadb-database/sevensuite
+    ports:
+        - "8080:8080"
+    depends_on:
+      mariadb-database:
+        condition: service_healthy
+    networks:
+      mariadb_network:
+        ipv4_address: 192.168.1.15
+
+  sevensuite-app:
+    build:
+      context: ../
+      dockerfile: /docker/app/Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      FLASK_ENV: development
+
+volumes:
+  mariadb_data:
+
+networks:
+  mariadb_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.1.0/24

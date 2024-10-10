@@ -1,7 +1,6 @@
 from models.ip_management.models import IPSegment
 from utils.threading_manager import ThreadingManager
 
-
 class ARPFunctions:
     def __init__(self):  
         pass
@@ -104,4 +103,14 @@ class ARPFunctions:
             else:
                 return str("")
         except Exception as e:
-            print(str(e))  
+            print(str(e))
+
+    @staticmethod
+    def validate_bulk_delete(session, model, arp_ids):
+        try:
+            from models.router_scan.models import ARP
+            if not session.query(model).filter(model.arp_id.in_(arp_ids)).all():
+                raise Exception('ARP not found')
+            return True
+        except Exception as e:
+            print(str(e))

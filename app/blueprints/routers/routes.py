@@ -323,3 +323,108 @@ def toggle_switch_scan_status():
         return jsonify({'status': switch_scan_status['enable']}), 200
     except Exception as e:
         return jsonify({'message': 'Failed to toggle scan status', 'error': str(e)}), 500
+
+@routers_bp.route('/verify/credentials/')
+@restriction.login_required
+@restriction.admin_required
+def verify_router_credentials():
+    try:
+        router_ip = request.args.get('router_ip')
+        router_username = request.args.get('router_username')
+        router_password = request.args.get('router_password')
+
+        response = requests.get(
+            f'http://localhost:8080/api/private/router/verify-credentials/',
+            headers=get_verified_jwt_header(),
+            params={
+                'user_id': session.get('user_id'),
+                'router_ip': router_ip,
+                'router_username': router_username,
+                'router_password': router_password
+            }
+        )
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                return jsonify({
+                    'message': response.json().get('message'),
+                    'is_connected': response.json().get('is_connected')
+                }), 200
+            else:
+                return jsonify({
+                    'message': response.json().get('message')
+                }), 500
+        elif response.status_code == 500:
+            return jsonify({
+                'message': 'Failed to verify router credentials'
+            }), 500
+    except Exception as e:
+        return jsonify({
+            'message': 'Failed to verify router credentials', 'error': str(e)
+        }), 500
+
+@routers_bp.route('/verify/<int:router_id>')
+@restriction.login_required
+@restriction.admin_required
+def verify_router(router_id):
+    try:
+        response = requests.get(
+            f'http://localhost:8080/api/private/router/verify/{router_id}',
+            headers=get_verified_jwt_header(),
+            params={
+                'user_id': session.get('user_id')
+            }
+        )
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                return jsonify({
+                    'message': response.json().get('message'),
+                    'backend_status': response.json().get('backend_status')
+                }), 200
+            else:
+                return jsonify({
+                    'message': response.json().get('message'),
+                    'backend_status': response.json().get('backend_status')
+                }), 500
+        elif response.status_code == 500:
+            return jsonify({
+                'message': response.json().get('message'),
+                'backend_status': response.json().get('backend_status')
+            }), 500
+    except Exception as e:
+        flash(str(e), 'danger')
+    return redirect(url_for('routers.routers'))
+
+@routers_bp.route('/verify/all')
+@restriction.login_required
+@restriction.admin_required
+def verify_all_routers():
+    try:
+        response = requests.get(
+            'http://localhost:8080/api/private/routers/verify/all/',
+            headers=get_verified_jwt_header(),
+            params={
+                'user_id': session.get('user_id')
+            }
+        )
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                return jsonify({
+                    'message': response.json().get('message'),
+                    'backend_status': response.json().get('backend_status'),
+                    'is_connected': response.json().get('is_connected')
+                }), 200
+            else:
+                return jsonify({
+                    'message': response.json().get('message'),
+                    'backend_status': response.json().get('backend_status'),
+                    'is_connected': response.json().get('is_connected')
+                }), 500
+        elif response.status_code == 500:
+            return jsonify({
+                'message': response.json().get('message'),
+                'backend_status': response.json().get('backend_status'),
+                'is_connected': response.json().get('is_connected')
+            }), 500
+    except Exception as e:
+        flash(str(e), 'danger')
+    return redirect(url_for('routers.routers'))
