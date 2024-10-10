@@ -17,6 +17,7 @@
     /* ===== Colors ===== */
     --spinner-wrapper: rgba(255, 255, 255, 0.35);
     --text-color: #100c04;
+    --secondary-text-color: #ffffff;
     --text-color-active: #fff;
     --sidebar-color: #f3f1ee;
     --body: #fdfbf7;
@@ -49,6 +50,7 @@ body.dark {
     --toggle-color: #fff;
     --text-color: #fbf7ef;
     --text-color-active: #fff;
+    --secondary-text-color: #ffffff;
 }
 
 ::selection {
