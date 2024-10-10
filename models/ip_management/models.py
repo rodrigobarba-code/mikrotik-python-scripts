@@ -1,4 +1,3 @@
-from app.blueprints.ip_management.routes import ip_segment
 from .. import Base
 from models.routers.models import Router
 from entities.ip_segment import IPSegmentTag, IPSegmentEntity

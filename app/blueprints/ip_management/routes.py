@@ -312,7 +312,7 @@ def get_ip_segment_details():
                 'network': ['Network', segment.ip_segment_network],
                 'interface': ['Interface', segment.ip_segment_interface],
                 'actual_iface': ['Actual Interface', segment.ip_segment_actual_iface],
-                'tags': [segment.ip_segment_tag],
+                'tags': ['Public IP' if segment.ip_segment_tag == 'PUBLIC_IP' else 'Private IP'],
                 'comment': ['Comment', segment.ip_segment_comment],
                 'is_invalid': ['Is Invalid', segment.ip_segment_is_invalid],
                 'is_dynamic': ['Is Dynamic', segment.ip_segment_is_dynamic],

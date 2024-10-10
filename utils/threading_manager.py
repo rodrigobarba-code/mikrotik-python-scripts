@@ -55,3 +55,5 @@ class ThreadingManager:
             session.rollback()
             session.close()
             raise e
+        finally:
+            session.close()

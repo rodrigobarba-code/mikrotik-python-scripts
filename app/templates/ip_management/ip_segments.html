@@ -87,10 +87,10 @@
                             <td>{{ ip_segment.ip_segment_mask }}</td>
                             <td>{{ ip_segment.ip_segment_network }}</td>
 
-                            {% if ip_segment.ip_segment_tag == 'Public IP' %}
+                            {% if ip_segment.ip_segment_tag == 'PUBLIC_IP' %}
                                 {% set badge_color = '#0B6477' %}
                                 {% set badge_text = 'Public' %}
-                            {% elif ip_segment.ip_segment_tag == 'Private IP' %}
+                            {% elif ip_segment.ip_segment_tag == 'PRIVATE_IP' %}
                                 {% set badge_color = '#0AD1C8' %}
                                 {% set badge_text = 'Private' %}
                             {% elif ip_segment.ip_segment_tag == '' %}

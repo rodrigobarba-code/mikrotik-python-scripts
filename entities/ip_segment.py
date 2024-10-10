@@ -6,9 +6,9 @@ import enum
 
 # Class for IP Address Tags
 class IPSegmentTag(enum.Enum):
-    PUBLIC_IP = 'Public IP'  # Public IP
-    PRIVATE_IP = 'Private IP'  # Private IP
-    INTERN_CONNECTION = 'Intern Connection'  # Intern Connection
+    PUBLIC_IP = 'PUBLIC_IP'  # Public IP
+    PRIVATE_IP = 'PRIVATE_IP'  # Private IP
+    INTERN_CONNECTION = 'INTERN_CONNECTION'  # Intern Connection
 # Class for IP Address Tags
 
 # Class for IP Segment Entity

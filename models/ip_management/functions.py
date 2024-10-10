@@ -80,8 +80,8 @@ class IPAddressesFunctions:
             from models.ip_management.models import IPSegment
 
             if ip_segment_ip.startswith("10."):
-                return IPSegmentTag.PRIVATE_IP.value
+                return IPSegmentTag['PRIVATE_IP'].value
             else:
-                return IPSegmentTag.PUBLIC_IP.value
+                return IPSegmentTag['PUBLIC_IP'].value
         except Exception as e:  
             raise e
