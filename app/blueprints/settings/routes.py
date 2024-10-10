@@ -1,4 +1,6 @@
 # Importing Required Libraries
+from tempfile import template
+
 import requests
 from . import settings_bp
 from entities.user import UserEntity
@@ -58,4 +60,79 @@ def update_settings():
         flash(str(e), 'danger')
         return redirect(url_for('settings.settings'))
 
+
 # Update User Settings (Profile Information) Route with api
+
+# Change user password Route with api
+@settings_bp.route('/update-password', methods=['POST'])
+@restriction.login_required
+def update_password():
+    if request.method == 'POST':
+        try:
+            response = requests.put(
+                f'http://localhost:8080/api/private/settings/user/password/{session.get("user_id")}',
+                headers=get_verified_jwt_header(),
+                params={
+                    'user_idx': session.get('user_id'),
+                    'user_id': session.get('user_id'),
+                    'user_username': session.get('user_username'),
+                    'user_password': request.form['old_password'],
+                    'new_password': request.form['new_password'],
+                }
+            )
+            if response.status_code == 200:
+                if response.json().get('backend_status') == 200:
+                    session['user_password'] = response.json().get('new_password')
+                    flash('Password updated successfully', 'success')
+                else:
+                    raise Exception(response.json().get('message'))
+            elif response.status_code == 500:
+                raise Exception('Failed to update password')
+        except Exception as e:
+            flash(str(e), 'danger')
+        return redirect(url_for('settings.settings'))
+
+    try:
+        return render_template(
+            'settings/settings.html',
+        )
+    except Exception as e:
+        flash(str(e), 'danger')
+        return redirect(url_for('settings.settings'))
+
+
+# Change user password Route with api
+
+# Account Deletion Route with api but check password before deletion
+@settings_bp.route('/delete', methods=['POST'])
+@restriction.login_required
+def delete_account():
+    import time
+    is_deleted = False
+    try:
+        response = requests.delete(
+            f'http://localhost:8080/api/private/settings/user/delete/',
+            headers=get_verified_jwt_header(),
+            params={
+                'user_idx': session.get('user_id'),
+                'user_username': session.get('user_username'),
+                'user_password': request.form['user_password']
+            }
+        )
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                is_deleted = True
+                flash('Account deleted successfully', 'success')
+            else:
+                flash(response.json().get('message'), 'danger')
+                return redirect(url_for('settings.settings'))
+        elif response.status_code == 500:
+            flash('Failed to delete the account', 'danger')
+            return redirect(url_for('settings.settings'))
+    except Exception as e:
+        flash(str(e), 'danger')
+        return redirect(url_for('settings.settings'))
+    finally:
+        if is_deleted:
+            return render_template('auth/login.html')
+# Account Deletion Route with api
