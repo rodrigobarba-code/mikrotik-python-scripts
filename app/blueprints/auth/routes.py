@@ -15,18 +15,18 @@ async def login():
     session.clear()
     dev_mode = os.getenv('DEVELOPMENT_MODE', 'True').lower() in ['true', '1', 't']
 
-if dev_mode:
-    session['user_id'] = os.getenv('SUPER_ADMIN_ID')
-    session['user_username'] = os.getenv('SUPER_ADMIN_USER')
-    session['user_privileges'] = os.getenv('SUPER_ADMIN_PRIVILEGES')
-    session['user_name'] = os.getenv('SUPER_ADMIN_NAME')
-    session['user_lastname'] = os.getenv('SUPER_ADMIN_LASTNAME')
-    session['user_avatar'] = url_for('static', filename=str(
-        os.getenv('SUPER_ADMIN_AVATAR')))
-    session['user_state'] = os.getenv('SUPER_ADMIN_STATE')
-    session['user_public_ip'] = str(get_public_ip())
-    session['user_local_ip'] = str(get_local_ip())
-    return render_template("home/home.html")
+    if dev_mode:
+        session['user_id'] = os.getenv('SUPER_ADMIN_ID')
+        session['user_username'] = os.getenv('SUPER_ADMIN_USER')
+        session['user_privileges'] = os.getenv('SUPER_ADMIN_PRIVILEGES')
+        session['user_name'] = os.getenv('SUPER_ADMIN_NAME')
+        session['user_lastname'] = os.getenv('SUPER_ADMIN_LASTNAME')
+        session['user_avatar'] = url_for('static', filename=str(
+            os.getenv('SUPER_ADMIN_AVATAR')))
+        session['user_state'] = os.getenv('SUPER_ADMIN_STATE')
+        session['user_public_ip'] = str(get_public_ip())
+        session['user_local_ip'] = str(get_local_ip())
+        return render_template("home/home.html")
 
     else:
         if request.method == 'POST':
