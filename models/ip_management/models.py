@@ -3,7 +3,8 @@ from models.routers.models import Router
 from sqlalchemy.orm import relationship, backref
 from entities.ip_segment import IPSegmentTag, IPSegmentEntity
 from models.ip_management.functions import IPAddressesFunctions
-from sqlalchemy import Column, Integer, String, Boolean, Enum, ForeignKey
+from entities.ip_groups import IPGroupsEntity, IPGroupsTagsEntity
+from sqlalchemy import Column, Integer, String, Boolean, Enum, ForeignKey, PrimaryKeyConstraint
 
 class IPSegment(Base):
     __tablename__ = 'ip_segment'
@@ -111,6 +112,12 @@ class IPSegment(Base):
         try:
             from models.router_scan.models import ARP, ARPTags
 
+            ip_groups = session.query(IPGroups).filter_by(fk_ip_segment_id=ip_segment_id).all()
+            ip_group_ids = [ip_group.ip_group_id for ip_group in ip_groups]
+
+            session.query(IPGroupsToIPGroupsTags).filter_by(fk_ip_group_id=ip_group_ids).delete(synchronize_session=False)
+            session.query(IPGroups).filter(IPGroups.ip_group_id.in_(ip_group_ids)).delete(synchronize_session=False)
+
             arps = session.query(ARP.arp_id).filter_by(fk_ip_address_id=ip_segment_id).all()
             arp_ids = [arp.arp_id for arp in arps]
 
@@ -130,6 +137,10 @@ class IPSegment(Base):
         try:
             from models.router_scan.models import ARP, ARPTags
 
+            session.query(IPGroupsToIPGroupsTags).delete()
+            session.query(IPGroupsTags).delete()
+            session.query(IPGroups).delete()
+
             session.query(ARPTags).delete()
             session.query(ARP).delete()
 
@@ -147,6 +158,12 @@ class IPSegment(Base):
             ip_segments = session.query(IPSegment).filter(IPSegment.fk_router_id.in_([router.router_id for router in routers])).all()
             ip_segment_ids = [ip_segment.ip_segment_id for ip_segment in ip_segments]
 
+            ip_groups = session.query(IPGroups).filter(IPGroups.fk_ip_segment_id.in_(ip_segment_ids)).all()
+            ip_group_ids = [ip_group.ip_group_id for ip_group in ip_groups]
+
+            session.query(IPGroupsToIPGroupsTags).filter_by(IPGroupsToIPGroupsTags.fk_ip_group_id.in_(ip_group_ids)).delete(synchronize_session=False)
+            session.query(IPGroups).filter(IPGroups.ip_group_id.in_(ip_group_ids)).delete(synchronize_session=False)
+
             arps = session.query(ARP.arp_id).filter(ARP.fk_ip_address_id.in_(ip_segment_ids)).all()
             arp_ids = [arp.arp_id for arp in arps]
 
@@ -162,6 +179,12 @@ class IPSegment(Base):
     def bulk_delete_ip_segments(session, segments_ids):
         try:
             from models.router_scan.models import ARP, ARPTags
+
+            ip_groups = session.query(IPGroups).filter(IPGroups.fk_ip_segment_id.in_(segments_ids)).all()
+            ip_group_ids = [ip_group.ip_group_id for ip_group in ip_groups]
+
+            session.query(IPGroupsToIPGroupsTags).filter_by(IPGroupsToIPGroupsTags.fk_ip_group_id.in_(ip_group_ids)).delete(synchronize_session=False)
+            session.query(IPGroups).filter(IPGroups.ip_group_id.in_(ip_group_ids)).delete(synchronize_session=False)
 
             arps = session.query(ARP.arp_id).filter(ARP.fk_ip_address_id.in_(segments_ids)).all()
             arp_ids = [arp.arp_id for arp in arps]
@@ -285,12 +308,247 @@ class IPSegment(Base):
         except Exception as e:  
             raise e
 
+class IPGroupsTags(Base):
+    __tablename__ = 'ip_groups_tags'
+
+    ip_group_tag_id = Column(Integer, primary_key=True, nullable=False)
+    ip_group_tag_name = Column(String(255), nullable=False)
+    ip_group_tag_color = Column(String(7), nullable=False, default='#30f2f2')
+    ip_group_tag_text_color = Column(String(7), nullable=False, default='#FFFFFF')
+    ip_group_tag_description = Column(String(255), nullable=True, default='')
+
+    def __repr__(self):
+        return f'<IP Group Tag {self.ip_group_tag_id}>'
+
+    def __dict__(self):
+        return {
+            'ip_group_tag_id': self.ip_group_tag_id,
+            'ip_group_tag_name': self.ip_group_tag_name,
+            'ip_group_tag_color': self.ip_group_tag_color,
+            'ip_group_tag_text_color': self.ip_group_tag_text_color,
+            'ip_group_tag_description': self.ip_group_tag_description
+        }
+
+    @staticmethod
+    def add_ip_group_tag(session, ip_group_tag: IPGroupsTagsEntity):
+        """
+        Add an IP group tag to the database
+        :param session: The database session
+        :param ip_group_tag: The IP group tag to add to the database
+        :return: None
+        """
+        try:
+            # Create the IP group tag object
+            ip_group_tag_obj = IPGroupsTags(
+                ip_group_tag_id=ip_group_tag.ip_group_tag_id,
+                ip_group_tag_name=ip_group_tag.ip_group_tag_name,
+                ip_group_tag_color=ip_group_tag.ip_group_tag_color,
+                ip_group_tag_text_color=ip_group_tag.ip_group_tag_text_color,
+                ip_group_tag_description=ip_group_tag.ip_group_tag_description
+            )
+
+            # Add the IP group tag to the database
+            session.add(ip_group_tag_obj)
+        except Exception as e:
+            raise e
+
+    @staticmethod
+    def update_ip_group_tag(session, ip_group_tag: IPGroupsTagsEntity):
+        """
+        Update an IP group tag in the database
+        :param session: The database session
+        :param ip_group_tag: The IP group tag to update in the database
+        :return: None
+        """
+        try:
+            # Get the IP group tag from the database based on the IP group tag ID
+            ip_group_tag_obj = session.query(IPGroupsTags).get(ip_group_tag.ip_group_tag_id)
+
+            # Update the IP group tag in the database
+            ip_group_tag_obj.ip_group_tag_name = ip_group_tag.ip_group_tag_name
+            ip_group_tag_obj.ip_group_tag_color = ip_group_tag.ip_group_tag_color
+            ip_group_tag_obj.ip_group_tag_text_color = ip_group_tag.ip_group_tag_text_color
+            ip_group_tag_obj.ip_group_tag_description = ip_group_tag.ip_group_tag_description
+        except Exception as e:
+            raise e
+
+    @staticmethod
+    def delete_ip_group_tag(session, ip_group_tag_id):
+        """
+        Delete an IP group tag from the database
+        :param session: The database session
+        :param ip_group_tag_id: The IP group tag ID
+        :return: None
+        """
+        try:
+            # Get the IP group tag from the database based on the IP group tag ID
+            ip_group_tag_obj = session.query(IPGroupsTags).get(ip_group_tag_id)
+
+            # Delete the IP group tag from the database
+            session.query(IPGroupsToIPGroupsTags).filter_by(fk_ip_group_tag_id=ip_group_tag_id).delete(synchronize_session=False)
+            session.delete(ip_group_tag_obj)
+        except Exception as e:
+            raise e
+
+    @staticmethod
+    def delete_ip_group_tags(session):
+        """
+        Delete all IP group tags from the database
+        :param session: The database session
+        :return: None
+        """
+        try:
+            # Get all IP group tags from the database
+            ip_group_tags = session.query(IPGroupsTags).all()
+
+            # Make a list of ids to delete
+            ip_group_tag_ids = [ip_group_tag.ip_group_tag_id for ip_group_tag in ip_group_tags]
+
+            # Delete all IP group tags from the database
+            session.query(IPGroupsToIPGroupsTags).filter(IPGroupsToIPGroupsTags.fk_ip_group_tag_id.in_(ip_group_tag_ids)).delete(synchronize_session=False)
+            session.query(IPGroupsTags).filter(IPGroupsTags.ip_group_tag_id.in_(ip_group_tag_ids)).delete(synchronize_session=False)
+        except Exception as e:
+            raise e
+
+    @staticmethod
+    def get_ip_group_tag(session, ip_group_tag_id):
+        """
+        Get an IP group tag from the database
+        :param session: The database session
+        :param ip_group_tag_id: The IP group tag ID
+        :return: The IP group tag object
+        """
+        try:
+            # Get the IP group tag from the database based on the IP group tag ID
+            ip_group_tag_obj = session.query(IPGroupsTags).get(ip_group_tag_id)
+            return IPGroupsTagsEntity(
+                ip_group_tag_id=ip_group_tag_obj.ip_group_tag_id,
+                ip_group_tag_name=ip_group_tag_obj.ip_group_tag_name,
+                ip_group_tag_color=ip_group_tag_obj.ip_group_tag_color,
+                ip_group_tag_text_color=ip_group_tag_obj.ip_group_tag_text_color,
+                ip_group_tag_description=ip_group_tag_obj.ip_group_tag_description
+            )
+        except Exception as e:
+            raise e
+
+    @staticmethod
+    def get_ip_group_tags(session):
+        """
+        Get all IP group tags from the database
+        :param session: The database session
+        :return: List of IP group tags
+        """
+        try:
+            # Get all IP group tags from the database
+            ip_group_tags = session.query(IPGroupsTags).all()
+            ip_group_tags_list = []
+            for ip_group_tag in ip_group_tags:
+                ip_group_tags_list.append(IPGroupsTagsEntity(
+                    ip_group_tag_id=ip_group_tag.ip_group_tag_id,
+                    ip_group_tag_name=ip_group_tag.ip_group_tag_name,
+                    ip_group_tag_color=ip_group_tag.ip_group_tag_color,
+                    ip_group_tag_text_color=ip_group_tag.ip_group_tag_text_color,
+                    ip_group_tag_description=ip_group_tag.ip_group_tag_description
+                ))
+            return ip_group_tags_list
+        except Exception as e:
+            raise e
+
+class IPGroupsToIPGroupsTags(Base):
+    __tablename__ = 'ip_groups_to_ip_groups_tags'
+
+    fk_ip_group_id = Column(Integer, ForeignKey('ip_groups.ip_group_id'), nullable=False)
+    fk_ip_group_tag_id = Column(Integer, ForeignKey('ip_groups_tags.ip_group_tag_id'), nullable=False)
+
+    __table_args__ = (
+        PrimaryKeyConstraint('fk_ip_group_id', 'fk_ip_group_tag_id'),
+    )
+
+    def __repr__(self):
+        return f'<IP Group to IP Group Tag {self.fk_ip_group_id} <-> {self.fk_ip_group_tag_id}>'
+
+    def __dict__(self):
+        return {
+            'fk_ip_group_id': self.fk_ip_group_id,
+            'fk_ip_group_tag_id': self.fk_ip_group_tag_id
+        }
+
+    @staticmethod
+    def assign_tag(session, ip_group_id: int, ip_group_tag_id: int) -> None:
+        """
+        Assign a tag to an IP group
+        :param session: The database session
+        :param ip_group_id: The IP group ID
+        :param ip_group_tag_id: The IP group tag ID
+        :return: None
+        """
+        try:
+            # Create the IP group to IP group tag object
+            ip_group_to_tag = IPGroupsToIPGroupsTags(
+                fk_ip_group_id=ip_group_id,
+                fk_ip_group_tag_id=ip_group_tag_id
+            )
+
+            # Add the IP group to IP group tag object to the database
+            session.add(ip_group_to_tag)
+        except Exception as e:
+            raise e
+
+    @staticmethod
+    def unassign_tag(session, ip_group_id: int, ip_group_tag_id: int) -> None:
+        """
+        Unassign a tag from an IP group
+        :param session: The database session
+        :param ip_group_id: The IP group ID
+        :param ip_group_tag_id: The IP group tag ID
+        :return: None
+        """
+        try:
+            # Get the IP group to IP group tag object from the database based on the IP group ID and IP group tag ID
+            ip_group_to_tag = session.query(IPGroupsToIPGroupsTags).filter_by(
+                fk_ip_group_id=ip_group_id,
+                fk_ip_group_tag_id=ip_group_tag_id
+            ).first()
+
+            # Delete the IP group to IP group tag object from the database
+            session.delete(ip_group_to_tag)
+        except Exception as e:
+            raise e
+
+    @staticmethod
+    def get_tags_by_ip_group_id(session, ip_group_id: int) -> list[IPGroupsTagsEntity]:
+        """
+        Get tags by IP group ID
+        :param session: The database session
+        :param ip_group_id: The IP group ID
+        :return: List of IP group tags
+        """
+        try:
+            # Get all IP group to IP group tag objects from the database based on the IP group ID
+            ip_group_to_tags = session.query(IPGroupsToIPGroupsTags).filter_by(fk_ip_group_id=ip_group_id).all()
+            ip_group_tags_list = []
+            for ip_group_to_tag in ip_group_to_tags:
+                # Get the IP group tag object from the database based on the IP group tag ID
+                ip_group_tag = session.query(IPGroupsTags).get(ip_group_to_tag.fk_ip_group_tag_id)
+                ip_group_tags_list.append(IPGroupsTagsEntity(
+                    ip_group_tag_id=ip_group_tag.ip_group_tag_id,
+                    ip_group_tag_name=ip_group_tag.ip_group_tag_name,
+                    ip_group_tag_color=ip_group_tag.ip_group_tag_color,
+                    ip_group_tag_text_color=ip_group_tag.ip_group_tag_text_color,
+                    ip_group_tag_description=ip_group_tag.ip_group_tag_description
+                ))
+            return ip_group_tags_list
+        except Exception as e:
+            raise e
+
 class IPGroups(Base):
     __tablename__ = 'ip_groups'
 
+    status_values = ['blacklist', 'authorized', 'unknown']
+
     ip_group_id = Column(Integer, primary_key=True, nullable=False)
     fk_ip_segment_id = Column(Integer, ForeignKey('ip_segment.ip_segment_id'), nullable=False)
-    ip_group_name = Column(String(255), nullable=False)
+    ip_group_name = Column(Enum(*status_values, name="status_enum"), nullable=False)
     ip_group_alias = Column(String(255), nullable=True)
     ip_group_description = Column(String(255), nullable=True)
     ip_group_ip = Column(String(15), nullable=False)
@@ -326,3 +584,234 @@ class IPGroups(Base):
             'ip_is_disabled': self.ip_is_disabled,
             'ip_is_published': self.ip_is_published
         }
+
+    @staticmethod
+    def bulk_add_ip_groups(session, ip_groups: list[IPGroupsEntity]) -> None:
+        """
+        Add a list of IP groups to the database in bulk
+        :arg session: The database session
+        :arg ip_groups: The list of IP Groups Entity to possibly add to the database
+        :return: None
+        """
+        try:
+            # Create a list of IPGroups objects obtained from router
+            bulk_list = [IPGroups(
+                fk_ip_segment_id=ip_group.fk_ip_segment_id,
+                ip_group_name=ip_group.ip_group_name,
+                ip_group_alias=ip_group.ip_group_alias,
+                ip_group_description=ip_group.ip_group_description,
+                ip_group_ip=ip_group.ip_group_ip,
+                ip_group_mask=ip_group.ip_group_mask,
+                ip_group_mac=ip_group.ip_group_mac,
+                ip_group_mac_vendor=ip_group.ip_group_mac_vendor,
+                ip_group_interface=ip_group.ip_group_interface,
+                ip_group_comment=ip_group.ip_group_comment,
+                ip_is_dhcp=ip_group.ip_is_dhcp,
+                ip_is_invalid=ip_group.ip_is_invalid,
+                ip_is_disabled=ip_group.ip_is_disabled,
+                ip_is_published=ip_group.ip_is_published
+            ) for ip_group in ip_groups]
+
+            # Create a list of IPGroups objects to add to the database
+            to_add = []
+
+            # Iterate on the bulk list and check if the IP group exists in the database
+            for ip_group in bulk_list:
+                # Verify if the IP group exists in the database, based on the IP address, mask and interface
+                if (IPAddressesFunctions.validate_ip_group_exists(
+                    session,
+                    ip_group.ip_group_ip,
+                    ip_group.ip_group_mask,
+                    ip_group.ip_group_interface
+                )):
+                    # If it does not exist, add it to the list
+                    to_add.append(ip_group)
+                else:
+                    # If it exists, update the IP group in the database
+
+                    # Get the IP group from the database based on the IP address, mask and interface
+                    ip_group = session.query(IPGroups).filter(
+                        IPGroups.ip_group_ip == ip_group.ip_group_ip,
+                        IPGroups.ip_group_mask == ip_group.ip_group_mask,
+                        IPGroups.ip_group_interface == ip_group.ip_group_interface
+                    ).first()
+
+                    # Update the IP group in the database
+                    ip_group.fk_ip_segment_id = ip_group.fk_ip_segment_id
+                    ip_group.ip_group_name = ip_group.ip_group_name
+                    ip_group.ip_group_alias = ip_group.ip_group_alias
+                    ip_group.ip_group_description = ip_group.ip_group_description
+                    ip_group.ip_group_mac = ip_group.ip_group_mac
+                    ip_group.ip_group_mac_vendor = ip_group.ip_group_mac_vendor
+                    ip_group.ip_group_interface = ip_group.ip_group_interface
+                    ip_group.ip_group_comment = ip_group.ip_group_comment
+                    ip_group.ip_is_dhcp = ip_group.ip_is_dhcp
+                    ip_group.ip_is_invalid = ip_group.ip_is_invalid
+                    ip_group.ip_is_disabled = ip_group.ip_is_disabled
+                    ip_group.ip_is_published = ip_group.ip_is_published
+
+            # if there are IP groups to add, add them to the database in bulk
+            if to_add:
+                session.bulk_save_objects(to_add)
+        except Exception as e:
+            raise e
+
+    @staticmethod
+    def delete_ip_group(session, ip_group_id: int) -> None:
+        """
+        Delete an IP group from the database
+        :param session: The database session
+        :param ip_group_id: The IP group ID
+        :return: None
+        """
+        try:
+            # Get the tags assigned to the IP group
+            tags = session.query(IPGroupsToIPGroupsTags).filter_by(fk_ip_group_id=ip_group_id).all()
+
+            # Get the IP group from the database based on the IP group ID
+            ip_group = session.query(IPGroups).get(ip_group_id)
+
+            # Delete the tags assigned to the IP group and the IP group from the database
+            session.delete(tags)
+            session.delete(ip_group)
+        except Exception as e:
+            raise e
+
+    @staticmethod
+    def delete_ip_groups(session) -> None:
+        """
+        Delete all IP groups from the database
+        :param session: The database session
+        :return: None
+        """
+        try:
+            # Get all IP groups and their tags from the database
+            ip_groups = session.query(IPGroups).all()
+
+            # Make a list of ids to delete
+            ip_group_ids = [ip_group.ip_group_id for ip_group in ip_groups]
+
+            # Delete all IP groups from the database
+            session.query(IPGroupsToIPGroupsTags).filter(IPGroupsToIPGroupsTags.fk_ip_group_id.in_(ip_group_ids)).delete(synchronize_session=False)
+            session.query(IPGroups).filter(IPGroups.ip_group_id.in_(ip_group_ids)).delete(synchronize_session=False)
+        except Exception as e:
+            raise e
+
+    @staticmethod
+    def get_ip_group(session, ip_group_id: int) -> list:
+        """
+        Get an IP group from the database
+        :param session: The database session
+        :param ip_group_id: The IP group ID
+        :return: The IP group object
+        """
+        try:
+            # List of IP groups and their tags
+            ip_group_tags_list = []
+
+            # Get the IP group from the database based on the IP group ID
+            ip_group = session.query(IPGroups).get(ip_group_id)
+
+            # Append the IP group object to the list
+            ip_group_tags_list.append(
+                IPGroupsEntity(
+                    ip_group_id=ip_group.ip_group_id,
+                    fk_ip_segment_id=ip_group.fk_ip_segment_id,
+                    ip_group_name=ip_group.ip_group_name,
+                    ip_group_alias=ip_group.ip_group_alias,
+                    ip_group_description=ip_group.ip_group_description,
+                    ip_group_ip=ip_group.ip_group_ip,
+                    ip_group_mask=ip_group.ip_group_mask,
+                    ip_group_mac=ip_group.ip_group_mac,
+                    ip_group_mac_vendor=ip_group.ip_group_mac_vendor,
+                    ip_group_interface=ip_group.ip_group_interface,
+                    ip_group_comment=ip_group.ip_group_comment,
+                    ip_is_dhcp=ip_group.ip_is_dhcp,
+                    ip_is_invalid=ip_group.ip_is_invalid,
+                    ip_is_disabled=ip_group.ip_is_disabled,
+                    ip_is_published=ip_group.ip_is_published
+                )
+            )
+
+            # Get the tags assigned to the IP group
+            tags = session.query(IPGroupsToIPGroupsTags).filter_by(fk_ip_group_id=ip_group_id).all()
+
+            # Iterate on the tags and create a list of IP group tags
+            for tag in tags:
+                # Get the IP group tag object from the database based on the IP group tag ID
+                ip_group_tag = session.query(IPGroupsTags).get(tag.fk_ip_group_tag_id)
+                ip_group_tags_list.append(
+                    IPGroupsTagsEntity(
+                        ip_group_tag_id=ip_group_tag.ip_group_tag_id,
+                        ip_group_tag_name=ip_group_tag.ip_group_tag_name,
+                        ip_group_tag_color=ip_group_tag.ip_group_tag_color,
+                        ip_group_tag_text_color=ip_group_tag.ip_group_tag_text_color,
+                        ip_group_tag_description=ip_group_tag.ip_group_tag_description
+                    )
+                )
+
+            # Return the list of IP groups and their tags
+            return ip_group_tags_list
+        except Exception as e:
+            raise e
+
+    @staticmethod
+    def get_ip_groups(session) -> list[tuple]:
+        """
+        Get all IP groups from the database
+        :param session: The database session
+        :return: List of IP groups
+        """
+        try:
+            # List of IP groups and their tags
+            ip_group_tags_list = []
+
+            # Get all IP groups from the database
+            ip_groups = session.query(IPGroups).all()
+
+            # Get all associated tags for each IP group
+            tags = session.query(IPGroupsToIPGroupsTags).all()
+
+            for ip_group in ip_groups:
+                # Create an object for the IP group
+                ip_group_obj = IPGroupsEntity(
+                    ip_group_id=ip_group.ip_group_id,
+                    fk_ip_segment_id=ip_group.fk_ip_segment_id,
+                    ip_group_name=ip_group.ip_group_name,
+                    ip_group_alias=ip_group.ip_group_alias,
+                    ip_group_description=ip_group.ip_group_description,
+                    ip_group_ip=ip_group.ip_group_ip,
+                    ip_group_mask=ip_group.ip_group_mask,
+                    ip_group_mac=ip_group.ip_group_mac,
+                    ip_group_mac_vendor=ip_group.ip_group_mac_vendor,
+                    ip_group_interface=ip_group.ip_group_interface,
+                    ip_group_comment=ip_group.ip_group_comment,
+                    ip_is_dhcp=ip_group.ip_is_dhcp,
+                    ip_is_invalid=ip_group.ip_is_invalid,
+                    ip_is_disabled=ip_group.ip_is_disabled,
+                    ip_is_published=ip_group.ip_is_published
+                )
+
+                # Create an object for the IP group tags
+                ip_group_tags = []
+                for tag in tags:
+                    # Get the IP group tag object from the database based on the IP group tag ID
+                    if tag.fk_ip_group_id == ip_group.ip_group_id:
+                        ip_group_tag = session.query(IPGroupsTags).get(tag.fk_ip_group_tag_id)
+                        ip_group_tags.append(
+                            IPGroupsTagsEntity(
+                                ip_group_tag_id=ip_group_tag.ip_group_tag_id,
+                                ip_group_tag_name=ip_group_tag.ip_group_tag_name,
+                                ip_group_tag_color=ip_group_tag.ip_group_tag_color,
+                                ip_group_tag_text_color=ip_group_tag.ip_group_tag_text_color,
+                                ip_group_tag_description=ip_group_tag.ip_group_tag_description
+                            )
+                        )
+
+                # Append the IP group and its tags to the list
+                ip_group_tags_list.append((ip_group_obj, ip_group_tags))
+
+            # Return the list of IP groups and their tags
+            return ip_group_tags_list
+        except Exception as e:
+            raise e
