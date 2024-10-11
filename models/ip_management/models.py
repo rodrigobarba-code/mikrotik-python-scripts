@@ -290,7 +290,7 @@ class IPGroups(Base):
 
     ip_group_id = Column(Integer, primary_key=True, nullable=False)
     fk_ip_segment_id = Column(Integer, ForeignKey('ip_segment.ip_segment_id'), nullable=False)
-    ip_group_name = Column(Enum(['blacklist', 'authorized']), nullable=False)
+    ip_group_name = Column(String(255), nullable=False)
     ip_group_alias = Column(String(255), nullable=True)
     ip_group_description = Column(String(255), nullable=True)
     ip_group_ip = Column(String(15), nullable=False)
