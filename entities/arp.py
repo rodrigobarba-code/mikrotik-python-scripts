@@ -1,6 +1,7 @@
 # Description: Scan Entities
 
 # Class for ARP Tags
+"""
 class ARPTag:
     # Constructor
     def __init__(
@@ -36,6 +37,7 @@ class ARPTag:
         }
     # Get Tags
 # Class for ARP Tags
+"""
 
 # Class for ARP Entity
 class ARPEntity:
@@ -47,6 +49,7 @@ class ARPEntity:
         arp_ip,  # ARP IP
         arp_mac,  # ARP MAC
         arp_alias,  # ARP Alias
+        arp_tag,  # ARP Tag
         arp_interface,  # ARP Interface
         arp_is_dhcp,  # ARP DHCP
         arp_is_invalid,  # ARP Invalid
@@ -54,12 +57,15 @@ class ARPEntity:
         arp_is_complete,  # ARP Complete
         arp_is_disabled,  # ARP Disabled
         arp_is_published,  # ARP Published
+        arp_duplicity,  # ARP Duplicity
+        arp_duplicity_indexes  # ARP Duplicity Indexes
     ):
         self.arp_id = arp_id
         self.fk_ip_address_id = fk_ip_address_id
         self.arp_ip = arp_ip
         self.arp_mac = arp_mac
         self.arp_alias = arp_alias
+        self.arp_tag = arp_tag
         self.arp_interface = arp_interface
         self.arp_is_dhcp = arp_is_dhcp
         self.arp_is_invalid = arp_is_invalid
@@ -67,6 +73,8 @@ class ARPEntity:
         self.arp_is_complete = arp_is_complete
         self.arp_is_disabled = arp_is_disabled
         self.arp_is_published = arp_is_published
+        self.arp_duplicity = arp_duplicity
+        self.arp_duplicity_indexes = arp_duplicity_indexes
     # Constructor
 
     # Validate ARP Entity

@@ -110,7 +110,8 @@ class IPSegment(Base):
     @staticmethod
     def delete_ip_segment(session, ip_segment_id):
         try:
-            from models.router_scan.models import ARP, ARPTags
+            from models.router_scan.models import ARP
+            # from models.router_scan.models import ARPTags
 
             ip_groups = session.query(IPGroups).filter_by(fk_ip_segment_id=ip_segment_id).all()
             ip_group_ids = [ip_group.ip_group_id for ip_group in ip_groups]
@@ -122,7 +123,7 @@ class IPSegment(Base):
             arp_ids = [arp.arp_id for arp in arps]
 
             if arp_ids:
-                session.query(ARPTags).filter(ARPTags.fk_arp_id.in_(arp_ids)).delete(synchronize_session=False)
+                # session.query(ARPTags).filter(ARPTags.fk_arp_id.in_(arp_ids)).delete(synchronize_session=False)
 
                 session.query(ARP).filter(ARP.arp_id.in_(arp_ids)).delete(synchronize_session=False)
 
@@ -135,13 +136,14 @@ class IPSegment(Base):
     @staticmethod
     def delete_ip_segments(session):
         try:
-            from models.router_scan.models import ARP, ARPTags
+            from models.router_scan.models import ARP
+            # from models.router_scan.models import ARPTags
 
             session.query(IPGroupsToIPGroupsTags).delete()
             session.query(IPGroupsTags).delete()
             session.query(IPGroups).delete()
 
-            session.query(ARPTags).delete()
+            # session.query(ARPTags).delete()
             session.query(ARP).delete()
 
             session.query(IPSegment).delete()
@@ -151,7 +153,8 @@ class IPSegment(Base):
     @staticmethod
     def delete_ip_segments_by_site(session, site_id):
         try:
-            from models.router_scan.models import ARP, ARPTags
+            from models.router_scan.models import ARP
+            # from models.router_scan.models import ARPTags
 
             routers = session.query(Router).filter_by(fk_site_id=site_id).all()
 
@@ -168,7 +171,7 @@ class IPSegment(Base):
             arp_ids = [arp.arp_id for arp in arps]
 
             if arp_ids:
-                session.query(ARPTags).filter(ARPTags.fk_arp_id.in_(arp_ids)).delete(synchronize_session=False)
+                # session.query(ARPTags).filter(ARPTags.fk_arp_id.in_(arp_ids)).delete(synchronize_session=False)
                 session.query(ARP).filter(ARP.arp_id.in_(arp_ids)).delete(synchronize_session=False)
 
             session.query(IPSegment).filter(IPSegment.ip_segment_id.in_(ip_segment_ids)).delete(synchronize_session=False)
@@ -178,7 +181,8 @@ class IPSegment(Base):
     @staticmethod
     def bulk_delete_ip_segments(session, segments_ids):
         try:
-            from models.router_scan.models import ARP, ARPTags
+            from models.router_scan.models import ARP
+            # from models.router_scan.models import ARPTags
 
             ip_groups = session.query(IPGroups).filter(IPGroups.fk_ip_segment_id.in_(segments_ids)).all()
             ip_group_ids = [ip_group.ip_group_id for ip_group in ip_groups]
@@ -190,7 +194,7 @@ class IPSegment(Base):
             arp_ids = [arp.arp_id for arp in arps]
 
             if arp_ids:
-                session.query(ARPTags).filter(ARPTags.fk_arp_id.in_(arp_ids)).delete(synchronize_session=False)
+                # session.query(ARPTags).filter(ARPTags.fk_arp_id.in_(arp_ids)).delete(synchronize_session=False)
                 session.query(ARP).filter(ARP.arp_id.in_(arp_ids)).delete(synchronize_session=False)
 
             session.query(IPSegment).filter(IPSegment.ip_segment_id.in_(segments_ids)).delete(synchronize_session=False)
@@ -544,11 +548,13 @@ class IPGroupsToIPGroupsTags(Base):
 class IPGroups(Base):
     __tablename__ = 'ip_groups'
 
+    types_values = ['public, private']
     status_values = ['blacklist', 'authorized', 'unknown']
 
     ip_group_id = Column(Integer, primary_key=True, nullable=False)
     fk_ip_segment_id = Column(Integer, ForeignKey('ip_segment.ip_segment_id'), nullable=False)
     ip_group_name = Column(Enum(*status_values, name="status_enum"), nullable=False)
+    ip_group_type = Column(Enum(*types_values, name="types_enum"), nullable=False)
     ip_group_alias = Column(String(255), nullable=True)
     ip_group_description = Column(String(255), nullable=True)
     ip_group_ip = Column(String(15), nullable=False)
@@ -572,6 +578,7 @@ class IPGroups(Base):
             'ip_group_id': self.ip_group_id,
             'fk_ip_segment_id': self.fk_ip_segment_id,
             'ip_group_name': self.ip_group_name,
+            'ip_group_type': self.ip_group_type,
             'ip_group_alias': self.ip_group_alias,
             'ip_group_comment': self.ip_group_comment,
             'ip_group_ip': self.ip_group_ip,
@@ -598,6 +605,7 @@ class IPGroups(Base):
             bulk_list = [IPGroups(
                 fk_ip_segment_id=ip_group.fk_ip_segment_id,
                 ip_group_name=ip_group.ip_group_name,
+                ip_group_type=ip_group.ip_group_type,
                 ip_group_alias=ip_group.ip_group_alias,
                 ip_group_description=ip_group.ip_group_description,
                 ip_group_ip=ip_group.ip_group_ip,
@@ -639,6 +647,7 @@ class IPGroups(Base):
                     # Update the IP group in the database
                     ip_group.fk_ip_segment_id = ip_group.fk_ip_segment_id
                     ip_group.ip_group_name = ip_group.ip_group_name
+                    ip_group.ip_group_type = ip_group.ip_group_type
                     ip_group.ip_group_alias = ip_group.ip_group_alias
                     ip_group.ip_group_description = ip_group.ip_group_description
                     ip_group.ip_group_mac = ip_group.ip_group_mac
@@ -718,6 +727,7 @@ class IPGroups(Base):
                     ip_group_id=ip_group.ip_group_id,
                     fk_ip_segment_id=ip_group.fk_ip_segment_id,
                     ip_group_name=ip_group.ip_group_name,
+                    ip_group_type=ip_group.ip_group_type,
                     ip_group_alias=ip_group.ip_group_alias,
                     ip_group_description=ip_group.ip_group_description,
                     ip_group_ip=ip_group.ip_group_ip,
@@ -778,6 +788,7 @@ class IPGroups(Base):
                     ip_group_id=ip_group.ip_group_id,
                     fk_ip_segment_id=ip_group.fk_ip_segment_id,
                     ip_group_name=ip_group.ip_group_name,
+                    ip_group_type=ip_group.ip_group_type,
                     ip_group_alias=ip_group.ip_group_alias,
                     ip_group_description=ip_group.ip_group_description,
                     ip_group_ip=ip_group.ip_group_ip,

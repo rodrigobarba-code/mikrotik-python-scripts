@@ -1,3 +1,4 @@
+from entities.arp import ARPEntity
 from models.ip_management.models import IPSegment
 from utils.threading_manager import ThreadingManager
 
@@ -23,6 +24,19 @@ class ARPFunctions:
             print(str(e))  
 
     @staticmethod
+    def validate_incoming_arp(arp_database: ARPEntity) -> tuple:
+        try:
+            """
+            Validate incoming ARP data
+            :param arp_data: ARP data
+            :return: Tuple
+            """
+            if bool(arp_database.arp_is_dynamic) is True and bool(arp_database.arp_is_complete) is True:
+                return (True, None)
+        except Exception as e:
+            return (False, str(e))
+
+    @staticmethod
     def delete_arps(session, router_metadata: dict) -> None:
         """
         Delete ARP entries from the database that are not present in the router
@@ -33,43 +47,32 @@ class ARPFunctions:
         try:
             # Importing here to avoid circular imports
             from models.router_scan.models import ARP
-            from models.router_scan.models import ARPTags
+            from models.ip_management.models import IPGroups
+            # from models.router_scan.models import ARPTags
 
-            # Create a list of tuples with the ARP entries obtained from the router
-            r_arp_list_real = [
-                (arp.arp_ip, arp.arp_mac)
-                for arp in router_metadata['arp_region_list']
-            ]
+            # Create list for ARP entries that needs to move from ARP Table to IPGroups Table
+            # Create list for ARP entries that needs to move from IPGroups Table to ARP Table
+            # Create list for ARP entries that needs to delete from ARP Table
+            arp_to_ipgroups = []
+            ipgroups_to_arp = []
 
-            # Create a list of ARP entries from the database
-            r_arp_list_db = [
-                arp for arp in session.query(IPSegment, ARP).join(ARP, IPSegment.ip_segment_id == ARP.fk_ip_address_id).filter(
-                    IPSegment.fk_router_id == router_metadata['router_id']
-                ).all()
-            ]
-
-            # Create a list for all ARP entries that need to be deleted
             arps_to_delete = []
 
-            # Validate if the ARP entry exists in the database but not in the router
-            if r_arp_list_real:
-                for r_arp in r_arp_list_db:
-                    # If the ARP entry exists in the database but not in the router, add it to the list of ARP entries to delete
-                    if (r_arp[1].arp_ip, r_arp[1].arp_mac) not in r_arp_list_real:
-                        ThreadingManager().run_thread(ARPTags.delete_arp_tags, 'w', r_arp[1].arp_id)
-                        arps_to_delete.append(r_arp[1])
+            # Create list for ARP entries that are present in the router
+            arps_in_database = []
 
-            # If there are ARP entries to delete, delete them
-            if arps_to_delete:
-                # Create a list of ARP IDs to delete
-                arps_ids_to_delete = [arp.arp_id for arp in arps_to_delete]
+            # Get all ARP entries from the database
+            for arp in session.query(ARP.arp_id, ARP.arp_ip, ARP.arp_mac, ARP.arp_interface).all():
+                arps_in_database.append((arp.arp_ip, arp.arp_mac, arp.arp_interface, arp.arp_id, 'ARP', None))
 
-                # Delete ARP entries from the database
-                session.query(ARP).filter(ARP.arp_id.in_(arps_ids_to_delete)).delete(synchronize_session='fetch')
+            # Get all IPGroup entries from the database
+            for ipgroup in session.query(IPGroups.ip_group_id, IPGroups.ip_group_ip, IPGroups.ip_group_mac, IPGroups.ip_group_interface, IPGroups.ip_group_name).all():
+                arps_in_database.append((ipgroup.ip_group_id, ipgroup.ip_group_ip, ipgroup.ip_group_mac, ipgroup.ip_group_interface, 'IPGroups', ipgroup.ip_group_name))
 
-                print("Deleted ARP entries: " + str(len(arps_ids_to_delete)))
-            else:
-                print("No ARP entries to delete")
+            # For each Incoming ARP entry from the router
+            for arp in router_metadata['arp_region_list']:
+                pass
+
         except Exception as e:  
             print(str("Error in delete_arps: " + str(e)))
 
@@ -102,6 +105,16 @@ class ARPFunctions:
                     return str(value)  
             else:
                 return str("")
+        except Exception as e:
+            print(str(e))
+
+    @staticmethod
+    def determine_arp_tag(arp_ip: str) -> str:
+        try:
+            if arp_ip.startswith("10."):
+                return 'Private IP'
+            else:
+                return 'Public IP'
         except Exception as e:
             print(str(e))
 
