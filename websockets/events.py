@@ -4,10 +4,11 @@ from flask_socketio import emit
 def register_handlers(socketio):
     @socketio.on('start_scan')
     def handle_start_scan():
+        from flask import session
         try:
             response = requests.get(
                 'http://localhost:8080/routeros/private/scan/',
-                params={'user_id': 1}
+                params={'user_id': session.get('user_id')}
             )
             if response.status_code == 200:
                 if response.json().get('backend_status') == 200:

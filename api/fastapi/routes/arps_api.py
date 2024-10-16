@@ -6,7 +6,7 @@ from utils.threading_manager import ThreadingManager
 
 from ...functions import APIFunctions
 from models.router_scan.models import ARP
-from models.router_scan.models import ARPTags
+# from models.router_scan.models import ARPTags
 
 arps_router = APIRouter()
 arps_functions = APIFunctions()
@@ -75,7 +75,7 @@ async def get_arps_essential(user_id: int, metadata: Request, token: dict = Depe
                     'segment': ARP.get_segment(session_for_segment, arp.fk_ip_address_id),
                     'interface': arp.arp_interface,
                     'alias': arp.arp_alias,
-                    'tag': ARPTags.get_arp_tags(session_for_tags, arp.arp_id)
+                    'tag': [arp.arp_tag]
                 }
                 arps.append(arp)
                 session_for_segment.close()
@@ -118,7 +118,7 @@ async def get_arp_essential(user_id: int, metadata: Request, arp_id: str, token:
                 'segment': ARP.get_segment(session_for_segment, request.fk_ip_address_id),
                 'interface': request.arp_interface,
                 'alias': request.arp_alias,
-                'tag': ARPTags.get_arp_tags(session_for_tags, request.arp_id),
+                'tag': [request.arp_tag],
                 'is_dhcp': request.arp_is_dhcp,
                 'is_invalid': request.arp_is_invalid,
                 'is_dynamic': request.arp_is_dynamic,
@@ -160,6 +160,7 @@ async def get_arp(user_id: int, metadata: Request, arp_id: int, token: dict = De
                 "arp_ip": request.arp_ip,
                 "arp_mac": request.arp_mac,
                 "arp_alias": request.arp_alias,
+                "arp_tag": request.arp_tag,
                 "arp_interface": request.arp_interface,
                 "arp_is_dhcp": request.arp_is_dhcp,
                 "arp_is_invalid": request.arp_is_invalid,

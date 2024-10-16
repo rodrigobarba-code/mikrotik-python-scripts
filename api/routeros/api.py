@@ -4,7 +4,8 @@ import ros_api
 from utils.threading_manager import ThreadingManager
 
 from entities.arp import ARPEntity
-from models.router_scan.models import ARP, ARPTags
+from models.router_scan.models import ARP
+# from models.router_scan.models import ARPTags
 from models.router_scan.functions import ARPFunctions
 
 from entities.ip_segment import IPSegmentEntity
@@ -229,6 +230,7 @@ class RouterAPI:
                             arp_ip=arp['address'],
                             arp_mac="" if 'mac-address' not in arp else arp['mac-address'],
                             arp_alias=ARPFunctions.assign_alias(str(arp['address']), queue_dict),
+                            arp_tag=ARPFunctions.determine_arp_tag(str(arp['address'])),
                             arp_interface=arp['interface'],
                             arp_is_dhcp=True if arp['dynamic'] == 'true' else False,
                             arp_is_invalid=True if arp['invalid'] == 'true' else False,
@@ -277,7 +279,7 @@ class RouterAPI:
             ThreadingManager().run_thread(ARP.bulk_add_arp, 'w', arp_list)
 
             # Assign the first tag to the ARP data
-            ThreadingManager().run_thread(ARPTags.assign_first_tag, 'wx')
+            # ThreadingManager().run_thread(ARPTags.assign_first_tag, 'wx')
         except Exception as e:  
             print(str('Error: add_arp_data: ' + str(e)))
 
@@ -288,9 +290,6 @@ class RouterAPI:
         :return: None
         """
         try:
-            # Set the scan status to 'IN PROGRESS'
-            # RouterAPI.set_scan_status(RouterAPI.SCAN_STATUS[1])
-
             # Get the IP segments data and add it to the database
             ip_data = await RouterAPI.get_ip_data()
             await RouterAPI.add_ip_data(ip_data)
@@ -298,9 +297,6 @@ class RouterAPI:
             # Get the ARP data and add it to the database
             arp_data = await RouterAPI.get_arp_data()
             await RouterAPI.add_arp_data(arp_data)
-
-            # Set the scan status to 'IDLE'
-            # RouterAPI.set_scan_status(RouterAPI.SCAN_STATUS[0])
 
             print('ARP scan finished')
         except Exception as e:
