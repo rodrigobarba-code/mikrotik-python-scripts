@@ -37,6 +37,15 @@ a:hover {
     z-index: 2;
 }
 
+.blacklist-jumbotron {
+    color: white;
+    background: rgb(26, 33, 64);
+    background-image: linear-gradient(94.3deg, rgba(26, 33, 64, 1) 10.9%, rgba(81, 84, 115, 1) 87.1%);
+    width: 100%;
+    min-height: 300px;
+    z-index: 2;
+}
+
 .col-c {
     transition: transform 0.3s ease-in-out;
 }
