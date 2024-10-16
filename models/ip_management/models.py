@@ -564,9 +564,12 @@ class IPGroups(Base):
     ip_group_interface = Column(String(255), nullable=False)
     ip_group_comment = Column(String(255), nullable=True)
     ip_is_dhcp = Column(Boolean, nullable=False)
-    ip_is_invalid = Column(Boolean, nullable=False)
+    ip_is_dynamic = Column(Boolean, nullable=False)
+    ip_is_complete = Column(Boolean, nullable=False)
     ip_is_disabled = Column(Boolean, nullable=False)
     ip_is_published = Column(Boolean, nullable=False)
+    ip_duplicity = Column(Boolean, nullable=False, default=False)
+    ip_duplicity_indexes = Column(String(511), nullable=True, default=None)
 
     ip_groups = relationship('IPSegment', backref=backref('ip_groups', lazy=True))
 
