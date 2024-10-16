@@ -39,9 +39,12 @@ class IPGroupsEntity:
         ip_group_interface: str = None,
         ip_group_comment: str = None,
         ip_is_dhcp: bool = False,
-        ip_is_invalid: bool = False,
+        ip_is_dynamic: bool = False,
+        ip_is_complete: bool = False,
         ip_is_disabled: bool = False,
         ip_is_published: bool = False,
+        ip_duplicity: bool = False,
+        ip_duplicity_indexes: str = '',
     ):
         self.ip_group_id = ip_group_id
         self.fk_ip_segment_id = fk_ip_segment_id
@@ -56,9 +59,12 @@ class IPGroupsEntity:
         self.ip_group_interface = ip_group_interface
         self.ip_group_comment = ip_group_comment
         self.ip_is_dhcp = ip_is_dhcp
-        self.ip_is_invalid = ip_is_invalid
+        self.ip_is_dynamic = ip_is_dynamic
+        self.ip_is_complete = ip_is_complete
         self.ip_is_disabled = ip_is_disabled
         self.ip_is_published = ip_is_published
+        self.ip_duplicity = ip_duplicity
+        self.ip_duplicity_indexes = ip_duplicity_indexes
 
     def validate_ip_group(self):
         try:
@@ -80,8 +86,11 @@ class IPGroupsEntity:
             assert isinstance(self.ip_group_interface, (str, type(None)))
             assert isinstance(self.ip_group_comment, (str, type(None)))
             assert isinstance(self.ip_is_dhcp, bool)
-            assert isinstance(self.ip_is_invalid, bool)
+            assert isinstance(self.ip_is_dynamic, bool)
+            assert isinstance(self.ip_is_complete, bool)
             assert isinstance(self.ip_is_disabled, bool)
             assert isinstance(self.ip_is_published, bool)
+            assert isinstance(self.ip_duplicity, bool)
+            assert isinstance(self.ip_duplicity_indexes, str)
         except (AssertionError, ValueError):
             raise ValueError('Invalid IP Group data')

@@ -57,8 +57,8 @@ class ARPEntity:
         arp_is_complete,  # ARP Complete
         arp_is_disabled,  # ARP Disabled
         arp_is_published,  # ARP Published
-        arp_duplicity,  # ARP Duplicity
-        arp_duplicity_indexes  # ARP Duplicity Indexes
+        arp_duplicity: bool = None,  # ARP Duplicity
+        arp_duplicity_indexes: str = None  # ARP Duplicity Indexes
     ):
         self.arp_id = arp_id
         self.fk_ip_address_id = fk_ip_address_id
