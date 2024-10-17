@@ -22,7 +22,7 @@ class ARPFunctions:
             print(str(e))  
 
     @staticmethod
-    def validate_incoming_arp(arp_database: tuple, incoming_arp: tuple) -> tuple:
+    def validate_incoming_arp(arp_database: tuple, incoming_arp: tuple) -> list:
         """
         Validate incoming ARP data
         :param arp_database:
@@ -31,11 +31,11 @@ class ARPFunctions:
         """
         try:
             # Check if the ARP entry is dynamic and does not have a MAC address and is not complete
-            if (incoming_arp[0][1] == '') and (incoming_arp[1][0] == True) and (incoming_arp[1][1] == False):
-                future_table = ('IPGroups', 'blacklist')
+            if incoming_arp[1][0] == True and incoming_arp[1][1] == False:
+                future_table = ['IPGroups', 'blacklist']
             # Check if the ARP entry is dynamic and has a MAC address and is complete
-            elif (incoming_arp[0][1] != '') and (incoming_arp[1][0] == True) and (incoming_arp[1][1] == True):
-                future_table = ('IPGroups', 'authorized')
+            elif incoming_arp[1][0] == True and incoming_arp[1][1] == True:
+                future_table = ['IPGroups', 'authorized']
             else:
                 future_table = None
 
@@ -43,18 +43,18 @@ class ARPFunctions:
             if future_table:
                 # Move the ARP entry to the IP Groups table
                 if (arp_database[1][1] == 'ARP') and (future_table[0] == 'IPGroups'):
-                    return (False, 'IPGroups', future_table[1])
+                    return [False, 'IPGroups', future_table[1]]
                 # Move the IP Groups entry to the ARP table
                 elif (arp_database[1][1] == 'IPGroups') and (future_table[0] == 'ARP'):
-                    return (False, 'ARP', None)
+                    return [False, 'ARP', None]
                 # If the ARP entry is already in the same table as the future table
                 elif (arp_database[1][1] == future_table[0]):
-                    return (True, None, None)
+                    return [True, None, None]
             else:
-                return (True, None, None)
+                return [True, None, None]
         except Exception as e:
             print(str(e))
-            return (True, None, None)
+            return [True, None, None]
 
     @staticmethod
     def find_by_ip_mac_interface(lst: list, ip_mac_interface: tuple):
@@ -129,7 +129,7 @@ class ARPFunctions:
                         # Move the ARP entry depending on the decision
                         if arp_decision[1] == 'IPGroups':
                             arp_to_ip_groups.append(arp[1][0])
-                            ip_groups_for_movement.append(arp[1][2])
+                            ip_groups_for_movement.append(arp_decision[2])
                         elif arp_decision[1] == 'ARP':
                             ip_groups_to_arp.append(arp[1][0])
 

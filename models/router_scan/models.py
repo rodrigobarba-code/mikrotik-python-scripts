@@ -313,7 +313,7 @@ class ARP(Base):
                     ip_duplicity=False,
                     ip_duplicity_indexes=''
                 ))
-                index += 1
+                index = index + 1
 
             # Delete the ARP objects from the ARP table
             session.query(ARP).filter(ARP.arp_id.in_(arp_metadata[0])).delete(synchronize_session='fetch')
