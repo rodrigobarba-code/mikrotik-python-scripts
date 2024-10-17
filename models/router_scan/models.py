@@ -1,9 +1,14 @@
+from inspect import trace
+
 from .. import Base
 # from entities.arp import ARPTag
 from entities.arp import ARPEntity
 from sqlalchemy.orm import relationship, backref
 from models.router_scan.functions import ARPFunctions
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, Enum
+
+from ..ip_management.models import IPSegment
+
 
 class ARP(Base):
     __tablename__ = 'arp'
@@ -262,6 +267,61 @@ class ARP(Base):
             segment = session.query(IPSegment).get(segment_id)
             return f'{segment.ip_segment_ip}/{segment.ip_segment_mask}'
         except Exception as e:
+            raise e
+
+    @staticmethod
+    def bulk_move_arp_to_ip_groups(session, arp_metadata) -> None:
+        """
+        Bulk move ARP objects to the IPGroups table
+        :param arp_metadata:
+        :param session: Database session
+        :param arp_ids: List of ARP IDs to move
+        :param arp_groups: List of ARP groups to assign to the ARP objects
+        :return: None
+        """
+
+        try:
+            # Importing here to avoid circular imports
+            import traceback
+            from models.ip_management.models import IPGroups
+            from models.ip_management.models import IPSegment
+
+            # Create a list of ARP objects to move to the IPGroups table
+            bulk_list = []
+
+            # Create a bulk list of ARP objects to move to the IPGroups table
+            index = 0
+
+            for arp in session.query(ARP).filter(ARP.arp_id.in_(arp_metadata[0])).all():
+                bulk_list.append(IPGroups(
+                    fk_ip_segment_id=arp.fk_ip_address_id,
+                    ip_group_name=arp_metadata[1][index],
+                    ip_group_type='public' if arp.arp_tag == 'Public IP' else 'private',
+                    ip_group_alias=arp.arp_alias,
+                    ip_group_description='',
+                    ip_group_ip=arp.arp_ip,
+                    ip_group_mask='',
+                    ip_group_mac=arp.arp_mac,
+                    ip_group_mac_vendor='',
+                    ip_group_interface=arp.arp_interface,
+                    ip_group_comment='',
+                    ip_is_dhcp=arp.arp_is_dhcp,
+                    ip_is_dynamic=arp.arp_is_dynamic,
+                    ip_is_complete=arp.arp_is_complete,
+                    ip_is_disabled=arp.arp_is_disabled,
+                    ip_is_published=arp.arp_is_published,
+                    ip_duplicity=False,
+                    ip_duplicity_indexes=''
+                ))
+                index += 1
+
+            # Delete the ARP objects from the ARP table
+            session.query(ARP).filter(ARP.arp_id.in_(arp_metadata[0])).delete(synchronize_session='fetch')
+
+            # Add the ARP objects to the IPGroups table in bulk
+            session.bulk_save_objects(bulk_list)
+        except Exception as e:
+            traceback.print_exc()
             raise e
 
 """
