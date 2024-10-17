@@ -1,3 +1,6 @@
+from entities.arp import ARPEntity
+from entities.ip_groups import IPGroupsEntity
+from models.ip_management.models import IPSegment
 from utils.threading_manager import ThreadingManager
 
 class ARPFunctions:
@@ -9,8 +12,7 @@ class ARPFunctions:
         try:
             from models.router_scan.models import ARP
             arp = session.query(ARP).filter(
-                ARP.arp_ip == arp_ip,  
-                ARP.arp_mac == arp_mac  
+                ARP.arp_ip == arp_ip
             ).first()
             if arp:
                 if arp_ip != arp.arp_ip and arp_mac != arp.arp_mac:
@@ -72,7 +74,84 @@ class ARPFunctions:
         return None
 
     @staticmethod
-    def delete_arps(session, router_metadata: dict) -> None:
+    def bulk_insert_decision(session, arp_list: list) -> None:
+        """
+        Decide if the ARP entries need to be inserted on ARP Table or IPGroups Table
+        :param arp_list: List of ARP entries
+        :return: None
+        """
+        # Importing here to avoid circular imports
+        try:
+            from models.router_scan.models import ARP
+            from models.ip_management.models import IPGroups
+
+            # Create lists for ARP entries and IPGroup entries
+            list_arp, list_ip_groups = [], []
+
+            # Iterate over the ARP entries
+            for arp in arp_list:
+                ip_group_name = ''
+                # Check if the ARP entry is dynamic and does not have a MAC address and is not complete
+                if arp.arp_is_dynamic and not arp.arp_is_complete:
+                    ip_group_name = 'blacklist'
+                # Check if the ARP entry is dynamic and has a MAC address and is complete
+                elif arp.arp_is_dynamic and arp.arp_is_complete:
+                    ip_group_name = 'authorized'
+                else:
+                    list_arp.append(ARPEntity(
+                        arp_id=0,
+                        fk_ip_address_id=arp.fk_ip_address_id,
+                        arp_ip=arp.arp_ip,
+                        arp_mac=arp.arp_mac,
+                        arp_interface=arp.arp_interface,
+                        arp_is_dhcp=arp.arp_is_dhcp,
+                        arp_is_dynamic=arp.arp_is_dynamic,
+                        arp_is_complete=arp.arp_is_complete,
+                        arp_is_disabled=arp.arp_is_disabled,
+                        arp_is_published=arp.arp_is_published,
+                        arp_tag=arp.arp_tag,
+                        arp_alias=arp.arp_alias
+                    ))
+
+                if ip_group_name != '':
+                    list_ip_groups.append(IPGroupsEntity(
+                        ip_group_id=0,
+                        fk_ip_segment_id=arp.fk_ip_address_id,
+                        ip_group_name='blacklist',
+                        ip_group_type='public' if arp.arp_tag == 'Public IP' else 'private',
+                        ip_group_alias=arp.arp_alias,
+                        ip_group_description='No description',
+                        ip_group_ip=arp.arp_ip,
+                        ip_group_mask=session.query(IPSegment).filter(
+                            IPSegment.ip_segment_id == arp.fk_ip_address_id).first().ip_segment_mask,
+                        ip_group_mac=arp.arp_mac,
+                        ip_group_mac_vendor='Unknown',
+                        ip_group_interface=arp.arp_interface,
+                        ip_group_comment='No comment',
+                        ip_is_dhcp=arp.arp_is_dhcp,
+                        ip_is_dynamic=arp.arp_is_dynamic,
+                        ip_is_complete=arp.arp_is_complete,
+                        ip_is_disabled=arp.arp_is_disabled,
+                        ip_is_published=arp.arp_is_published,
+                        ip_duplicity=False,
+                        ip_duplicity_indexes=''
+                    ))
+
+            # Insert ARP entries to the database
+            if len(list_arp) > 0:
+                ThreadingManager().run_thread(ARP.bulk_add_arp, 'w', list_arp)
+                print(f'ARP entries inserted: {len(list_arp)}')
+            # Insert IPGroup entries to the database
+            elif len(list_ip_groups) > 0:
+                ThreadingManager().run_thread(IPGroups.bulk_add_ip_groups, 'w', list_ip_groups)
+                print(f'IPGroup entries inserted: {len(list_ip_groups)}')
+            else:
+                print('No ARP entries to insert or move')
+        except Exception as e:
+            print(str(e))
+
+    @staticmethod
+    def arp_bulk_insert_and_validation(session, arp_list: list) -> None:
         """
         Delete ARP entries from the database that are not present in the router
         :param session: Database session
@@ -84,6 +163,9 @@ class ARPFunctions:
             from models.router_scan.models import ARP
             from models.ip_management.models import IPGroups
             # from models.router_scan.models import ARPTags
+
+            # Insert ARP entries to the database
+            ARPFunctions.bulk_insert_decision(session, arp_list)
 
             # Create list for ARP entries that needs to move from ARP Table to IPGroups Table
             # Create list for ARP entries that needs to move from IPGroups Table to ARP Table
@@ -107,7 +189,7 @@ class ARPFunctions:
             # Convert the incoming ARP entries from the router to a list of tuples with the format (arp_ip, arp_mac, arp_interface)
             incoming_arp = [
                 ((arp.arp_ip, arp.arp_mac, arp.arp_interface), (arp.arp_is_dynamic, arp.arp_is_complete))
-                for arp in router_metadata['arp_region_list']
+                for arp in arp_list
             ]
 
             # For each Incoming ARP entry from the router

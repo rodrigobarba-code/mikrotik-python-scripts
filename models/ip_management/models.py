@@ -641,8 +641,7 @@ class IPGroups(Base):
                 if (IPAddressesFunctions.validate_ip_group_exists(
                     session,
                     ip_group.ip_group_ip,
-                    ip_group.ip_group_mask,
-                    ip_group.ip_group_interface
+                    ip_group.ip_group_mac
                 )):
                     # If it does not exist, add it to the list
                     to_add.append(ip_group)
@@ -652,8 +651,7 @@ class IPGroups(Base):
                     # Get the IP group from the database based on the IP address, mask and interface
                     ip_group = session.query(IPGroups).filter(
                         IPGroups.ip_group_ip == ip_group.ip_group_ip,
-                        IPGroups.ip_group_mask == ip_group.ip_group_mask,
-                        IPGroups.ip_group_interface == ip_group.ip_group_interface
+                        IPGroups.ip_group_mac == ip_group.ip_group_mac
                     ).first()
 
                     # Update the IP group in the database

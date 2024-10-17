@@ -87,7 +87,7 @@ class IPAddressesFunctions:
             raise e
 
     @staticmethod
-    def validate_ip_group_exists(session, ip_group_ip, ip_group_mask, ip_group_interface):
+    def validate_ip_group_exists(session, ip_group_ip, ip_group_mac):
         try:
             # Importing here to avoid circular imports
             from models.ip_management.models import IPGroups
@@ -95,14 +95,13 @@ class IPAddressesFunctions:
             # Check if the IP group exists in the database
             ip_group = session.query(IPGroups).filter(
                 IPGroups.ip_group_ip == ip_group_ip,
-                IPGroups.ip_group_mask == ip_group_mask,
-                IPGroups.ip_group_interface == ip_group_interface
+                IPGroups.ip_group_mac == ip_group_mac
             ).first()
 
             # If the IP group exists, verify if the data is the same
             if ip_group:
                 # If the data is different, return True, else return False
-                if ip_group_ip != ip_group.ip_group_ip and ip_group_mask != ip_group.ip_group_mask and ip_group_interface != ip_group.ip_group_interface:
+                if ip_group_ip != ip_group.ip_group_ip and ip_group_mac != ip_group.ip_group_mac:
                     return True
                 return False
             else:
