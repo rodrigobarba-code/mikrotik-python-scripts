@@ -66,7 +66,7 @@ class IPAddressesFunctions:
                 segments_ids_to_delete = [segment.ip_segment_id for segment in segments_to_delete]
 
                 # Delete the segments
-                ThreadingManager().run_thread(IPSegment.bulk_delete_ip_segments, 'w', segments_ids_to_delete)
+                IPSegment.bulk_delete_ip_segments(session, segments_ids_to_delete)
                 print('IP segments deleted: ' + str(len(segments_ids_to_delete)))
             else:
                 print('No segments to delete.')
@@ -108,3 +108,50 @@ class IPAddressesFunctions:
                 return True
         except Exception as e:
             print(str(e))
+
+    @staticmethod
+    def get_available_ip_by_segment(session, ip_segment_id: int) -> list:
+        try:
+            import ipaddress
+            from models.ip_management.models import IPSegment
+            from models.ip_management.models import IPGroups
+
+            # Get the IP Groups from the database where IPs are authorized
+            ip_groups = session.query(IPGroups).filter(
+                IPGroups.fk_ip_segment_id == ip_segment_id,
+                IPGroups.ip_group_name == 'authorized'
+            ).all()
+
+            # Create a set of all IPs from the IP Groups
+            ip_groups_ips = set(ip_group.ip_group_ip for ip_group in ip_groups)
+
+            # Get the IP Segment from the database
+            ip_segment = session.query(IPSegment).filter(
+                IPSegment.ip_segment_id == ip_segment_id
+            ).first()
+
+            if not ip_segment:
+                raise ValueError(f"IP Segment with ID {ip_segment_id} not found.")
+
+            # Get the IP Segment IP and Mask
+            ip_segment_ip = ip_segment.ip_segment_ip
+            ip_segment_mask = ip_segment.ip_segment_mask
+
+            # Ensure valid network address (handles the 'host bits set' issue)
+            try:
+                network = ipaddress.IPv4Network(f"{ip_segment_ip}/{ip_segment_mask}", strict=False)
+            except ValueError as e:
+                raise ValueError(f"Invalid network: {e}")
+
+            # Create a set of all IPs that are in the IP Segment
+            ip_segment_ips = set(str(ip) for ip in network)
+
+            # Get the available IPs (IP addresses in segment but not in groups)
+            available_ips = ip_segment_ips - ip_groups_ips
+
+            # Return a list of available IPs
+            return list(available_ips)
+
+        except Exception as e:
+            print(f"Error: {e}")
+            raise e

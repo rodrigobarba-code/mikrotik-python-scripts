@@ -90,30 +90,8 @@ class ARPFunctions:
 
             # Iterate over the ARP entries
             for arp in arp_list:
-                ip_group_name = ''
                 # Check if the ARP entry is dynamic and does not have a MAC address and is not complete
-                if arp.arp_is_dynamic and not arp.arp_is_complete:
-                    ip_group_name = 'blacklist'
-                # Check if the ARP entry is dynamic and has a MAC address and is complete
-                elif arp.arp_is_dynamic and arp.arp_is_complete:
-                    ip_group_name = 'authorized'
-                else:
-                    list_arp.append(ARPEntity(
-                        arp_id=0,
-                        fk_ip_address_id=arp.fk_ip_address_id,
-                        arp_ip=arp.arp_ip,
-                        arp_mac=arp.arp_mac,
-                        arp_interface=arp.arp_interface,
-                        arp_is_dhcp=arp.arp_is_dhcp,
-                        arp_is_dynamic=arp.arp_is_dynamic,
-                        arp_is_complete=arp.arp_is_complete,
-                        arp_is_disabled=arp.arp_is_disabled,
-                        arp_is_published=arp.arp_is_published,
-                        arp_tag=arp.arp_tag,
-                        arp_alias=arp.arp_alias
-                    ))
-
-                if ip_group_name != '':
+                if arp.arp_is_dynamic is True and arp.arp_is_complete is False:
                     list_ip_groups.append(IPGroupsEntity(
                         ip_group_id=0,
                         fk_ip_segment_id=arp.fk_ip_address_id,
@@ -135,6 +113,45 @@ class ARPFunctions:
                         ip_is_published=arp.arp_is_published,
                         ip_duplicity=False,
                         ip_duplicity_indexes=''
+                    ))
+                # Check if the ARP entry is dynamic and has a MAC address and is complete
+                elif arp.arp_is_dynamic is True and arp.arp_is_complete is True:
+                    list_ip_groups.append(IPGroupsEntity(
+                        ip_group_id=0,
+                        fk_ip_segment_id=arp.fk_ip_address_id,
+                        ip_group_name='authorized',
+                        ip_group_type='public' if arp.arp_tag == 'Public IP' else 'private',
+                        ip_group_alias=arp.arp_alias,
+                        ip_group_description='No description',
+                        ip_group_ip=arp.arp_ip,
+                        ip_group_mask=session.query(IPSegment).filter(
+                            IPSegment.ip_segment_id == arp.fk_ip_address_id).first().ip_segment_mask,
+                        ip_group_mac=arp.arp_mac,
+                        ip_group_mac_vendor='Unknown',
+                        ip_group_interface=arp.arp_interface,
+                        ip_group_comment='No comment',
+                        ip_is_dhcp=arp.arp_is_dhcp,
+                        ip_is_dynamic=arp.arp_is_dynamic,
+                        ip_is_complete=arp.arp_is_complete,
+                        ip_is_disabled=arp.arp_is_disabled,
+                        ip_is_published=arp.arp_is_published,
+                        ip_duplicity=False,
+                        ip_duplicity_indexes=''
+                    ))
+                else:
+                    list_arp.append(ARPEntity(
+                        arp_id=0,
+                        fk_ip_address_id=arp.fk_ip_address_id,
+                        arp_ip=arp.arp_ip,
+                        arp_mac=arp.arp_mac,
+                        arp_interface=arp.arp_interface,
+                        arp_is_dhcp=arp.arp_is_dhcp,
+                        arp_is_dynamic=arp.arp_is_dynamic,
+                        arp_is_complete=arp.arp_is_complete,
+                        arp_is_disabled=arp.arp_is_disabled,
+                        arp_is_published=arp.arp_is_published,
+                        arp_tag=arp.arp_tag,
+                        arp_alias=arp.arp_alias
                     ))
 
             # Insert ARP entries to the database
