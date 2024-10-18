@@ -29,7 +29,6 @@ a:hover {
 
 .segments-jumbotron {
     color: white;
-    background: rgb(2, 37, 78);
     background-image: radial-gradient(circle farthest-corner at 10% 20%, rgba(2, 37, 78, 1) 0%, rgba(4, 56, 126, 1) 19.7%, rgba(85, 245, 221, 1) 100.2%);
     background-size: cover;
     width: 100%;
@@ -39,7 +38,6 @@ a:hover {
 
 .blacklist-jumbotron {
     color: white;
-    background: rgb(26, 33, 64);
     background-image: linear-gradient(94.3deg, rgba(26, 33, 64, 1) 10.9%, rgba(81, 84, 115, 1) 87.1%);
     width: 100%;
     min-height: 300px;
@@ -89,42 +87,101 @@ a:hover {
 
 /* Styles for IP Management Options */
 .management-options-jumbotron {
-    color: white;
-    background: rgb(38, 51, 97);
-    background-image: radial-gradient(circle farthest-corner at 10% 20%, rgba(38, 51, 97, 1) 0%, rgba(65, 143, 222, 1) 79%);
-    background-size: cover;
+    position: relative;
     width: 100%;
     min-height: 300px;
     z-index: 2;
+    color: white;
+    background-image: radial-gradient(circle farthest-corner at 10% 20%, rgba(38, 51, 97, 1) 0%, rgba(65, 143, 222, 1) 79%);
+    background-size: cover;
+    overflow: hidden; /* Ensure the layers stay inside the jumbotron */
 }
+
+.jumbotron-bg-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    transition: opacity 0.8s ease-in-out;
+    z-index: 1; /* Lower z-index so background is behind content */
+}
+
+.jumbotron-bg-layer.new-bg {
+    z-index: 1;
+    opacity: 0; /* Initially hidden */
+}
+
+/* Background layer when active */
+.jumbotron-bg-layer.visible {
+    opacity: 1; /* Visible when active */
+}
+
+/* Ensure content inside the jumbotron is above the background layers */
+.management-options-jumbotron #jumbotron-content {
+    position: relative;
+    z-index: 10; /* Higher z-index than the background layers */
+}
+
 
 .segments-background-c {
     height: 100px;
     border-radius: 20px;
-    background: rgb(2, 37, 78);
     background-image: radial-gradient(circle farthest-corner at 10% 20%, rgba(2, 37, 78, 1) 0%, rgba(4, 56, 126, 1) 19.7%, rgba(85, 245, 221, 1) 100.2%);
 }
 
 .blacklist-background-c {
     height: 100px;
     border-radius: 20px;
-    background: rgb(26, 33, 64);
     background-image: linear-gradient(94.3deg, rgba(26, 33, 64, 1) 10.9%, rgba(81, 84, 115, 1) 87.1%);
 }
 
 .authorized-background-c {
     height: 100px;
     border-radius: 20px;
-    background: rgb(222, 73, 5);
     background-image: linear-gradient(109.6deg, rgba(222, 73, 5, 1) 11.2%, rgba(236, 249, 10, 1) 91.1%);
 }
 
 .available-background-c {
     height: 100px;
     border-radius: 20px;
-    background: rgb(123, 216, 96);
     background-image: linear-gradient(117deg, rgba(123, 216, 96, 1) 39.2%, rgba(255, 255, 255, 1) 156.2%);
 }
 
-/* Styles for IP Management Options */
+.groups-table {
+    overflow-x: scroll;
+}
 
+.groups-jumbotron {
+    color: white;
+    background-size: cover;
+    width: 100%;
+    min-height: 300px;
+    z-index: 2;
+}
+
+.blacklist-jumbotron {
+    color: white;
+    background: url("../../img/banner-blacklist.svg") no-repeat center, linear-gradient(94.3deg, rgba(26, 33, 64, 1) 10.9%, rgba(81, 84, 115, 1) 87.1%);
+    background-size: cover;
+    width: 100%;
+    min-height: 300px;
+    z-index: 2;
+}
+
+.authorized-jumbotron {
+    color: white;
+    background: linear-gradient(109.6deg, rgba(222, 73, 5, 1) 11.2%, rgba(236, 249, 10, 1) 91.1%);
+    background-size: cover;
+    width: 100%;
+    min-height: 300px;
+    z-index: 2;
+}
+
+.no_identified {
+    color: gray;
+}
+
+
+/* Styles for IP Management Options */
