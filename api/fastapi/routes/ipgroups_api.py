@@ -10,11 +10,14 @@ from models.ip_management.models import IPGroups
 ip_groups_router = APIRouter()
 ip_groups_functions = APIFunctions()
 
+
 class IPGroupsBulkDeleteBase(BaseModel):
     ip_groups_ids: List[int]
 
+
 class IPGroupsTagsBase(BaseModel):
     tags: List[int]
+
 
 @ip_groups_router.get("/ip/groups/")
 async def get_ip_groups(user_id: int, metadata: Request, token: dict = Depends(verify_jwt)):
@@ -66,6 +69,7 @@ async def get_ip_groups(user_id: int, metadata: Request, token: dict = Depends(v
             'backend_status': 400
         }
 
+
 @ip_groups_router.get("/ip/group/{ip_group_id}")
 async def get_ip_group(user_id: int, ip_group_id: int, metadata: Request, token: dict = Depends(verify_jwt)):
     try:
@@ -112,6 +116,7 @@ async def get_ip_group(user_id: int, ip_group_id: int, metadata: Request, token:
             'backend_status': 400
         }
 
+
 @ip_groups_router.get("/blacklist/{site_id}")
 async def get_blacklist_by_site(user_id: int, site_id: int, metadata: Request, token: dict = Depends(verify_jwt)):
     try:
@@ -138,6 +143,7 @@ async def get_blacklist_by_site(user_id: int, site_id: int, metadata: Request, t
             'message': f"Failed to retrieve Blacklist for Site {site_id}: {str(e)}",
             'backend_status': 400
         }
+
 
 @ip_groups_router.get("/ip/authorized/{site_id}")
 async def get_authorized_by_site(user_id: int, site_id: int, metadata: Request, token: dict = Depends(verify_jwt)):
@@ -166,6 +172,7 @@ async def get_authorized_by_site(user_id: int, site_id: int, metadata: Request, 
             'backend_status': 400
         }
 
+
 @ip_groups_router.get("/ip/availables/{site_id}")
 async def get_availables_by_site(user_id: int, site_id: int, metadata: Request, token: dict = Depends(verify_jwt)):
     try:
@@ -191,8 +198,10 @@ async def get_availables_by_site(user_id: int, site_id: int, metadata: Request, 
             'backend_status': 400
         }
 
+
 @ip_groups_router.put("/ip/group/{ip_group_id}")
-async def update_ip_group(user_id: int, ip_group_id: int, tags: IPGroupsTagsBase, metadata: Request, token: dict = Depends(verify_jwt)):
+async def update_ip_group(user_id: int, ip_group_id: int, tags: IPGroupsTagsBase, metadata: Request,
+                          token: dict = Depends(verify_jwt)):
     try:
         if ip_groups_functions.verify_user_existence(user_id):
             ip_group_metadata = {'ip_group_id': ip_group_id, 'tags': tags.tags}
@@ -215,6 +224,7 @@ async def update_ip_group(user_id: int, ip_group_id: int, tags: IPGroupsTagsBase
             'message': f"Failed to update IP Group {ip_group_id}: {str(e)}",
             'backend_status': 400
         }
+
 
 @ip_groups_router.delete("/ip/group/{ip_group_id}")
 async def delete_ip_group(user_id: int, ip_group_id: int, metadata: Request, token: dict = Depends(verify_jwt)):
@@ -240,6 +250,7 @@ async def delete_ip_group(user_id: int, ip_group_id: int, metadata: Request, tok
             'backend_status': 400
         }
 
+
 @ip_groups_router.delete("/ip/groups/")
 async def delete_ip_groups(user_id: int, metadata: Request, token: dict = Depends(verify_jwt)):
     try:
@@ -261,5 +272,57 @@ async def delete_ip_groups(user_id: int, metadata: Request, token: dict = Depend
     except Exception as e:
         return {
             'message': f"Failed to delete IP Groups: {str(e)}",
+            'backend_status': 400
+        }
+
+
+@ip_groups_router.delete("/blacklist/site/{site_id}")
+async def delete_blacklist_by_site(user_id: int, site_id: int, metadata: Request, token: dict = Depends(verify_jwt)):
+    try:
+        if ip_groups_functions.verify_user_existence(user_id):
+            group_metadata = {'site_id': site_id, 'group': 'blacklist'}
+            ThreadingManager().run_thread(IPGroups.delete_ip_group_by_site, 'w', group_metadata)
+            ip_groups_functions.create_transaction_log(
+                action="DELETE",
+                table="ip_groups",
+                user_id=int(user_id),
+                description=f"Blacklist for Site {site_id} deleted successfully",
+                public=str(str(metadata.client.host) + ':' + str(metadata.client.port))
+            )
+            return {
+                'message': f"Blacklist for Site {site_id} deleted successfully",
+                'backend_status': 200
+            }
+        else:
+            raise Exception("User not registered in the system")
+    except Exception as e:
+        return {
+            'message': f"Failed to delete Blacklist for Site {site_id}: {str(e)}",
+            'backend_status': 400
+        }
+
+
+@ip_groups_router.delete("/ip/authorized/site/{site_id}")
+async def delete_authorized_by_site(user_id: int, site_id: int, metadata: Request, token: dict = Depends(verify_jwt)):
+    try:
+        if ip_groups_functions.verify_user_existence(user_id):
+            group_metadata = {'site_id': site_id, 'group': 'authorized'}
+            ThreadingManager().run_thread(IPGroups.delete_ip_group_by_site, 'w', group_metadata)
+            ip_groups_functions.create_transaction_log(
+                action="DELETE",
+                table="ip_groups",
+                user_id=int(user_id),
+                description=f"Authorized for Site {site_id} deleted successfully",
+                public=str(str(metadata.client.host) + ':' + str(metadata.client.port))
+            )
+            return {
+                'message': f"Authorized for Site {site_id} deleted successfully",
+                'backend_status': 200
+            }
+        else:
+            raise Exception("User not registered in the system")
+    except Exception as e:
+        return {
+            'message': f"Failed to delete Authorized for Site {site_id}: {str(e)}",
             'backend_status': 400
         }
