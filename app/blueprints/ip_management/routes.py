@@ -2,6 +2,7 @@ import requests
 from . import ip_management_bp
 from entities.site import SiteEntity
 from entities.region import RegionEntity
+from entities.ip_groups import IPGroupsEntity
 from entities.ip_segment import IPSegmentEntity
 from app.functions import get_verified_jwt_header
 from app.decorators import RequirementsDecorators as restriction
@@ -336,18 +337,134 @@ def get_ip_segment_details():
         return jsonify({'message': 'Failed to get router data', 'error': str(e)}), 500
 
 
-@ip_management_bp.route('/blacklist/<site_id>', methods=['GET'])
+def get_blacklist(site_id: int) -> list:
+    try:
+        response = requests.get(
+            f'http://localhost:8080/api/private/blacklist/{site_id}',
+            headers=get_verified_jwt_header(),
+            params={
+                'user_id': session.get('user_id'),
+                'site_id': site_id
+            }
+        )
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                return response.json().get('blacklist')
+            else:
+                raise Exception(response.json().get('message'))
+        elif response.status_code == 500:
+            raise Exception('Failed to retrieve blacklist')
+    except Exception as e:
+        flash(str(e), 'danger')
+        return []
+
+
+@ip_management_bp.route('/blacklist/<int:site_id>', methods=['GET'])
 @restriction.login_required
 @restriction.admin_required
-def blacklist(site_id):
+def blacklist(site_id: int):
     try:
-        site_id = site_id
         site_name = get_site_name(site_id, get_sites())
+        blacklist_list = get_blacklist(site_id)
         return render_template(
-            'ip_management/blacklist.html',
+            'ip_management/ip_groups.html',
             site_name=site_name,
-            site_id=site_id
+            site_id=site_id,
+            groups=blacklist_list,
+            is_blacklist=True
         )
     except Exception as e:
         flash(str(e), 'danger')
         return redirect(url_for('ip_management.ip_management'))
+
+
+def get_authorized(site_id: int) -> list:
+    try:
+        response = requests.get(
+            f'http://localhost:8080/api/private/ip/authorized/{site_id}',
+            headers=get_verified_jwt_header(),
+            params={
+                'user_id': session.get('user_id'),
+                'site_id': site_id
+            }
+        )
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                return response.json().get('authorized')
+            else:
+                raise Exception(response.json().get('message'))
+        elif response.status_code == 500:
+            raise Exception('Failed to retrieve authorized')
+    except Exception as e:
+        flash(str(e), 'danger')
+        return []
+
+
+@ip_management_bp.route('/authorized/<int:site_id>', methods=['GET'])
+@restriction.login_required
+@restriction.admin_required
+def authorized(site_id: int):
+    try:
+        site_name = get_site_name(site_id, get_sites())
+        authorized_list = get_authorized(site_id)
+        return render_template(
+            'ip_management/ip_groups.html',
+            site_name=site_name,
+            site_id=site_id,
+            groups=authorized_list,
+            is_blacklist=False
+        )
+    except Exception as e:
+        flash(str(e), 'danger')
+        return redirect(url_for('ip_management.ip_management'))
+
+
+@ip_management_bp.route('/blacklist/delete/bulk', methods=['POST'])
+@restriction.login_required
+@restriction.admin_required
+def bulk_delete_blacklist():
+    data = request.get_json()
+    blacklist_ids = data.get('items_ids', [])
+    try:
+        response = requests.delete(
+            'http://localhost:8080/api/private/blacklist/bulk/',
+            json={'blacklist_ids': blacklist_ids},
+            headers=get_verified_jwt_header(),
+            params={
+                'user_id': session.get('user_id')
+            }
+        )
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                flag = response.json().get('count_flag')
+                flash(f'{flag} segments deleted successfully', 'success')
+
+                return jsonify({'message': f'{flag} segments deleted successfully'}), 200
+            else:
+                raise Exception(response.json().get('message'))
+        elif response.status_code == 500:
+            raise Exception('Failed to delete segments')
+    except Exception as e:
+        flash(str(e), 'danger')
+        return jsonify({'message': 'Failed to delete segments', 'error': str(e)}), 500
+
+
+@ip_management_bp.route('/segments/delete/all/<int:site_id>', methods=['POST'])
+@restriction.login_required
+@restriction.admin_required
+def delete_segments(site_id):
+    try:
+        response = requests.delete(
+            f'http://localhost:8080/api/private/segments/site/{site_id}',
+            headers=get_verified_jwt_header(),
+            params={'user_id': session.get('user_id')}
+        )
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                flash('All IP Segments deleted successfully', 'success')
+                return jsonify({'message': 'All IP Segments deleted successfully'}), 200
+            else:
+                raise Exception(response.json().get('message'))
+    except Exception as e:
+        flash(str(e), 'danger')
+        return jsonify({'message': 'Failed to delete all IP Segments', 'error': str(e)}), 500

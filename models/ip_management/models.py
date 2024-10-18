@@ -194,7 +194,8 @@ class IPSegment(Base):
             ip_groups = session.query(IPGroups).filter(IPGroups.fk_ip_segment_id.in_(segments_ids)).all()
             ip_group_ids = [ip_group.ip_group_id for ip_group in ip_groups]
 
-            session.query(IPGroupsToIPGroupsTags).filter(IPGroupsToIPGroupsTags.fk_ip_group_id.in_(ip_group_ids)).delete(
+            session.query(IPGroupsToIPGroupsTags).filter(
+                IPGroupsToIPGroupsTags.fk_ip_group_id.in_(ip_group_ids)).delete(
                 synchronize_session=False)
             session.query(IPGroups).filter(IPGroups.ip_group_id.in_(ip_group_ids)).delete(synchronize_session=False)
 
@@ -866,6 +867,27 @@ class IPGroups(Base):
             # Delete all IP groups from the database
             session.query(IPGroupsToIPGroupsTags).filter(
                 IPGroupsToIPGroupsTags.fk_ip_group_id.in_(ip_group_ids)).delete(synchronize_session=False)
+            session.query(IPGroups).filter(IPGroups.ip_group_id.in_(ip_group_ids)).delete(synchronize_session=False)
+        except Exception as e:
+            raise e
+
+    @staticmethod
+    def delete_ip_group_by_site(session, group_metadata: dict) -> list:
+        try:
+            router = session.query(Router).filter_by(fk_site_id=group_metadata['site_id']).first()
+            segments = session.query(IPSegment).filter_by(fk_router_id=router.router_id).all()
+
+            segments_ids = [segment.ip_segment_id for segment in segments]
+
+            ip_groups = session.query(IPGroups).filter(
+                IPGroups.ip_group_name == group_metadata['group'],
+                IPGroups.fk_ip_segment_id.in_(segments_ids)
+            ).all()
+            ip_group_ids = [ip_group.ip_group_id for ip_group in ip_groups]
+
+            session.query(IPGroupsToIPGroupsTags).filter(
+                IPGroupsToIPGroupsTags.fk_ip_group_id.in_(ip_group_ids)).delete(
+                synchronize_session=False)
             session.query(IPGroups).filter(IPGroups.ip_group_id.in_(ip_group_ids)).delete(synchronize_session=False)
         except Exception as e:
             raise e

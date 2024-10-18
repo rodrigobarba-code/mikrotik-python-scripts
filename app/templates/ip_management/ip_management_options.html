@@ -9,7 +9,7 @@
 {% block content %}
     <!-- IP Management Options Jumbotron -->
     <section class="management-options-jumbotron pt-5 mb-3">
-        <div class="container-fluid py-5 d-flex flex-column flex-md-row">
+        <div id="jumbotron-content" class="container-fluid py-5 d-flex flex-column flex-md-row">
             <div class="d-flex col-md-1 order-md-1 order-2 text-md-start text-center my-md-0 my-3 justify-content-center align-items-center">
                 <button class="btn btn-c-return">
                     <a href="{{ url_for('ip_management.ip_management') }}" class="text-decoration-none text-dark"
@@ -88,7 +88,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="{{ url_for('home.home') }}">
+                <a href="{{ url_for('ip_management.authorized', site_id=site_id) }}">
                     <div class="col-c col-12 col-md-12">
                         <div class="card-c card mb-3">
                             <div class="row g-0">
