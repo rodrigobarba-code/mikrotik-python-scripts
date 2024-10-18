@@ -4,7 +4,6 @@ import ros_api
 from utils.threading_manager import ThreadingManager
 
 from entities.arp import ARPEntity
-from models.router_scan.models import ARP
 # from models.router_scan.models import ARPTags
 from models.router_scan.functions import ARPFunctions
 
@@ -250,12 +249,6 @@ class RouterAPI:
                         # print(arp['address'] + ' not found in the IP segments')
                         pass
 
-                # Create a dictionary with the ARP list, the router ID and the model
-                router_metadata = {'arp_region_list': arp_region_list, 'router_id': router['id']}
-
-                # Delete all ARP data from the database that are in database but not in the router
-                ThreadingManager().run_thread(ARPFunctions.delete_arps, 'w', router_metadata)
-
                 # Concatenate the ARP data to the list
                 arp_list.extend(arp_region_list)
             return arp_list
@@ -275,8 +268,8 @@ class RouterAPI:
             for arp in arp_list:
                 arp.validate_arp()
 
-            # Add all ARP data to the database in bulk
-            ThreadingManager().run_thread(ARP.bulk_add_arp, 'w', arp_list)
+            # Delete all ARP data from the database that are in database but not in the router
+            ThreadingManager().run_thread(ARPFunctions.arp_bulk_insert_and_validation, 'w', arp_list)
 
             # Assign the first tag to the ARP data
             # ThreadingManager().run_thread(ARPTags.assign_first_tag, 'wx')
