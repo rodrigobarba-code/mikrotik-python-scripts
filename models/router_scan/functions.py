@@ -2,6 +2,7 @@ from entities.arp import ARPEntity
 from entities.ip_groups import IPGroupsEntity
 from models.ip_management.models import IPSegment
 from utils.threading_manager import ThreadingManager
+from mac_vendor_lookup import MacLookup, BaseMacLookup
 
 class ARPFunctions:
     def __init__(self):  
@@ -74,10 +75,24 @@ class ARPFunctions:
         return None
 
     @staticmethod
-    def bulk_insert_decision(session, arp_list: list) -> None:
+    def get_mac_vendor(mac: str, operator) -> str:
+        """
+        Get the MAC vendor from the MAC address of the device
+        :param mac: MAC address of the device
+        :return: MAC vendor of the device
+        """
+        try:
+            return operator.lookup(mac) if operator.lookup(mac) else 'Unknown'
+        except Exception as e:
+            return 'Unknown'
+
+    @staticmethod
+    def bulk_insert_decision(session, arp_list: list, mac) -> None:
         """
         Decide if the ARP entries need to be inserted on ARP Table or IPGroups Table
         :param arp_list: List of ARP entries
+        :param mac: MAC lookup operator
+        :param session: Database session
         :return: None
         """
         # Importing here to avoid circular imports
@@ -103,7 +118,7 @@ class ARPFunctions:
                         ip_group_mask=session.query(IPSegment).filter(
                             IPSegment.ip_segment_id == arp.fk_ip_address_id).first().ip_segment_mask,
                         ip_group_mac=arp.arp_mac,
-                        ip_group_mac_vendor='Unknown',
+                        ip_group_mac_vendor=ARPFunctions.get_mac_vendor(arp.arp_mac, mac),
                         ip_group_interface=arp.arp_interface,
                         ip_group_comment='No comment',
                         ip_is_dhcp=arp.arp_is_dhcp,
@@ -127,7 +142,7 @@ class ARPFunctions:
                         ip_group_mask=session.query(IPSegment).filter(
                             IPSegment.ip_segment_id == arp.fk_ip_address_id).first().ip_segment_mask,
                         ip_group_mac=arp.arp_mac,
-                        ip_group_mac_vendor='Unknown',
+                        ip_group_mac_vendor=ARPFunctions.get_mac_vendor(arp.arp_mac, mac),
                         ip_group_interface=arp.arp_interface,
                         ip_group_comment='No comment',
                         ip_is_dhcp=arp.arp_is_dhcp,
@@ -179,10 +194,15 @@ class ARPFunctions:
             # Importing here to avoid circular imports
             from models.router_scan.models import ARP
             from models.ip_management.models import IPGroups
+
+            # Set the cache path for the MAC lookup
+            BaseMacLookup.cache_path = "./mac.txt"
+            mac = MacLookup()
+            mac.update_vendors()
             # from models.router_scan.models import ARPTags
 
             # Insert ARP entries to the database
-            ARPFunctions.bulk_insert_decision(session, arp_list)
+            ARPFunctions.bulk_insert_decision(session, arp_list, mac)
 
             # Create list for ARP entries that needs to move from ARP Table to IPGroups Table
             # Create list for ARP entries that needs to move from IPGroups Table to ARP Table
@@ -237,7 +257,7 @@ class ARPFunctions:
             # Check if there are ARP entries to delete from ARP Table
             if arp_to_ip_groups:
                 # Move ARP entries to IPGroups
-                arp_metadata = [arp_to_ip_groups, ip_groups_for_movement]
+                arp_metadata = [arp_to_ip_groups, ip_groups_for_movement, mac]
                 ThreadingManager().run_thread(ARP.bulk_move_arp_to_ip_groups, 'w', arp_metadata)
                 print(f'ARP entries moved to IPGroups: {len(arp_to_ip_groups)}')
             elif ip_groups_to_arp:
