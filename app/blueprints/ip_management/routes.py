@@ -447,24 +447,3 @@ def bulk_delete_blacklist():
     except Exception as e:
         flash(str(e), 'danger')
         return jsonify({'message': 'Failed to delete segments', 'error': str(e)}), 500
-
-
-@ip_management_bp.route('/segments/delete/all/<int:site_id>', methods=['POST'])
-@restriction.login_required
-@restriction.admin_required
-def delete_segments(site_id):
-    try:
-        response = requests.delete(
-            f'http://localhost:8080/api/private/segments/site/{site_id}',
-            headers=get_verified_jwt_header(),
-            params={'user_id': session.get('user_id')}
-        )
-        if response.status_code == 200:
-            if response.json().get('backend_status') == 200:
-                flash('All IP Segments deleted successfully', 'success')
-                return jsonify({'message': 'All IP Segments deleted successfully'}), 200
-            else:
-                raise Exception(response.json().get('message'))
-    except Exception as e:
-        flash(str(e), 'danger')
-        return jsonify({'message': 'Failed to delete all IP Segments', 'error': str(e)}), 500
