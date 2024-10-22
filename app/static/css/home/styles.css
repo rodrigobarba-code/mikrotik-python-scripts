@@ -1,0 +1,47 @@
+h1 {
+    font-weight: bold;
+}
+
+@keyframes move-gradient {
+    0% {
+    background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+    background-position: 0% 50%;
+    }
+}
+
+#welcome-name {
+    background: radial-gradient(circle farthest-corner at 10% 20%, rgba(2,37,78,1) 0%, rgba(4,56,126,1) 19.7%, rgba(85,245,221,1) 100.2%);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+
+    animation: move-gradient 2s infinite linear;
+}
+
+#welcome-text {
+    color: var(--text-color);
+}
+
+.round-small {
+    border-radius: 2rem;
+}
+
+#c-end {
+    height: 250px;
+    z-index: 100;
+    background-image: radial-gradient( circle farthest-corner at 10% 20%,  rgba(2,37,78,1) 0%, rgba(4,56,126,1) 19.7%, rgba(85,245,221,1) 100.2% );
+}
+
+#c-front {
+    width: 99%;
+    height: 89%;
+    z-index: 400;
+    background-color: var(--sidebar-color);
+}
+
