@@ -1,21 +1,27 @@
-h1 {
+/* Welcome Text */
+
+.text {
+    color: var(--text-color);
+}
+
+h1, h2 {
     font-weight: bold;
 }
 
 @keyframes move-gradient {
     0% {
-    background-position: 0% 50%;
+        background-position: 0% 50%;
     }
     50% {
         background-position: 100% 50%;
     }
     100% {
-    background-position: 0% 50%;
+        background-position: 0% 50%;
     }
 }
 
 #welcome-name {
-    background: radial-gradient(circle farthest-corner at 10% 20%, rgba(2,37,78,1) 0%, rgba(4,56,126,1) 19.7%, rgba(85,245,221,1) 100.2%);
+    background: radial-gradient(circle farthest-corner at 10% 20%, rgba(2, 37, 78, 1) 0%, rgba(4, 56, 126, 1) 19.7%, rgba(85, 245, 221, 1) 100.2%);
     background-size: 200% 200%;
     -webkit-background-clip: text;
     background-clip: text;
@@ -28,20 +34,141 @@ h1 {
     color: var(--text-color);
 }
 
+/* Phone */
+@media (max-width: 768px) {
+    #welcome-text {
+        padding-left: 1.5rem;
+    }
+}
+
+/* Tablet */
+@media (min-width: 768px) and (max-width: 1024px) {
+    #welcome-text {
+        padding-left: 1.5rem;
+    }
+}
+
+/* Welcome Text */
+
+/* Shortcuts Container */
+
 .round-small {
-    border-radius: 2rem;
+    border-radius: 1rem;
 }
 
-#c-end {
-    height: 250px;
-    z-index: 100;
-    background-image: radial-gradient( circle farthest-corner at 10% 20%,  rgba(2,37,78,1) 0%, rgba(4,56,126,1) 19.7%, rgba(85,245,221,1) 100.2% );
-}
-
-#c-front {
-    width: 99%;
-    height: 89%;
-    z-index: 400;
+.shortcut-container {
+    width: 85%;
+    position: relative;
+    height: 20.5rem;
     background-color: var(--sidebar-color);
 }
 
+.box::before , .box::after {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    background: radial-gradient(circle farthest-corner at 10% 20%, rgba(2, 37, 78, 1) 0%, rgba(4, 56, 126, 1) 19.7%, rgba(85, 245, 221, 1) 100.2%);
+    background-size: 400%;
+    width: calc(100% + 1px);
+    height: calc(100% + 1px);
+    border-radius: 1rem;
+    z-index: -1;
+
+    animation: glowing 10s linear infinite;
+}
+
+/* Rotate Glowing Animation */
+@keyframes glowing {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+.box::after {
+    filter: blur(10px);
+}
+
+/* Phone */
+@media (max-width: 768px) {
+    .shortcut-container {
+        width: calc(100% - 4rem);
+        height: 20rem;
+    }
+}
+
+/* Tablet */
+@media (min-width: 768px) and (max-width: 1024px) {
+    .shortcut-container {
+        width: calc(100% - 5rem);
+        height: 20rem;
+    }
+}
+
+.shortcut {
+    width: fit-content;
+}
+
+.shortcut a {
+    text-decoration: none;
+}
+
+.shortcut-icon {
+    width: 6rem;
+    height: 6rem;
+    background-color: var(--nav-items);
+    border-radius: 100%;
+    transition: box-shadow 0.5s ease-in-out;
+}
+
+.shortcut-icon:hover {
+    box-shadow: 0 0 0.5rem var(--text-color);
+}
+
+.shortcut-icon i {
+    font-size: 3rem;
+    color: var(--text-color);
+}
+
+.shortcut-text {
+    color: var(--text-color);
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+/* Phone */
+@media (max-width: 768px) {
+    .shortcuts {
+        overflow-x: scroll;
+    }
+
+    .shortcut-icon {
+        width: 4.5rem;
+        height: 4.5rem;
+    }
+
+    .shortcut-icon i {
+        font-size: 2.5rem;
+    }
+
+    .shortcut-text {
+        font-size: 1rem;
+    }
+}
+
+#particles-js {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+/* Shortcuts Container */
