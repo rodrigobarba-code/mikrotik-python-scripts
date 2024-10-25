@@ -35,9 +35,9 @@
                         <div class="col-12">
                             <div class="container-fluid d-flex flex-row pt-4 align-items-start justify-content-between shortcuts">
                                 <div class="d-flex flex-column align-items-center justify-content-center shortcut">
-                                    <a href="">
+                                    <a href="{{ url_for('dashboard.dashboard') }}">
                                         <div class="d-flex justify-content-center align-items-center shortcut-icon">
-                                            <i class="fas fa-router"></i>
+                                            <i style="color: #80ED99" class="fa-solid fa-gauge-circle-bolt"></i>
                                         </div>
                                     </a>
                                     <div class="shortcut-text text-center">
@@ -45,19 +45,19 @@
                                     </div>
                                 </div>
                                 <div class="d-flex flex-column align-items-center justify-content-center shortcut">
-                                    <a href="">
+                                    <a href="{{ url_for('sites.sites') }}">
                                         <div class="d-flex justify-content-center align-items-center shortcut-icon">
-                                            <i class="fas fa-router"></i>
+                                            <i style="color: #45DFB1" class="fa-solid fa-earth-americas"></i>
                                         </div>
                                     </a>
                                     <div class="shortcut-text text-center">
-                                        <p class="pt-2">Regions</p>
+                                        <p class="pt-2">Sites</p>
                                     </div>
                                 </div>
                                 <div class="d-flex flex-column align-items-center justify-content-center shortcut">
-                                    <a href="">
+                                    <a href="{{ url_for('routers.routers') }}">
                                         <div class="d-flex justify-content-center align-items-center shortcut-icon">
-                                            <i class="fas fa-router"></i>
+                                            <i style="color: #0AD1C8" class="fas fa-router"></i>
                                         </div>
                                     </a>
                                     <div class="shortcut-text text-center">
@@ -65,9 +65,9 @@
                                     </div>
                                 </div>
                                 <div class="d-flex flex-column align-items-center justify-content-center shortcut">
-                                    <a href="">
+                                    <a href="{{ url_for('ip_management.ip_management') }}">
                                         <div class="d-flex justify-content-center align-items-center shortcut-icon">
-                                            <i class="fas fa-router"></i>
+                                            <i style="color: #14919B" class="fa-duotone fa-solid fa-sitemap"></i>
                                         </div>
                                     </a>
                                     <div class="shortcut-text text-center">
@@ -75,9 +75,9 @@
                                     </div>
                                 </div>
                                 <div class="d-flex flex-column align-items-center justify-content-center shortcut">
-                                    <a href="">
+                                    <a href="{{ url_for('router_scan.scan') }}">
                                         <div class="d-flex justify-content-center align-items-center shortcut-icon">
-                                            <i class="fas fa-router"></i>
+                                            <i style="color: #0B6477" class="fa-sharp fa-solid fa-radar"></i>
                                         </div>
                                     </a>
                                     <div class="shortcut-text text-center">
@@ -85,9 +85,9 @@
                                     </div>
                                 </div>
                                 <div class="d-flex flex-column align-items-center justify-content-center shortcut">
-                                    <a href="">
+                                    <a href="{{ url_for('users.users') }}">
                                         <div class="d-flex justify-content-center align-items-center shortcut-icon">
-                                            <i class="fas fa-router"></i>
+                                            <i style="color: #80ED99" class="fa-solid fa-users"></i>
                                         </div>
                                     </a>
                                     <div class="shortcut-text text-center">
@@ -102,4 +102,85 @@
         </div>
     </div>
     <!-- Shortcuts Container -->
+
+    <!-- Carousel Container -->
+    <div style="width: 93%" class="container mt-4">
+    <div class="row">
+        <div class="col-12 col-md-6 col-lg-8">
+            <div class="carousel-container round-small mx-auto">
+                <div id="carouselExampleCaptions" class="carousel slide" data-bs-ride="carousel">
+                    <div class="carousel-indicators">
+                        <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="0"
+                                class="active"
+                                aria-current="true" aria-label="Slide 1"></button>
+                        <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="1"
+                                aria-label="Slide 2"></button>
+                    </div>
+                    <div class="container carousel-inner">
+                        <div class="carousel-item active">
+                            <img src="{{ url_for('static', filename='img/carousel/2.png') }}" class="d-block w-100"
+                                 alt="First slide">
+                        </div>
+                        <div class="carousel-item">
+                            <img src="{{ url_for('static', filename='img/carousel/1.jpeg') }}" class="d-block w-100"
+                                 alt="Second slide">
+                        </div>
+                    </div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleCaptions"
+                            data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Previous</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleCaptions"
+                            data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Next</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="app-container round-small">
+                <div class="d-flex flex-column align-items-center justify-content-center">
+                    <h1 class="text mt-4">Applications</h1>
+                    <div class="d-flex flex-row pt-4 applications">
+                        <div class="application">
+                            <a href="https://app.hubspot.com/login" target="_blank">
+                                <div class="d-flex justify-content-center align-items-center application-icon">
+                                    <i style="color: #FF7A59" class="fa-brands fa-hubspot"></i>
+                                </div>
+                            </a>
+                            <div class="application-text text-center">
+                                <p class="pt-2">Hub Spot</p>
+                            </div>
+                        </div>
+                        <div class="application">
+                            <a href="https://web.whatsapp.com/" target="_blank">
+                                <div class="d-flex justify-content-center align-items-center application-icon">
+                                    <i style="color: #25D366" class="fa-brands fa-whatsapp"></i>
+                                </div>
+                            </a>
+                            <div class="application-text text-center">
+                                <p class="pt-2">Whats App</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-row applications">
+                        <div class="application">
+                            <a href="https://app.whaticket.com/" target="_blank">
+                                <div class="d-flex justify-content-center align-items-center application-icon">
+                                    <i style="color: #5888ff" class="fa-solid fa-tickets"></i>
+                                </div>
+                            </a>
+                            <div class="application-text text-center">
+                                <p class="pt-2">Whaticket</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Carousel Container -->
 {% endblock %}
