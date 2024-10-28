@@ -12,7 +12,7 @@ ip_groups_functions = APIFunctions()
 
 
 class IPGroupsBulkDeleteBase(BaseModel):
-    ip_groups_ids: List[int]
+    ip_groups_ids: List
 
 
 class BlacklistBulkMoveBase(BaseModel):
@@ -334,7 +334,7 @@ async def delete_ip_group(user_id: int, ip_group_id: int, metadata: Request, tok
         }
 
 
-@ip_groups_router.delete("/ip/groups/bulk")
+@ip_groups_router.delete("/ip/groups/bulk/")
 async def delete_ip_groups_bulk(user_id: int, ip_groups_ids: IPGroupsBulkDeleteBase, metadata: Request,
                                 token: dict = Depends(verify_jwt)):
     try:
