@@ -104,3 +104,7 @@
 .swal2-popup {
     border-radius: 30px; /* Cambia a tu valor deseado */
 }
+
+.modal-backdrop {
+    display: none !important;
+}
