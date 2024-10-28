@@ -337,6 +337,50 @@ def get_ip_segment_details():
         return jsonify({'message': 'Failed to get router data', 'error': str(e)}), 500
 
 
+@ip_management_bp.route('/ip/group/details/', methods=['GET'])
+def get_ip_group_details():
+    try:
+        ip_group_id = request.args.get('id')
+        response = requests.get(
+            f'http://localhost:8080/api/private/ip/group/{ip_group_id}',
+            headers=get_verified_jwt_header(),
+            params={'user_id': session.get('user_id'),
+                    'ip_group_id': ip_group_id
+                    }
+        )
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                blacklist_obj = response.json().get('ip_group')
+                return jsonify([{
+                    'id': ['Identifier', blacklist_obj.get('ip_group_id')],
+                    'name': ['Group Name', 'Blacklist' if blacklist_obj.get(
+                        'ip_group_name') == 'blacklist' else 'Authorized'],
+                    'type': ['IP Type', blacklist_obj.get('ip_group_type')],
+                    'alias': ['Alias', blacklist_obj.get('ip_group_alias')],
+                    'description': ['Description', blacklist_obj.get('ip_group_description')],
+                    'ip': ['IP', blacklist_obj.get('ip_group_ip')],
+                    'mask': ['Mask', blacklist_obj.get('ip_group_mask')],
+                    'mac': ['MAC', blacklist_obj.get('ip_group_mac')],
+                    'mac_vendor': ['MAC Vendor', blacklist_obj.get('ip_group_mac_vendor')],
+                    'interface': ['Interface', blacklist_obj.get('ip_group_interface')],
+                    'comment': ['Comment', blacklist_obj.get('ip_group_comment')],
+                    'ip_is_dhcp': ['IP is DHCP', blacklist_obj.get('ip_is_dhcp')],
+                    'ip_is_dynamic': ['IP is Dynamic', blacklist_obj.get('ip_is_dynamic')],
+                    'ip_is_complete': ['IP is Complete', blacklist_obj.get('ip_is_complete')],
+                    'ip_is_disabled': ['IP is Disabled', blacklist_obj.get('ip_is_disabled')],
+                    'ip_is_published': ['IP is Published', blacklist_obj.get('ip_is_published')],
+                    'ip_duplicity': ['IP Duplicity', blacklist_obj.get('ip_duplicity')],
+                    'tags': ['Tags', blacklist_obj.get('ip_group_tags')],
+
+                }]), 200
+            else:
+                return jsonify({'message': response.json().get('message')}), 500
+        elif response.status_code == 500:
+            return jsonify({'message': 'Failed to get IP Group details'}), 500
+    except Exception as e:
+        return jsonify({'message': 'Failed to get IP Group details', 'error': str(e)}), 500
+
+
 def get_blacklist(site_id: int) -> list:
     try:
         response = requests.get(
@@ -447,3 +491,29 @@ def bulk_delete_blacklist():
     except Exception as e:
         flash(str(e), 'danger')
         return jsonify({'message': 'Failed to delete segments', 'error': str(e)}), 500
+
+
+@ip_management_bp.route('/ip/group/delete/<int:ip_group_id>', methods=['GET'])
+@restriction.login_required
+@restriction.admin_required
+def delete_ip_group(ip_group_id):
+    try:
+        response = requests.delete(
+            f'http://localhost:8080/api/private/ip/group/{ip_group_id}',
+            headers=get_verified_jwt_header(),
+            params={
+                'user_id': session.get('user_id'),
+                'ip_group_id': ip_group_id
+            }
+        )
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                flash('IP Group deleted successfully', 'success')
+                return redirect(url_for('ip_management.blacklist', site_id=1))
+            else:
+                raise Exception(response.json().get('message'))
+        elif response.status_code == 500:
+            raise Exception('Failed to delete IP Group')
+    except Exception as e:
+        flash(str(e), 'danger')
+        return redirect(url_for('ip_management.blacklist', site_id=1))

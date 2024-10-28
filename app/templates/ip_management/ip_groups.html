@@ -112,18 +112,19 @@
                         <td>
                             <a href="" type="button"
                                class="btn btn-sm btn-warning"><i class="fa-solid fa-edit"></i></a>
-                            <a href="" type="button"
-                               class="btn btn-sm btn-info"><i class="fa-solid fa-star" style="color: white"></i></a>
                             <button type="button" id="delete-button-blacklist-{{ ip_group.ip_group_id }}"
                                     class="btn btn-sm btn-danger"
                                     data-bs-toggle="modal"
                                     data-bs-target="#delete-modal"
                                     data-id="{{ ip_group.ip_group_id }}"
                                     data-type="blacklist"
-                                    data-url=""
+                                    data-url="{{ url_for('ip_management.delete_ip_group', ip_group_id=ip_group.ip_group_id) }}"
                                     data-name="{{ ip_group.ip_group_ip }}"
                             ><i class="fa-solid fa-trash"></i></button>
+                            <a href="" type="button"
+                               class="btn btn-sm btn-info"><i class="fa-solid fa-right-left"></i></a>
                             <!-- Show Details Button -->
+                            {{ show_details_button(ip_group.ip_group_id, url_for('ip_management.get_ip_group_details'), 'Blacklist' if is_blacklist else 'Authorized') }}
                         </td>
                     </tr>
                 {% endfor %}
