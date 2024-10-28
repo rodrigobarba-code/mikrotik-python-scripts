@@ -542,6 +542,7 @@ body.dark .switch::before {
     position: relative;
     background: transparent;
     left: 0;
+    z-index: 1;
     height: max-content;
     box-sizing: border-box;
     padding-left: 78px;

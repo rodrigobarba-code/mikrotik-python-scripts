@@ -1,5 +1,6 @@
 from threading import Thread
 
+from app.blueprints.ip_management.routes import ip_segment
 from .. import Base
 from models.routers.models import Router
 from sqlalchemy.orm import relationship, backref
@@ -745,24 +746,26 @@ class IPGroups(Base):
             ip_group.ip_group_alias = ip_group.ip_group_alias
             ip_group.ip_group_description = ip_group.ip_group_description
 
-            # Check what tags to assign and unassign
-            tags_to_assign = set(ip_group_metadata['tags'])
-            tags_to_unassign = tags_to_assign - set(old_tags)
+            # Verify if there are tags to assign and unassign
+            if ip_group_metadata['tags']:
+                # Check what tags to assign and unassign
+                tags_to_assign = set(ip_group_metadata['tags'])
+                tags_to_unassign = tags_to_assign - set(old_tags)
 
-            if tags_to_unassign or tags_to_assign:
-                # Verify if there are tags to assign
-                if tags_to_assign:
-                    # Iterate in the tags to assign to the IP group
-                    for tag in tags_to_assign:
-                        # Assign the tag to the IP group
-                        ThreadingManager().run_thread(IPGroupsToIPGroupsTags.assign_tag, 'w', tag)
+                if tags_to_unassign or tags_to_assign:
+                    # Verify if there are tags to assign
+                    if tags_to_assign:
+                        # Iterate in the tags to assign to the IP group
+                        for tag in tags_to_assign:
+                            # Assign the tag to the IP group
+                            ThreadingManager().run_thread(IPGroupsToIPGroupsTags.assign_tag, 'w', tag)
 
-                # Verify if there are tags to unassign
-                if tags_to_unassign:
-                    # Iterate in the tags to unassign from the IP group
-                    for tag in tags_to_unassign:
-                        # Unassign the tag from the IP group
-                        ThreadingManager().run_thread(IPGroupsToIPGroupsTags.unassign_tag, 'w', tag)
+                    # Verify if there are tags to unassign
+                    if tags_to_unassign:
+                        # Iterate in the tags to unassign from the IP group
+                        for tag in tags_to_unassign:
+                            # Unassign the tag from the IP group
+                            ThreadingManager().run_thread(IPGroupsToIPGroupsTags.unassign_tag, 'w', tag)
             else:
                 # Do nothing
                 pass
@@ -812,6 +815,68 @@ class IPGroups(Base):
             raise e
 
     @staticmethod
+    def move_from_blacklist_to_authorized(session, ip_group_id: int) -> None:
+        """
+        Move an IP group from blacklist to authorized
+        :param session: The database session
+        :param ip_group_id: The IP group ID
+        :return: None
+        """
+        try:
+            # Get the IP group from the database based on the IP group ID
+            ip_group = session.query(IPGroups).get(ip_group_id)
+
+            # Update the IP group in the database
+            ip_group.ip_group_name = 'authorized'
+        except Exception as e:
+            raise e
+
+    @staticmethod
+    def bulk_move_from_blacklist_to_authorized(session, ip_group_ids: list[int]) -> None:
+        """
+        Move a list of IP groups from blacklist to authorized
+        :param session: The database session
+        :param ip_group_ids: The list of IP group IDs
+        :return: None
+        """
+        try:
+            # Get all IP groups from the database based on the IP group IDs
+            ip_groups = session.query(IPGroups).filter(IPGroups.ip_group_id.in_(ip_group_ids)).all()
+
+            # Iterate on the IP groups and update them in the database
+            for ip_group in ip_groups:
+                ip_group.ip_group_name = 'authorized'
+        except Exception as e:
+            raise e
+
+    @staticmethod
+    def move_all_from_blacklist_to_authorized(session, site_id: str) -> None:
+        """
+        Move all IP groups from blacklist to authorized
+        :param session: The database session
+        :param site_id: The site ID
+        :return: None
+        """
+        try:
+            # Get router from the database based on the site ID
+            router = session.query(Router).filter_by(fk_site_id=site_id).first()
+
+            # Get all IP groups from the database based on the router ID
+            ip_segments = session.query(IPSegment).filter_by(fk_router_id=router.router_id).all()
+
+            # Make a list of IP segment IDs
+            ip_segment_ids = [ip_segment.ip_segment_id for ip_segment in ip_segments]
+
+            # Get all IP groups from the database based on the IP segment IDs
+            ip_groups = session.query(IPGroups).filter(IPGroups.fk_ip_segment_id.in_(ip_segment_ids)).all()
+
+            # Iterate on the IP groups and update them in the database
+            for ip_group in ip_groups:
+                ip_group.ip_group_name = 'authorized'
+        except Exception as e:
+            raise e
+
+    @staticmethod
     def delete_ip_group(session, ip_group_id: int) -> None:
         """
         Delete an IP group from the database
@@ -822,13 +887,15 @@ class IPGroups(Base):
         try:
             # Get the tags assigned to the IP group
             tags = session.query(IPGroupsToIPGroupsTags).filter_by(fk_ip_group_id=ip_group_id).all()
+            tags_ids = [tag.fk_ip_group_tag_id for tag in tags]
 
             # Get the IP group from the database based on the IP group ID
             ip_group = session.query(IPGroups).get(ip_group_id)
+            ip_groups_ids = [ip_group.ip_group_id for ip_group in ip_group]
 
             # Delete the tags assigned to the IP group and the IP group from the database
-            session.delete(tags)
-            session.delete(ip_group)
+            session.query(IPGroupsToIPGroupsTags).filter_by(IPGroupsToIPGroupsTags.fk_ip_group_id.in_(ip_groups_ids)).delete(synchronize_session=False)
+            session.query(IPGroups).filter_by(IPGroups.ip_group_id.in_(ip_groups_ids)).delete(synchronize_session=False)
         except Exception as e:
             raise e
 
