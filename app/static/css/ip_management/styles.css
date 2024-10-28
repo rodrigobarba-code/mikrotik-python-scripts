@@ -29,16 +29,8 @@ a:hover {
 
 .segments-jumbotron {
     color: white;
-    background-image: radial-gradient(circle farthest-corner at 10% 20%, rgba(2, 37, 78, 1) 0%, rgba(4, 56, 126, 1) 19.7%, rgba(85, 245, 221, 1) 100.2%);
+    background: url("../../img/banner-segments.svg") no-repeat center, radial-gradient(circle farthest-corner at 10% 20%, rgba(2, 37, 78, 1) 0%, rgba(4, 56, 126, 1) 19.7%, rgba(85, 245, 221, 1) 100.2%);
     background-size: cover;
-    width: 100%;
-    min-height: 300px;
-    z-index: 2;
-}
-
-.blacklist-jumbotron {
-    color: white;
-    background-image: linear-gradient(94.3deg, rgba(26, 33, 64, 1) 10.9%, rgba(81, 84, 115, 1) 87.1%);
     width: 100%;
     min-height: 300px;
     z-index: 2;
@@ -172,7 +164,7 @@ a:hover {
 
 .authorized-jumbotron {
     color: white;
-    background: linear-gradient(109.6deg, rgba(222, 73, 5, 1) 11.2%, rgba(236, 249, 10, 1) 91.1%);
+    background: url("../../img/banner-authorized.svg") no-repeat center, linear-gradient(109.6deg, rgba(222, 73, 5, 1) 11.2%, rgba(236, 249, 10, 1) 91.1%);
     background-size: cover;
     width: 100%;
     min-height: 300px;
