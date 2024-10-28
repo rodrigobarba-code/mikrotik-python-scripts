@@ -15,6 +15,10 @@ class IPGroupsBulkDeleteBase(BaseModel):
     ip_groups_ids: List[int]
 
 
+class BlacklistBulkMoveBase(BaseModel):
+    ip_groups_ids: List[int]
+
+
 class IPGroupsTagsBase(BaseModel):
     tags: List[int]
 
@@ -174,7 +178,7 @@ async def get_authorized_by_site(user_id: int, site_id: int, metadata: Request, 
 
 
 @ip_groups_router.get("/ip/availables/{site_id}")
-async def get_availables_by_site(user_id: int, site_id: int, metadata: Request, token: dict = Depends(verify_jwt)):
+async def get_available_by_site(user_id: int, site_id: int, metadata: Request, token: dict = Depends(verify_jwt)):
     try:
         if ip_groups_functions.verify_user_existence(user_id):
             request = ThreadingManager().run_thread(IPGroups.get_available_authorized_by_site, 'rx', site_id)
@@ -226,6 +230,85 @@ async def update_ip_group(user_id: int, ip_group_id: int, tags: IPGroupsTagsBase
         }
 
 
+@ip_groups_router.put("/blacklist/move/to/authorized/{ip_group_id}")
+async def move_blacklist_to_authorized(user_id: int, ip_group_id: int, metadata: Request,
+                                       token: dict = Depends(verify_jwt)):
+    try:
+        if ip_groups_functions.verify_user_existence(user_id):
+            ThreadingManager().run_thread(IPGroups.move_from_blacklist_to_authorized, 'w', ip_group_id)
+            ip_groups_functions.create_transaction_log(
+                action="UPDATE",
+                table="ip_groups",
+                user_id=int(user_id),
+                description=f"IP Group {ip_group_id} moved from Blacklist to Authorized",
+                public=str(str(metadata.client.host) + ':' + str(metadata.client.port))
+            )
+            return {
+                'message': f"IP Group {ip_group_id} moved from Blacklist to Authorized",
+                'backend_status': 200
+            }
+        else:
+            raise Exception("User not registered in the system")
+    except Exception as e:
+        return {
+            'message': f"Failed to move IP Group {ip_group_id} from Blacklist to Authorized: {str(e)}",
+            'backend_status': 400
+        }
+
+
+@ip_groups_router.put("/blacklist/move/to/authorized/bulk")
+async def move_blacklist_to_authorized_bulk(user_id: int, ip_groups_ids: BlacklistBulkMoveBase, metadata: Request,
+                                            token: dict = Depends(verify_jwt)):
+    try:
+        if ip_groups_functions.verify_user_existence(user_id):
+            ThreadingManager().run_thread(IPGroups.bulk_move_from_blacklist_to_authorized, 'w', ip_groups_ids)
+            ip_groups_functions.create_transaction_log(
+                action="UPDATE",
+                table="ip_groups",
+                user_id=int(user_id),
+                description=f"IP Groups moved from Blacklist to Authorized",
+                public=str(str(metadata.client.host) + ':' + str(metadata.client.port))
+            )
+            return {
+                'message': f"IP Groups moved from Blacklist to Authorized",
+                'backend_status': 200
+            }
+        else:
+            raise Exception("User not registered in the system")
+    except Exception as e:
+        return {
+            'message': f"Failed to move IP Groups from Blacklist to Authorized: {str(e)}",
+            'backend_status': 400
+        }
+
+
+@ip_groups_router.put("/blacklist/move/all/to/authorized/{site_id}")
+async def move_all_blacklist_to_authorized(user_id: int, site_id: int, metadata: Request,
+                                           token: dict = Depends(verify_jwt)):
+    try:
+        if ip_groups_functions.verify_user_existence(user_id):
+            group_metadata = {'site_id': site_id, 'group': 'blacklist'}
+            ThreadingManager().run_thread(IPGroups.move_all_from_blacklist_to_authorized, 'w', group_metadata)
+            ip_groups_functions.create_transaction_log(
+                action="UPDATE",
+                table="ip_groups",
+                user_id=int(user_id),
+                description=f"All Blacklist IPs moved to Authorized for Site {site_id}",
+                public=str(str(metadata.client.host) + ':' + str(metadata.client.port))
+            )
+            return {
+                'message': f"All Blacklist IPs moved to Authorized for Site {site_id}",
+                'backend_status': 200
+            }
+        else:
+            raise Exception("User not registered in the system")
+    except Exception as e:
+        return {
+            'message': f"Failed to move all Blacklist IPs to Authorized for Site {site_id}: {str(e)}",
+            'backend_status': 400
+        }
+
+
 @ip_groups_router.delete("/ip/group/{ip_group_id}")
 async def delete_ip_group(user_id: int, ip_group_id: int, metadata: Request, token: dict = Depends(verify_jwt)):
     try:
@@ -247,6 +330,32 @@ async def delete_ip_group(user_id: int, ip_group_id: int, metadata: Request, tok
     except Exception as e:
         return {
             'message': f"Failed to delete IP Group {ip_group_id}: {str(e)}",
+            'backend_status': 400
+        }
+
+
+@ip_groups_router.delete("/ip/groups/bulk")
+async def delete_ip_groups_bulk(user_id: int, ip_groups_ids: IPGroupsBulkDeleteBase, metadata: Request,
+                                token: dict = Depends(verify_jwt)):
+    try:
+        if ip_groups_functions.verify_user_existence(user_id):
+            ThreadingManager().run_thread(IPGroups.bulk_delete_ip_groups, 'w', ip_groups_ids)
+            ip_groups_functions.create_transaction_log(
+                action="DELETE",
+                table="ip_groups",
+                user_id=int(user_id),
+                description="IP Groups deleted successfully",
+                public=str(str(metadata.client.host) + ':' + str(metadata.client.port))
+            )
+            return {
+                'message': "IP Groups deleted successfully",
+                'backend_status': 200
+            }
+        else:
+            raise Exception("User not registered in the system")
+    except Exception as e:
+        return {
+            'message': f"Failed to delete IP Groups: {str(e)}",
             'backend_status': 400
         }
 
