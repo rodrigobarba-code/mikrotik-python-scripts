@@ -123,3 +123,7 @@
 .btn:hover {
     color: white;
 }
+
+.modal-backdrop {
+    display: none !important;
+}

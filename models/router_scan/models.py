@@ -1,13 +1,9 @@
-from inspect import trace
-
 from .. import Base
 # from entities.arp import ARPTag
 from entities.arp import ARPEntity
 from sqlalchemy.orm import relationship, backref
 from models.router_scan.functions import ARPFunctions
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, Enum
-
-from ..ip_management.models import IPSegment
 
 
 class ARP(Base):
@@ -302,7 +298,7 @@ class ARP(Base):
                     ip_group_ip=arp.arp_ip,
                     ip_group_mask='',
                     ip_group_mac=arp.arp_mac,
-                    ip_group_mac_vendor='',
+                    ip_group_mac_vendor=ARPFunctions.get_mac_vendor(arp.arp_mac, arp_metadata[2]),
                     ip_group_interface=arp.arp_interface,
                     ip_group_comment='',
                     ip_is_dhcp=arp.arp_is_dhcp,
