@@ -887,13 +887,15 @@ class IPGroups(Base):
         try:
             # Get the tags assigned to the IP group
             tags = session.query(IPGroupsToIPGroupsTags).filter_by(fk_ip_group_id=ip_group_id).all()
+            tags_ids = [tag.fk_ip_group_tag_id for tag in tags]
 
             # Get the IP group from the database based on the IP group ID
             ip_group = session.query(IPGroups).get(ip_group_id)
+            ip_groups_ids = [ip_group.ip_group_id for ip_group in ip_group]
 
             # Delete the tags assigned to the IP group and the IP group from the database
-            session.delete(tags)
-            session.delete(ip_group)
+            session.query(IPGroupsToIPGroupsTags).filter_by(IPGroupsToIPGroupsTags.fk_ip_group_id.in_(ip_groups_ids)).delete(synchronize_session=False)
+            session.query(IPGroups).filter_by(IPGroups.ip_group_id.in_(ip_groups_ids)).delete(synchronize_session=False)
         except Exception as e:
             raise e
 
