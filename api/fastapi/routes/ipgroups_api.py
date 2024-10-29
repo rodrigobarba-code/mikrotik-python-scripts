@@ -349,6 +349,7 @@ async def delete_ip_groups_bulk(user_id: int, metadata: Request, request: IPGrou
             )
             return {
                 'message': "IP Groups deleted successfully",
+                'count_flag': len(request.ip_groups_ids),
                 'backend_status': 200
             }
         else:

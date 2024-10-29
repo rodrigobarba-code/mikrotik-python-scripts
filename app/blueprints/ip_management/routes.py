@@ -545,7 +545,7 @@ def transfer_to_authorized(ip_group_id, site_id):
         return redirect(url_for('ip_management.blacklist', site_id=site_id))
 
 
-@ip_management_bp.route('/ip/group/bulk/delete', methods=['POST'])
+@ip_management_bp.route('/ip/group/delete/bulk', methods=['POST'])
 @restriction.login_required
 @restriction.admin_required
 def bulk_delete_ip_group():
@@ -553,7 +553,7 @@ def bulk_delete_ip_group():
     ip_group_ids = data.get('items_ids', [])
     try:
         response = requests.delete(
-            'http://localhost:8080/api/private/ip/group/bulk/',
+            'http://localhost:8080/api/private/ip/groups/bulk/',
             json={'ip_groups_ids': ip_group_ids},
             headers=get_verified_jwt_header(),
             params={
@@ -563,16 +563,16 @@ def bulk_delete_ip_group():
         if response.status_code == 200:
             if response.json().get('backend_status') == 200:
                 flag = response.json().get('count_flag')
-                flash(f'{flag} groups deleted successfully', 'success')
+                flash(f'{flag} IP Groups deleted successfully', 'success')
 
-                return jsonify({'message': f'{flag} groups deleted successfully'}), 200
+                return jsonify({'message': f'{flag} IP Groups deleted successfully'}), 200
             else:
                 raise Exception(response.json().get('message'))
         elif response.status_code == 500:
-            raise Exception('Failed to delete groups')
+            raise Exception('Failed to delete IP Groups')
     except Exception as e:
         flash(str(e), 'danger')
-        return jsonify({'message': 'Failed to delete groups', 'error': str(e)}), 500
+        return jsonify({'message': 'Failed to delete IP Groups', 'error': str(e)}), 500
 
 
 @ip_management_bp.route('/ip/group/delete/all/<int:site_id>/<is_blacklist>', methods=['POST'])
@@ -599,3 +599,13 @@ def delete_ip_groups(site_id, is_blacklist):
     except Exception as e:
         flash(str(e), 'danger')
         return jsonify({'message': 'Failed to delete all IP Groups', 'error': str(e)}), 500
+
+@ip_management_bp.route('/ip/group/tags/', methods=['GET'])
+@restriction.login_required
+@restriction.admin_required
+def ip_group_tags():
+    try:
+        return render_template('ip_management/ip_groups_tags.html')
+    except Exception as e:
+        flash(str(e), 'danger')
+        return redirect(url_for('ip_management.ip_management'))
