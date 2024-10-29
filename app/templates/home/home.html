@@ -29,7 +29,7 @@
                 <div style="z-index: 1" id="particles-js"></div>
                 <div style="z-index: 200; position: relative">
                     <div class="row">
-                        <div class="col-12"><h1 class="text pt-5">What would you like to do?</h1></div>
+                        <div class="col-12"><h1 class="text pt-5">What would you like to do? &nbsp; <i class="fa-solid fa-signal-stream"></i></h1></div>
                     </div>
                     <div class="row">
                         <div class="col-12">
@@ -142,7 +142,7 @@
         <div class="col-12 col-md-6 col-lg-4">
             <div class="app-container round-small">
                 <div class="d-flex flex-column align-items-center justify-content-center">
-                    <h1 class="text mt-4">Applications</h1>
+                    <h1 class="text mt-4">Applications &nbsp; <i class="fa-solid fa-rocket-launch"></i></h1>
                     <div class="d-flex flex-row pt-4 applications">
                         <div class="application">
                             <a href="https://app.hubspot.com/login" target="_blank">
@@ -183,4 +183,25 @@
         </div>
     </div>
     <!-- Carousel Container -->
+
+    <!-- Changelog Container -->
+    <div class="container changelog-container mt-4">
+        <h1 class="text-center pt-4">Changelog &nbsp; <i class="fa-solid fa-diagram-sankey"></i></h1>
+        <div class="timeline">
+            {% for log in changelog %}
+                <div class="timeline-item">
+                    <h5>{{ log['version'] }} - {{ log['date'] }}</h5>
+                    {% for change in log['changes'] %}
+                        <p>
+                            <span class="tag {{ change['type'] }}">{{ change['title'] }}</span> {{ change['description'] }}
+                        </p>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    <!-- Changelog Container -->
+
+    <!-- Footer -->
+    <div class="container mt-2">&nbsp;</div>
 {% endblock %}
