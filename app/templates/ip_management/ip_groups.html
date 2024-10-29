@@ -8,6 +8,13 @@
 {% block scripts %}
     <script src="{{ url_for('static', filename='/js/ip_management/scripts.js') }}"></script>
     <script>
+        {% if is_blacklist %}
+            deleteSelectModal("{{ url_for('ip_management.bulk_delete_ip_group', site_id=site_id) }}", "{{ url_for('ip_management.blacklist', site_id=site_id) }}", 'ip-group');
+            deleteAllModal("{{ url_for('ip_management.delete_ip_groups', site_id=site_id,  is_blacklist= is_blacklist) }}", "{{ url_for('ip_management.blacklist', site_id=site_id) }}", 'ip-group');
+        {% else %}
+            deleteSelectModal("{{ url_for('ip_management.bulk_delete_ip_group', site_id=site_id) }}", "{{ url_for('ip_management.authorized', site_id=site_id) }}", 'ip-group');
+            deleteAllModal("{{ url_for('ip_management.delete_ip_groups', site_id=site_id, is_blacklist= is_blacklist) }}", "{{ url_for('ip_management.authorized', site_id=site_id) }}", 'ip-group');
+        {% endif %}
     </script>
 {% endblock %}
 {% block content %}
@@ -86,9 +93,9 @@
                 <tbody>
                 {% for ip_group in groups %}
                     <tr>
-                        <td class="text-center"><label for="groups-{{ ip_group.ip_group_id }}"></label>
+                        <td class="text-center"><label for="ip-group-{{ ip_group.ip_group_id }}"></label>
                             <input type="checkbox" class="form-check-input"
-                                   id="groups-{{ ip_group.ip_group_id }}">
+                                   id="ip-group-{{ ip_group.ip_group_id }}">
                         </td>
                         <td>{{ ip_group.ip_group_id }}</td>
                         <td>{{ ip_group.ip_group_ip }}</td>
@@ -112,18 +119,21 @@
                         <td>
                             <a href="" type="button"
                                class="btn btn-sm btn-warning"><i class="fa-solid fa-edit"></i></a>
-                            <a href="" type="button"
-                               class="btn btn-sm btn-info"><i class="fa-solid fa-star" style="color: white"></i></a>
                             <button type="button" id="delete-button-blacklist-{{ ip_group.ip_group_id }}"
                                     class="btn btn-sm btn-danger"
                                     data-bs-toggle="modal"
                                     data-bs-target="#delete-modal"
                                     data-id="{{ ip_group.ip_group_id }}"
                                     data-type="blacklist"
-                                    data-url=""
+                                    data-url="{{ url_for('ip_management.delete_ip_group', ip_group_id=ip_group.ip_group_id, site_id=site_id) }}"
                                     data-name="{{ ip_group.ip_group_ip }}"
                             ><i class="fa-solid fa-trash"></i></button>
+                            <a href="{{ url_for('ip_management.transfer_to_authorized', ip_group_id=ip_group.ip_group_id, site_id=site_id) }}"
+                               type="button"
+                               class="btn btn-sm btn-info"><i class="fa-solid fa-right-left"></i>
+                            </a>
                             <!-- Show Details Button -->
+                            {{ show_details_button(ip_group.ip_group_id, url_for('ip_management.get_ip_group_details'), 'Blacklist' if is_blacklist else 'Authorized') }}
                         </td>
                     </tr>
                 {% endfor %}

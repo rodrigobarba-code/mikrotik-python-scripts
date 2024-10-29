@@ -337,6 +337,50 @@ def get_ip_segment_details():
         return jsonify({'message': 'Failed to get router data', 'error': str(e)}), 500
 
 
+@ip_management_bp.route('/ip/group/details/', methods=['GET'])
+def get_ip_group_details():
+    try:
+        ip_group_id = request.args.get('id')
+        response = requests.get(
+            f'http://localhost:8080/api/private/ip/group/{ip_group_id}',
+            headers=get_verified_jwt_header(),
+            params={'user_id': session.get('user_id'),
+                    'ip_group_id': ip_group_id
+                    }
+        )
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                blacklist_obj = response.json().get('ip_group')
+                return jsonify([{
+                    'id': ['Identifier', blacklist_obj.get('ip_group_id')],
+                    'name': ['Group Name', 'Blacklist' if blacklist_obj.get(
+                        'ip_group_name') == 'blacklist' else 'Authorized'],
+                    'type': ['IP Type', blacklist_obj.get('ip_group_type')],
+                    'alias': ['Alias', blacklist_obj.get('ip_group_alias')],
+                    'description': ['Description', blacklist_obj.get('ip_group_description')],
+                    'ip': ['IP', blacklist_obj.get('ip_group_ip')],
+                    'mask': ['Mask', blacklist_obj.get('ip_group_mask')],
+                    'mac': ['MAC', blacklist_obj.get('ip_group_mac')],
+                    'mac_vendor': ['MAC Vendor', blacklist_obj.get('ip_group_mac_vendor')],
+                    'interface': ['Interface', blacklist_obj.get('ip_group_interface')],
+                    'comment': ['Comment', blacklist_obj.get('ip_group_comment')],
+                    'ip_is_dhcp': ['IP is DHCP', blacklist_obj.get('ip_is_dhcp')],
+                    'ip_is_dynamic': ['IP is Dynamic', blacklist_obj.get('ip_is_dynamic')],
+                    'ip_is_complete': ['IP is Complete', blacklist_obj.get('ip_is_complete')],
+                    'ip_is_disabled': ['IP is Disabled', blacklist_obj.get('ip_is_disabled')],
+                    'ip_is_published': ['IP is Published', blacklist_obj.get('ip_is_published')],
+                    'ip_duplicity': ['IP Duplicity', blacklist_obj.get('ip_duplicity')],
+                    'tags': ['Tags', blacklist_obj.get('ip_group_tags')],
+
+                }]), 200
+            else:
+                return jsonify({'message': response.json().get('message')}), 500
+        elif response.status_code == 500:
+            return jsonify({'message': 'Failed to get IP Group details'}), 500
+    except Exception as e:
+        return jsonify({'message': 'Failed to get IP Group details', 'error': str(e)}), 500
+
+
 def get_blacklist(site_id: int) -> list:
     try:
         response = requests.get(
@@ -447,3 +491,111 @@ def bulk_delete_blacklist():
     except Exception as e:
         flash(str(e), 'danger')
         return jsonify({'message': 'Failed to delete segments', 'error': str(e)}), 500
+
+
+@ip_management_bp.route('/ip/group/delete/<int:ip_group_id>/<int:site_id>', methods=['GET'])
+@restriction.login_required
+@restriction.admin_required
+def delete_ip_group(ip_group_id, site_id):
+    try:
+        response = requests.delete(
+            f'http://localhost:8080/api/private/ip/group/{ip_group_id}',
+            headers=get_verified_jwt_header(),
+            params={
+                'user_id': session.get('user_id'),
+                'ip_group_id': ip_group_id
+            }
+        )
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                flash('IP Group deleted successfully', 'success')
+                return redirect(url_for('ip_management.blacklist', site_id=site_id))
+            else:
+                raise Exception(response.json().get('message'))
+        elif response.status_code == 500:
+            raise Exception('Failed to delete IP Group')
+    except Exception as e:
+        flash(str(e), 'danger')
+        return redirect(url_for('ip_management.blacklist', site_id=site_id))
+
+
+@ip_management_bp.route('/ip/group/transfer/authorized/<int:ip_group_id>/<int:site_id>', methods=['GET'])
+@restriction.login_required
+@restriction.admin_required
+def transfer_to_authorized(ip_group_id, site_id):
+    try:
+        response = requests.put(
+            f'http://localhost:8080/api/private/blacklist/move/to/authorized/{ip_group_id}',
+            headers=get_verified_jwt_header(),
+            params={
+                'user_id': session.get('user_id'),
+                'ip_group_id': ip_group_id
+            }
+        )
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                flash('IP Group transferred successfully', 'success')
+                return redirect(url_for('ip_management.blacklist', site_id=site_id))
+            else:
+                raise Exception(response.json().get('message'))
+        elif response.status_code == 500:
+            raise Exception('Failed to transfer IP Group')
+    except Exception as e:
+        flash(str(e), 'danger')
+        return redirect(url_for('ip_management.blacklist', site_id=site_id))
+
+
+@ip_management_bp.route('/ip/group/bulk/delete', methods=['POST'])
+@restriction.login_required
+@restriction.admin_required
+def bulk_delete_ip_group():
+    data = request.get_json()
+    ip_group_ids = data.get('items_ids', [])
+    try:
+        response = requests.delete(
+            'http://localhost:8080/api/private/ip/group/bulk/',
+            json={'ip_groups_ids': ip_group_ids},
+            headers=get_verified_jwt_header(),
+            params={
+                'user_id': session.get('user_id')
+            }
+        )
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                flag = response.json().get('count_flag')
+                flash(f'{flag} groups deleted successfully', 'success')
+
+                return jsonify({'message': f'{flag} groups deleted successfully'}), 200
+            else:
+                raise Exception(response.json().get('message'))
+        elif response.status_code == 500:
+            raise Exception('Failed to delete groups')
+    except Exception as e:
+        flash(str(e), 'danger')
+        return jsonify({'message': 'Failed to delete groups', 'error': str(e)}), 500
+
+
+@ip_management_bp.route('/ip/group/delete/all/<int:site_id>/<is_blacklist>', methods=['POST'])
+@restriction.login_required
+@restriction.admin_required
+def delete_ip_groups(site_id, is_blacklist):
+    try:
+        if is_blacklist is True:
+            url = f'http://localhost:8080/api/private/blacklist/site/{site_id}'
+        else:
+            url = f'http://localhost:8080/api/private/ip/authorized/site/{site_id}'
+
+        response = requests.delete(
+            url,
+            headers=get_verified_jwt_header(),
+            params={'user_id': session.get('user_id')}
+        )
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                flash('All IP Groups deleted successfully', 'success')
+                return jsonify({'message': 'All IP Groups deleted successfully'}), 200
+            else:
+                raise Exception(response.json().get('message'))
+    except Exception as e:
+        flash(str(e), 'danger')
+        return jsonify({'message': 'Failed to delete all IP Groups', 'error': str(e)}), 500

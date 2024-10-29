@@ -334,12 +334,12 @@ async def delete_ip_group(user_id: int, ip_group_id: int, metadata: Request, tok
         }
 
 
-@ip_groups_router.delete("/ip/groups/bulk")
-async def delete_ip_groups_bulk(user_id: int, ip_groups_ids: IPGroupsBulkDeleteBase, metadata: Request,
+@ip_groups_router.delete("/ip/groups/bulk/")
+async def delete_ip_groups_bulk(user_id: int, metadata: Request, request: IPGroupsBulkDeleteBase,
                                 token: dict = Depends(verify_jwt)):
     try:
         if ip_groups_functions.verify_user_existence(user_id):
-            ThreadingManager().run_thread(IPGroups.bulk_delete_ip_groups, 'w', ip_groups_ids)
+            ThreadingManager().run_thread(IPGroups.bulk_delete_ip_groups, 'w', request.ip_groups_ids)
             ip_groups_functions.create_transaction_log(
                 action="DELETE",
                 table="ip_groups",

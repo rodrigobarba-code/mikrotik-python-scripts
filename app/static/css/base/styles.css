@@ -25,8 +25,19 @@
 }
 
 .list-group-item:hover {
-    background-color: #f1f1f1;
+    background-color: var(--sidebar-color);
     cursor: pointer;
+}
+
+.list-group-item {
+    background: var(--hover-color);
+    color: var(--text-color);
+}
+
+.transfer-auth-icon {
+    width: 20px;
+    height: 20px;
+    color: var(--accent);
 }
 
 .notyf {
@@ -103,6 +114,14 @@
 /* Cambia el borde del modal */
 .swal2-popup {
     border-radius: 30px; /* Cambia a tu valor deseado */
+}
+
+.btn {
+    color: white;
+}
+
+.btn:hover {
+    color: white;
 }
 
 .modal-backdrop {

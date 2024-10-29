@@ -891,16 +891,16 @@ class IPGroups(Base):
 
             # Get the IP group from the database based on the IP group ID
             ip_group = session.query(IPGroups).get(ip_group_id)
-            ip_groups_ids = [ip_group.ip_group_id for ip_group in ip_group]
 
             # Delete the tags assigned to the IP group and the IP group from the database
-            session.query(IPGroupsToIPGroupsTags).filter_by(IPGroupsToIPGroupsTags.fk_ip_group_id.in_(ip_groups_ids)).delete(synchronize_session=False)
-            session.query(IPGroups).filter_by(IPGroups.ip_group_id.in_(ip_groups_ids)).delete(synchronize_session=False)
+            session.query(IPGroupsToIPGroupsTags).filter(IPGroupsToIPGroupsTags.fk_ip_group_id.in_(tags_ids)).delete(
+                synchronize_session=False)
+            session.delete(ip_group)
         except Exception as e:
             raise e
 
     @staticmethod
-    def bulk_delete_ip_groups(session, ip_group_ids: list[int]) -> None:
+    def bulk_delete_ip_groups(session, ip_group_ids) -> None:
         """
         Delete a list of IP groups from the database in bulk
         :param session: The database session
