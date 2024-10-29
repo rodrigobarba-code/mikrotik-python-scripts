@@ -545,10 +545,10 @@ def transfer_to_authorized(ip_group_id, site_id):
         return redirect(url_for('ip_management.blacklist', site_id=site_id))
 
 
-@ip_management_bp.route('/ip/group/bulk/delete/<int:site_id>', methods=['POST'])
+@ip_management_bp.route('/ip/group/bulk/delete', methods=['POST'])
 @restriction.login_required
 @restriction.admin_required
-def bulk_delete_ip_group(site_id):
+def bulk_delete_ip_group():
     data = request.get_json()
     ip_group_ids = data.get('items_ids', [])
     try:
