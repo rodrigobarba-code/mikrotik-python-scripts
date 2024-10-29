@@ -599,3 +599,13 @@ def delete_ip_groups(site_id, is_blacklist):
     except Exception as e:
         flash(str(e), 'danger')
         return jsonify({'message': 'Failed to delete all IP Groups', 'error': str(e)}), 500
+
+@ip_management_bp.route('/ip/group/tags/', methods=['GET'])
+@restriction.login_required
+@restriction.admin_required
+def ip_group_tags():
+    try:
+        return render_template('ip_management/ip_groups_tags.html')
+    except Exception as e:
+        flash(str(e), 'danger')
+        return redirect(url_for('ip_management.ip_management'))

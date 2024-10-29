@@ -129,6 +129,13 @@ a:hover {
     background-image: linear-gradient(94.3deg, rgba(26, 33, 64, 1) 10.9%, rgba(81, 84, 115, 1) 87.1%);
 }
 
+.tags-background-c {
+    height: 50px;
+    border-radius: 20px;
+    background-color: #4158D0;
+    background-image: linear-gradient(43deg, #4158D0 0%, #C850C0 46%, #FFCC70 100%);
+}
+
 .authorized-background-c {
     height: 100px;
     border-radius: 20px;
@@ -165,6 +172,15 @@ a:hover {
 .authorized-jumbotron {
     color: white;
     background: url("../../img/banner-authorized.svg") no-repeat center, linear-gradient(109.6deg, rgba(222, 73, 5, 1) 11.2%, rgba(236, 249, 10, 1) 91.1%);
+    background-size: cover;
+    width: 100%;
+    min-height: 300px;
+    z-index: 2;
+}
+
+.tags-jumbotron {
+    color: white;
+    background: url("../../img/banner-authorized.svg") no-repeat center, linear-gradient(43deg, #4158D0 0%, #C850C0 46%, #FFCC70 100%);
     background-size: cover;
     width: 100%;
     min-height: 300px;
