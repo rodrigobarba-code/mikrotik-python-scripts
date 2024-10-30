@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% block title %} IP Management &#10095; Sites &#10095; Options &#10095;
+    {{ 'Blacklist' if is_blacklist else 'Authorized' }} for {{ site_name }} &#10095; Update{% endblock %}
+{% block head %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/ip_management/styles.css') }}">
+{% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='/js/ip_management/scripts.js') }}"></script>
+{% endblock %}
+{% block content %}
+    <!-- IP Groups Jumbotron -->
+    <section class="{{ 'blacklist' if is_blacklist else 'authorized' }}-jumbotron pt-5 mb-3">
+        <div class="container-fluid py-5 d-flex flex-column flex-md-row">
+            <div class="d-flex col-md-1 order-md-1 order-2 text-md-start text-center my-md-0 my-3 justify-content-center align-items-center">
+                <button class="btn btn-c-return">
+                    <a href="
+                    {% if is_blacklist %}
+                        {{ url_for('ip_management.blacklist', site_id=site_id) }}
+                    {% else %}
+                        {{ url_for('ip_management.authorized', site_id=site_id) }}
+                    {% endif %}
+                    " class="text-decoration-none text-dark" style="font-size: 2.5rem">
+                        <i class="fa-solid fa-backward" style="color: white"></i>
+                    </a>
+                </button>
+            </div>
+            <div class=" col-md-11 order-md-2 order-1">
+                <h1 class="display-5 fw-bold">Update {{ 'Blacklist' if is_blacklist else 'Authorized' }}</h1>
+                {% if is_blacklist %}
+                    <p class="col-md-8 fs-4">Update Blacklist IP.</p>
+                {% else %}
+                    <p class="col-md-8 fs-4">Update Authorized IP.</p>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+    <!-- IP Groups Jumbotron -->
+
+    <!-- Routers Forms -->
+    <section class="ip-groups-forms text">
+        <div class="container-fluid w-75 pb-3">
+            <form id="ip-group-form"
+                  data-url="{{ url_for('ip_management.update_ip_group', ip_group_id=ip_group.ip_group_id, site_id=site_id, is_blacklist=is_blacklist) }}"
+                  data-reload="
+                    {% if is_blacklist %}
+                        {{ url_for('ip_management.blacklist', site_id=site_id) }}
+                    {% else %}
+                        {{ url_for('ip_management.authorized', site_id=site_id) }}"
+                  {% endif %}
+                  data-result-action="{{ "IP Group updated successfully!" }}"
+            >
+                <h2> General Information </h2>
+                <div class="row">
+                    <div class="col-6">
+                        <div class="form-group">
+                            <label for="ip_group_alias">Alias</label>
+                            <input type="text" class="form-control" id="ip_group_alias" name="ip_group_alias"
+                                   value="{{ ip_group.ip_group_alias if ip_group is not none else '' }}" maxlength="128"
+                                   required>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="form-group">
+                            <label for="ip_group_description">Description</label>
+                            <input type="text" class="form-control" id="ip_group_description"
+                                   name="ip_group_description"
+                                   value="{{ ip_group.ip_group_description if ip_group is not none else '' }}"
+                                   maxlength="256"
+                                   required>
+                        </div>
+                    </div>
+                </div>
+                <!-- IP Group Tags editor with selectize JS-->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="form-group mb-3">
+                            <label for="ip_group_tags">Tags</label>
+                            <select id="ip_group_tags" name="ip_group_tags[]" multiple="multiple" required>
+                                {% for tag in tag_list %}
+                                    <option value="{{ tag.tag_id }}"
+                                            {% if ip_group is not none and tag.tag_id in ip_group_tags %}
+                                            selected {% endif %}>
+                                        {{ tag.tag_name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </section>
+    <!-- Routers Forms -->
+{% endblock %}

@@ -115,7 +115,8 @@
                             <td><i class="no_identified">No Tags</i></td>
                         {% endif %}
                         <td>
-                            <a href="" type="button"
+                            <a href="{{ url_for('ip_management.update_ip_group', ip_group_id=ip_group.ip_group_id, site_id=site_id, is_blacklist=is_blacklist) }}"
+                               type="button"
                                class="btn btn-sm btn-warning"><i class="fa-solid fa-edit"></i></a>
                             <button type="button" id="delete-button-blacklist-{{ ip_group.ip_group_id }}"
                                     class="btn btn-sm btn-danger"

@@ -1,6 +1,5 @@
 from threading import Thread
 
-from app.blueprints.ip_management.routes import ip_segment
 from .. import Base
 from models.routers.models import Router
 from sqlalchemy.orm import relationship, backref
