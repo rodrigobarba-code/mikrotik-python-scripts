@@ -1,0 +1,149 @@
+[
+  {
+    "version": "v1.0.0",
+    "date": "2020-01-01",
+    "changes": [
+      {
+        "type": "added",
+        "title": "Added",
+        "description": "New home section added, with a carousel and a list of features"
+      },
+      {
+        "type": "changed",
+        "title": "Changed",
+        "description": "Updated the IP Groups Tags section"
+      },
+      {
+        "type": "fixed",
+        "title": "Fixed",
+        "description": "Fixed the issue in bulk delete of IP Groups"
+      }
+    ]
+  },
+  {
+    "version": "v1.0.1",
+    "date": "2020-01-02",
+    "changes": [
+      {
+        "type": "added",
+        "title": "Added",
+        "description": "Added a new section for IP Groups"
+      },
+      {
+        "type": "changed",
+        "title": "Changed",
+        "description": "Updated the IP Groups Tags section"
+      },
+      {
+        "type": "fixed",
+        "title": "Fixed",
+        "description": "Fixed the issue in bulk delete of IP Groups"
+      }
+    ]
+  },
+  {
+    "version": "v1.0.2",
+    "date": "2020-01-03",
+    "changes": [
+      {
+        "type": "added",
+        "title": "Added",
+        "description": "Added a new section for IP Groups"
+      },
+      {
+        "type": "changed",
+        "title": "Changed",
+        "description": "Updated the IP Groups Tags section"
+      },
+      {
+        "type": "fixed",
+        "title": "Fixed",
+        "description": "Fixed the issue in bulk delete of IP Groups"
+      }
+    ]
+  },
+  {
+    "version": "v1.0.3",
+    "date": "2020-01-04",
+    "changes": [
+      {
+        "type": "added",
+        "title": "Added",
+        "description": "Added a new section for IP Groups"
+      },
+      {
+        "type": "changed",
+        "title": "Changed",
+        "description": "Updated the IP Groups Tags section"
+      },
+      {
+        "type": "fixed",
+        "title": "Fixed",
+        "description": "Fixed the issue in bulk delete of IP Groups"
+      }
+    ]
+  },
+  {
+    "version": "v1.0.4",
+    "date": "2020-01-05",
+    "changes": [
+      {
+        "type": "added",
+        "title": "Added",
+        "description": "Added a new section for IP Groups"
+      },
+      {
+        "type": "changed",
+        "title": "Changed",
+        "description": "Updated the IP Groups Tags section"
+      },
+      {
+        "type": "fixed",
+        "title": "Fixed",
+        "description": "Fixed the issue in bulk delete of IP Groups"
+      }
+    ]
+  },
+  {
+    "version": "v1.0.5",
+    "date": "2020-01-06",
+    "changes": [
+      {
+        "type": "added",
+        "title": "Added",
+        "description": "Added a new section for IP Groups"
+      },
+      {
+        "type": "changed",
+        "title": "Changed",
+        "description": "Updated the IP Groups Tags section"
+      },
+      {
+        "type": "fixed",
+        "title": "Fixed",
+        "description": "Fixed the issue in bulk delete of IP Groups"
+      }
+    ]
+  },
+  {
+    "version": "v1.0.6",
+    "date": "2020-01-07",
+    "changes": [
+      {
+        "type": "added",
+        "title": "Added",
+        "description": "Added a new section for IP Groups"
+      },
+      {
+        "type": "changed",
+        "title": "Changed",
+        "description": "Updated the IP Groups Tags section"
+      },
+      {
+        "type": "fixed",
+        "title": "Fixed",
+        "description": "Fixed the issue in bulk delete of IP Groups"
+      }
+    ]
+  }
+]

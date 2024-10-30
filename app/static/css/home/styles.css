@@ -57,7 +57,7 @@ h1, h2 {
 }
 
 .shortcut-container {
-    width: 95%;
+    width: 97%;
     position: relative;
     height: 20.5rem;
     background-color: var(--sidebar-color);
@@ -235,7 +235,7 @@ h1, h2 {
 /* Tablet */
 @media (min-width: 768px) and (max-width: 1024px) {
     .carousel-container {
-        width:100%;
+        width: 100%;
         height: 21rem;
         margin-bottom: 1.5rem;
     }
@@ -341,3 +341,82 @@ h1, h2 {
 }
 
 /* Carousel Container */
+
+/* Changelog Container */
+
+.changelog-container {
+    color: var(--text-color);
+    width: 100%;
+    height: 20rem;
+    background-color: var(--sidebar-color);
+    border-radius: 1rem;
+    overflow-y: scroll;
+}
+
+.timeline {
+    position: relative;
+    padding: 20px 0;
+    margin: 20px 0;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #ddd;
+    left: 20px;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+    padding-left: 40px;
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #ddd;
+    left: 16px;
+    top: 5px;
+}
+
+.tag {
+    font-size: 12px;
+    padding: 5px 10px;
+    border-radius: 20px;
+    color: var(--text-color);
+    margin-right: 5px;
+}
+
+.tag.added {
+    background-color: #28a745;
+}
+
+.tag.changed {
+    background-color: #007bff;
+}
+
+.tag.fixed {
+    background-color: #dc3545;
+}
+
+.tag.deprecated {
+    background-color: #6c757d;
+}
+
+.tag.removed {
+    background-color: #343a40;
+}
+
+.tag.security {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+/* Changelog Container */

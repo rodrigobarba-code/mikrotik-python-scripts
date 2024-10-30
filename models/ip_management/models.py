@@ -335,6 +335,7 @@ class IPGroupsTags(Base):
     def __repr__(self):
         return f'<IP Group Tag {self.ip_group_tag_id}>'
 
+    """
     def __dict__(self):
         return {
             'ip_group_tag_id': self.ip_group_tag_id,
@@ -343,6 +344,7 @@ class IPGroupsTags(Base):
             'ip_group_tag_text_color': self.ip_group_tag_text_color,
             'ip_group_tag_description': self.ip_group_tag_description
         }
+    """
 
     @staticmethod
     def add_ip_group_tag(session, ip_group_tag: IPGroupsTagsEntity):
@@ -354,8 +356,8 @@ class IPGroupsTags(Base):
         """
         try:
             # Create the IP group tag object
+
             ip_group_tag_obj = IPGroupsTags(
-                ip_group_tag_id=ip_group_tag.ip_group_tag_id,
                 ip_group_tag_name=ip_group_tag.ip_group_tag_name,
                 ip_group_tag_color=ip_group_tag.ip_group_tag_color,
                 ip_group_tag_text_color=ip_group_tag.ip_group_tag_text_color,
@@ -403,6 +405,23 @@ class IPGroupsTags(Base):
             session.query(IPGroupsToIPGroupsTags).filter_by(fk_ip_group_tag_id=ip_group_tag_id).delete(
                 synchronize_session=False)
             session.delete(ip_group_tag_obj)
+        except Exception as e:
+            raise e
+
+    @staticmethod
+    def bulk_delete_ip_group_tags(session, ip_group_tag_ids: list):
+        """
+        Delete a list of IP group tags from the database
+        :param session: The database session
+        :param ip_group_tag_ids: The list of IP group tag IDs to delete
+        :return: None
+        """
+        try:
+            # Delete all IP group tags from the database based on the list of IP group tag IDs
+            session.query(IPGroupsToIPGroupsTags).filter(
+                IPGroupsToIPGroupsTags.fk_ip_group_tag_id.in_(ip_group_tag_ids)).delete(synchronize_session=False)
+            session.query(IPGroupsTags).filter(IPGroupsTags.ip_group_tag_id.in_(ip_group_tag_ids)).delete(
+                synchronize_session=False)
         except Exception as e:
             raise e
 
