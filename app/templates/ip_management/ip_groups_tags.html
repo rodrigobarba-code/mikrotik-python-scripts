@@ -17,7 +17,7 @@
             <div class="container-fluid py-5">
                 <h1 class="display-5 fw-bold ">IP Groups Tags</h1>
                 <p class="col-md-8 fs-4">You can create, update, delete and view all IP Groups Tags here.</p>
-                <a href="" class="btn btn-primary btn-lg" type="button"><i
+                <a href="{{ url_for( 'ip_management.add_ip_group_tag' ) }}" class="btn btn-primary btn-lg"><i
                         class="fa-solid fa-plus"></i> Create New Tag</a>
             </div>
         </div>
@@ -59,16 +59,58 @@
                 <thead class="text">
                 <tr>
                     <th scope="col"></th>
-                    <th scope="col">#</th>
                     <th scope="col">Tag ID</th>
                     <th scope="col">Color</th>
+                    <th scope="col">Text Color</th>
                     <th scope="col">Name</th>
                     <th scope="col">Description</th>
                     <th scope="col">Actions</th>
                 </tr>
                 </thead>
                 <tbody class="text">
+                {% for tag in tags %}
+                    <tr>
+                        <!-- Checkbox -->
+                        <td>
+                            <input type="checkbox" class="form-check-input" name="delete-select" value="{{ tag.ip_group_tag_id }}">
+                        </td>
 
+                        <!-- Identifier -->
+                        <td>{{ tag.ip_group_tag_id }}</td>
+
+                        <!-- Color -->
+                        <td>
+                            <span class="badge" style="background-color: {{ tag.ip_group_tag_color }}; color: {{ tag.ip_group_tag_text_color }};">
+                                {{ tag.ip_group_tag_color }}
+                        </td>
+
+                        <!-- Text Color -->
+                        <td>
+                            <span class="badge" style="background-color: {{ tag.ip_group_tag_text_color }}; color: {{ tag.ip_group_tag_color }};">
+                                {{ tag.ip_group_tag_text_color }}
+                            </span>
+                        </td>
+
+                        <!-- Name -->
+                        <td>{{ tag.ip_group_tag_name }}</td>
+
+                        <!-- Description -->
+                        <td>{{ tag.ip_group_tag_description }}</td>
+
+                        <!-- Actions -->
+                        <td>
+                            <a href="{{ url_for('ip_management.update_ip_group_tag', tag_id=tag.ip_group_tag_id) }}"
+                               class="btn btn-sm btn-primary me-2">
+                                <i class="fa-solid fa-pencil"></i>
+                            </a>
+                            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal"
+                                    data-bs-target="#deleteModal"
+                                    data-id="{{ tag.ip_group_tag_id }}" data-name="{{ tag.ip_group_tag_name }}">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                {% endfor %}
                 </tbody>
             </table>
         </div>

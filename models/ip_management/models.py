@@ -335,6 +335,7 @@ class IPGroupsTags(Base):
     def __repr__(self):
         return f'<IP Group Tag {self.ip_group_tag_id}>'
 
+    """
     def __dict__(self):
         return {
             'ip_group_tag_id': self.ip_group_tag_id,
@@ -343,6 +344,7 @@ class IPGroupsTags(Base):
             'ip_group_tag_text_color': self.ip_group_tag_text_color,
             'ip_group_tag_description': self.ip_group_tag_description
         }
+    """
 
     @staticmethod
     def add_ip_group_tag(session, ip_group_tag: IPGroupsTagsEntity):
@@ -354,8 +356,8 @@ class IPGroupsTags(Base):
         """
         try:
             # Create the IP group tag object
+
             ip_group_tag_obj = IPGroupsTags(
-                ip_group_tag_id=ip_group_tag.ip_group_tag_id,
                 ip_group_tag_name=ip_group_tag.ip_group_tag_name,
                 ip_group_tag_color=ip_group_tag.ip_group_tag_color,
                 ip_group_tag_text_color=ip_group_tag.ip_group_tag_text_color,
