@@ -630,12 +630,14 @@ def update_ip_group(site_id, ip_group_id):
                 site_name = get_site_name(site_id, get_sites())
                 ip_group = response.json().get('ip_group')
                 is_blacklist = ip_group.get('ip_group_name') == 'blacklist'
+                tags= get_tags()
                 return render_template(
                     'ip_management/form_ip_groups.html',
                     site_name=site_name,
                     site_id=site_id,
                     ip_group=ip_group,
-                    is_blacklist=is_blacklist
+                    is_blacklist=is_blacklist,
+                    tags=tags
                 )
             else:
                 raise Exception(response.json().get('message'))

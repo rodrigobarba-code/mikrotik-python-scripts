@@ -3,24 +3,42 @@
     {{ 'Blacklist' if is_blacklist else 'Authorized' }} for {{ site_name }} &#10095; Update{% endblock %}
 {% block head %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/ip_management/styles.css') }}">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/selectize@0.12.6/dist/css/selectize.bootstrap3.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/@yaireo/tagify/dist/tagify.css">
 {% endblock %}
+
 {% block scripts %}
     <script src="{{ url_for('static', filename='/js/ip_management/scripts.js') }}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/selectize@0.12.6/dist/js/standalone/selectize.min.js"></script>
+    <script src="https://unpkg.com/@yaireo/tagify"></script>
     <script>
-        $(document).ready(function () {
-            $('#ip_group_tags').selectize({
-                delimiter: ',',
-                persist: false,
-                create: function (input) {
-                    return {value: input, text: input};
+        document.addEventListener("DOMContentLoaded", function () {
+            const input = document.querySelector("#ip_group_tags");
+            const tagify = new Tagify(input, {
+                whitelist: [
+                    {% for tag in tags %}
+                        {
+                            value: "{{ tag.ip_group_tag_name }}",
+                            color: "{{ tag.ip_group_tag_color }}",
+                            text: "{{ tag.ip_group_tag_text_color }}"
+                        },
+                    {% endfor %}
+                ],
+                dropdown: {
+                    maxItems: 10,
+                    classname: "tags-look",
+                    enabled: 0,
+                    closeOnSelect: false
+                },
+                transformTag: function (tagData) {
+                    tagData.style = "--tag-bg:" + tagData.color;
+                    tagData.style += ";--tag-text-color:" + tagData.text;
+                    tagData.style += ";--tag-inset-shadow-size: 2.1em;";
+                    tagData.style += ";--tag-border-radius: 30px;";
+                    return tagData;
                 }
             });
         });
     </script>
 {% endblock %}
-
 {% block content %}
     <!-- IP Groups Jumbotron -->
     <section class="{{ 'blacklist' if is_blacklist else 'authorized' }}-jumbotron pt-5 mb-3">
@@ -92,6 +110,7 @@
                             <input type="text" class="form-control" id="ip_group_tags" name="ip_group_tags"
                                    value="{{ ','.join(ip_group.tags) if ip_group and ip_group.tags else '' }}"
                                    placeholder="Add tags">
+
                         </div>
                     </div>
                 </div>
@@ -109,6 +128,7 @@
                                 class="btn btn-primary">Update IP Group
                         </button>
                     </div>
+                </div>
             </form>
         </div>
     </section>
