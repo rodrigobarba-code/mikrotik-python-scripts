@@ -5,7 +5,7 @@ from models.ip_management.models import IPGroups
 from . import ip_management_bp
 from entities.site import SiteEntity
 from entities.region import RegionEntity
-from entities.ip_groups import IPGroupsEntity
+from entities.ip_groups import IPGroupsEntity, IPGroupsTagsEntity
 from entities.ip_segment import IPSegmentEntity
 from app.functions import get_verified_jwt_header
 from app.decorators import RequirementsDecorators as restriction
@@ -646,12 +646,223 @@ def update_ip_group(site_id, ip_group_id):
         return redirect(url_for('ip_management.ip_management'))
 
 
+
+def get_tags():
+    try:
+        response = requests.get(
+            'http://localhost:8080/api/private/ip/groups/tags/',
+            headers=get_verified_jwt_header(),
+            params={'user_id': session.get('user_id')}
+        )
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                tags_list = [
+                    IPGroupsTagsEntity(
+                        tag.get('ip_group_tag_id'),
+                        tag.get('ip_group_tag_name'),
+                        tag.get('ip_group_tag_color'),
+                        tag.get('ip_group_tag_text_color'),
+                        tag.get('ip_group_tag_description')
+                    )
+                    for tag in response.json().get('ip_groups_tags')
+                ]
+                if tags_list is None:
+                    return []
+                return tags_list
+            else:
+                raise Exception(response.json().get('message'))
+        elif response.status_code == 500:
+            raise Exception('Failed to retrieve tags')
+    except Exception as e:
+        flash(str(e), 'danger')
+        return []
+
+
+def get_tag(tag_id: int) -> IPGroupsTagsEntity:
+    try:
+        response = requests.get(
+            f'http://localhost:8080/api/private/ip/groups/tag/{tag_id}',
+            headers=get_verified_jwt_header(),
+            params={
+                'user_id': session.get('user_id'),
+                'ip_group_tag_id': tag_id
+            }
+        )
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                tag = response.json().get('ip_group_tag')
+                return IPGroupsTagsEntity(
+                    tag.get('ip_group_tag_id'),
+                    tag.get('ip_group_tag_name'),
+                    tag.get('ip_group_tag_color'),
+                    tag.get('ip_group_tag_text_color'),
+                    tag.get('ip_group_tag_description')
+                )
+            else:
+                raise Exception(response.json().get('message'))
+        elif response.status_code == 500:
+            raise Exception('Failed to retrieve tag')
+    except Exception as e:
+        flash(str(e), 'danger')
+        return None
+
+
 @ip_management_bp.route('/ip/group/tags/', methods=['GET'])
 @restriction.login_required
 @restriction.admin_required
 def ip_group_tags():
     try:
-        return render_template('ip_management/ip_groups_tags.html')
+        return render_template(
+            'ip_management/ip_groups_tags.html',
+            tags=get_tags()
+        )
     except Exception as e:
         flash(str(e), 'danger')
         return redirect(url_for('ip_management.ip_management'))
+
+
+@ip_management_bp.route('/ip/group/tags/add/', methods=['GET', 'POST'])
+@restriction.login_required
+@restriction.admin_required
+def add_ip_group_tag():
+    try:
+        if request.method == 'POST':
+            tag_name = request.form.get('tag_name')
+            tag_color = request.form.get('tag_color')
+            tag_text_color = request.form.get('tag_text_color')
+            tag_description = request.form.get('tag_description')
+            response = requests.post(
+                'http://localhost:8080/api/private/ip/groups/tag/',
+                headers=get_verified_jwt_header(),
+                params={
+                    'user_id': session.get('user_id'),
+                    'x_ip_group_tag_name': tag_name,
+                    'x_ip_group_tag_color': tag_color,
+                    'x_ip_group_tag_text_color': tag_text_color,
+                    'x_ip_group_tag_description': tag_description
+                }
+            )
+            if response.status_code == 200:
+                if response.json().get('backend_status') == 200:
+                    flash('Tag added successfully', 'success')
+                    return redirect(url_for('ip_management.ip_group_tags'))
+                else:
+                    raise Exception(response.json().get('message'))
+            elif response.status_code == 500:
+                raise Exception('Failed to add tag')
+        return render_template(
+            'ip_management/form_ip_groups_tags.html',
+            tag_obj=None
+        )
+    except Exception as e:
+        flash(str(e), 'danger')
+        return redirect(url_for('ip_management.ip_group_tags'))
+
+@ip_management_bp.route('/ip/group/tags/update/<int:tag_id>', methods=['GET', 'POST'])
+@restriction.login_required
+@restriction.admin_required
+def update_ip_group_tag(tag_id):
+    try:
+        tag_obj = get_tag(tag_id)
+        if request.method == 'POST':
+            response = requests.put(
+                f'http://localhost:8080/api/private/ip/groups/tag/{tag_id}',
+                headers=get_verified_jwt_header(),
+                params={
+                    'user_id': session.get('user_id'),
+                    'ip_group_tag_id': tag_id,
+                    'ip_group_tag_name': request.form.get('tag_name'),
+                    'ip_group_tag_color': request.form.get('tag_color'),
+                    'ip_group_tag_text_color': request.form.get('tag_text_color'),
+                    'ip_group_tag_description': request.form.get('tag_description')
+                }
+            )
+            if response.status_code == 200:
+                if response.json().get('backend_status') == 200:
+                    flash('Tag updated successfully', 'success')
+                    return redirect(url_for('ip_management.ip_group_tags'))
+                else:
+                    raise Exception(response.json().get('message'))
+            elif response.status_code == 500:
+                raise Exception('Failed to update tag')
+        return render_template(
+            'ip_management/form_ip_groups_tags.html',
+            tag_obj=tag_obj
+        )
+    except Exception as e:
+        flash(str(e), 'danger')
+        return redirect(url_for('ip_management.ip_group_tags'))
+
+@ip_management_bp.route('/ip/group/tags/delete/<int:tag_id>', methods=['GET'])
+@restriction.login_required
+@restriction.admin_required
+def delete_ip_group_tag(tag_id):
+    try:
+        response = requests.delete(
+            f'http://localhost:8080/api/private/ip/groups/tag/{tag_id}',
+            headers=get_verified_jwt_header(),
+            params={
+                'user_id': session.get('user_id'),
+                'ip_group_tag_id': tag_id
+            }
+        )
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                flash('Tag deleted successfully', 'success')
+                return redirect(url_for('ip_management.ip_group_tags'))
+            else:
+                raise Exception(response.json().get('message'))
+        elif response.status_code == 500:
+            raise Exception('Failed to delete tag')
+    except Exception as e:
+        flash(str(e), 'danger')
+        return redirect(url_for('ip_management.ip_group_tags'))
+
+@ip_management_bp.route('/ip/group/tags/delete/bulk', methods=['POST'])
+@restriction.login_required
+@restriction.admin_required
+def bulk_delete_ip_group_tag():
+    data = request.get_json()
+    tags_ids = data.get('items_ids', [])
+    try:
+        response = requests.delete(
+            'http://localhost:8080/api/private/ip/groups/tags/bulk/',
+            json={'tags_ids': tags_ids},
+            headers=get_verified_jwt_header(),
+            params={
+                'user_id': session.get('user_id')
+            }
+        )
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                flag = response.json().get('count_flag')
+                flash(f'{flag} tags deleted successfully', 'success')
+
+                return jsonify({'message': f'{flag} tags deleted successfully'}), 200
+            else:
+                raise Exception(response.json().get('message'))
+        elif response.status_code == 500:
+            raise Exception('Failed to delete tags')
+    except Exception as e:
+        flash(str(e), 'danger')
+        return jsonify({'message': 'Failed to delete tags', 'error': str(e)}), 500
+
+@ip_management_bp.route('/ip/group/tags/delete/all', methods=['POST'])
+@restriction.login_required
+@restriction.admin_required
+def delete_all_ip_group_tags():
+    try:
+        response = requests.delete(
+            'http://localhost:8080/api/private/ip/groups/tags/',
+            headers=get_verified_jwt_header(),
+            params={'user_id': session.get('user_id')}
+        )
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                flash('All tags deleted successfully', 'success')
+                return jsonify({'message': 'All tags deleted successfully'}), 200
+            else:
+                raise Exception(response.json().get('message'))
+    except Exception as e:
+        flash(str(e), 'danger')
+        return jsonify({'message': 'Failed to delete all tags', 'error': str(e)}), 500
