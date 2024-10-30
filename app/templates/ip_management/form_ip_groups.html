@@ -2,11 +2,25 @@
 {% block title %} IP Management &#10095; Sites &#10095; Options &#10095;
     {{ 'Blacklist' if is_blacklist else 'Authorized' }} for {{ site_name }} &#10095; Update{% endblock %}
 {% block head %}
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/ip_management/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/ip_management/styles.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/selectize@0.12.6/dist/css/selectize.bootstrap3.min.css">
 {% endblock %}
 {% block scripts %}
     <script src="{{ url_for('static', filename='/js/ip_management/scripts.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/selectize@0.12.6/dist/js/standalone/selectize.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#ip_group_tags').selectize({
+                delimiter: ',',
+                persist: false,
+                create: function (input) {
+                    return {value: input, text: input};
+                }
+            });
+        });
+    </script>
 {% endblock %}
+
 {% block content %}
     <!-- IP Groups Jumbotron -->
     <section class="{{ 'blacklist' if is_blacklist else 'authorized' }}-jumbotron pt-5 mb-3">
@@ -71,22 +85,30 @@
                     </div>
                 </div>
                 <!-- IP Group Tags editor with selectize JS-->
-                <div class="row">
+                <div class="row mt-3">
                     <div class="col-12">
-                        <div class="form-group mb-3">
+                        <div class="form-group">
                             <label for="ip_group_tags">Tags</label>
-                            <select id="ip_group_tags" name="ip_group_tags[]" multiple="multiple" required>
-                                {% for tag in tag_list %}
-                                    <option value="{{ tag.tag_id }}"
-                                            {% if ip_group is not none and tag.tag_id in ip_group_tags %}
-                                            selected {% endif %}>
-                                        {{ tag.tag_name }}
-                                    </option>
-                                {% endfor %}
-                            </select>
+                            <input type="text" class="form-control" id="ip_group_tags" name="ip_group_tags"
+                                   value="{{ ','.join(ip_group.tags) if ip_group and ip_group.tags else '' }}"
+                                   placeholder="Add tags">
                         </div>
                     </div>
                 </div>
+                <!-- IP Group Tags editor with selectize JS-->
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="condition-check">
+                    <label class="form-check-label" for="condition-check">I've read and accept that the data provided
+                        will be
+                        used to update a IP Group.</label>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <button type="button" class="btn btn-secondary" onclick="window.history.back()">Cancel</button>
+                        <button type="submit"
+                                class="btn btn-primary">Update IP Group
+                        </button>
+                    </div>
             </form>
         </div>
     </section>

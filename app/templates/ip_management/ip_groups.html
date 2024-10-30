@@ -10,10 +10,10 @@
     <script>
         {% if is_blacklist %}
             deleteSelectModal("{{ url_for('ip_management.bulk_delete_ip_group', site_id=site_id) }}", "{{ url_for('ip_management.blacklist', site_id=site_id) }}", 'ip-group');
-            deleteAllModal("{{ url_for('ip_management.delete_ip_groups', site_id=site_id,  is_blacklist= is_blacklist) }}", "{{ url_for('ip_management.blacklist', site_id=site_id) }}", 'ip-group');
+            deleteAllModal("{{ url_for('ip_management.delete_ip_groups', site_id=site_id) }}", "{{ url_for('ip_management.blacklist', site_id=site_id) }}", 'ip-group');
         {% else %}
             deleteSelectModal("{{ url_for('ip_management.bulk_delete_ip_group', site_id=site_id) }}", "{{ url_for('ip_management.authorized', site_id=site_id) }}", 'ip-group');
-            deleteAllModal("{{ url_for('ip_management.delete_ip_groups', site_id=site_id, is_blacklist= is_blacklist) }}", "{{ url_for('ip_management.authorized', site_id=site_id) }}", 'ip-group');
+            deleteAllModal("{{ url_for('ip_management.delete_ip_groups', site_id=site_id) }}", "{{ url_for('ip_management.authorized', site_id=site_id) }}", 'ip-group');
         {% endif %}
     </script>
 {% endblock %}
@@ -115,7 +115,7 @@
                             <td><i class="no_identified">No Tags</i></td>
                         {% endif %}
                         <td>
-                            <a href="{{ url_for('ip_management.update_ip_group', ip_group_id=ip_group.ip_group_id, site_id=site_id, is_blacklist=is_blacklist) }}"
+                            <a href="{{ url_for('ip_management.update_ip_group', ip_group_id=ip_group.ip_group_id, site_id=site_id) }}"
                                type="button"
                                class="btn btn-sm btn-warning"><i class="fa-solid fa-edit"></i></a>
                             <button type="button" id="delete-button-blacklist-{{ ip_group.ip_group_id }}"

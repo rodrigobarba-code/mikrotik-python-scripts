@@ -578,36 +578,47 @@ def bulk_delete_ip_group():
         return jsonify({'message': 'Failed to delete IP Groups', 'error': str(e)}), 500
 
 
-@ip_management_bp.route('/ip/group/delete/all/<int:site_id>/<is_blacklist>', methods=['POST'])
+@ip_management_bp.route('/ip/group/delete/all/<int:site_id>', methods=['POST'])
 @restriction.login_required
 @restriction.admin_required
-def delete_ip_groups(site_id, is_blacklist):
+def delete_ip_groups(site_id):
     try:
-        if is_blacklist == 'True':
-            url = f'http://localhost:8080/api/private/blacklist/site/{site_id}'
-        else:
-            url = f'http://localhost:8080/api/private/ip/authorized/site/{site_id}'
-
-        response = requests.delete(
-            url,
+        response = requests.get(
+            f'http://localhost:8080/api/private/ip/group/{site_id}',
             headers=get_verified_jwt_header(),
             params={'user_id': session.get('user_id')}
         )
         if response.status_code == 200:
             if response.json().get('backend_status') == 200:
-                flash('All IP Groups deleted successfully', 'success')
-                return jsonify({'message': 'All IP Groups deleted successfully'}), 200
-            else:
-                raise Exception(response.json().get('message'))
+                ip_group = response.json().get('ip_group')
+                is_blacklist = ip_group.get('ip_group_name') == 'blacklist'
+                if is_blacklist:
+                    url = f'http://localhost:8080/api/private/blacklist/site/{site_id}'
+                else:
+                    url = f'http://localhost:8080/api/private/ip/authorized/site/{site_id}'
+
+                delete_response = requests.delete(
+                    url,
+                    headers=get_verified_jwt_header(),
+                    params={'user_id': session.get('user_id')}
+                )
+                if delete_response.status_code == 200:
+                    if delete_response.json().get('backend_status') == 200:
+                        flash('All IP Groups deleted successfully', 'success')
+                        return jsonify({'message': 'All IP Groups deleted successfully'}), 200
+                    else:
+                        raise Exception(delete_response.json().get('message'))
+        elif response.status_code == 500:
+            raise Exception('Failed to retrieve IP Group')
     except Exception as e:
         flash(str(e), 'danger')
         return jsonify({'message': 'Failed to delete all IP Groups', 'error': str(e)}), 500
 
 
-@ip_management_bp.route('/update/<int:site_id>/<int:ip_group_id>/<is_blacklist>', methods=['GET', 'POST'])
+@ip_management_bp.route('/update/<int:site_id>/<int:ip_group_id>', methods=['GET', 'POST'])
 @restriction.login_required
 @restriction.admin_required
-def update_ip_group(site_id, ip_group_id, is_blacklist):
+def update_ip_group(site_id, ip_group_id):
     try:
         response = requests.get(
             f'http://localhost:8080/api/private/ip/group/{ip_group_id}',
@@ -616,9 +627,12 @@ def update_ip_group(site_id, ip_group_id, is_blacklist):
         )
         if response.status_code == 200:
             if response.json().get('backend_status') == 200:
+                site_name = get_site_name(site_id, get_sites())
                 ip_group = response.json().get('ip_group')
+                is_blacklist = ip_group.get('ip_group_name') == 'blacklist'
                 return render_template(
                     'ip_management/form_ip_groups.html',
+                    site_name=site_name,
                     site_id=site_id,
                     ip_group=ip_group,
                     is_blacklist=is_blacklist
