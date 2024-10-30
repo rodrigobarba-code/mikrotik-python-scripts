@@ -27,7 +27,7 @@ class IPGroupsEntity:
     def __init__(
         self,
         ip_group_id: int,
-        fk_ip_segment_id: int,
+        fk_ip_segment_id: int = None,
         ip_group_name: str = 'blacklist',
         ip_group_type: str = 'public',
         ip_group_alias: str = None,
