@@ -81,6 +81,42 @@ async def get_ip_group_tag(user_id: int, ip_group_tag_id: int, metadata: Request
             'backend_status': 400
         }
 
+@ip_groups_tags_router.get("/ip/groups/tags/{ip_group_id}")
+async def get_ip_group_tags_by_group_id(user_id: int, ip_group_id: int, metadata: Request, token: dict = Depends(verify_jwt)):
+    try:
+        if ip_groups_tags_functions.verify_user_existence(user_id):
+            request = ThreadingManager().run_thread(IPGroupsTags.get_tags_by_ip_group_id, 'rx', ip_group_id)
+            ip_group_tags = [
+                {
+                    'ip_group_tag_id': tag.ip_group_tag_id,
+                    'ip_group_tag_name': tag.ip_group_tag_name,
+                    'ip_group_tag_color': tag.ip_group_tag_color,
+                    'ip_group_tag_text_color': tag.ip_group_tag_text_color,
+                    'ip_group_tag_description': tag.ip_group_tag_description,
+                }
+                for tag in request
+            ]
+            ip_groups_tags_functions.create_transaction_log(
+                action="GET",
+                table="ip_groups_tags",
+                user_id=int(user_id),
+                description="IP Group Tags retrieved successfully",
+                public=str(str(metadata.client.host) + ':' + str(metadata.client.port))
+            )
+            return {
+                'message': "IP Group Tags retrieved successfully",
+                'ip_group_tags': ip_group_tags,
+                'length': len(ip_group_tags),
+                'backend_status': 200
+            }
+        else:
+            raise Exception("User not registered in the system")
+    except Exception as e:
+        return {
+            'message': f"Failed to retrieve IP Group Tags: {str(e)}",
+            'backend_status': 400
+        }
+
 @ip_groups_tags_router.post("/ip/groups/tag/")
 async def add_ip_group_tag(
         user_id: int,

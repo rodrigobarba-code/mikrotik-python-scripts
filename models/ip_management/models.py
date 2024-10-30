@@ -491,6 +491,32 @@ class IPGroupsTags(Base):
         except Exception as e:
             raise e
 
+    @staticmethod
+    def get_tags_by_ip_group_id(session, ip_group_id: int) -> list[IPGroupsTagsEntity]:
+        """
+        Get tags by IP group ID
+        :param session: The database session
+        :param ip_group_id: The IP group ID
+        :return: List of IP group tags
+        """
+        try:
+            # Get all IP group to IP group tag objects from the database based on the IP group ID
+            ip_group_to_tags = session.query(IPGroupsToIPGroupsTags).filter_by(fk_ip_group_id=ip_group_id).all()
+            ip_group_tags_list = []
+            for ip_group_to_tag in ip_group_to_tags:
+                # Get the IP group tag object from the database based on the IP group tag ID
+                ip_group_tag = session.query(IPGroupsTags).get(ip_group_to_tag.fk_ip_group_tag_id)
+                ip_group_tags_list.append(IPGroupsTagsEntity(
+                    ip_group_tag_id=ip_group_tag.ip_group_tag_id,
+                    ip_group_tag_name=ip_group_tag.ip_group_tag_name,
+                    ip_group_tag_color=ip_group_tag.ip_group_tag_color,
+                    ip_group_tag_text_color=ip_group_tag.ip_group_tag_text_color,
+                    ip_group_tag_description=ip_group_tag.ip_group_tag_description
+                ))
+            return ip_group_tags_list
+        except Exception as e:
+            raise e
+
 
 class IPGroupsToIPGroupsTags(Base):
     __tablename__ = 'ip_groups_to_ip_groups_tags'
@@ -505,14 +531,8 @@ class IPGroupsToIPGroupsTags(Base):
     def __repr__(self):
         return f'<IP Group to IP Group Tag {self.fk_ip_group_id} <-> {self.fk_ip_group_tag_id}>'
 
-    def __dict__(self):
-        return {
-            'fk_ip_group_id': self.fk_ip_group_id,
-            'fk_ip_group_tag_id': self.fk_ip_group_tag_id
-        }
-
     @staticmethod
-    def assign_tag(session, ip_group_id: int, ip_group_tag_id: int) -> None:
+    def assign_tag(session, tag_metadata: dict) -> None:
         """
         Assign a tag to an IP group
         :param session: The database session
@@ -523,30 +543,29 @@ class IPGroupsToIPGroupsTags(Base):
         try:
             # Check if the tag is already assigned to the IP group
             ip_group_to_tag = session.query(IPGroupsToIPGroupsTags).filter_by(
-                fk_ip_group_id=ip_group_id,
-                fk_ip_group_tag_id=ip_group_tag_id
+                fk_ip_group_id=tag_metadata['ip_group_id'],
+                fk_ip_group_tag_id=tag_metadata['ip_group_tag_id']
             ).first()
 
             # If the tag is not assigned to the IP group, assign it
             if not ip_group_to_tag:
                 # Create the IP group to IP group tag object
                 ip_group = IPGroupsToIPGroupsTags(
-                    fk_ip_group_id=ip_group_id,
-                    fk_ip_group_tag_id=ip_group_tag_id
+                    fk_ip_group_id=tag_metadata['ip_group_id'],
+                    fk_ip_group_tag_id=tag_metadata['ip_group_tag_id']
                 )
 
                 # Add the IP group to IP group tag object to the database
                 session.add(ip_group)
             # If the tag is already assigned to the IP group, update it
             else:
-                # Update the IP group to IP group tag object in the database
-                ip_group_to_tag.fk_ip_group_id = ip_group_id
-                ip_group_to_tag.fk_ip_group_tag_id = ip_group_tag_id
+                # Do nothing
+                pass
         except Exception as e:
             raise e
 
     @staticmethod
-    def unassign_tag(session, ip_group_id: int, ip_group_tag_id: int) -> None:
+    def unassign_tag(session, tag_metadata: dict) -> None:
         """
         Unassign a tag from an IP group
         :param session: The database session
@@ -557,12 +576,30 @@ class IPGroupsToIPGroupsTags(Base):
         try:
             # Get the IP group to IP group tag object from the database based on the IP group ID and IP group tag ID
             ip_group_to_tag = session.query(IPGroupsToIPGroupsTags).filter_by(
-                fk_ip_group_id=ip_group_id,
-                fk_ip_group_tag_id=ip_group_tag_id
+                fk_ip_group_id=tag_metadata['ip_group_id'],
+                fk_ip_group_tag_id=tag_metadata['ip_group_tag_id']
             ).first()
 
             # Delete the IP group to IP group tag object from the database
             session.delete(ip_group_to_tag)
+        except Exception as e:
+            raise e
+
+    @staticmethod
+    def unassing_all_tags(session, ip_group_id: int) -> None:
+        """
+        Unassign all tags from an IP group
+        :param session: The database session
+        :param ip_group_id: The IP group ID
+        :return: None
+        """
+        try:
+            # Get all IP group to IP group tag objects from the database based on the IP group ID
+            ip_group_to_tags = session.query(IPGroupsToIPGroupsTags).filter_by(fk_ip_group_id=ip_group_id).all()
+
+            # Delete all IP group to IP group tag objects from the database based on the IP group ID
+            for ip_group_to_tag in ip_group_to_tags:
+                session.delete(ip_group_to_tag)
         except Exception as e:
             raise e
 
@@ -757,19 +794,24 @@ class IPGroups(Base):
             from utils.threading_manager import ThreadingManager
 
             # Get the IP group from the database based on the IP group ID
-            ip_group = session.query(IPGroups).get(ip_group_metadata['ip_group_id'])
-            old_tags = ThreadingManager().run_thread(IPGroupsToIPGroupsTags.get_tags_ids_by_ip_group_id, 'r',
-                                                     ip_group_metadata['ip_group_id'])
+            ip_group = session.query(IPGroups).get(ip_group_metadata['ip_group'].ip_group_id)
+            old_tags = ThreadingManager().run_thread(IPGroupsToIPGroupsTags.get_tags_ids_by_ip_group_id, 'rx',
+                                                     ip_group_metadata['ip_group'].ip_group_id)
+
+            print(f"old_tags: {old_tags}")
 
             # Update the IP group in the database
             ip_group.ip_group_alias = ip_group.ip_group_alias
             ip_group.ip_group_description = ip_group.ip_group_description
 
             # Verify if there are tags to assign and unassign
-            if ip_group_metadata['tags']:
+            if ip_group_metadata['tags'][0] != -1:
                 # Check what tags to assign and unassign
                 tags_to_assign = set(ip_group_metadata['tags'])
-                tags_to_unassign = tags_to_assign - set(old_tags)
+                tags_to_unassign = set(set(old_tags) - tags_to_assign)
+
+                print(f"tags_to_assign: {tags_to_assign}")
+                print(f"tags_to_unassign: {tags_to_unassign}")
 
                 if tags_to_unassign or tags_to_assign:
                     # Verify if there are tags to assign
@@ -777,17 +819,26 @@ class IPGroups(Base):
                         # Iterate in the tags to assign to the IP group
                         for tag in tags_to_assign:
                             # Assign the tag to the IP group
-                            ThreadingManager().run_thread(IPGroupsToIPGroupsTags.assign_tag, 'w', tag)
+                            tag_metadata = {
+                                'ip_group_id': ip_group_metadata['ip_group'].ip_group_id,
+                                'ip_group_tag_id': tag
+                            }
+                            ThreadingManager().run_thread(IPGroupsToIPGroupsTags.assign_tag, 'w', tag_metadata)
 
                     # Verify if there are tags to unassign
                     if tags_to_unassign:
                         # Iterate in the tags to unassign from the IP group
                         for tag in tags_to_unassign:
+                            tag_metadata = {
+                                'ip_group_id': ip_group_metadata['ip_group'].ip_group_id,
+                                'ip_group_tag_id': tag
+                            }
                             # Unassign the tag from the IP group
-                            ThreadingManager().run_thread(IPGroupsToIPGroupsTags.unassign_tag, 'w', tag)
+                            ThreadingManager().run_thread(IPGroupsToIPGroupsTags.unassign_tag, 'w', tag_metadata)
             else:
-                # Do nothing
-                pass
+                # Unassign all tags from the IP group
+                ThreadingManager().run_thread(IPGroupsToIPGroupsTags.unassing_all_tags, 'w',
+                                              ip_group_metadata['ip_group'].ip_group_id)
         except Exception as e:
             raise e
 

@@ -1,4 +1,6 @@
 from typing import List
+
+from entities.ip_groups import IPGroupsEntity
 from ...auth import verify_jwt
 from pydantic import BaseModel
 from fastapi import APIRouter, Depends, Request
@@ -204,11 +206,22 @@ async def get_available_by_site(user_id: int, site_id: int, metadata: Request, t
 
 
 @ip_groups_router.put("/ip/group/{ip_group_id}")
-async def update_ip_group(user_id: int, ip_group_id: int, tags: IPGroupsTagsBase, metadata: Request,
-                          token: dict = Depends(verify_jwt)):
+async def update_ip_group(
+        user_id: int,
+        ip_group_id: int,
+        ip_group_alias: str,
+        ip_group_description: str,
+        tags: IPGroupsTagsBase,
+        metadata: Request,
+        token: dict = Depends(verify_jwt)):
     try:
         if ip_groups_functions.verify_user_existence(user_id):
-            ip_group_metadata = {'ip_group_id': ip_group_id, 'tags': tags.tags}
+            ip_group = IPGroupsEntity(
+                ip_group_id=ip_group_id,
+                ip_group_alias=ip_group_alias,
+                ip_group_description=ip_group_description
+            )
+            ip_group_metadata = {'ip_group': ip_group, 'tags': tags.tags}
             ThreadingManager().run_thread(IPGroups.update_ip_group, 'w', ip_group_metadata)
             ip_groups_functions.create_transaction_log(
                 action="UPDATE",
