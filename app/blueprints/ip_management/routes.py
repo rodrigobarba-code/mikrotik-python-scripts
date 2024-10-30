@@ -635,7 +635,7 @@ def get_tags():
 def get_tag(tag_id: int) -> IPGroupsTagsEntity:
     try:
         response = requests.get(
-            f'http://localhost:8080/api/private/ip/groups/tags/{tag_id}',
+            f'http://localhost:8080/api/private/ip/groups/tag/{tag_id}',
             headers=get_verified_jwt_header(),
             params={
                 'user_id': session.get('user_id'),
@@ -706,7 +706,7 @@ def add_ip_group_tag():
                 raise Exception('Failed to add tag')
         return render_template(
             'ip_management/form_ip_groups_tags.html',
-            tag=None
+            tag_obj=None
         )
     except Exception as e:
         flash(str(e), 'danger')
@@ -771,6 +771,35 @@ def delete_ip_group_tag(tag_id):
     except Exception as e:
         flash(str(e), 'danger')
         return redirect(url_for('ip_management.ip_group_tags'))
+
+@ip_management_bp.route('/ip/group/tags/delete/bulk', methods=['POST'])
+@restriction.login_required
+@restriction.admin_required
+def bulk_delete_ip_group_tag():
+    data = request.get_json()
+    tags_ids = data.get('items_ids', [])
+    try:
+        response = requests.delete(
+            'http://localhost:8080/api/private/ip/groups/tags/bulk/',
+            json={'tags_ids': tags_ids},
+            headers=get_verified_jwt_header(),
+            params={
+                'user_id': session.get('user_id')
+            }
+        )
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                flag = response.json().get('count_flag')
+                flash(f'{flag} tags deleted successfully', 'success')
+
+                return jsonify({'message': f'{flag} tags deleted successfully'}), 200
+            else:
+                raise Exception(response.json().get('message'))
+        elif response.status_code == 500:
+            raise Exception('Failed to delete tags')
+    except Exception as e:
+        flash(str(e), 'danger')
+        return jsonify({'message': 'Failed to delete tags', 'error': str(e)}), 500
 
 @ip_management_bp.route('/ip/group/tags/delete/all', methods=['POST'])
 @restriction.login_required

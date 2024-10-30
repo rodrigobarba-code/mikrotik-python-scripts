@@ -409,6 +409,23 @@ class IPGroupsTags(Base):
             raise e
 
     @staticmethod
+    def bulk_delete_ip_group_tags(session, ip_group_tag_ids: list):
+        """
+        Delete a list of IP group tags from the database
+        :param session: The database session
+        :param ip_group_tag_ids: The list of IP group tag IDs to delete
+        :return: None
+        """
+        try:
+            # Delete all IP group tags from the database based on the list of IP group tag IDs
+            session.query(IPGroupsToIPGroupsTags).filter(
+                IPGroupsToIPGroupsTags.fk_ip_group_tag_id.in_(ip_group_tag_ids)).delete(synchronize_session=False)
+            session.query(IPGroupsTags).filter(IPGroupsTags.ip_group_tag_id.in_(ip_group_tag_ids)).delete(
+                synchronize_session=False)
+        except Exception as e:
+            raise e
+
+    @staticmethod
     def delete_ip_group_tags(session):
         """
         Delete all IP group tags from the database

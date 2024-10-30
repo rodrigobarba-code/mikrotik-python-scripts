@@ -22,40 +22,50 @@
     <!-- Tags Forms -->
     <section class="tags-forms text">
         <div class="container-fluid w-75">
-            <form action="{{ url_for('ip_management.add_ip_group_tag') if tag_obj is none else url_for('ip_management.update_ip_group_tag', tag_id=tag.ip_group_tag_id) }}"
+            <form action="{{ url_for('ip_management.add_ip_group_tag') if tag_obj is none else url_for('ip_management.update_ip_group_tag', tag_id=tag_obj.ip_group_tag_id) }}"
                   method="POST">
-                <!-- Tag Name -->
-                <div class="mb-3">
-                    <label for="tag-name" class="form-label">Tag Name *</label>
-                    <input type="text" class="form-control" id="tag-name" name="tag_name"
-                           value="{{ tag_obj.ip_group_tag_name if tag_obj is not none else '' }}" required>
+
+                <h2> Tag Information </h2>
+                <hr>
+
+                <!-- Tag Colors Field Group -->
+                <div class="row mb-3">
+                    <!-- Tag Name -->
+                    <div class="col">
+                        <label for="tag-name" class="form-label">Tag Name <span style="color: red">*</span> </label>
+                        <input type="text" class="form-control" id="tag-name" name="tag_name"
+                               value="{{ tag_obj.ip_group_tag_name if tag_obj is not none else '' }}" required>
+                    </div>
+                    <!-- Tag Color -->
+                    <div class="col">
+                        <label for="tag-color" class="form-label">Tag Color <span style="color: red">*</span></label>
+                        <input type="color" class="form-control form-control-color" id="tag-color" name="tag_color"
+                               title="Choose your color"
+                               value="{{ tag_obj.ip_group_tag_color if tag_obj is not none else '#000000' }}" required>
+                    </div>
+                    <!-- Tag Text Color -->
+                    <div class="col">
+                        <label for="tag-text-color" class="form-label">Tag Text Color <span style="color: red">*</span></label>
+                        <input type="color" class="form-control form-control-color" id="tag-text-color"
+                               name="tag_text_color" title="Choose your color"
+                               value="{{ tag_obj.ip_group_tag_text_color if tag_obj is not none else '#ffffff' }}"
+                               required>
+                    </div>
                 </div>
 
                 <!-- Tag Description -->
                 <div class="mb-3">
                     <label for="tag-description" class="form-label">Tag Description</label>
                     <textarea class="form-control" id="tag-description" name="tag_description"
-                              rows="3">{{ tag.ip_group_tag_description if tag_obj is not none else '' }}</textarea>
+                              rows="3">{{ tag_obj.ip_group_tag_description if tag_obj is not none else '' }}</textarea>
                 </div>
 
-                <!-- Tag Colors Field Group -->
-                <div class="row mb-3">
-                    <!-- Tag Color -->
-                    <div class="col">
-                        <label for="tag-color" class="form-label">Tag Color</label>
-                        <input type="color" class="form-control" id="tag-color" name="tag_color" style="width: 10%"
-                               value="{{ tag.ip_group_tag_color if tag_obj is not none else '#000000' }}" required>
-                    </div>
-                    <!-- Tag Text Color -->
-                    <div class="col">
-                        <label for="tag-text-color" class="form-label">Tag Text Color</label>
-                        <input type="color" class="form-control" id="tag-text-color" name="tag_text_color" style="width: 10%"
-                               value="{{ tag.ip_group_tag_text_color if tag_obj is not none else '#ffffff' }}" required>
-                    </div>
-                </div>
+                <!-- Back Button -->
+                <a href="{{ url_for('ip_management.ip_group_tags') }}" class="btn btn-secondary mb-3">Back</a>
 
                 <!-- Submit Button -->
-                <button type="submit" class="btn btn-primary">{{ "Add Tag" if tag_obj is none else "Update Tag" }}</button>
+                <button type="submit"
+                        class="btn btn-primary mb-3">{{ "Add Tag" if tag_obj is none else "Update Tag" }}</button>
             </form>
         </div>
     </section>
