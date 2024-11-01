@@ -1185,29 +1185,47 @@ class IPGroups(Base):
         # Iterate on the grouped IP groups and create a list of group IP groups
         for ip_group in group_site_list:
             # Create the group IP group object
-            group_list.append(
-                IPGroupsEntity(
-                    ip_group_id=ip_group.ip_group_id,
-                    fk_ip_segment_id=ip_group.fk_ip_segment_id,
-                    ip_group_name=ip_group.ip_group_name,
-                    ip_group_type=ip_group.ip_group_type,
-                    ip_group_alias=ip_group.ip_group_alias,
-                    ip_group_description=ip_group.ip_group_description,
-                    ip_group_ip=ip_group.ip_group_ip,
-                    ip_group_mask=ip_group.ip_group_mask,
-                    ip_group_mac=ip_group.ip_group_mac,
-                    ip_group_mac_vendor=ip_group.ip_group_mac_vendor,
-                    ip_group_interface=ip_group.ip_group_interface,
-                    ip_group_comment=ip_group.ip_group_comment,
-                    ip_is_dhcp=ip_group.ip_is_dhcp,
-                    ip_is_dynamic=ip_group.ip_is_dynamic,
-                    ip_is_complete=ip_group.ip_is_complete,
-                    ip_is_disabled=ip_group.ip_is_disabled,
-                    ip_is_published=ip_group.ip_is_published,
-                    ip_duplicity=ip_group.ip_duplicity,
-                    ip_duplicity_indexes=ip_group.ip_duplicity_indexes
-                )
+            ip_group_entity = IPGroupsEntity(
+                ip_group_id=ip_group.ip_group_id,
+                fk_ip_segment_id=ip_group.fk_ip_segment_id,
+                ip_group_name=ip_group.ip_group_name,
+                ip_group_type=ip_group.ip_group_type,
+                ip_group_alias=ip_group.ip_group_alias,
+                ip_group_description=ip_group.ip_group_description,
+                ip_group_ip=ip_group.ip_group_ip,
+                ip_group_mask=ip_group.ip_group_mask,
+                ip_group_mac=ip_group.ip_group_mac,
+                ip_group_mac_vendor=ip_group.ip_group_mac_vendor,
+                ip_group_interface=ip_group.ip_group_interface,
+                ip_group_comment=ip_group.ip_group_comment,
+                ip_is_dhcp=ip_group.ip_is_dhcp,
+                ip_is_dynamic=ip_group.ip_is_dynamic,
+                ip_is_complete=ip_group.ip_is_complete,
+                ip_is_disabled=ip_group.ip_is_disabled,
+                ip_is_published=ip_group.ip_is_published,
+                ip_duplicity=ip_group.ip_duplicity,
+                ip_duplicity_indexes=ip_group.ip_duplicity_indexes
             )
+
+            # Obtain tags for this IP group
+            assigned_tags = session.query(IPGroupsToIPGroupsTags).filter_by(fk_ip_group_id=ip_group.ip_group_id).all()
+            tags = [
+                session.query(IPGroupsTags).get(tag.fk_ip_group_tag_id) for tag in assigned_tags
+            ]
+
+            # Create a list of tags for this IP group
+            tags_entity = [
+                IPGroupsTagsEntity(
+                    tag.ip_group_tag_id,
+                    tag.ip_group_tag_name,
+                    tag.ip_group_tag_color,
+                    tag.ip_group_tag_text_color,
+                    tag.ip_group_tag_description
+                ) for tag in tags
+            ]
+
+            # Append the group IP group object and its tags to the list
+            group_list.append((ip_group_entity, tags_entity))
 
         # Return the list of group IP groups
         return group_list
