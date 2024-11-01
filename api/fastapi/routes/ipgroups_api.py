@@ -129,6 +129,42 @@ async def get_blacklist_by_site(user_id: int, site_id: int, metadata: Request, t
         if ip_groups_functions.verify_user_existence(user_id):
             group_metadata = {'site_id': site_id, 'group': 'blacklist'}
             request = ThreadingManager().run_thread(IPGroups.get_group_by_site, 'rx', group_metadata)
+            final = [
+                {
+                    'ip_group': {
+                        'ip_group_id': ip_group[0].ip_group_id,
+                        'fk_ip_segment_id': ip_group[0].fk_ip_segment_id,
+                        'ip_group_name': ip_group[0].ip_group_name,
+                        'ip_group_type': ip_group[0].ip_group_type,
+                        'ip_group_alias': ip_group[0].ip_group_alias,
+                        'ip_group_description': ip_group[0].ip_group_description,
+                        'ip_group_ip': ip_group[0].ip_group_ip,
+                        'ip_group_mask': ip_group[0].ip_group_mask,
+                        'ip_group_mac': ip_group[0].ip_group_mac,
+                        'ip_group_mac_vendor': ip_group[0].ip_group_mac_vendor,
+                        'ip_group_interface': ip_group[0].ip_group_interface,
+                        'ip_group_comment': ip_group[0].ip_group_comment,
+                        'ip_is_dhcp': ip_group[0].ip_is_dhcp,
+                        'ip_is_dynamic': ip_group[0].ip_is_dynamic,
+                        'ip_is_complete': ip_group[0].ip_is_complete,
+                        'ip_is_disabled': ip_group[0].ip_is_disabled,
+                        'ip_is_published': ip_group[0].ip_is_published,
+                        'ip_duplicity': ip_group[0].ip_duplicity,
+                        'ip_duplicity_indexes': ip_group[0].ip_duplicity_indexes
+                    },
+                    'tags': [
+                        {
+                            'ip_group_tag_id': tag.ip_group_tag_id,
+                            'ip_group_tag_name': tag.ip_group_tag_name,
+                            'ip_group_tag_description': tag.ip_group_tag_description,
+                            'ip_group_tag_color': tag.ip_group_tag_color,
+                            'ip_group_tag_text_color': tag.ip_group_tag_text_color
+                        }
+                        for tag in ip_group[1]
+                    ]
+                }
+                for ip_group in request
+            ]
             ip_groups_functions.create_transaction_log(
                 action="GET",
                 table="ip_groups",
@@ -138,8 +174,8 @@ async def get_blacklist_by_site(user_id: int, site_id: int, metadata: Request, t
             )
             return {
                 'message': f"Blacklist for Site {site_id} retrieved successfully",
-                'length': len(request),
-                'blacklist': request,
+                'length': len(final),
+                'blacklist': final,
                 'backend_status': 200
             }
         else:
@@ -157,6 +193,42 @@ async def get_authorized_by_site(user_id: int, site_id: int, metadata: Request, 
         if ip_groups_functions.verify_user_existence(user_id):
             group_metadata = {'site_id': site_id, 'group': 'authorized'}
             request = ThreadingManager().run_thread(IPGroups.get_group_by_site, 'rx', group_metadata)
+            final = [
+                {
+                    'ip_group': {
+                        'ip_group_id': ip_group[0].ip_group_id,
+                        'fk_ip_segment_id': ip_group[0].fk_ip_segment_id,
+                        'ip_group_name': ip_group[0].ip_group_name,
+                        'ip_group_type': ip_group[0].ip_group_type,
+                        'ip_group_alias': ip_group[0].ip_group_alias,
+                        'ip_group_description': ip_group[0].ip_group_description,
+                        'ip_group_ip': ip_group[0].ip_group_ip,
+                        'ip_group_mask': ip_group[0].ip_group_mask,
+                        'ip_group_mac': ip_group[0].ip_group_mac,
+                        'ip_group_mac_vendor': ip_group[0].ip_group_mac_vendor,
+                        'ip_group_interface': ip_group[0].ip_group_interface,
+                        'ip_group_comment': ip_group[0].ip_group_comment,
+                        'ip_is_dhcp': ip_group[0].ip_is_dhcp,
+                        'ip_is_dynamic': ip_group[0].ip_is_dynamic,
+                        'ip_is_complete': ip_group[0].ip_is_complete,
+                        'ip_is_disabled': ip_group[0].ip_is_disabled,
+                        'ip_is_published': ip_group[0].ip_is_published,
+                        'ip_duplicity': ip_group[0].ip_duplicity,
+                        'ip_duplicity_indexes': ip_group[0].ip_duplicity_indexes
+                    },
+                    'tags': [
+                        {
+                            'ip_group_tag_id': tag.ip_group_tag_id,
+                            'ip_group_tag_name': tag.ip_group_tag_name,
+                            'ip_group_tag_description': tag.ip_group_tag_description,
+                            'ip_group_tag_color': tag.ip_group_tag_color,
+                            'ip_group_tag_text_color': tag.ip_group_tag_text_color
+                        }
+                        for tag in ip_group[1]
+                    ]
+                }
+                for ip_group in request
+            ]
             ip_groups_functions.create_transaction_log(
                 action="GET",
                 table="ip_groups",
