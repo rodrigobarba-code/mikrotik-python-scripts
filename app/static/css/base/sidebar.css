@@ -19,10 +19,12 @@
     --text-color: #100c04;
     --secondary-text-color: #ffffff;
     --text-color-active: #fff;
+    --text-color-not-active: #b3b3b3;
+    --active-color: #ffffff;
     --sidebar-color: #f3f1ee;
     --body: #fdfbf7;
     --nav-items: #d2d2d2;
-    --hover-color: #e1e0e0;
+    --hover-color: #ffffff;
     --primary-color: #00477a;
     --secondary-color: #00bd61;
     --accent: #0870b6;
@@ -50,6 +52,8 @@ body.dark {
     --toggle-color: #fff;
     --text-color: #fbf7ef;
     --text-color-active: #fff;
+    --text-color-not-active: #b3b3b3;
+    --active-color: #212121;
     --secondary-text-color: #ffffff;
 }
 
