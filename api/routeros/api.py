@@ -277,6 +277,45 @@ class RouterAPI:
             print(str('Error: add_arp_data: ' + str(e)))
 
     @staticmethod
+    async def get_ip_duplicates() -> dict:
+        """
+        Get IP duplicates from the database
+        :return: Dictionary with the IP duplicates
+        """
+
+        # Importing here to avoid circular imports
+        from models.ip_management.functions import IPAddressesFunctions
+
+        try:
+            # Get the IP duplicates
+            result = ThreadingManager().run_thread(IPAddressesFunctions.find_ip_duplicates, 'r')
+
+            # Return the IP duplicates
+            return result
+        except Exception as e:
+            print(str('Error: get_ip_duplicates: ' + str(e)))
+
+    @staticmethod
+    async def validate_ip_duplicates():
+        """
+        Validate IP duplicates in the database
+        :return: None
+        """
+
+        try:
+            # Get all IP segments
+            ip_segments = ThreadingManager().run_thread(IPSegment.get_all_ip_segments, 'r')
+
+            # Validate all IP segments
+            for ip in ip_segments:
+                ip.validate_ip_segment()
+
+            # Delete all IP segments from the database that are in database but not in the router
+            ThreadingManager().run_thread(IPAddressesFunctions.delete_ip_segments, 'w', ip_segments)
+        except Exception as e:
+            print(str('Error: validate_ip_duplicates: ' + str(e)))
+
+    @staticmethod
     async def arp_scan():
         """
         Scan ARP data from all available routers
@@ -290,6 +329,10 @@ class RouterAPI:
             # Get the ARP data and add it to the database
             arp_data = await RouterAPI.get_arp_data()
             await RouterAPI.add_arp_data(arp_data)
+
+            # Resolve IP Duplicates
+            ip_duplicates = await RouterAPI.get_ip_duplicates()
+            print('IP Duplicates: ' + str(ip_duplicates))
 
             print('ARP scan finished')
         except Exception as e:

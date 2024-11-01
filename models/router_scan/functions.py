@@ -106,7 +106,7 @@ class ARPFunctions:
             # Iterate over the ARP entries
             for arp in arp_list:
                 # Check if the ARP entry is dynamic and does not have a MAC address and is not complete
-                if arp.arp_is_dynamic is True and arp.arp_is_complete is False:
+                if (arp.arp_is_dynamic is True and arp.arp_is_complete is False) or (arp.arp_is_dynamic is False and arp.arp_is_complete is True):
                     list_ip_groups.append(IPGroupsEntity(
                         ip_group_id=0,
                         fk_ip_segment_id=arp.fk_ip_address_id,

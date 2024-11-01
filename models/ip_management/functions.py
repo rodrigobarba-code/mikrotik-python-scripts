@@ -1,5 +1,5 @@
 class IPAddressesFunctions:
-    def __init__(self):  
+    def __init__(self):
         pass
 
     @staticmethod
@@ -57,7 +57,8 @@ class IPAddressesFunctions:
             if r_segment_list_real:
                 for r_segment in r_segments_list_db:
                     # If the IP segment exists in the database but not in the router, add it to the list of segments to delete
-                    if (r_segment.ip_segment_ip, r_segment.ip_segment_mask, r_segment.ip_segment_interface) not in r_segment_list_real:
+                    if (r_segment.ip_segment_ip, r_segment.ip_segment_mask,
+                        r_segment.ip_segment_interface) not in r_segment_list_real:
                         segments_to_delete.append(r_segment)
 
             # If there are segments to delete, delete them
@@ -70,7 +71,7 @@ class IPAddressesFunctions:
                 print('IP segments deleted: ' + str(len(segments_ids_to_delete)))
             else:
                 print('No segments to delete.')
-        except Exception as e:  
+        except Exception as e:
             print('Error on deleting IP segments: ' + str(e))
 
     @staticmethod
@@ -83,7 +84,7 @@ class IPAddressesFunctions:
                 return IPSegmentTag['PRIVATE_IP'].value
             else:
                 return IPSegmentTag['PUBLIC_IP'].value
-        except Exception as e:  
+        except Exception as e:
             raise e
 
     @staticmethod
@@ -154,4 +155,43 @@ class IPAddressesFunctions:
 
         except Exception as e:
             print(f"Error: {e}")
+            raise e
+
+    @staticmethod
+    def find_ip_duplicates(session) -> dict:
+        try:
+            # Import necessary models
+            from collections import defaultdict
+            from models.router_scan.models import ARP
+            from models.ip_management.models import IPGroups
+
+            # Import necessary entities
+            from entities.arp import ARPEntity
+            from entities.ip_groups import IPGroupsEntity
+
+            # Create a dictionary to store the duplicates
+            duplicates = defaultdict(lambda: {"arp": [], "ip_groups": []})
+
+            # Get all ARP entries
+            arp_list = ARP.get_arps(session)
+
+            # Get all IP Groups entries
+            ip_groups_list = IPGroups.get_ip_groups(session)
+
+            # Store the ARP and IP Groups entries in a 'duplicates' dictionary
+            for arp in arp_list:
+                duplicates[arp.arp_ip]["arp"].append(arp.arp_ip)
+
+            for ipgroup in ip_groups_list:
+                duplicates[ipgroup[0].ip_group_ip]["ip_groups"].append(ipgroup[0].ip_group_ip)
+
+            # Filter by duplicates (more than one ARP entry or more than one IP Groups entry)
+            result = [
+                {ip: ids}
+                for ip, ids in duplicates.items()
+                if len(ids["arp"]) > 1 or len(ids["ip_groups"]) > 1 or (ids["arp"] and ids["ip_groups"])
+            ]
+
+            return result
+        except Exception as e:
             raise e
