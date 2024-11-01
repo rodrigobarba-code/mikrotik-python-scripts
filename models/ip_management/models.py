@@ -793,15 +793,17 @@ class IPGroups(Base):
             from utils.threading_manager import ThreadingManager
 
             # Get the IP group from the database based on the IP group ID
-            ip_group = session.query(IPGroups).get(ip_group_metadata['ip_group'].ip_group_id)
+            ip_group_x = session.query(IPGroups).get(ip_group_metadata['ip_group'].ip_group_id)
             old_tags = ThreadingManager().run_thread(IPGroupsToIPGroupsTags.get_tags_ids_by_ip_group_id, 'rx',
                                                      ip_group_metadata['ip_group'].ip_group_id)
 
             print(f"old_tags: {old_tags}")
 
             # Update the IP group in the database
-            ip_group.ip_group_alias = ip_group.ip_group_alias
-            ip_group.ip_group_description = ip_group.ip_group_description
+            ip_group_x.ip_group_alias = ip_group_metadata['ip_group'].ip_group_alias
+            ip_group_x.ip_group_description = ip_group_metadata['ip_group'].ip_group_description
+
+            session.commit()
 
             # Verify if there are tags to assign and unassign
             if ip_group_metadata['tags'][0] != -1:
@@ -839,6 +841,7 @@ class IPGroups(Base):
                 ThreadingManager().run_thread(IPGroupsToIPGroupsTags.unassing_all_tags, 'w',
                                               ip_group_metadata['ip_group'].ip_group_id)
         except Exception as e:
+            session.rollback()
             raise e
 
     @staticmethod

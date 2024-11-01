@@ -3,12 +3,10 @@
     {{ 'Blacklist' if is_blacklist else 'Authorized' }} for {{ site_name }} &#10095; Update{% endblock %}
 {% block head %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/ip_management/styles.css') }}">
-    <link rel="stylesheet" href="https://unpkg.com/@yaireo/tagify/dist/tagify.css">
 {% endblock %}
 
 {% block scripts %}
     <script src="{{ url_for('static', filename='/js/ip_management/scripts.js') }}"></script>
-    <script src="https://unpkg.com/@yaireo/tagify"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const input = document.querySelector("#ip_group_tags");
@@ -16,6 +14,7 @@
                 whitelist: [
                     {% for tag in tags %}
                         {
+                            id: "{{ tag.ip_group_tag_id }}",
                             value: "{{ tag.ip_group_tag_name }}",
                             color: "{{ tag.ip_group_tag_color }}",
                             text: "{{ tag.ip_group_tag_text_color }}"
@@ -23,7 +22,7 @@
                     {% endfor %}
                 ],
                 dropdown: {
-                    maxItems: 10,
+                    maxItems: undefined,
                     classname: "tags-look",
                     enabled: 0,
                     closeOnSelect: false
@@ -36,9 +35,23 @@
                     return tagData;
                 }
             });
+
+            // Personaliza los estilos de los elementos del dropdown
+            tagify.on("dropdown:show dropdown:updated", function (e) {
+                const dropdownItems = e.detail.tagify.DOM.dropdown.content.querySelectorAll(".tagify__dropdown__item");
+
+                dropdownItems.forEach(item => {
+                    const tag = tagify.whitelist.find(t => t.value === item.textContent.trim());
+                    if (tag) {
+                        item.style.backgroundColor = tag.color;
+                        item.style.color = tag.text;
+                        item.style.borderRadius = "30px";
+                        item.style.padding = "5px 10px";
+                    }
+                });
+            });
         });
-    </script>
-{% endblock %}
+    </script>{% endblock %}
 {% block content %}
     <!-- IP Groups Jumbotron -->
     <section class="{{ 'blacklist' if is_blacklist else 'authorized' }}-jumbotron pt-5 mb-3">
@@ -80,6 +93,7 @@
                         {{ url_for('ip_management.authorized', site_id=site_id) }}"
                   {% endif %}
                   data-result-action="{{ "IP Group updated successfully!" }}"
+                  method="POST"
             >
                 <h2> General Information </h2>
                 <div class="row">
@@ -96,9 +110,8 @@
                             <label for="ip_group_description">Description</label>
                             <input type="text" class="form-control" id="ip_group_description"
                                    name="ip_group_description"
-                                   value="{{ ip_group.ip_group_description if ip_group is not none else '' }}"
-                                   maxlength="256"
-                                   required>
+                                   value="{{ ip_group.ip_group_description if ip_group and ip_group.ip_group_description != 'No description' else '' }}"
+                                   maxlength="256">
                         </div>
                     </div>
                 </div>
@@ -115,11 +128,12 @@
                     </div>
                 </div>
                 <!-- IP Group Tags editor with selectize JS-->
-                <div class="mb-3 form-check">
+                <div class="mb-3 form-check pt-2">
                     <input type="checkbox" class="form-check-input" id="condition-check">
                     <label class="form-check-label" for="condition-check">I've read and accept that the data provided
                         will be
-                        used to update a IP Group.</label>
+                        used to update a IP Group.
+                    </label>
                 </div>
                 <div class="row">
                     <div class="col-12">

@@ -615,38 +615,71 @@ def delete_ip_groups(site_id):
         return jsonify({'message': 'Failed to delete all IP Groups', 'error': str(e)}), 500
 
 
-@ip_management_bp.route('/update/<int:site_id>/<int:ip_group_id>', methods=['GET', 'POST'])
+@ip_management_bp.route('ip-group/update/<int:site_id>/<int:ip_group_id>', methods=['GET', 'POST'])
 @restriction.login_required
 @restriction.admin_required
 def update_ip_group(site_id, ip_group_id):
     try:
-        response = requests.get(
-            f'http://localhost:8080/api/private/ip/group/{ip_group_id}',
-            headers=get_verified_jwt_header(),
-            params={'user_id': session.get('user_id')}
+        is_blacklist = False
+        if request.method == 'GET':
+            response = requests.get(
+                f'http://localhost:8080/api/private/ip/group/{ip_group_id}',
+                headers=get_verified_jwt_header(),
+                params={'user_id': session.get('user_id')}
+            )
+            if response.status_code == 200:
+                if response.json().get('backend_status') == 200:
+                    site_name = get_site_name(site_id, get_sites())
+                    ip_group = response.json().get('ip_group')
+                    is_blacklist = ip_group.get('ip_group_name') == 'blacklist'
+                    tags = get_tags()
+                else:
+                    raise Exception(response.json().get('message'))
+            elif response.status_code == 500:
+                raise Exception('Failed to retrieve IP Group')
+
+        elif request.method == 'POST':
+            import json
+            temp_list = json.loads(request.form.get('ip_group_tags'))
+            tag_list = [
+                int(i['id']) for i in temp_list
+            ]
+
+            response = requests.put(
+                f'http://localhost:8080/api/private/ip/group/{ip_group_id}',
+                json={'tags': tag_list},
+                headers=get_verified_jwt_header(),
+                params={
+                    'user_id': session.get('user_id'),
+                    'ip_group_id': ip_group_id,
+                    'ip_group_alias': request.form.get('ip_group_alias'),
+                    'ip_group_description': request.form.get('ip_group_description') if request.form.get(
+                        'ip_group_description') != '' else 'No description',
+                }
+            )
+            if response.status_code == 200:
+                if response.json().get('backend_status') == 200:
+                    flash('IP Group updated successfully', 'success')
+                    if is_blacklist:
+                        return redirect(url_for('ip_management.blacklist', site_id=site_id))
+                    else:
+                        return redirect(url_for('ip_management.authorized', site_id=site_id))
+                else:
+                    raise Exception(response.json().get('message'))
+            elif response.status_code == 500:
+                raise Exception('Failed to update IP Group')
+
+        return render_template(
+            'ip_management/form_ip_groups.html',
+            site_name=site_name if site_name is not None else '',
+            site_id=site_id if site_id is not None else '',
+            ip_group=ip_group if ip_group is not None else '',
+            is_blacklist=is_blacklist if is_blacklist is not None else False,
+            tags=tags if tags is not None else []
         )
-        if response.status_code == 200:
-            if response.json().get('backend_status') == 200:
-                site_name = get_site_name(site_id, get_sites())
-                ip_group = response.json().get('ip_group')
-                is_blacklist = ip_group.get('ip_group_name') == 'blacklist'
-                tags= get_tags()
-                return render_template(
-                    'ip_management/form_ip_groups.html',
-                    site_name=site_name,
-                    site_id=site_id,
-                    ip_group=ip_group,
-                    is_blacklist=is_blacklist,
-                    tags=tags
-                )
-            else:
-                raise Exception(response.json().get('message'))
-        elif response.status_code == 500:
-            raise Exception('Failed to retrieve IP Group')
     except Exception as e:
         flash(str(e), 'danger')
         return redirect(url_for('ip_management.ip_management'))
-
 
 
 def get_tags():
@@ -760,6 +793,7 @@ def add_ip_group_tag():
         flash(str(e), 'danger')
         return redirect(url_for('ip_management.ip_group_tags'))
 
+
 @ip_management_bp.route('/ip/group/tags/update/<int:tag_id>', methods=['GET', 'POST'])
 @restriction.login_required
 @restriction.admin_required
@@ -795,6 +829,7 @@ def update_ip_group_tag(tag_id):
         flash(str(e), 'danger')
         return redirect(url_for('ip_management.ip_group_tags'))
 
+
 @ip_management_bp.route('/ip/group/tags/delete/<int:tag_id>', methods=['GET'])
 @restriction.login_required
 @restriction.admin_required
@@ -819,6 +854,7 @@ def delete_ip_group_tag(tag_id):
     except Exception as e:
         flash(str(e), 'danger')
         return redirect(url_for('ip_management.ip_group_tags'))
+
 
 @ip_management_bp.route('/ip/group/tags/delete/bulk', methods=['POST'])
 @restriction.login_required
@@ -848,6 +884,7 @@ def bulk_delete_ip_group_tag():
     except Exception as e:
         flash(str(e), 'danger')
         return jsonify({'message': 'Failed to delete tags', 'error': str(e)}), 500
+
 
 @ip_management_bp.route('/ip/group/tags/delete/all', methods=['POST'])
 @restriction.login_required

@@ -222,7 +222,7 @@ async def update_ip_group(
                 ip_group_description=ip_group_description
             )
             ip_group_metadata = {'ip_group': ip_group, 'tags': tags.tags}
-            ThreadingManager().run_thread(IPGroups.update_ip_group, 'w', ip_group_metadata)
+            ThreadingManager().run_thread(IPGroups.update_ip_group, 'rx', ip_group_metadata)
             ip_groups_functions.create_transaction_log(
                 action="UPDATE",
                 table="ip_groups",
