@@ -127,3 +127,14 @@
 .modal-backdrop {
     display: none !important;
 }
+
+.form-control, .form-select {
+    background-color: var(--active-color);
+    color: var(--text-color);
+    border-radius: 20px;
+}
+
+.form-control:focus, .form-select:focus {
+    background-color: var(--hover-color);
+    color: var(--text-color);
+}

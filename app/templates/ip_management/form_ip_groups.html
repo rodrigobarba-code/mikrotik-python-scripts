@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+{% block title %} IP Management &#10095; Sites &#10095; Options &#10095;
+    {{ 'Blacklist' if is_blacklist else 'Authorized' }} for {{ site_name }} &#10095; Update{% endblock %}
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/ip_management/styles.css') }}">
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='/js/ip_management/scripts.js') }}"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const input = document.querySelector("#ip_group_tags");
+            const tagify = new Tagify(input, {
+                whitelist: [
+                    {% for tag in tags %}
+                        {
+                            id: "{{ tag.ip_group_tag_id }}",
+                            value: "{{ tag.ip_group_tag_name }}",
+                            color: "{{ tag.ip_group_tag_color }}",
+                            text: "{{ tag.ip_group_tag_text_color }}"
+                        },
+                    {% endfor %}
+                ],
+                enforceWhitelist: true,
+                dropdown: {
+                    maxItems: undefined,
+                    classname: "tags-look",
+                    enabled: 0,
+                    closeOnSelect: false
+                },
+                transformTag: function (tagData) {
+                    tagData.style = "--tag-bg:" + tagData.color;
+                    tagData.style += ";--tag-text-color:" + tagData.text;
+                    tagData.style += ";--tag-inset-shadow-size: 2.1em;";
+                    tagData.style += ";--tag-border-radius: 30px;";
+                    return tagData;
+                }
+            });
+
+            // Personaliza los estilos de los elementos del dropdown
+            tagify.on("dropdown:show dropdown:updated", function (e) {
+                const dropdownItems = e.detail.tagify.DOM.dropdown.content.querySelectorAll(".tagify__dropdown__item");
+
+                dropdownItems.forEach(item => {
+                    const tag = tagify.whitelist.find(t => t.value === item.textContent.trim());
+                    if (tag) {
+                        item.style.backgroundColor = tag.color;
+                        item.style.color = tag.text;
+                        item.style.borderRadius = "30px";
+                        item.style.padding = "5px 10px";
+                    }
+                });
+            });
+        });
+    </script>{% endblock %}
+{% block content %}
+    <!-- IP Groups Jumbotron -->
+    <section class="{{ 'blacklist' if is_blacklist else 'authorized' }}-jumbotron pt-5 mb-3">
+        <div class="container-fluid py-5 d-flex flex-column flex-md-row">
+            <div class="d-flex col-md-1 order-md-1 order-2 text-md-start text-center my-md-0 my-3 justify-content-center align-items-center">
+                <button class="btn btn-c-return">
+                    <a href="
+                    {% if is_blacklist %}
+                        {{ url_for('ip_management.blacklist', site_id=site_id) }}
+                    {% else %}
+                        {{ url_for('ip_management.authorized', site_id=site_id) }}
+                    {% endif %}
+                    " class="text-decoration-none text-dark" style="font-size: 2.5rem">
+                        <i class="fa-solid fa-backward" style="color: white"></i>
+                    </a>
+                </button>
+            </div>
+            <div class=" col-md-11 order-md-2 order-1">
+                <h1 class="display-5 fw-bold">Update {{ 'Blacklist' if is_blacklist else 'Authorized' }}</h1>
+                {% if is_blacklist %}
+                    <p class="col-md-8 fs-4">Update Blacklist IP.</p>
+                {% else %}
+                    <p class="col-md-8 fs-4">Update Authorized IP.</p>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+    <!-- IP Groups Jumbotron -->
+
+    <!-- Routers Forms -->
+    <section class="ip-groups-forms text">
+        <div class="container-fluid w-75 pb-3">
+            <form id="ip-group-form"
+                  data-url="{{ url_for('ip_management.update_ip_group', ip_group_id=ip_group.ip_group_id, site_id=site_id, is_blacklist=is_blacklist) }}"
+                  data-reload="
+                    {% if is_blacklist %}
+                        {{ url_for('ip_management.blacklist', site_id=site_id) }}
+                    {% else %}
+                        {{ url_for('ip_management.authorized', site_id=site_id) }}"
+                  {% endif %}
+                  data-result-action="{{ "IP Group updated successfully!" }}"
+                  method="POST"
+            >
+                <h2> General Information </h2>
+                <div class="row">
+                    <div class="form-group">
+                        <input type="text" class="form-control" id="ip_group_name" name="ip_group_name"
+                               value="{{ ip_group.ip_group_name if ip_group is not none else '' }}" maxlength="128"
+                               hidden>
+                    </div>
+                    <div class="col-6">
+                        <div class="form-group">
+                            <label for="ip_group_alias">Alias</label>
+                            <input type="text" class="form-control" id="ip_group_alias" name="ip_group_alias"
+                                   value="{{ ip_group.ip_group_alias if ip_group is not none else '' }}" maxlength="128"
+                                   required>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="form-group">
+                            <label for="ip_group_description">Description</label>
+                            <input type="text" class="form-control" id="ip_group_description"
+                                   name="ip_group_description"
+                                   value="{{ ip_group.ip_group_description if ip_group and ip_group.ip_group_description != 'No description' else '' }}"
+                                   maxlength="256">
+                        </div>
+                    </div>
+                </div>
+                <!-- IP Group Tags editor with selectize JS-->
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label for="ip_group_tags">Tags</label>
+                            <input type="text" class="form-control" id="ip_group_tags" name="ip_group_tags"
+                                   value="{{ ','.join(ip_group.tags) if ip_group and ip_group.tags else '' }}"
+                                   placeholder="Add tags">
+
+                        </div>
+                    </div>
+                </div>
+                <!-- IP Group Tags editor with selectize JS-->
+                <div class="mb-3 form-check pt-2">
+                    <input type="checkbox" class="form-check-input" id="condition-check">
+                    <label class="form-check-label" for="condition-check">I've read and accept that the data provided
+                        will be
+                        used to update a IP Group.
+                    </label>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <button type="button" class="btn btn-secondary" onclick="window.history.back()">Cancel</button>
+                        <button type="submit"
+                                class="btn btn-primary">Update IP Group
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </section>
+    <!-- Routers Forms -->
+{% endblock %}
