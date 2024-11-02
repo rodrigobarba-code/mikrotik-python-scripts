@@ -640,14 +640,16 @@ def update_ip_group(site_id, ip_group_id):
 
         elif request.method == 'POST':
             import json
-            temp_list = json.loads(request.form.get('ip_group_tags'))
+            temp_list = json.loads(request.form.get('ip_group_tags')) if request.form.get('ip_group_tags') != '' else []
             tag_list = [
                 int(i['id']) for i in temp_list
             ]
 
+            is_blacklist = request.form.get('ip_group_name') == 'blacklist'
+
             response = requests.put(
                 f'http://localhost:8080/api/private/ip/group/{ip_group_id}',
-                json={'tags': tag_list},
+                json={'tags': tag_list if tag_list != [] else [-1]},
                 headers=get_verified_jwt_header(),
                 params={
                     'user_id': session.get('user_id'),
@@ -660,7 +662,7 @@ def update_ip_group(site_id, ip_group_id):
             if response.status_code == 200:
                 if response.json().get('backend_status') == 200:
                     flash('IP Group updated successfully', 'success')
-                    if is_blacklist:
+                    if is_blacklist is True:
                         return redirect(url_for('ip_management.blacklist', site_id=site_id))
                     else:
                         return redirect(url_for('ip_management.authorized', site_id=site_id))

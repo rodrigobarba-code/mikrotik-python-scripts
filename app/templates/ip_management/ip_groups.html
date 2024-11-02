@@ -91,48 +91,56 @@
                 <tbody>
                 {% for ip_group in groups %}
                     <tr>
-                        <td class="text-center"><label for="ip-group-{{ ip_group.ip_group_id }}"></label>
+                        <td class="text-center"><label for="ip-group-{{ ip_group[0].ip_group_id }}"></label>
                             <input type="checkbox" class="form-check-input"
-                                   id="ip-group-{{ ip_group.ip_group_id }}">
+                                   id="ip-group-{{ ip_group[0].ip_group_id }}">
                         </td>
-                        <td>{{ ip_group.ip_group_id }}</td>
-                        <td>{{ ip_group.ip_group_ip }}</td>
-                        {% if ip_group.ip_group_mac %}
-                            <td>{{ ip_group.ip_group_mac }}</td>
+                        <td>{{ ip_group[0].ip_group_id }}</td>
+                        <td>{{ ip_group[0].ip_group_ip }}</td>
+                        {% if ip_group[0].ip_group_mac %}
+                            <td>{{ ip_group[0].ip_group_mac }}</td>
                         {% else %}
                             <td><i class="no_identified">No MAC Address</i></td>
                         {% endif %}
-                        <td>{{ ip_group.ip_group_interface }}</td>
-                        {% if ip_group.ip_group_alias %}
-                            <td>{{ ip_group.ip_group_alias }}</td>
+                        <td>{{ ip_group[0].ip_group_interface }}</td>
+                        {% if ip_group[0].ip_group_alias %}
+                            <td>{{ ip_group[0].ip_group_alias }}</td>
                         {% else %}
                             <td><i class="no_identified">No Alias</i></td>
                         {% endif %}
-                        <td>{{ ip_group.ip_group_description }}</td>
-                        {% if ip_group.ip_group_tags %}
-                            <td>{{ ip_group.ip_group_tags }}</td>
+                        <td>{{ ip_group[0].ip_group_description }}</td>
+                        {% if ip_group[1] != [] %}
+                            <td>
+                                {% for tag in ip_group[1] %}
+                                    <span class="badge"
+                                          style="background-color: {{ tag.ip_group_tag_color }}; color: {{ tag.ip_group_tag_text_color }}">{{ tag.ip_group_tag_name }}
+                                    </span>
+                                {% endfor %}
+                            </td>
                         {% else %}
                             <td><i class="no_identified">No Tags</i></td>
                         {% endif %}
                         <td>
-                            <a href="{{ url_for('ip_management.update_ip_group', ip_group_id=ip_group.ip_group_id, site_id=site_id) }}"
+                            <a href="{{ url_for('ip_management.update_ip_group', ip_group_id=ip_group[0].ip_group_id, site_id=site_id) }}"
                                type="button"
                                class="btn btn-sm btn-warning"><i class="fa-solid fa-edit"></i></a>
-                            <button type="button" id="delete-button-blacklist-{{ ip_group.ip_group_id }}"
+                            <button type="button" id="delete-button-blacklist-{{ ip_group[0].ip_group_id }}"
                                     class="btn btn-sm btn-danger"
                                     data-bs-toggle="modal"
                                     data-bs-target="#delete-modal"
-                                    data-id="{{ ip_group.ip_group_id }}"
+                                    data-id="{{ ip_group[0].ip_group_id }}"
                                     data-type="blacklist"
-                                    data-url="{{ url_for('ip_management.delete_ip_group', ip_group_id=ip_group.ip_group_id, site_id=site_id) }}"
-                                    data-name="{{ ip_group.ip_group_ip }}"
+                                    data-url="{{ url_for('ip_management.delete_ip_group', ip_group_id=ip_group[0].ip_group_id, site_id=site_id) }}"
+                                    data-name="{{ ip_group[0].ip_group_ip }}"
                             ><i class="fa-solid fa-trash"></i></button>
-                            <a href="{{ url_for('ip_management.transfer_to_authorized', ip_group_id=ip_group.ip_group_id, site_id=site_id) }}"
+                            {% if is_blacklist%}
+                            <a href="{{ url_for('ip_management.transfer_to_authorized', ip_group_id=ip_group[0].ip_group_id, site_id=site_id) }}"
                                type="button"
                                class="btn btn-sm btn-info"><i class="fa-solid fa-right-left"></i>
                             </a>
+                            {% endif %}
                             <!-- Show Details Button -->
-                            {{ show_details_button(ip_group.ip_group_id, url_for('ip_management.get_ip_group_details'), 'Blacklist' if is_blacklist else 'Authorized') }}
+                            {{ show_details_button(ip_group[0].ip_group_id, url_for('ip_management.get_ip_group_details'), 'Blacklist' if is_blacklist else 'Authorized') }}
                         </td>
                     </tr>
                 {% endfor %}

@@ -21,6 +21,7 @@
                         },
                     {% endfor %}
                 ],
+                enforceWhitelist: true,
                 dropdown: {
                     maxItems: undefined,
                     classname: "tags-look",
@@ -97,6 +98,11 @@
             >
                 <h2> General Information </h2>
                 <div class="row">
+                    <div class="form-group">
+                        <input type="text" class="form-control" id="ip_group_name" name="ip_group_name"
+                               value="{{ ip_group.ip_group_name if ip_group is not none else '' }}" maxlength="128"
+                               hidden>
+                    </div>
                     <div class="col-6">
                         <div class="form-group">
                             <label for="ip_group_alias">Alias</label>
