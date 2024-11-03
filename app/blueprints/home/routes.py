@@ -33,7 +33,7 @@ def get_current_changelog() -> dict:
         current_dir = os.path.dirname(os.path.realpath(__file__))
 
         # Get the changelog file
-        changelog_file = os.path.join(current_dir, 'changelog.json')
+        changelog_file = os.path.join(current_dir, './changelog.json')
 
         # Check if the changelog file exists
         if os.path.exists(changelog_file):
@@ -45,10 +45,11 @@ def get_current_changelog() -> dict:
                 # Load the changelog file
                 changelog = json.load(file)
 
-                # Sort by date
-                changelog['date'].sort()
+                # Sort the changes by date
+                changelog.sort(key=lambda x: x['date'], reverse=True)
 
                 # Return the changelog
+                return changelog
         else:
             return {
                 'version': '1.0.0',
