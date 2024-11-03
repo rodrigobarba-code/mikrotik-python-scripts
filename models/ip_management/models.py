@@ -1075,10 +1075,11 @@ class IPGroups(Base):
             tags = session.query(IPGroupsToIPGroupsTags).filter_by(fk_ip_group_id=ip_group_id).all()
 
             # Iterate on the tags and create a list of IP group tags
+            tag_list = []
             for tag in tags:
                 # Get the IP group tag object from the database based on the IP group tag ID
                 ip_group_tag = session.query(IPGroupsTags).get(tag.fk_ip_group_tag_id)
-                ip_group_tags_list.append(
+                tag_list.append(
                     IPGroupsTagsEntity(
                         ip_group_tag_id=ip_group_tag.ip_group_tag_id,
                         ip_group_tag_name=ip_group_tag.ip_group_tag_name,
@@ -1087,6 +1088,9 @@ class IPGroups(Base):
                         ip_group_tag_description=ip_group_tag.ip_group_tag_description
                     )
                 )
+
+            # Append the IP group tags to the list
+            ip_group_tags_list.append(tag_list)
 
             # Return the list of IP groups and their tags
             return ip_group_tags_list

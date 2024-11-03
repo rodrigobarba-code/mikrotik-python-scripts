@@ -86,7 +86,7 @@
     <section class="ip-groups-forms text">
         <div class="container-fluid w-75 pb-3">
             <form id="ip-group-form"
-                  data-url="{{ url_for('ip_management.update_ip_group', ip_group_id=ip_group.ip_group_id, site_id=site_id, is_blacklist=is_blacklist) }}"
+                  data-url="{{ url_for('ip_management.update_ip_group', ip_group_id=ip_group[0].ip_group_id, site_id=site_id, is_blacklist=is_blacklist) }}"
                   data-reload="
                     {% if is_blacklist %}
                         {{ url_for('ip_management.blacklist', site_id=site_id) }}
@@ -100,14 +100,14 @@
                 <div class="row">
                     <div class="form-group">
                         <input type="text" class="form-control" id="ip_group_name" name="ip_group_name"
-                               value="{{ ip_group.ip_group_name if ip_group is not none else '' }}" maxlength="128"
+                               value="{{ ip_group[0].ip_group_name if ip_group[0] is not none else '' }}" maxlength="128"
                                hidden>
                     </div>
                     <div class="col-6">
                         <div class="form-group">
                             <label for="ip_group_alias">Alias</label>
                             <input type="text" class="form-control" id="ip_group_alias" name="ip_group_alias"
-                                   value="{{ ip_group.ip_group_alias if ip_group is not none else '' }}" maxlength="128"
+                                   value="{{ ip_group[0].ip_group_alias if ip_group[0] is not none else '' }}" maxlength="128"
                                    required>
                         </div>
                     </div>
@@ -116,7 +116,7 @@
                             <label for="ip_group_description">Description</label>
                             <input type="text" class="form-control" id="ip_group_description"
                                    name="ip_group_description"
-                                   value="{{ ip_group.ip_group_description if ip_group and ip_group.ip_group_description != 'No description' else '' }}"
+                                   value="{{ ip_group[0].ip_group_description if ip_group[0] and ip_group[0].ip_group_description != 'No description' else '' }}"
                                    maxlength="256">
                         </div>
                     </div>
@@ -127,7 +127,7 @@
                         <div class="form-group">
                             <label for="ip_group_tags">Tags</label>
                             <input type="text" class="form-control" id="ip_group_tags" name="ip_group_tags"
-                                   value="{{ ','.join(ip_group.tags) if ip_group and ip_group.tags else '' }}"
+                                   value="{{ ip_group_tags }}"
                                    placeholder="Add tags">
 
                         </div>

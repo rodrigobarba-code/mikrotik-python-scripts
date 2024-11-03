@@ -355,26 +355,25 @@ def get_ip_group_details():
             if response.json().get('backend_status') == 200:
                 blacklist_obj = response.json().get('ip_group')
                 return jsonify([{
-                    'id': ['Identifier', blacklist_obj.get('ip_group_id')],
-                    'name': ['Group Name', 'Blacklist' if blacklist_obj.get(
+                    'id': ['Identifier', blacklist_obj[0].get('ip_group_id')],
+                    'name': ['Group Name', 'Blacklist' if blacklist_obj[0].get(
                         'ip_group_name') == 'blacklist' else 'Authorized'],
-                    'type': ['IP Type', blacklist_obj.get('ip_group_type')],
-                    'alias': ['Alias', blacklist_obj.get('ip_group_alias')],
-                    'description': ['Description', blacklist_obj.get('ip_group_description')],
-                    'ip': ['IP', blacklist_obj.get('ip_group_ip')],
-                    'mask': ['Mask', blacklist_obj.get('ip_group_mask')],
-                    'mac': ['MAC', blacklist_obj.get('ip_group_mac')],
-                    'mac_vendor': ['MAC Vendor', blacklist_obj.get('ip_group_mac_vendor')],
-                    'interface': ['Interface', blacklist_obj.get('ip_group_interface')],
-                    'comment': ['Comment', blacklist_obj.get('ip_group_comment')],
-                    'ip_is_dhcp': ['IP is DHCP', blacklist_obj.get('ip_is_dhcp')],
-                    'ip_is_dynamic': ['IP is Dynamic', blacklist_obj.get('ip_is_dynamic')],
-                    'ip_is_complete': ['IP is Complete', blacklist_obj.get('ip_is_complete')],
-                    'ip_is_disabled': ['IP is Disabled', blacklist_obj.get('ip_is_disabled')],
-                    'ip_is_published': ['IP is Published', blacklist_obj.get('ip_is_published')],
-                    'ip_duplicity': ['IP Duplicity', blacklist_obj.get('ip_duplicity')],
-                    'tags': ['Tags', blacklist_obj.get('ip_group_tags')],
-
+                    'type': ['IP Type', blacklist_obj[0].get('ip_group_type')],
+                    'alias': ['Alias', blacklist_obj[0].get('ip_group_alias')],
+                    'description': ['Description', blacklist_obj[0].get('ip_group_description')],
+                    'ip': ['IP', blacklist_obj[0].get('ip_group_ip')],
+                    'mask': ['Mask', blacklist_obj[0].get('ip_group_mask')],
+                    'mac': ['MAC', blacklist_obj[0].get('ip_group_mac')],
+                    'mac_vendor': ['MAC Vendor', blacklist_obj[0].get('ip_group_mac_vendor')],
+                    'interface': ['Interface', blacklist_obj[0].get('ip_group_interface')],
+                    'comment': ['Comment', blacklist_obj[0].get('ip_group_comment')],
+                    'ip_is_dhcp': ['IP is DHCP', blacklist_obj[0].get('ip_is_dhcp')],
+                    'ip_is_dynamic': ['IP is Dynamic', blacklist_obj[0].get('ip_is_dynamic')],
+                    'ip_is_complete': ['IP is Complete', blacklist_obj[0].get('ip_is_complete')],
+                    'ip_is_disabled': ['IP is Disabled', blacklist_obj[0].get('ip_is_disabled')],
+                    'ip_is_published': ['IP is Published', blacklist_obj[0].get('ip_is_published')],
+                    'ip_duplicity': ['IP Duplicity', blacklist_obj[0].get('ip_duplicity')],
+                    'tags': [tag.get('ip_group_tag_name') for tag in blacklist_obj[1]],
                 }]), 200
             else:
                 return jsonify({'message': response.json().get('message')}), 500
@@ -631,8 +630,9 @@ def update_ip_group(site_id, ip_group_id):
                 if response.json().get('backend_status') == 200:
                     site_name = get_site_name(site_id, get_sites())
                     ip_group = response.json().get('ip_group')
-                    is_blacklist = ip_group.get('ip_group_name') == 'blacklist'
+                    is_blacklist = ip_group[0].get('ip_group_name') == 'blacklist'
                     tags = get_tags()
+                    ip_group_tags = ', '.join([tag.get('ip_group_tag_name') for tag in ip_group[1]])
                 else:
                     raise Exception(response.json().get('message'))
             elif response.status_code == 500:
@@ -677,7 +677,8 @@ def update_ip_group(site_id, ip_group_id):
             site_id=site_id if site_id is not None else '',
             ip_group=ip_group if ip_group is not None else '',
             is_blacklist=is_blacklist if is_blacklist is not None else False,
-            tags=tags if tags is not None else []
+            tags=tags if tags is not None else [],
+            ip_group_tags=ip_group_tags if ip_group_tags is not None else ''
         )
     except Exception as e:
         flash(str(e), 'danger')
