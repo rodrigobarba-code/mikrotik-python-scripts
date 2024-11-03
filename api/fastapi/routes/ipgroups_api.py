@@ -81,27 +81,6 @@ async def get_ip_group(user_id: int, ip_group_id: int, metadata: Request, token:
     try:
         if ip_groups_functions.verify_user_existence(user_id):
             request = ThreadingManager().run_thread(IPGroups.get_ip_group, 'rx', ip_group_id)
-            ip_group = {
-                'ip_group_id': request[0].ip_group_id,
-                'fk_ip_segment_id': request[0].fk_ip_segment_id,
-                'ip_group_name': request[0].ip_group_name,
-                'ip_group_type': request[0].ip_group_type,
-                'ip_group_alias': request[0].ip_group_alias,
-                'ip_group_description': request[0].ip_group_description,
-                'ip_group_ip': request[0].ip_group_ip,
-                'ip_group_mask': request[0].ip_group_mask,
-                'ip_group_mac': request[0].ip_group_mac,
-                'ip_group_mac_vendor': request[0].ip_group_mac_vendor,
-                'ip_group_interface': request[0].ip_group_interface,
-                'ip_group_comment': request[0].ip_group_comment,
-                'ip_is_dhcp': request[0].ip_is_dhcp,
-                'ip_is_dynamic': request[0].ip_is_dynamic,
-                'ip_is_complete': request[0].ip_is_complete,
-                'ip_is_disabled': request[0].ip_is_disabled,
-                'ip_is_published': request[0].ip_is_published,
-                'ip_duplicity': request[0].ip_duplicity,
-                'ip_duplicity_indexes': request[0].ip_duplicity_indexes
-            }
             ip_groups_functions.create_transaction_log(
                 action="GET",
                 table="ip_groups",
@@ -111,7 +90,7 @@ async def get_ip_group(user_id: int, ip_group_id: int, metadata: Request, token:
             )
             return {
                 'message': f"IP Group {ip_group_id} retrieved successfully",
-                'ip_group': ip_group,
+                'ip_group': request,
                 'backend_status': 200
             }
         else:
