@@ -43,7 +43,7 @@ services:
     environment:
       DATABASE_URI: mariadb+mariadbconnector://sevensuiteuser:development-sevensuiteapp@mariadb-database/sevensuite
     ports:
-        - "8080:8080"
+      - "8080:8080"
     depends_on:
       mariadb-database:
         condition: service_healthy
@@ -60,8 +60,40 @@ services:
     environment:
       FLASK_ENV: development
 
+  nextcloud-database:
+    image: mariadb:latest
+    container_name: nextcloud_database
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: nextcloud_db
+      MYSQL_USER: nextcloud_user
+      MYSQL_PASSWORD: user_password
+    volumes:
+      - nextcloud_db_data:/var/lib/mysql
+
+  nextcloud-app:
+    image: nextcloud:latest
+    container_name: nextcloud_app
+    restart: always
+    ports:
+      - "8082:80"
+    environment:
+      MYSQL_HOST: nextcloud-database
+      MYSQL_DATABASE: nextcloud_db
+      MYSQL_USER: nextcloud_user
+      MYSQL_PASSWORD: user_password
+      NEXTCLOUD_ADMIN_USER: admin_username
+      NEXTCLOUD_ADMIN_PASSWORD: admin_password
+    depends_on:
+      - nextcloud-database
+    volumes:
+      - nextcloud_data:/var/www/html
+
 volumes:
   mariadb_data:
+  nextcloud_data:
+  nextcloud_db_data:
 
 networks:
   mariadb_network:
