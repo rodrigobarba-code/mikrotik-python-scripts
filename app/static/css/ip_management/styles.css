@@ -286,3 +286,25 @@ a:hover {
     text-indent: -20px;
     border: 0;
 }
+
+#transfer-icon {
+    width: 20px;
+    height: 20px;
+    transform: scale(2.6);
+    transition: var(--tran-03);
+}
+
+#transfer-icon:hover {
+    transform: scale(3);
+}
+
+#transfer-icon-all {
+    width: 20px;
+    height: 20px;
+    transform: scale(2.6);
+    transition: var(--tran-03);
+}
+
+#transfer-icon-all:hover {
+    transform: scale(3);
+}

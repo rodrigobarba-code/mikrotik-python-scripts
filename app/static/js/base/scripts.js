@@ -123,6 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
  * @param   {string} type - The type of item to delete.
  * @returns {void}
  */
+
 function deleteSelectModal(urlIn, urlOut, type) {
     // Add event listener to the confirm delete select button in modal
     document.getElementById('delete-select').addEventListener('click', function () {
@@ -165,7 +166,7 @@ function deleteSelectModal(urlIn, urlOut, type) {
                         // Check if the response is ok
                         if (response.ok) {
                             location.href = urlOut;  // Redirect the user to the urlOut
-                        // If not, alert the user that the delete failed
+                            // If not, alert the user that the delete failed
                         } else {
                             alert('Failed to delete' + type);  // Alert the user that the delete failed
                         }
@@ -209,53 +210,53 @@ function deleteAllModal(urlIn, urlOut, type) {
     document.getElementById('delete-all').addEventListener('click', function () {
         // Check if there are items to delete
         if (document.querySelectorAll('input[type="checkbox"]').length === 0) {
-          Swal.fire({
-        title: 'Oops! No ' + type + ' to delete',
-        icon: 'info',
-        text: 'It seems there are no ' + type + 's to delete.',
-        showCancelButton: false,
-        confirmButtonText: 'Close',
-    });  // Alert the user that there are no items to delete
-  // If there are items to delete, send a POST request to the urlIn
-  } else {
-    let des = '';
-    if (type === 'segments') {
-        des = 'All Segments, ARPs, ARP Tags, and all other related data with this segment will be deleted.';
-    }
-    Swal.fire({
-        title: 'Are you really sure you want to delete all ' + type + '?',
-        icon: 'warning',
-        text: des,
-        showCancelButton: true,
-        allowOutsideClick: false,
-        confirmButtonText: 'Yes',
-        cancelButtonText: 'No',
-    }).then((result) => {
-        if (result.isConfirmed) {
             Swal.fire({
-                title: 'Deleting all ' + type,
+                title: 'Oops! No ' + type + ' to delete',
                 icon: 'info',
-                text: 'Please wait while we delete the ' + type + '(s).',
+                text: 'It seems there are no ' + type + 's to delete.',
                 showCancelButton: false,
-                showConfirmButton: false,
+                confirmButtonText: 'Close',
+            });  // Alert the user that there are no items to delete
+            // If there are items to delete, send a POST request to the urlIn
+        } else {
+            let des = '';
+            if (type === 'segments') {
+                des = 'All Segments, ARPs, ARP Tags, and all other related data with this segment will be deleted.';
+            }
+            Swal.fire({
+                title: 'Are you really sure you want to delete all ' + type + '?',
+                icon: 'warning',
+                text: des,
+                showCancelButton: true,
                 allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();  // Show the loading icon
-                },
-            });
-            fetch(urlIn, {
-                method: 'POST', headers: {
-                    'Content-Type': 'application/json'  // Set the content type to JSON
-                }, body: JSON.stringify({items_ids: []})  // Set the body of the request
-            }).then(response => {
-                // Check if the response is ok
-                if (response.ok) {
-                    location.href = urlOut;  // Redirect the user to the urlOut
-                // If not, alert the user that the delete failed
-                } else {
-                    alert('Failed to delete' + type);  // Alert the user that the delete failed
-                }
-            });
+                confirmButtonText: 'Yes',
+                cancelButtonText: 'No',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: 'Deleting all ' + type,
+                        icon: 'info',
+                        text: 'Please wait while we delete the ' + type + '(s).',
+                        showCancelButton: false,
+                        showConfirmButton: false,
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();  // Show the loading icon
+                        },
+                    });
+                    fetch(urlIn, {
+                        method: 'POST', headers: {
+                            'Content-Type': 'application/json'  // Set the content type to JSON
+                        }, body: JSON.stringify({items_ids: []})  // Set the body of the request
+                    }).then(response => {
+                        // Check if the response is ok
+                        if (response.ok) {
+                            location.href = urlOut;  // Redirect the user to the urlOut
+                            // If not, alert the user that the delete failed
+                        } else {
+                            alert('Failed to delete' + type);  // Alert the user that the delete failed
+                        }
+                    });
                 } else {
                     Swal.fire({
                         title: 'Delete cancelled successfully',
@@ -272,3 +273,157 @@ function deleteAllModal(urlIn, urlOut, type) {
 }
 
 /* Function to delete all items in a table using a modal. */
+
+/*function move all to authorized*/
+function moveAllToAuthorized(urlIn, urlOut, type) {
+    // Add event listener to the confirm delete all button in modal
+    document.getElementById('move-all-to-authorized').addEventListener('click', function () {
+        // Check if there are items to delete
+        if (document.querySelectorAll('input[type="checkbox"]').length === 0) {
+            Swal.fire({
+                title: 'Oops! No ' + type + ' to move',
+                icon: 'info',
+                text: 'It seems there are no ' + type + 's to move.',
+                showCancelButton: false,
+                confirmButtonText: 'Close',
+            });  // Alert the user that there are no items to delete
+            // If there are items to delete, send a POST request to the urlIn
+        } else {
+            Swal.fire({
+                title: 'Are you really sure you want to move all ' + type + ' to authorized?',
+                icon: 'warning',
+                text: 'All ' + type + 's will be moved to authorized.',
+                showCancelButton: true,
+                allowOutsideClick: false,
+                confirmButtonText: 'Yes',
+                cancelButtonText: 'No',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: 'Moving all ' + type + ' to authorized',
+                        icon: 'info',
+                        text: 'Please wait while we move the ' + type + '(s).',
+                        showCancelButton: false,
+                        showConfirmButton: false,
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();  // Show the loading icon
+                        },
+                    });
+                    fetch(urlIn, {
+                        method: 'POST', headers: {
+                            'Content-Type': 'application/json'  // Set the content type to JSON
+                        },  // Set the body of the request
+                    }).then(response => {
+                        // Check if the response is ok
+                        if (response.ok) {
+                            location.href = urlOut;  // Redirect the user to the urlOut
+                            // If not, alert the user that the delete failed
+                        } else {
+                            alert('Failed to move ' + type + ' to authorized');  // Alert the user that the delete failed
+                        }
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Move cancelled successfully',
+                        icon: ' info',
+                        description: 'No ' + type + ' were moved.',
+                        showCancelButton: false,
+                        confirmButtonText: 'Close',
+                    });
+                }
+            });
+        }
+    });
+    // Add event listener to the confirm delete all button in modal
+}
+
+/*function move select to authorized*/
+function moveSelectToAuthorized(urlIn, urlOut, type) {
+    // Add event listener to the confirm move button in modal
+    document.getElementById('move-select-to-authorized').addEventListener('click', function () {
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');  // Get all checked checkboxes
+        const selectedIds = Array.from(checkboxes).map(cb => cb.id.replace(type + '-', ''));  // Get all selected ids
+
+        // Check if there are any selected checkboxes
+        if (selectedIds.length === 0) {
+            Swal.fire({
+                title: 'Oops! No ' + type + ' to move',
+                icon: 'info',
+                text: 'It seems there are no ' + type + 's selected to move.',
+                showCancelButton: false,
+                confirmButtonText: 'Close',
+            });
+            return; // Exit the function if no checkboxes are selected
+        }
+
+        // Confirm move to authorized
+        Swal.fire({
+            title: 'Are you really sure you want to move ' + selectedIds.length + ' ' + type + '(s) to authorized?',
+            icon: 'warning',
+            text: 'All selected ' + type + 's will be moved to authorized.',
+            showCancelButton: true,
+            allowOutsideClick: false,
+            confirmButtonText: 'Yes',
+            cancelButtonText: 'No',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Show loading indicator
+                Swal.fire({
+                    title: 'Moving ' + selectedIds.length + ' ' + type + ' to authorized',
+                    icon: 'info',
+                    text: 'Please wait while we move the ' + type + '(s).',
+                    showCancelButton: false,
+                    showConfirmButton: false,
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();  // Show loading icon
+                    },
+                });
+
+                // Make the POST request
+                fetch(urlIn, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',  // Set content type to JSON
+                    },
+                    body: JSON.stringify({items_ids: selectedIds})  // Pass selected IDs in the body
+                }).then(response => {
+                    if (response.ok) {
+                        // If the request is successful, redirect the user
+                        Swal.close();  // Close the loading modal
+                        location.href = urlOut;  // Redirect the user to the desired page
+                    } else {
+                        // Handle failed move
+                        Swal.fire({
+                            title: 'Failed to move ' + type + ' to authorized',
+                            icon: 'error',
+                            text: 'Something went wrong, please try again later.',
+                            showCancelButton: false,
+                            confirmButtonText: 'Close',
+                        });
+                    }
+                }).catch((error) => {
+                    // Handle network or fetch error
+                    Swal.fire({
+                        title: 'Error occurred',
+                        icon: 'error',
+                        text: 'There was an issue with the network request.',
+                        showCancelButton: false,
+                        confirmButtonText: 'Close',
+                    });
+                });
+
+            } else {
+                // If the user cancels the action
+                Swal.fire({
+                    title: 'Move cancelled',
+                    icon: 'info',
+                    text: 'No ' + type + 's were moved.',
+                    showCancelButton: false,
+                    confirmButtonText: 'Close',
+                });
+            }
+        });
+    });
+}
