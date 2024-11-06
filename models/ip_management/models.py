@@ -922,16 +922,16 @@ class IPGroups(Base):
             raise e
 
     @staticmethod
-    def move_all_from_blacklist_to_authorized(session, site_id: str) -> None:
+    def move_all_from_blacklist_to_authorized(session, group_metadata: dict) -> None:
         """
         Move all IP groups from blacklist to authorized
         :param session: The database session
-        :param site_id: The site ID
+        :param group_metadata: The group metadata
         :return: None
         """
         try:
             # Get router from the database based on the site ID
-            router = session.query(Router).filter_by(fk_site_id=site_id).first()
+            router = session.query(Router).filter_by(fk_site_id=group_metadata['site_id']).first()
 
             # Get all IP groups from the database based on the router ID
             ip_segments = session.query(IPSegment).filter_by(fk_router_id=router.router_id).all()
@@ -940,7 +940,9 @@ class IPGroups(Base):
             ip_segment_ids = [ip_segment.ip_segment_id for ip_segment in ip_segments]
 
             # Get all IP groups from the database based on the IP segment IDs
-            ip_groups = session.query(IPGroups).filter(IPGroups.fk_ip_segment_id.in_(ip_segment_ids)).all()
+            ip_groups = session.query(IPGroups).filter(
+                IPGroups.fk_ip_segment_id.in_(ip_segment_ids), IPGroups.ip_group_name == group_metadata['group']
+            ).all()
 
             # Iterate on the IP groups and update them in the database
             for ip_group in ip_groups:

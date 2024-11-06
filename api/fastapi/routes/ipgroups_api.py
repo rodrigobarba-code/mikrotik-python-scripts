@@ -248,12 +248,12 @@ async def move_blacklist_to_authorized(user_id: int, ip_group_id: int, metadata:
         }
 
 
-@ip_groups_router.put("/blacklist/move/to/authorized/bulk")
+@ip_groups_router.put("/blacklist/move/to/authorized/bulk/")
 async def move_blacklist_to_authorized_bulk(user_id: int, ip_groups_ids: BlacklistBulkMoveBase, metadata: Request,
                                             token: dict = Depends(verify_jwt)):
     try:
         if ip_groups_functions.verify_user_existence(user_id):
-            ThreadingManager().run_thread(IPGroups.bulk_move_from_blacklist_to_authorized, 'w', ip_groups_ids)
+            ThreadingManager().run_thread(IPGroups.bulk_move_from_blacklist_to_authorized, 'w', ip_groups_ids.ip_groups_ids)
             ip_groups_functions.create_transaction_log(
                 action="UPDATE",
                 table="ip_groups",
@@ -263,7 +263,8 @@ async def move_blacklist_to_authorized_bulk(user_id: int, ip_groups_ids: Blackli
             )
             return {
                 'message': f"IP Groups moved from Blacklist to Authorized",
-                'backend_status': 200
+                'backend_status': 200,
+                'count_flag': len(ip_groups_ids.ip_groups_ids)
             }
         else:
             raise Exception("User not registered in the system")

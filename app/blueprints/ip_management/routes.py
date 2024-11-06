@@ -485,14 +485,14 @@ def bulk_delete_blacklist():
                 flag = response.json().get('count_flag')
                 flash(f'{flag} segments deleted successfully', 'success')
 
-                return jsonify({'message': f'{flag} segments deleted successfully'}), 200
+                return jsonify({'message': f'{flag} IP Groups deleted successfully'}), 200
             else:
                 raise Exception(response.json().get('message'))
         elif response.status_code == 500:
-            raise Exception('Failed to delete segments')
+            raise Exception('Failed to delete IP Groups')
     except Exception as e:
         flash(str(e), 'danger')
-        return jsonify({'message': 'Failed to delete segments', 'error': str(e)}), 500
+        return jsonify({'message': 'Failed to delete IP Groups', 'error': str(e)}), 500
 
 
 @ip_management_bp.route('/ip/group/delete/<int:ip_group_id>/<int:site_id>', methods=['GET'])
@@ -547,6 +547,61 @@ def transfer_to_authorized(ip_group_id, site_id):
         return redirect(url_for('ip_management.blacklist', site_id=site_id))
 
 
+@ip_management_bp.route('/ip/group/transfer/all/authorized/<int:site_id>', methods=['POST'])
+@restriction.login_required
+@restriction.admin_required
+def transfer_all_to_authorized(site_id):
+    try:
+        response = requests.put(
+            f'http://localhost:8080/api/private/blacklist/move/all/to/authorized/{site_id}',
+            headers=get_verified_jwt_header(),
+            params={
+                'user_id': session.get('user_id'),
+                'site_id': site_id
+            }
+        )
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                flash(f'All IP Groups moved to authorized successfully', 'success')
+                return jsonify({'message': f'All IP Groups moved to authorized successfully'}), 200
+            else:
+                raise Exception(response.json().get('message'))
+        elif response.status_code == 500:
+            raise Exception('Failed to transfer IP Groups')
+    except Exception as e:
+        flash(str(e), 'danger')
+        return redirect(url_for('ip_management.blacklist', site_id=site_id))
+
+@ip_management_bp.route('/ip/group/transfer/bulk/authorized/', methods=['POST'])
+@restriction.login_required
+@restriction.admin_required
+def transfer_bulk_to_authorized():
+    data = request.get_json()
+    ip_group_ids = data.get('items_ids', [])
+    try:
+        response = requests.put(
+            f'http://localhost:8080/api/private/blacklist/move/to/authorized/bulk/',
+            json={'ip_groups_ids': ip_group_ids},
+            headers=get_verified_jwt_header(),
+            params={
+                'user_id': session.get('user_id')
+            }
+        )
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                flag = response.json().get('count_flag')
+                flash(f'{flag} IP Groups moved to authorized successfully', 'success')
+                return jsonify({'message': f'{flag} IP Groups moved to authorized successfully'}), 200
+            else:
+                raise Exception(response.json().get('message'))
+        elif response.status_code == 500:
+            raise Exception('Failed to transfer IP Groups')
+    except Exception as e:
+        flash(str(e), 'danger')
+        return jsonify({'message': 'Failed to transfer IP Groups', 'error': str(e)}), 500
+
+
+
 @ip_management_bp.route('/ip/group/delete/bulk', methods=['POST'])
 @restriction.login_required
 @restriction.admin_required
@@ -580,34 +635,26 @@ def bulk_delete_ip_group():
 @ip_management_bp.route('/ip/group/delete/all/<int:site_id>', methods=['POST'])
 @restriction.login_required
 @restriction.admin_required
-def delete_ip_groups(site_id):
+def delete_all_ip_groups(site_id):
     try:
-        response = requests.get(
-            f'http://localhost:8080/api/private/ip/group/{site_id}',
+        is_blacklist = request.args.get('is_blacklist')
+        if is_blacklist:
+            url = f'http://localhost:8080/api/private/blacklist/site/{site_id}'
+        else:
+            url = f'http://localhost:8080/api/private/ip/authorized/site/{site_id}'
+
+        delete_response = requests.delete(
+            url,
             headers=get_verified_jwt_header(),
             params={'user_id': session.get('user_id')}
         )
-        if response.status_code == 200:
-            if response.json().get('backend_status') == 200:
-                ip_group = response.json().get('ip_group')
-                is_blacklist = ip_group.get('ip_group_name') == 'blacklist'
-                if is_blacklist:
-                    url = f'http://localhost:8080/api/private/blacklist/site/{site_id}'
-                else:
-                    url = f'http://localhost:8080/api/private/ip/authorized/site/{site_id}'
-
-                delete_response = requests.delete(
-                    url,
-                    headers=get_verified_jwt_header(),
-                    params={'user_id': session.get('user_id')}
-                )
-                if delete_response.status_code == 200:
-                    if delete_response.json().get('backend_status') == 200:
-                        flash('All IP Groups deleted successfully', 'success')
-                        return jsonify({'message': 'All IP Groups deleted successfully'}), 200
-                    else:
-                        raise Exception(delete_response.json().get('message'))
-        elif response.status_code == 500:
+        if delete_response.status_code == 200:
+            if delete_response.json().get('backend_status') == 200:
+                flash('All IP Groups deleted successfully', 'success')
+                return jsonify({'message': 'All IP Groups deleted successfully'}), 200
+            else:
+                raise Exception(delete_response.json().get('message'))
+        elif delete_response.status_code == 500:
             raise Exception('Failed to retrieve IP Group')
     except Exception as e:
         flash(str(e), 'danger')
