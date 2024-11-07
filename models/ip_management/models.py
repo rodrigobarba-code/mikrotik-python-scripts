@@ -1289,3 +1289,61 @@ class IPGroups(Base):
             return authorized_list
         except Exception as e:
             raise e
+
+    @staticmethod
+    def bulk_update_duplicity(session, ip_groups: list[IPGroupsEntity]) -> None:
+        """
+        Update the duplicity of a list of IP groups
+        :param session: The database session
+        :param ip_groups: The list of IP groups
+        :return: None
+        """
+        try:
+            # Create a list of IP Groups objects to update
+            to_update = []
+
+            # Iterate on the IP groups and update their duplicity in the database
+            for ip_group in ip_groups:
+                # Get the IP group from the database based on the IP group ID
+                ip_group_x = session.query(IPGroups).get(ip_group.ip_group_id)
+
+                # Update the IP group in the database
+                ip_group_x.ip_duplicity = ip_group.ip_duplicity
+                ip_group_x.ip_duplicity_indexes = ip_group.ip_duplicity_indexes
+
+                # Add the IP group to the list
+                to_update.append(ip_group_x)
+
+            # Update the IP groups in the database
+            session.bulk_save_objects(to_update)
+        except Exception as e:
+            raise e
+
+    @staticmethod
+    def bulk_delete_duplicity(session, ip_group_ids: list[int]) -> None:
+        """
+        Delete the duplicity of a list of IP groups
+        :param session: The database session
+        :param ip_group_ids: The list of IP group IDs
+        :return: None
+        """
+        try:
+            # Create a list of IP Groups objects to update
+            to_update = []
+
+            # Iterate on the IP groups and update their duplicity in the database
+            for ip_group_id in ip_group_ids:
+                # Get the IP group from the database based on the IP group ID
+                ip_group_x = session.query(IPGroups).get(ip_group_id)
+
+                # Update the IP group in the database
+                ip_group_x.ip_duplicity = False
+                ip_group_x.ip_duplicity_indexes = ''
+
+                # Add the IP group to the list
+                to_update.append(ip_group_x)
+
+            # Update the IP groups in the database
+            session.bulk_save_objects(to_update)
+        except Exception as e:
+            raise e
