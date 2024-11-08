@@ -756,9 +756,16 @@ class IPGroups(Base):
                         IPGroups.ip_group_mac == ip_group.ip_group_mac
                     ).first()
 
+                    group_name = 'blacklist'
+                    if (ip_group.ip_is_dynamic is True and ip_group.ip_is_complete is False) or (
+                            ip_group.ip_is_dynamic is False and ip_group.ip_is_complete is True):
+                        group_name = 'blacklist'
+                    elif ip_group.ip_is_dynamic is True and ip_group.ip_is_complete is True:
+                        group_name = 'authorized'
+
                     # Update the IP group in the database
                     old_ip_group.fk_ip_segment_id = ip_group.fk_ip_segment_id
-                    old_ip_group.ip_group_name = ip_group.ip_group_name
+                    old_ip_group.ip_group_name = group_name
                     old_ip_group.ip_group_type = ip_group.ip_group_type
                     old_ip_group.ip_group_alias = ip_group.ip_group_alias
                     old_ip_group.ip_group_description = ip_group.ip_group_description
@@ -1345,5 +1352,46 @@ class IPGroups(Base):
 
             # Update the IP groups in the database
             session.bulk_save_objects(to_update)
+        except Exception as e:
+            raise e
+
+    @staticmethod
+    def move_to_arps(session, ip_groups: list[IPGroupsEntity]) -> None:
+        """
+        Move a list of IP groups to ARP
+        :param session: The database session
+        :param ip_groups: The list of IP groups
+        :return: None
+        """
+
+        try:
+            # Import the ARP model
+            from models.router_scan.models import ARP
+
+            # Create a list of ARP objects to add to the database
+            arps = []
+            for ip_group in ip_groups:
+                arps.append(ARP(
+                    fk_ip_address_id=ip_group.fk_ip_segment_id,
+                    arp_ip=ip_group.ip_group_ip,
+                    arp_mac=ip_group.ip_group_mac,
+                    arp_alias=ip_group.ip_group_alias,
+                    arp_tag='Public IP' if ip_group.ip_group_type == 'public' else 'Private IP',
+                    arp_interface=ip_group.ip_group_interface,
+                    arp_is_dhcp=ip_group.ip_is_dhcp,
+                    arp_is_invalid=False,
+                    arp_is_dynamic=ip_group.ip_is_dynamic,
+                    arp_is_complete=ip_group.ip_is_complete,
+                    arp_is_disabled=ip_group.ip_is_disabled,
+                    arp_is_published=ip_group.ip_is_published,
+                    arp_duplicity=ip_group.ip_duplicity,
+                    arp_duplicity_indexes=ip_group.ip_duplicity_indexes
+                ))
+
+            # Delete the IP groups from the database
+            session.query(IPGroups).filter(IPGroups.ip_group_id.in_([ip_group.ip_group_id for ip_group in ip_groups])).delete(synchronize_session=False)
+
+            # Add the ARP objects to the database
+            session.bulk_save_objects(arps)
         except Exception as e:
             raise e

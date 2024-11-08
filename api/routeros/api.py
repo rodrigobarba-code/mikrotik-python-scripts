@@ -1,4 +1,5 @@
 import asyncio
+from threading import Thread
 
 import ros_api
 
@@ -307,7 +308,7 @@ class RouterAPI:
             # Get the IP scan data from the router
             ip_scan_data = RouterAPI.communicate_data(
                 router_api_instance.get_api(),
-                ['/tool/ip-scan', '=interface=bridgeAPs', '=duration=25s']
+                ['/tool/ip-scan', '=interface=bridgeAPs', '=duration=180s']
             )
 
             # Return the IP scan data
@@ -325,6 +326,7 @@ class RouterAPI:
 
         try:
             # Import the ThreadPoolExecutor and as_completed modules
+            import re
             from concurrent.futures import ThreadPoolExecutor, as_completed
 
             # Get a list of all allowed routers
@@ -341,12 +343,28 @@ class RouterAPI:
                 # Iterate through all futures and routers
                 for future in as_completed(future_to_router):
                     # router = future_to_router[future]
+                    router_ip = future_to_router[future]['ip']
                     try:
                         # Get the IP scan data from the future
-                        data = future.result()
+                        raw_data = future.result()
 
-                        # Concatenate the IP scan data to the dictionary
-                        results.update(data)
+                        # Reverse the list elements and get the first element
+                        reverse = list(raw_data.values())[0]
+                        reverse.reverse()
+
+                        # Get the last section of IP Scan using REGEX to find =.section=*
+                        last_section_string = [item for item in reverse[1] if item.startswith('=.section=')][0]
+
+                        # Remove all elements that are not the last section of IP Scan
+                        reverse.pop(0)
+
+                        # Iterate through all elements in the reversed list
+                        reverse_mod = [sublist for sublist in reverse if last_section_string in sublist]
+                        reverse_mod.reverse()
+
+                        # Concatenate the IP scan data to the results dictionary
+                        dict_mod = {router_ip: reverse_mod}
+                        results.update(dict_mod)
                     except Exception as exc:
                         raise exc
 
@@ -406,16 +424,15 @@ class RouterAPI:
                 duplicates[ip] = []
 
             # Verify if the MAC address is not None
-            if mac is not None:
+            if mac is not None and mac != mac_main:
                 duplicates[ip].append(mac)
 
         # Return the duplicates MAC addresses
-        macs = duplicates.get(ip_main, [])
+        macs = duplicates[ip_main] if ip_main in duplicates else []
 
         # Verify if there are more than one MAC address
-        if len(macs) > 1:
+        if len(macs) > 0:
             # Return the duplicates MAC addresses
-            print(f"IP: {ip_main} has duplicates: {', '.join(macs)}")
             return ', '.join(macs)
         else:
             return ''
@@ -463,6 +480,7 @@ class RouterAPI:
             elif remove_duplicity_arp:
                 # Remove the ARP data with duplicity
                 ThreadingManager().run_thread(ARP.bulk_delete_duplicity, 'w', remove_duplicity_arp)
+                ThreadingManager().run_thread(ARP.move_to_ip_groups, 'w', insert_duplicity_arp)
 
             for ip_group in ip_groups:
                 # Get the IP and MAC address from the ARP data
@@ -479,23 +497,20 @@ class RouterAPI:
                     ip_group[0].ip_duplicity_indexes = duplicates
 
                     # Add the ARP data to the insert list
-                    insert_duplicity_arp.append(ip_group[0])
+                    insert_duplicity_ip_group.append(ip_group[0])
 
                 elif duplicates == '' and ip_group[0].ip_duplicity is True:
                     # Append ARP ID to the remove list
-                    remove_duplicity_arp.append(ip_group[0].ip_group_id)
+                    remove_duplicity_ip_group.append(ip_group[0].ip_group_id)
 
             # Verify if there are IP Group data to insert
             if insert_duplicity_ip_group:
                 # Insert the IP Group data with duplicity
                 ThreadingManager().run_thread(IPGroups.bulk_update_duplicity, 'w', insert_duplicity_ip_group)
+                ThreadingManager().run_thread(IPGroups.move_to_arps, 'w', insert_duplicity_ip_group)
             elif remove_duplicity_ip_group:
                 # Remove the IP Group data with duplicity
                 ThreadingManager().run_thread(IPGroups.bulk_delete_duplicity, 'w', remove_duplicity_ip_group)
-
-            print('IP Duplicity resolved')
-            print([insert_duplicity_arp, remove_duplicity_arp, insert_duplicity_ip_group, remove_duplicity_ip_group])
-
         except Exception as e:
             print(str('Error: resolve_ip_duplicity: ' + str(e)))
 

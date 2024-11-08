@@ -369,6 +369,61 @@ class ARP(Base):
         except Exception as e:
             raise e
 
+    @staticmethod
+    def move_to_ip_groups(session, arps: list[ARPEntity]) -> None:
+        """
+        Move an ARP object to the IPGroups table
+        :param session: Database session
+        :param arp_id: ARP ID to move
+        :return: None
+        """
+
+        try:
+            # Importing here to avoid circular imports
+            from models.ip_management.models import IPGroups
+
+            # Create a list for the IP Groups object to move
+            ip_groups = []
+
+            for arp in arps:
+                # Check if it will go to Blacklist or Authorized
+                group_name = 'blacklist'
+
+                if (arp.arp_is_dynamic is True and arp.arp_is_complete is False) or (
+                        arp.arp_is_dynamic is False and arp.arp_is_complete is True):
+                    group_name = 'blacklist'
+                elif arp.arp_is_dynamic is True and arp.arp_is_complete is True:
+                    group_name = 'authorized'
+
+                ip_groups.append(IPGroups(
+                    fk_ip_segment_id=arp.fk_ip_address_id,
+                    ip_group_name=group_name,
+                    ip_group_type='public' if arp.arp_tag == 'Public IP' else 'private',
+                    ip_group_alias=arp.arp_alias,
+                    ip_group_description='No Description',
+                    ip_group_ip=arp.arp_ip,
+                    ip_group_mask='',
+                    ip_group_mac=arp.arp_mac,
+                    ip_group_mac_vendor=ARPFunctions.get_mac_vendor(arp.arp_mac),
+                    ip_group_interface=arp.arp_interface,
+                    ip_group_comment='',
+                    ip_is_dhcp=arp.arp_is_dhcp,
+                    ip_is_dynamic=arp.arp_is_dynamic,
+                    ip_is_complete=arp.arp_is_complete,
+                    ip_is_disabled=arp.arp_is_disabled,
+                    ip_is_published=arp.arp_is_published,
+                    ip_duplicity=arp.arp_duplicity,
+                    ip_duplicity_indexes=arp.arp_duplicity_indexes
+                ))
+
+            # Delete the ARP object from the ARP table
+            session.query(ARP).filter(ARP.arp_id.in_([arp.arp_id for arp in arps])).delete(synchronize_session='fetch')
+
+            # Add the IP Groups object to the IPGroups table
+            session.bulk_save_objects(ip_groups)
+        except Exception as e:
+            raise e
+
 
 """
 class ARPTags(Base):
