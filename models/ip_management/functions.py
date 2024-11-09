@@ -119,9 +119,10 @@ class IPAddressesFunctions:
 
             # Get the IP Groups from the database where IPs are authorized
             ip_groups = session.query(IPGroups).filter(
-                IPGroups.fk_ip_segment_id == ip_segment_id,
-                IPGroups.ip_group_name == 'authorized'
+                IPGroups.fk_ip_segment_id == ip_segment_id
             ).all()
+
+            # IPGroups.ip_group_name == 'authorized'
 
             # Create a set of all IPs from the IP Groups
             ip_groups_ips = set(ip_group.ip_group_ip for ip_group in ip_groups)
