@@ -147,6 +147,9 @@ class IPAddressesFunctions:
             # Create a set of all IPs that are in the IP Segment
             ip_segment_ips = set(str(ip) for ip in network)
 
+            # Remove the given IP Segment IP from the set
+            ip_segment_ips.remove(ip_segment_ip)
+
             # Get the available IPs (IP addresses in segment but not in groups)
             available_ips = ip_segment_ips - ip_groups_ips
 
