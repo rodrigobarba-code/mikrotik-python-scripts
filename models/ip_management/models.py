@@ -756,9 +756,16 @@ class IPGroups(Base):
                         IPGroups.ip_group_mac == ip_group.ip_group_mac
                     ).first()
 
+                    group_name = 'blacklist'
+                    if (ip_group.ip_is_dynamic is True and ip_group.ip_is_complete is False) or (
+                            ip_group.ip_is_dynamic is False and ip_group.ip_is_complete is True):
+                        group_name = 'blacklist'
+                    elif ip_group.ip_is_dynamic is True and ip_group.ip_is_complete is True:
+                        group_name = 'authorized'
+
                     # Update the IP group in the database
                     old_ip_group.fk_ip_segment_id = ip_group.fk_ip_segment_id
-                    old_ip_group.ip_group_name = ip_group.ip_group_name
+                    old_ip_group.ip_group_name = group_name
                     old_ip_group.ip_group_type = ip_group.ip_group_type
                     old_ip_group.ip_group_alias = ip_group.ip_group_alias
                     old_ip_group.ip_group_description = ip_group.ip_group_description
@@ -1237,7 +1244,7 @@ class IPGroups(Base):
         return group_list
 
     @staticmethod
-    def get_available_authorized_by_site(session, site_id: int) -> list:
+    def get_available_authorized_by_site(session, metadata: dict) -> list:
         """
         Get all available authorized IP groups from the database by site
         :param session: The database session
@@ -1251,41 +1258,306 @@ class IPGroups(Base):
             authorized_list = []
 
             # Get the router from the database based on the site ID
-            router = session.query(Router).filter_by(fk_site_id=site_id).first()
+            router = session.query(Router).filter_by(fk_site_id=metadata['site_id']).first()
 
             # Get all IP segments from the database based on the router ID
-            ip_segments = session.query(IPSegment).filter_by(fk_router_id=router.router_id).all()
+            ip_segments = session.query(IPSegment).filter_by(
+                fk_router_id=router.router_id
+            ).all()
+
+            # Iterate for each segment
+            for ipx in ip_segments:
+                # Verify is the segment is disabled
+                if ipx.ip_segment_is_disabled is False:
+                    # List of available and unavailable IP groups
+                    a_list = []
+                    u_list = []
+
+                    # Get all available IP groups from the database based on the segment ID
+                    available_ips = IPAddressesFunctions.get_available_ip_by_segment(session, ipx.ip_segment_id)
+                    unavailable_ips = session.query(IPGroups).filter_by(fk_ip_segment_id=ipx.ip_segment_id).all()
+
+                    # Iterate on the available and unavailable IP groups and create a list of available authorized IP groups
+                    if unavailable_ips:
+                        for ipy in unavailable_ips:
+                            u_list.append([ipy.ip_group_id, ipy.ip_group_ip])
+
+                    # Append the available and unavailable IP groups to the list
+                    if available_ips:
+                        a_list = available_ips
+
+                    # Append the available authorized IP groups to the list
+                    authorized_list.append(
+                        {
+                            f'{ipx.ip_segment_ip}/{ipx.ip_segment_mask}': {
+                                'available': a_list,
+                                'unavailable': u_list
+                            }
+                        }
+                    )
+                else:
+                    # Append the available authorized IP groups to the list
+                    authorized_list.append(
+                        {
+                            f'{ipx.ip_segment_ip}/{ipx.ip_segment_mask}': -1
+                        }
+                    )
+
+            # Return the list of available authorized IP groups
+            return authorized_list
+        except Exception as e:
+            raise e
+
+    @staticmethod
+    def get_count_ip_by_site(session, metadata: dict) -> list:
+        """
+        Get the count of private IP groups from the database by site
+        :param session: The database session
+        :param metadata: The metadata
+        :return: List of available private IP groups
+        """
+        try:
+            from models.ip_management.functions import IPAddressesFunctions
+
+            # List of available private IP groups
+            private_list = []
+
+            # Get the router from the database based on the site ID
+            router = session.query(Router).filter_by(fk_site_id=metadata['site_id']).first()
+
+            # Get all IP segments from the database based on the router ID
+            ip_segments = session.query(IPSegment).filter_by(
+                fk_router_id=router.router_id,
+                ip_segment_tag='PRIVATE_IP' if metadata['type'] == 'private' else 'PUBLIC_IP'
+            ).all()
 
             # Iterate for each segment
             for ipx in ip_segments:
                 # List of available and unavailable IP groups
-                a_list = []
-                u_list = []
+                sum_u = 0
+                sum_a = 0
 
                 # Get all available IP groups from the database based on the segment ID
                 available_ips = IPAddressesFunctions.get_available_ip_by_segment(session, ipx.ip_segment_id)
                 unavailable_ips = session.query(IPGroups).filter_by(fk_ip_segment_id=ipx.ip_segment_id).all()
 
-                # Iterate on the available and unavailable IP groups and create a list of available authorized IP groups
+                # Iterate on the available and unavailable IP groups and create a list of available private IP groups
+                if unavailable_ips:
+                    sum_u = len(unavailable_ips)
+
+                # Append the available and unavailable IP groups to the list
+                if available_ips:
+                    sum_a = len(available_ips)
+
+                # Append the available private IP groups to the list
+                private_list.append(
+                    {
+                        f'{ipx.ip_segment_ip}/{ipx.ip_segment_mask}': sum_u + sum_a
+                    }
+                )
+
+            # Return the list of available private IP groups
+            return private_list
+        except Exception as e:
+            raise e
+
+    @staticmethod
+    def get_assigned_ip_by_site(session, metadata: dict) -> list:
+        """
+        Get all available private IP groups from the database by site
+        :param session: The database session
+        :param site_id: The site ID
+        :return: List of available private IP groups
+        """
+        try:
+            from models.ip_management.functions import IPAddressesFunctions
+
+            # List of available private IP groups
+            private_list = []
+
+            # Get the router from the database based on the site ID
+            router = session.query(Router).filter_by(fk_site_id=metadata['site_id']).first()
+
+            # Get all IP segments from the database based on the router ID
+            if metadata['type']:
+                ip_segments = session.query(IPSegment).filter_by(
+                    fk_router_id=router.router_id,
+                    ip_segment_tag='PRIVATE_IP' if metadata['type'] == 'private' else 'PUBLIC_IP'
+                ).all()
+            else:
+                ip_segments = session.query(IPSegment).filter_by(fk_router_id=router.router_id).all()
+
+            # Iterate for each segment
+            for ipx in ip_segments:
+                # List of available and unavailable IP groups
+                u_list = []
+
+                # Get all available IP groups from the database based on the segment ID
+                unavailable_ips = session.query(IPGroups).filter_by(fk_ip_segment_id=ipx.ip_segment_id).all()
+
+                # Iterate on the available and unavailable IP groups and create a list of available private IP groups
                 if unavailable_ips:
                     for ipy in unavailable_ips:
                         u_list.append([ipy.ip_group_id, ipy.ip_group_ip])
 
-                # Append the available and unavailable IP groups to the list
-                if available_ips:
-                    a_list = available_ips
-
-                # Append the available authorized IP groups to the list
-                authorized_list.append(
+                # Append the available private IP groups to the list
+                private_list.append(
                     {
-                        f'{ipx.ip_segment_ip}/{ipx.ip_segment_mask}': {
-                            'available': a_list,
-                            'unavailable': u_list
-                        }
+                        f'{ipx.ip_segment_ip}/{ipx.ip_segment_mask}': [
+                            u[1] for u in u_list
+                        ]
                     }
                 )
 
-            # Return the list of available authorized IP groups
-            return authorized_list
+            # Return the list of available private IP groups
+            return private_list
+        except Exception as e:
+            raise e
+
+    @staticmethod
+    def get_available_ip_by_site(session, metadata: dict) -> list:
+        """
+        Get all available private IP groups from the database by site
+        :param session: 
+        :param metadata: 
+        :return: 
+        """
+        try:
+            from models.ip_management.functions import IPAddressesFunctions
+
+            # List of available private IP groups
+            private_list = []
+
+            # Get the router from the database based on the site ID
+            router = session.query(Router).filter_by(fk_site_id=metadata['site_id']).first()
+
+            # Get all IP segments from the database based on the router ID
+            ip_segments = session.query(IPSegment).filter_by(
+                fk_router_id=router.router_id,
+                ip_segment_tag='PRIVATE_IP' if metadata['type'] == 'private' else 'PUBLIC_IP'
+            ).all()
+
+            # Iterate for each segment
+            for ipx in ip_segments:
+                # List of available and unavailable IP groups
+                a_list = []
+
+                # Get all available IP groups from the database based on the segment ID
+                available_ips = IPAddressesFunctions.get_available_ip_by_segment(session, ipx.ip_segment_id)
+
+                # Iterate on the available and unavailable IP groups and create a list of available private IP groups
+                if available_ips:
+                    a_list = available_ips
+
+                # Append the available private IP groups to the list
+                private_list.append(
+                    {
+                        f'{ipx.ip_segment_ip}/{ipx.ip_segment_mask}': [
+                            a for a in a_list
+                        ]
+                    }
+                )
+
+            # Return the list of available private IP groups
+            return private_list
+        except Exception as e:
+            raise e
+
+    @staticmethod
+    def bulk_update_duplicity(session, ip_groups: list[IPGroupsEntity]) -> None:
+        """
+        Update the duplicity of a list of IP groups
+        :param session: The database session
+        :param ip_groups: The list of IP groups
+        :return: None
+        """
+        try:
+            # Create a list of IP Groups objects to update
+            to_update = []
+
+            # Iterate on the IP groups and update their duplicity in the database
+            for ip_group in ip_groups:
+                # Get the IP group from the database based on the IP group ID
+                ip_group_x = session.query(IPGroups).get(ip_group.ip_group_id)
+
+                # Update the IP group in the database
+                ip_group_x.ip_duplicity = ip_group.ip_duplicity
+                ip_group_x.ip_duplicity_indexes = ip_group.ip_duplicity_indexes
+
+                # Add the IP group to the list
+                to_update.append(ip_group_x)
+
+            # Update the IP groups in the database
+            session.bulk_save_objects(to_update)
+        except Exception as e:
+            raise e
+
+    @staticmethod
+    def bulk_delete_duplicity(session, ip_group_ids: list[int]) -> None:
+        """
+        Delete the duplicity of a list of IP groups
+        :param session: The database session
+        :param ip_group_ids: The list of IP group IDs
+        :return: None
+        """
+        try:
+            # Create a list of IP Groups objects to update
+            to_update = []
+
+            # Iterate on the IP groups and update their duplicity in the database
+            for ip_group_id in ip_group_ids:
+                # Get the IP group from the database based on the IP group ID
+                ip_group_x = session.query(IPGroups).get(ip_group_id)
+
+                # Update the IP group in the database
+                ip_group_x.ip_duplicity = False
+                ip_group_x.ip_duplicity_indexes = ''
+
+                # Add the IP group to the list
+                to_update.append(ip_group_x)
+
+            # Update the IP groups in the database
+            session.bulk_save_objects(to_update)
+        except Exception as e:
+            raise e
+
+    @staticmethod
+    def move_to_arps(session, ip_groups: list[IPGroupsEntity]) -> None:
+        """
+        Move a list of IP groups to ARP
+        :param session: The database session
+        :param ip_groups: The list of IP groups
+        :return: None
+        """
+
+        try:
+            # Import the ARP model
+            from models.router_scan.models import ARP
+
+            # Create a list of ARP objects to add to the database
+            arps = []
+            for ip_group in ip_groups:
+                arps.append(ARP(
+                    fk_ip_address_id=ip_group.fk_ip_segment_id,
+                    arp_ip=ip_group.ip_group_ip,
+                    arp_mac=ip_group.ip_group_mac,
+                    arp_alias=ip_group.ip_group_alias,
+                    arp_tag='Public IP' if ip_group.ip_group_type == 'public' else 'Private IP',
+                    arp_interface=ip_group.ip_group_interface,
+                    arp_is_dhcp=ip_group.ip_is_dhcp,
+                    arp_is_invalid=False,
+                    arp_is_dynamic=ip_group.ip_is_dynamic,
+                    arp_is_complete=ip_group.ip_is_complete,
+                    arp_is_disabled=ip_group.ip_is_disabled,
+                    arp_is_published=ip_group.ip_is_published,
+                    arp_duplicity=ip_group.ip_duplicity,
+                    arp_duplicity_indexes=ip_group.ip_duplicity_indexes
+                ))
+
+            # Delete the IP groups from the database
+            session.query(IPGroups).filter(IPGroups.ip_group_id.in_([ip_group.ip_group_id for ip_group in ip_groups])).delete(synchronize_session=False)
+
+            # Add the ARP objects to the database
+            session.bulk_save_objects(arps)
         except Exception as e:
             raise e
