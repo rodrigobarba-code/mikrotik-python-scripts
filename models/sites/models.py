@@ -175,3 +175,13 @@ class Site(Base):
             return site_list
         except Exception as e:
             raise SiteError()
+
+    @staticmethod
+    def verify_site_has_router(session, site_id):
+        try:
+            if session.query(Router).filter(Router.fk_site_id == site_id).first():
+                return True
+            else:
+                return False
+        except Exception as e:
+            raise SiteError()

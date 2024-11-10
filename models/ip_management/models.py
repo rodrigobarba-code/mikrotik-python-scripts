@@ -1351,7 +1351,7 @@ class IPGroups(Base):
             raise e
 
     @staticmethod
-    def get_available_ip_by_site(session, metadata: dict) -> list:
+    def get_assigned_ip_by_site(session, metadata: dict) -> list:
         """
         Get all available private IP groups from the database by site
         :param session: The database session
@@ -1368,10 +1368,13 @@ class IPGroups(Base):
             router = session.query(Router).filter_by(fk_site_id=metadata['site_id']).first()
 
             # Get all IP segments from the database based on the router ID
-            ip_segments = session.query(IPSegment).filter_by(
-                fk_router_id=router.router_id,
-                ip_segment_tag='PRIVATE_IP' if metadata['type'] == 'private' else 'PUBLIC_IP'
-            ).all()
+            if metadata['type']:
+                ip_segments = session.query(IPSegment).filter_by(
+                    fk_router_id=router.router_id,
+                    ip_segment_tag='PRIVATE_IP' if metadata['type'] == 'private' else 'PUBLIC_IP'
+                ).all()
+            else:
+                ip_segments = session.query(IPSegment).filter_by(fk_router_id=router.router_id).all()
 
             # Iterate for each segment
             for ipx in ip_segments:
@@ -1391,6 +1394,55 @@ class IPGroups(Base):
                     {
                         f'{ipx.ip_segment_ip}/{ipx.ip_segment_mask}': [
                             u[1] for u in u_list
+                        ]
+                    }
+                )
+
+            # Return the list of available private IP groups
+            return private_list
+        except Exception as e:
+            raise e
+
+    @staticmethod
+    def get_available_ip_by_site(session, metadata: dict) -> list:
+        """
+        Get all available private IP groups from the database by site
+        :param session: 
+        :param metadata: 
+        :return: 
+        """
+        try:
+            from models.ip_management.functions import IPAddressesFunctions
+
+            # List of available private IP groups
+            private_list = []
+
+            # Get the router from the database based on the site ID
+            router = session.query(Router).filter_by(fk_site_id=metadata['site_id']).first()
+
+            # Get all IP segments from the database based on the router ID
+            ip_segments = session.query(IPSegment).filter_by(
+                fk_router_id=router.router_id,
+                ip_segment_tag='PRIVATE_IP' if metadata['type'] == 'private' else 'PUBLIC_IP'
+            ).all()
+
+            # Iterate for each segment
+            for ipx in ip_segments:
+                # List of available and unavailable IP groups
+                a_list = []
+
+                # Get all available IP groups from the database based on the segment ID
+                available_ips = IPAddressesFunctions.get_available_ip_by_segment(session, ipx.ip_segment_id)
+
+                # Iterate on the available and unavailable IP groups and create a list of available private IP groups
+                if available_ips:
+                    a_list = available_ips
+
+                # Append the available private IP groups to the list
+                private_list.append(
+                    {
+                        f'{ipx.ip_segment_ip}/{ipx.ip_segment_mask}': [
+                            a for a in a_list
                         ]
                     }
                 )

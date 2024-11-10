@@ -162,7 +162,8 @@ async def get_authorized_by_site(user_id: int, site_id: int, metadata: Request, 
 async def get_available_by_site(user_id: int, site_id: int, metadata: Request, token: dict = Depends(verify_jwt)):
     try:
         if ip_groups_functions.verify_user_existence(user_id):
-            request = ThreadingManager().run_thread(IPGroups.get_available_authorized_by_site, 'rx', site_id)
+            metadata = {'site_id': site_id}
+            request = ThreadingManager().run_thread(IPGroups.get_available_authorized_by_site, 'rx', metadata)
             ip_groups_functions.create_transaction_log(
                 action="GET",
                 table="ip_groups",
