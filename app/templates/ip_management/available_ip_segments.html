@@ -1,0 +1,70 @@
+{% from 'macros.html' import delete_modal, delete_select_modal, delete_all_modal %}
+{% extends 'base.html' %}
+
+{% block title %} Available IPs Segments{% endblock %}
+
+{% block head %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/ip_management/styles.css') }}">
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='/js/ip_management/scripts.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+    <!-- Available IPs Jumbotron -->
+    <section class="available-jumbotron text">
+        <div class="p-5 mb-4 base-jumbotron">
+            <div class="container-fluid py-5">
+                <h1 class="display-5 fw-bold ">Available IPs</h1>
+                <p class="col-md-8 fs-4">Available IPs per segment</p>
+            </div>
+        </div>
+    </section>
+    <!-- Available IPs Jumbotron -->
+
+    <!-- Available IPs Database -->
+    <section class="available-database pt-3 text">
+        <div class="container w-75">
+            <div class="row">
+                <div class="col-12 col-md-8 text-left">
+                    <h2 class="available-database-title"><b>IP Segments for</b> {{ site_name }}</h2>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Available IPs Database -->
+
+    <!-- Available IPs Separator -->
+    <section class="available-separator">
+        <div class="container w-75">
+            <hr class="text">
+        </div>
+    </section>
+    <!-- Available IPs Separator -->
+
+
+    <!-- Segment Available IPs Available Container -->
+    <section class="ip-segments-container">
+        <div class="container w-75">
+            <div class="row">
+                <div class="col-12">
+                    <div class="row">
+                        {% for segment in segments %}
+                            <div class="col-md-4 mb-4">
+                                <a href="{{ url_for('ip_management.ip_available', site_id=site_id) }}?segment={{ segment.ip }}/{{ segment.subnet_mask }}">
+                                    <div class="custom-card">
+                                        <div class="card-content">
+                                            <span class="ip-text text">{{ segment.ip }}</span>
+                                            <span class="port-text text">{{ segment.subnet_mask }}</span>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>    <!-- Segment Available Container -->
+{% endblock %}
