@@ -572,6 +572,7 @@ def transfer_all_to_authorized(site_id):
         flash(str(e), 'danger')
         return redirect(url_for('ip_management.blacklist', site_id=site_id))
 
+
 @ip_management_bp.route('/ip/group/transfer/bulk/authorized/', methods=['POST'])
 @restriction.login_required
 @restriction.admin_required
@@ -599,7 +600,6 @@ def transfer_bulk_to_authorized():
     except Exception as e:
         flash(str(e), 'danger')
         return jsonify({'message': 'Failed to transfer IP Groups', 'error': str(e)}), 500
-
 
 
 @ip_management_bp.route('/ip/group/delete/bulk', methods=['POST'])
@@ -638,7 +638,7 @@ def bulk_delete_ip_group():
 def delete_all_ip_groups(site_id):
     try:
         is_blacklist = request.args.get('is_blacklist')
-        if is_blacklist:
+        if is_blacklist == 'True':
             url = f'http://localhost:8080/api/private/blacklist/site/{site_id}'
         else:
             url = f'http://localhost:8080/api/private/ip/authorized/site/{site_id}'
@@ -955,3 +955,94 @@ def delete_all_ip_group_tags():
     except Exception as e:
         flash(str(e), 'danger')
         return jsonify({'message': 'Failed to delete all tags', 'error': str(e)}), 500
+
+
+@ip_management_bp.route('/ip/segments/<int:site_id>', methods=['GET'])
+@restriction.login_required
+@restriction.admin_required
+def available_ip_segments(site_id):
+    try:
+        site_name = get_site_name(site_id, get_sites())
+        response = requests.get(
+            f'http://localhost:8080/api/private/ip/availables/{site_id}',
+            headers=get_verified_jwt_header(),
+            params={
+                'user_id': session.get('user_id'),
+                'site_id': site_id
+            }
+        )
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                availables_data = response.json().get('availables')
+
+                # Extraemos los segmentos y separamos la IP de la máscara
+                segments = []
+                for segment_data in availables_data:
+                    for segment, _ in segment_data.items():
+                        ip, subnet_mask = segment.split('/')
+                        segments.append({'ip': ip, 'subnet_mask': subnet_mask})
+
+                return render_template(
+                    'ip_management/available_ip_segments.html',
+                    site_name=site_name,
+                    site_id=site_id,
+                    segments=segments  # Pasa los segmentos separados
+                )
+            else:
+                raise Exception(response.json().get('message'))
+        elif response.status_code == 500:
+            raise Exception('Failed to retrieve segments')
+    except Exception as e:
+        flash(str(e), 'danger')
+        return redirect(url_for('ip_management.ip_management'))
+
+
+@ip_management_bp.route('/ip/available/<int:site_id>', methods=['GET'])
+@restriction.login_required
+@restriction.admin_required
+def ip_available(site_id):
+    try:
+        segment = request.args.get('segment')  # Obtener el segmento desde la URL
+        site_name = get_site_name(site_id, get_sites())
+        response = requests.get(
+            f'http://localhost:8080/api/private/ip/availables/{site_id}',
+            headers=get_verified_jwt_header(),
+            params={
+                'user_id': session.get('user_id'),
+                'site_id': site_id
+            }
+        )
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                availables_data = response.json().get('availables')
+
+                # Filtrar las IPs por el segmento recibido
+                ip_availables = []
+                for segment_data in availables_data:
+                    for s, data in segment_data.items():
+                        if s == segment:  # Solo mostrar el segmento seleccionado
+                            available_ips = data.get("available", [])
+                            unavailable_ips = data.get("unavailable", [])
+
+                            # Agregar las IPs disponibles
+                            for ip in available_ips:
+                                ip_availables.append({'address': ip, 'is_occupied': False})
+
+                            # Agregar las IPs ocupadas
+                            for _, ip in unavailable_ips:
+                                ip_availables.append({'address': ip, 'is_occupied': True})
+
+                return render_template(
+                    'ip_management/ip_available.html',
+                    site_name=site_name,
+                    site_id=site_id,
+                    ip_availables=ip_availables,  # Pasa las IPs del segmento seleccionado
+                    segment=segment  # Pasa el segmento para mostrar en la vista
+                )
+            else:
+                raise Exception(response.json().get('message'))
+        elif response.status_code == 500:
+            raise Exception('Failed to retrieve available IPs')
+    except Exception as e:
+        flash(str(e), 'danger')
+        return redirect(url_for('ip_management.ip_management'))
