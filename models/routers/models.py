@@ -199,3 +199,67 @@ class Router(Base):
                 router.allow_scan = 0
         except Exception as e:
             raise e
+
+    @staticmethod
+    def bulk_insert_routers(session, routers: list[RouterEntity]) -> None:
+        """
+        Bulk insert routers into the database
+        :param session: SQLAlchemy session
+        :param routers: List of RouterEntity objects
+        :return: None
+        """
+
+        # Import RouterAPI class
+        from api.routeros.api import RouterAPI
+
+        # Create a model object
+        model_r = Router
+
+        # Create an instance of the RoutersFunctions class
+        v_router = RoutersFunctions()
+
+        try:
+            # Create a list to store the new routers
+            router_list = []
+
+            # Iterate for the RouterEntity objects list
+            for router in routers:
+                # Validate if the router information is correct
+                if v_router.validate_router(session, router, 'insert', model_r):
+                    # Create a new Router object
+                    new_router = Router(
+                        router_name=router.router_name,
+                        router_description=router.router_description,
+                        router_brand=router.router_brand,
+                        router_model=router.router_model,
+                        fk_site_id=router.fk_site_id,
+                        router_ip=router.router_ip,
+                        router_mac=router.router_mac,
+                        router_username=router.router_username,
+                        router_password=router.router_password,
+                        allow_scan=router.allow_scan
+                    )
+                    # Create a new RouterAPI object
+                    router_api_obj = RouterAPI(new_router.router_ip, new_router.router_username, new_router.router_password)
+
+                    # Set the RouterAPI object to the new router
+                    router_api_obj.set_api()
+
+                    # Verify the router credentials
+                    flag = RouterAPI.verify_router_connection(router_api_obj.get_api())
+
+                    if flag is True:
+                        # Append the new router to the list
+                        router_list.append(new_router)
+                    else:
+                        # Raise an exception
+                        raise Exception('The Router with IP: ' + new_router.router_ip + ' is not reachable')
+                else:
+                    # If not exception is raised, raise a new exception
+                    raise Exception()
+
+            # Bulk save the new routers
+            session.bulk_save_objects(router_list)
+        except Exception as e:
+            # Raise the exception
+            raise e

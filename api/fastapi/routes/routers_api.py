@@ -14,6 +14,9 @@ routers_functions = APIFunctions()
 class RouterBulkDeleteBase(BaseModel):
     routers_ids: List[int]
 
+class RouterBulkInsertBase(BaseModel):
+    routers: List[dict]
+
 @routers_router.get("/routers/")
 async def get_routers(user_id: int, metadata: Request, token: dict = Depends(verify_jwt)):
     try:
@@ -460,5 +463,50 @@ async def delete_all_routers(user_id: int, metadata: Request, token: dict = Depe
     except Exception as e:
         return {
             'message': f"Failed to delete routers: {str(e)}",
+            'backend_status': 400
+        }
+
+@routers_router.post("/bulk/insert/routers/")
+async def bulk_insert_routers(
+        user_id: int,
+        metadata: Request,
+        request: RouterBulkInsertBase,
+        token: dict = Depends(verify_jwt)
+):
+    try:
+        if routers_functions.verify_user_existence(user_id):
+            routers = [
+                RouterEntity(
+                    router_id=1,
+                    router_name=router['router_name'],
+                    router_description=router['router_description'],
+                    router_brand=router['router_brand'],
+                    router_model=router['router_model'],
+                    fk_site_id=router['fk_site_id'],
+                    router_ip=router['router_ip'],
+                    router_mac=router['router_mac'],
+                    router_username=router['router_username'],
+                    router_password=router['router_password'],
+                    allow_scan=router['allow_scan']
+                )
+                for router in request.routers
+            ]
+            ThreadingManager().run_thread(Router.bulk_insert_routers, 'w', routers)
+            routers_functions.create_transaction_log(
+                action="POST",
+                table="routers",
+                user_id=int(user_id),
+                description="Routers bulk inserted successfully",
+                public=str(str(metadata.client.host) + ':' + str(metadata.client.port))
+            )
+            return {
+                'message': "Routers bulk inserted successfully",
+                'backend_status': 200
+            }
+        else:
+            raise Exception("User not registered in the system")
+    except Exception as e:
+        return {
+            'message': f"Failed to bulk insert routers: {str(e)}",
             'backend_status': 400
         }

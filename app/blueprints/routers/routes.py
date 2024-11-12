@@ -428,3 +428,54 @@ def verify_all_routers():
     except Exception as e:
         flash(str(e), 'danger')
     return redirect(url_for('routers.routers'))
+
+@routers_bp.route('/import/excel', methods=['POST'])
+@restriction.login_required
+@restriction.admin_required
+def import_routers_from_excel():
+    try:
+        import pandas as pd
+
+        file = request.files['file']
+
+        if file.filename.split('.')[-1] not in ['xls', 'xlsx']:
+            raise Exception('Invalid file format')
+
+        df = pd.read_excel(file)
+        df = df.where(pd.notnull(df), None)
+
+        json_router_list = []
+        for index, row in df.iterrows():
+            router = {
+                'router_name': row['Router Name'],
+                'router_description': row['Router Description'],
+                'router_model': row['Router Model'],
+                'fk_site_id': int(row['Site ID']),
+                'router_ip': row['Router IP'],
+                'router_mac': row['Router MAC'],
+                'router_username': row['Router Username'],
+                'router_password': row['Router Password'],
+                'allow_scan': 1 if row['Allow Scan'] else 0
+            }
+            json_router_list.append(router)
+
+        response = requests.post(
+            'http://localhost:8080/api/private/bulk/insert/routers/',
+            json={'routers': json_router_list},
+            headers=get_verified_jwt_header(),
+            params={'user_id': session.get('user_id')}
+        )
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                flash(response.json().get('message'), 'success')
+                return jsonify(
+                    {'message': response.json().get('message')}
+                ), 200
+            else:
+                raise Exception(response.json().get('message'))
+        elif response.status_code == 500:
+            raise Exception('Failed to import routers from excel')
+    except Exception as e:
+        flash(str(e), 'danger')
+        return jsonify({'message': str(e)}), 500
+    return redirect(url_for('routers.routers'))
