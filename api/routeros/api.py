@@ -463,8 +463,8 @@ class RouterAPI:
                 # Verify if there are duplicates and ARP data has duplicity as False
                 if duplicates != '' and arp_data_entry.ip_duplicity is False:
                     # Set the ARP data duplicity to True and add the duplicates to the ARP data
-                    arp_data_entry.ip_duplicity = True
-                    arp_data_entry.ip_duplicity_indexes = duplicates
+                    arp_data_entry.arp_duplicity = True
+                    arp_data_entry.arp_duplicity_indexes = duplicates
 
                     # Add the ARP data to the insert list
                     insert_duplicity_arp.append(arp_data_entry)

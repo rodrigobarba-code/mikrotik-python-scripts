@@ -250,6 +250,7 @@ class ARP(Base):
                     arp_is_disabled=arp.arp_is_disabled,
                     arp_is_published=arp.arp_is_published,
                     arp_duplicity=arp.arp_duplicity,
+                    arp_duplicity_indexes=arp.arp_duplicity_indexes
                 )
                 obj_list.append(obj)
             return obj_list

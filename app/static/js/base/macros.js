@@ -362,55 +362,52 @@ async function importExcel(url, type, redirect_url, template_url) {
         if (result.isConfirmed) {
             const file = document.getElementById('file-input').files[0];
             if (file) {
-                console.log('Uploaded file:', file);
+                const formData = new FormData();
+                formData.append('file', file);
+
+                Swal.fire({
+                    title: 'Uploading File',
+                    icon: 'info',
+                    text: 'Please wait...',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                $.ajax({
+                    url: url,
+                    method: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function (response) {
+                        Swal.fire({
+                            title: 'Success',
+                            text: response.message,
+                            icon: 'success',
+                            confirmButtonText: 'Close'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.href = redirect_url;
+                            }
+                        });
+                    },
+                    error: function (error) {
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'Could not upload file.',
+                            icon: 'error',
+                            confirmButtonText: 'Close'
+                        });
+                    }
+                });
             } else {
                 Swal.fire('Select a file to upload.');
             }
         }
     });
-
-    if (file) {
-        const formData = new FormData();
-        formData.append('file', file);
-
-        Swal.fire({
-            title: 'Uploading File',
-            icon: 'info',
-            text: 'Please wait...',
-            allowOutsideClick: false,
-            didOpen: () => {
-                Swal.showLoading();
-            }
-        });
-
-        $.ajax({
-            url: url,
-            method: 'POST',
-            data: formData,
-            contentType: false,
-            processData: false,
-            success: function (response) {
-                Swal.fire({
-                    title: 'Success',
-                    text: response.message,
-                    icon: 'success',
-                    confirmButtonText: 'Close'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = redirect_url;
-                    }
-                });
-            },
-            error: function (error) {
-                Swal.fire({
-                    title: 'Error',
-                    text: 'Could not upload file.',
-                    icon: 'error',
-                    confirmButtonText: 'Close'
-                });
-            }
-        });
-    }
 }
+
 /* Macro for Excel import */
 /* Macros for recyclable components */
