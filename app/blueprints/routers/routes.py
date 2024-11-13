@@ -449,6 +449,7 @@ def import_routers_from_excel():
             router = {
                 'router_name': row['Router Name'],
                 'router_description': row['Router Description'],
+                'router_brand': 'Mikrotik',
                 'router_model': row['Router Model'],
                 'fk_site_id': int(row['Site ID']),
                 'router_ip': row['Router IP'],

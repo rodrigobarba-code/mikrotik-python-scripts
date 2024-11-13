@@ -240,7 +240,13 @@ class Router(Base):
                         allow_scan=router.allow_scan
                     )
                     # Create a new RouterAPI object
-                    router_api_obj = RouterAPI(new_router.router_ip, new_router.router_username, new_router.router_password)
+                    # print(router.router_ip, router.router_username, router.router_password)
+
+                    router_api_obj = RouterAPI(
+                        router.router_ip,
+                        router.router_username,
+                        router.router_password
+                    )
 
                     # Set the RouterAPI object to the new router
                     router_api_obj.set_api()
