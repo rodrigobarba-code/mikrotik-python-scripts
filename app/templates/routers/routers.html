@@ -1,4 +1,4 @@
-{% from 'macros.html' import delete_modal, delete_select_modal, delete_all_modal, show_details_button %}
+{% from 'macros.html' import delete_modal, delete_select_modal, delete_all_modal, show_details_button, excel_import_file %}
 {% extends 'base.html' %}
 {% block title %} Routers {% endblock %}
 {% block head %}
@@ -40,6 +40,7 @@
                     <button type="button" id="verify-all-routers-connection-button" class="btn btn-md btn-success me-2">
                         <i style="font-size: large" class="fa-solid fa-cloud-check"></i>
                     </button>
+                    {{ excel_import_file(url_for('routers.import_routers_from_excel'), 'Routers', url_for('routers.routers'), url_for('static', filename='files/routers.xlsx')) }}
                     <button type="button" class="btn btn-md btn-danger me-2" id="delete-select"
                             data-bs-target="#delete-select-modal">
                         <i style="font-size: large" class="fa-solid fa-trash-can-plus"></i>

@@ -315,4 +315,16 @@
     </button>
 {% endmacro %}
 <!-- Macro for show details button -->
+
+<!-- Macro for Excel importing file -->
+{% macro excel_import_file(url, type, redirect_url, template_url) %}
+    <button class="btn btn-sm btn-primary me-2"
+            type="button" data-bs-toggle="modal"
+            data-bs-target="#import-modal"
+            onclick="importExcel('{{ url }}', '{{ type }}', '{{ redirect_url }}', '{{ template_url }}')"
+    >
+        <i class="fa-solid fa-file-import" style="font-size: large"></i>
+    </button>
+{% endmacro %}
 <!-- Macros for recyclable components -->
+<!-- Macros for settings -->

@@ -271,4 +271,143 @@ async function fetchItemsData(id, url, type) {
 
 /* Function to fetch the items data for the show details button. */
 /* Macro for show details button */
+
+/* Macro for Excel import */
+
+/*
+    * Function to import an Excel file.
+    * @param {string} url - The url to import the Excel file.
+    * @param {string} type - The type of the Excel file.
+    * @param {string} redirect_url - The redirect url after importing the Excel file.
+    * @returns {void} - Function does not return anything.
+ */
+async function importExcel(url, type, redirect_url, template_url) {
+    const {value: file} = await Swal.fire({
+        title: 'Upload Excel File for ' + type,
+        html: `
+                <p style="color: var(--text-color)">Drag and drop a file for ${type} or click here to select one.</p>
+                <div id="file-drop-area" style="
+                  border: 2px dashed #007bff;
+                  padding: 20px;
+                  border-radius: 8px;
+                  text-align: center;
+                  color: #007bff;
+                  cursor: pointer;
+                ">
+                  <p style="font-weight: bolder; color: var(--text-color);">Drag and Drop File Here</p>
+                  <p>Supported file types: .xlsx, .xls</p>
+                  <p>Maximum file size: 5MB</p>
+                  <i class="fas fa-file-upload" style="font-size: 50px;"></i>
+                  <input type="file" id="file-input" style="display: none;" />
+                </div>
+                <p class="pt-4" style="color: var(--text-color); font-size: 14px">Note: The file will be uploaded to the server for processing.</p>
+                <span style="color: var(--text-color); font-size: 14px">You can download the template <a href="${template_url}" target="_blank">here</a>.</span>
+              `,
+        showCancelButton: true,
+        cancelButtonColor: '#dc3545',
+        confirmButtonText: 'Upload',
+        confirmButtonColor: '#007bff',
+        didOpen: () => {
+            const fileDropArea = document.getElementById('file-drop-area');
+            const fileInput = document.getElementById('file-input');
+
+            fileDropArea.addEventListener('dragover', (event) => {
+                event.preventDefault();
+                fileDropArea.style.borderColor = '#0056b3';
+            });
+
+            fileDropArea.addEventListener('dragleave', () => {
+                fileDropArea.style.borderColor = '#007bff';
+            });
+
+            fileDropArea.addEventListener('drop', (event) => {
+                event.preventDefault();
+                fileDropArea.style.borderColor = '#007bff';
+                fileInput.files = event.dataTransfer.files;
+
+                const fileName = fileInput.files[0].name;
+                const fileExtension = fileName.split('.').pop();
+                if (fileExtension !== 'xlsx' && fileExtension !== 'xls') {
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Invalid file type. Please select a valid file type.',
+                        icon: 'error',
+                        confirmButtonText: 'Close'
+                    })
+                } else {
+                    fileDropArea.querySelector('p').textContent = `Selected File: ${fileName}`;
+                }
+            });
+
+            fileDropArea.addEventListener('click', () => {
+                fileInput.click();
+            });
+
+            fileInput.addEventListener('change', () => {
+                const fileName = fileInput.files[0].name;
+                const fileExtension = fileName.split('.').pop();
+                if (fileExtension !== 'xlsx' && fileExtension !== 'xls') {
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Invalid file type. Please select a valid file type.',
+                        icon: 'error',
+                        confirmButtonText: 'Close'
+                    })
+                } else {
+                    fileDropArea.querySelector('p').textContent = `Selected File: ${fileName}`;
+                }
+            });
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const file = document.getElementById('file-input').files[0];
+            if (file) {
+                const formData = new FormData();
+                formData.append('file', file);
+
+                Swal.fire({
+                    title: 'Uploading File',
+                    icon: 'info',
+                    text: 'Please wait...',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                $.ajax({
+                    url: url,
+                    method: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function (response) {
+                        Swal.fire({
+                            title: 'Success',
+                            text: response.message,
+                            icon: 'success',
+                            confirmButtonText: 'Close'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.href = redirect_url;
+                            }
+                        });
+                    },
+                    error: function (error) {
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'Could not upload file.',
+                            icon: 'error',
+                            confirmButtonText: 'Close'
+                        });
+                    }
+                });
+            } else {
+                Swal.fire('Select a file to upload.');
+            }
+        }
+    });
+}
+
+/* Macro for Excel import */
 /* Macros for recyclable components */

@@ -52,11 +52,11 @@ class ARPEntity:
         arp_tag,  # ARP Tag
         arp_interface,  # ARP Interface
         arp_is_dhcp,  # ARP DHCP
-        arp_is_invalid,  # ARP Invalid
-        arp_is_dynamic,  # ARP Dynamic
-        arp_is_complete,  # ARP Complete
-        arp_is_disabled,  # ARP Disabled
-        arp_is_published,  # ARP Published
+        arp_is_invalid: bool = True,  # ARP Invalid
+        arp_is_dynamic: bool = True,  # ARP Dynamic
+        arp_is_complete: bool = True,  # ARP Complete
+        arp_is_disabled: bool = True,  # ARP Disabled
+        arp_is_published: bool = True,  # ARP Published
         arp_duplicity: bool = False,  # ARP Duplicity
         arp_duplicity_indexes: str = ''  # ARP Duplicity Indexes
     ):
