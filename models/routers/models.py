@@ -1,4 +1,5 @@
 from .. import Base
+from sqlalchemy import text
 from entities.router import RouterEntity
 from sqlalchemy.orm import relationship, backref
 from models.routers.functions import RoutersFunctions
@@ -40,6 +41,14 @@ class Router(Base):
             'router_password': self.router_password,  
             'allow_scan': self.allow_scan  
         }
+
+    @staticmethod
+    def verify_autoincrement_id(session):
+        try:
+            if session.query(Router).all() is None:
+                session.execute(text("ALTER TABLE routers AUTO_INCREMENT = 1"))
+        except Exception as e:
+            raise e
 
     @staticmethod
     def add_router(session, router: RouterEntity):

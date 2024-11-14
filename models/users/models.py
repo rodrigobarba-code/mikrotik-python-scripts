@@ -4,7 +4,7 @@ from dateutil import parser
 from datetime import datetime
 from entities.user import UserEntity
 from entities.user_log import UserLogEntity
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, text
 from models.users.functions import UsersFunctions
 
 
@@ -32,6 +32,14 @@ class User(Base):
             'user_privileges': self.user_privileges,
             'user_state': self.user_state
         }
+
+    @staticmethod
+    def verify_autoincrement_id(session):
+        try:
+            if session.query(User).all() is None:
+                session.execute(text("ALTER TABLE users AUTO_INCREMENT = 1"))
+        except Exception as e:
+            raise e
 
     @staticmethod
     def add_user(session, user: UserEntity):
@@ -277,6 +285,14 @@ class UserLog(Base):
             'user_log_public_ip': self.user_log_public_ip,
             'user_log_local_ip': self.user_log_local_ip
         }
+
+    @staticmethod
+    def verify_autoincrement_id(session):
+        try:
+            if session.query(UserLog).all() is None:
+                session.execute(text("ALTER TABLE users_log AUTO_INCREMENT = 1"))
+        except Exception as e:
+            raise e
 
     @staticmethod
     def add_user_log(session, user_log: UserLogEntity):

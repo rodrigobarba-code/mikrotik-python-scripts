@@ -148,6 +148,7 @@ async def delete_site(user_id: int, metadata: Request, site_id: int, token: dict
     try:
         if sites_functions.verify_user_existence(user_id):
             ThreadingManager().run_thread(Site.delete_site, 'w', site_id)
+            ThreadingManager().run_thread(Site.verify_autoincrement_id, 'r')
             sites_functions.create_transaction_log(
                 action="DELETE",
                 table="sites",
@@ -172,6 +173,7 @@ async def bulk_delete_sites(user_id: int, metadata: Request, request: SiteBulkDe
     try:
         if sites_functions.verify_user_existence(user_id):
             ThreadingManager().run_thread(Site.bulk_delete_sites, 'w', request.sites_ids)
+            ThreadingManager().run_thread(Site.verify_autoincrement_id, 'r')
             sites_functions.create_transaction_log(
                 action="DELETE",
                 table="sites",
@@ -195,7 +197,8 @@ async def bulk_delete_sites(user_id: int, metadata: Request, request: SiteBulkDe
 async def delete_all_sites(user_id: int, metadata: Request, token: dict = Depends(verify_jwt)):
     try:
         if sites_functions.verify_user_existence(user_id):
-            ThreadingManager().run_thread(Site.delete_all_sites, 'wx')
+            ThreadingManager().run_thread(Site.delete_sites, 'wx')
+            ThreadingManager().run_thread(Site.verify_autoincrement_id, 'r')
             sites_functions.create_transaction_log(
                 action="DELETE",
                 table="sites",

@@ -1,12 +1,10 @@
-from threading import Thread
-
 from .. import Base
 from models.routers.models import Router
 from sqlalchemy.orm import relationship, backref
 from entities.ip_segment import IPSegmentTag, IPSegmentEntity
 from models.ip_management.functions import IPAddressesFunctions
 from entities.ip_groups import IPGroupsEntity, IPGroupsTagsEntity
-from sqlalchemy import Column, Integer, String, Boolean, Enum, ForeignKey, PrimaryKeyConstraint
+from sqlalchemy import Column, Integer, String, Boolean, Enum, ForeignKey, PrimaryKeyConstraint, text
 
 
 class IPSegment(Base):
@@ -43,6 +41,14 @@ class IPSegment(Base):
             'ip_segment_is_dynamic': self.ip_segment_is_dynamic,
             'ip_segment_is_disabled': self.ip_segment_is_disabled
         }
+
+    @staticmethod
+    def verify_autoincrement_id(session):
+        try:
+            if session.query(IPSegment).all() is None:
+                session.execute(text("ALTER TABLE ip_segment AUTO_INCREMENT = 1"))
+        except Exception as e:
+            raise e
 
     @staticmethod
     def bulk_add_ip_segments(session, ip_segments: list[IPSegmentEntity]) -> None:
@@ -346,6 +352,14 @@ class IPGroupsTags(Base):
     """
 
     @staticmethod
+    def verify_autoincrement_id(session):
+        try:
+            if session.query(IPGroupsTags).all() is None:
+                session.execute(text("ALTER TABLE ip_groups_tags AUTO_INCREMENT = 1"))
+        except Exception as e:
+            raise e
+
+    @staticmethod
     def add_ip_group_tag(session, ip_group_tag: IPGroupsTagsEntity):
         """
         Add an IP group tag to the database
@@ -531,6 +545,14 @@ class IPGroupsToIPGroupsTags(Base):
         return f'<IP Group to IP Group Tag {self.fk_ip_group_id} <-> {self.fk_ip_group_tag_id}>'
 
     @staticmethod
+    def verify_autoincrement_id(session):
+        try:
+            if session.query(IPGroupsToIPGroupsTags).all() is None:
+                session.execute(text("ALTER TABLE ip_groups_to_ip_groups_tags AUTO_INCREMENT = 1"))
+        except Exception as e:
+            raise e
+
+    @staticmethod
     def assign_tag(session, tag_metadata: dict) -> None:
         """
         Assign a tag to an IP group
@@ -704,6 +726,14 @@ class IPGroups(Base):
     """
 
     @staticmethod
+    def verify_autoincrement_id(session):
+        try:
+            if session.query(IPGroups).all() is None:
+                session.execute(text("ALTER TABLE ip_groups AUTO_INCREMENT = 1"))
+        except Exception as e:
+            raise e
+
+    @staticmethod
     def bulk_add_ip_groups(session, ip_groups: list[IPGroupsEntity]) -> None:
         """
         Add a list of IP groups to the database in bulk
@@ -843,10 +873,12 @@ class IPGroups(Base):
                             }
                             # Unassign the tag from the IP group
                             ThreadingManager().run_thread(IPGroupsToIPGroupsTags.unassign_tag, 'w', tag_metadata)
+                        ThreadingManager().run_thread(IPGroupsToIPGroupsTags.verify_autoincrement_id, 'r')
             else:
                 # Unassign all tags from the IP group
                 ThreadingManager().run_thread(IPGroupsToIPGroupsTags.unassing_all_tags, 'w',
                                               ip_group_metadata['ip_group'].ip_group_id)
+                ThreadingManager().run_thread(IPGroupsToIPGroupsTags.verify_autoincrement_id, 'r')
         except Exception as e:
             session.rollback()
             raise e

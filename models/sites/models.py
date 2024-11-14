@@ -1,5 +1,5 @@
 from .. import Base
-from sqlalchemy import func, delete
+from sqlalchemy import func, delete, text
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy import Column, Integer, String, ForeignKey
 
@@ -27,6 +27,14 @@ class Site(Base):
             'site_name': self.site_name,  
             'site_segment': self.site_segment  
         }
+
+    @staticmethod
+    def verify_autoincrement_id(session):
+        try:
+            if session.query(Site).all() is None:
+                session.execute(text("ALTER TABLE sites AUTO_INCREMENT = 1"))
+        except Exception as e:
+            raise SiteError()
 
     @staticmethod
     def add_site(session, site):

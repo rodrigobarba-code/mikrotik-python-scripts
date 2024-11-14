@@ -133,6 +133,7 @@ async def delete_region(user_id: str, metadata: Request, region_id: int, token: 
     try:
         if regions_functions.verify_user_existence(user_id):
             ThreadingManager().run_thread(Region.delete_region, 'w', region_id)
+            ThreadingManager().run_thread(Region.verify_autoincrement_id, 'r')
             regions_functions.create_transaction_log(
                 action="DELETE",
                 table="regions",
@@ -157,6 +158,7 @@ async def bulk_delete_regions(user_id: str, metadata: Request, request: RegionBu
     try:
         if regions_functions.verify_user_existence(user_id):
             ThreadingManager().run_thread(Region.bulk_delete_regions, 'w', request.regions_ids)
+            ThreadingManager().run_thread(Region.verify_autoincrement_id, 'r')
             regions_functions.create_transaction_log(
                 action="DELETE",
                 table="regions",
@@ -181,6 +183,7 @@ async def delete_all_regions(user_id: int, metadata: Request, token: dict = Depe
     try:
         if regions_functions.verify_user_existence(user_id):
             ThreadingManager().run_thread(Region.delete_all_regions, 'wx')
+            ThreadingManager().run_thread(Region.verify_autoincrement_id, 'r')
             regions_functions.create_transaction_log(
                 action="DELETE",
                 table="regions",

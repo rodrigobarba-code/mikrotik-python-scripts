@@ -1,10 +1,11 @@
 from .. import Base
-from sqlalchemy import func, delete
+from sqlalchemy import func, delete, text
 from sqlalchemy import Column, Integer, String
 
 from models.sites.models import Site
 from models.regions.exceptions import *
 from entities.region import RegionEntity
+
 
 class Region(Base):
     __tablename__ = 'regions'  
@@ -20,6 +21,14 @@ class Region(Base):
             'region_id': self.region_id,  
             'region_name': self.region_name  
         }
+
+    @staticmethod
+    def verify_autoincrement_id(session):
+        try:
+            if session.query(Region).all() is None:
+                session.execute(text("ALTER TABLE regions AUTO_INCREMENT = 1"))
+        except Exception as e:
+            raise RegionError()
 
     @staticmethod
     def add_region(session, region):

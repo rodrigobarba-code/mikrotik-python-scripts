@@ -406,6 +406,7 @@ async def delete_router(user_id: int, metadata: Request, router_id: int, token: 
     try:
         if routers_functions.verify_user_existence(user_id):
             ThreadingManager().run_thread(Router.delete_router, 'w', router_id)
+            ThreadingManager().run_thread(Router.verify_autoincrement_id, 'r')
             routers_functions.create_transaction_log(
                 action="DELETE",
                 table="routers",
@@ -430,6 +431,7 @@ async def bulk_delete_routers(user_id: int, metadata: Request, request: RouterBu
     try:
         if routers_functions.verify_user_existence(user_id):
             ThreadingManager().run_thread(Router.bulk_delete_routers, 'w', request.routers_ids)
+            ThreadingManager().run_thread(Router.verify_autoincrement_id, 'r')
             routers_functions.create_transaction_log(
                 action="DELETE",
                 table="routers",
@@ -453,7 +455,8 @@ async def bulk_delete_routers(user_id: int, metadata: Request, request: RouterBu
 async def delete_all_routers(user_id: int, metadata: Request, token: dict = Depends(verify_jwt)):
     try:
         if routers_functions.verify_user_existence(user_id):
-            ThreadingManager().run_thread(Router.delete_all_routers, 'wx')
+            ThreadingManager().run_thread(Router.delete_routers, 'wx')
+            ThreadingManager().run_thread(Router.verify_autoincrement_id, 'r')
             routers_functions.create_transaction_log(
                 action="DELETE",
                 table="routers",
