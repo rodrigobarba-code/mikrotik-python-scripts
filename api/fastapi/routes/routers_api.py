@@ -29,6 +29,7 @@ async def get_routers(user_id: int, metadata: Request, token: dict = Depends(ver
                     "router_description": router.router_description,
                     "router_brand": router.router_brand,
                     "router_model": router.router_model,
+                    "router_serial": router.router_serial,
                     "fk_site_id": router.fk_site_id,
                     "router_ip": router.router_ip,
                     "router_mac": router.router_mac,
@@ -69,6 +70,7 @@ async def get_router(user_id: int, metadata: Request, router_id: int, token: dic
                 "router_description": request.router_description,
                 "router_brand": request.router_brand,
                 "router_model": request.router_model,
+                "router_serial": request.router_serial,
                 "fk_site_id": request.fk_site_id,
                 "router_ip": request.router_ip,
                 "router_mac": request.router_mac,
@@ -108,6 +110,7 @@ async def verify_router(user_id: int, metadata: Request, router_id: int, token: 
                 "router_description": request.router_description,
                 "router_brand": request.router_brand,
                 "router_model": request.router_model,
+                "router_serial": request.router_serial,
                 "fk_site_id": request.fk_site_id,
                 "router_ip": request.router_ip,
                 "router_mac": request.router_mac,
@@ -299,6 +302,7 @@ async def add_router(
         router_description: str,
         router_brand: str,
         router_model: str,
+        router_serial: str,
         fk_site_id: int,
         router_ip: str,
         router_mac: str,
@@ -315,6 +319,7 @@ async def add_router(
                 router_description=router_description,
                 router_brand=router_brand,
                 router_model=router_model,
+                router_serial=router_serial,
                 fk_site_id=fk_site_id,
                 router_ip=router_ip,
                 router_mac=router_mac,
@@ -351,6 +356,7 @@ async def update_router(
         router_description: str,
         router_brand: str,
         router_model: str,
+        router_serial: str,
         fk_site_id: int,
         router_ip: str,
         router_mac: str,
@@ -367,6 +373,7 @@ async def update_router(
                 router_description=router_description,
                 router_brand=router_brand,
                 router_model=router_model,
+                router_serial=router_serial,
                 fk_site_id=fk_site_id,
                 router_ip=router_ip,
                 router_mac=router_mac,
@@ -399,6 +406,7 @@ async def delete_router(user_id: int, metadata: Request, router_id: int, token: 
     try:
         if routers_functions.verify_user_existence(user_id):
             ThreadingManager().run_thread(Router.delete_router, 'w', router_id)
+            ThreadingManager().run_thread(Router.verify_autoincrement_id, 'r')
             routers_functions.create_transaction_log(
                 action="DELETE",
                 table="routers",
@@ -423,6 +431,7 @@ async def bulk_delete_routers(user_id: int, metadata: Request, request: RouterBu
     try:
         if routers_functions.verify_user_existence(user_id):
             ThreadingManager().run_thread(Router.bulk_delete_routers, 'w', request.routers_ids)
+            ThreadingManager().run_thread(Router.verify_autoincrement_id, 'r')
             routers_functions.create_transaction_log(
                 action="DELETE",
                 table="routers",
@@ -446,7 +455,8 @@ async def bulk_delete_routers(user_id: int, metadata: Request, request: RouterBu
 async def delete_all_routers(user_id: int, metadata: Request, token: dict = Depends(verify_jwt)):
     try:
         if routers_functions.verify_user_existence(user_id):
-            ThreadingManager().run_thread(Router.delete_all_routers, 'wx')
+            ThreadingManager().run_thread(Router.delete_routers, 'wx')
+            ThreadingManager().run_thread(Router.verify_autoincrement_id, 'r')
             routers_functions.create_transaction_log(
                 action="DELETE",
                 table="routers",
@@ -482,6 +492,7 @@ async def bulk_insert_routers(
                     router_description=router['router_description'],
                     router_brand=router['router_brand'],
                     router_model=router['router_model'],
+                    router_serial=router['router_serial'],
                     fk_site_id=router['fk_site_id'],
                     router_ip=router['router_ip'],
                     router_mac=router['router_mac'],

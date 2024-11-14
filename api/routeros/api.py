@@ -156,6 +156,7 @@ class RouterAPI:
 
                 # Delete all IP segments from the database that are in database but not in the router
                 ThreadingManager().run_thread(IPAddressesFunctions.delete_ip_segments, 'w', ip_data)
+                ThreadingManager().run_thread(IPSegment.verify_autoincrement_id, 'r')
             return ip_list
         except Exception as e:
             print(str('Error: get_ip_data: ' + str(e)))
@@ -272,6 +273,7 @@ class RouterAPI:
         :param arp_list: List of ARP data
         :return: None
         """
+        from models.router_scan.models import ARP
 
         try:
             # Validate all ARP data
@@ -280,9 +282,6 @@ class RouterAPI:
 
             # Delete all ARP data from the database that are in database but not in the router
             ThreadingManager().run_thread(ARPFunctions.arp_bulk_insert_and_validation, 'w', arp_list)
-
-            # Assign the first tag to the ARP data
-            # ThreadingManager().run_thread(ARPTags.assign_first_tag, 'wx')
         except Exception as e:
             print(str('Error: add_arp_data: ' + str(e)))
 
@@ -481,6 +480,7 @@ class RouterAPI:
                 # Remove the ARP data with duplicity
                 ThreadingManager().run_thread(ARP.bulk_delete_duplicity, 'w', remove_duplicity_arp)
                 ThreadingManager().run_thread(ARP.move_to_ip_groups, 'w', insert_duplicity_arp)
+                ThreadingManager().run_thread(ARP.verify_autoincrement_id, 'r')
 
             for ip_group in ip_groups:
                 # Get the IP and MAC address from the ARP data
@@ -508,6 +508,7 @@ class RouterAPI:
                 # Insert the IP Group data with duplicity
                 ThreadingManager().run_thread(IPGroups.bulk_update_duplicity, 'w', insert_duplicity_ip_group)
                 ThreadingManager().run_thread(IPGroups.move_to_arps, 'w', insert_duplicity_ip_group)
+                ThreadingManager().run_thread(IPGroups.verify_autoincrement_id, 'r')
             elif remove_duplicity_ip_group:
                 # Remove the IP Group data with duplicity
                 ThreadingManager().run_thread(IPGroups.bulk_delete_duplicity, 'w', remove_duplicity_ip_group)

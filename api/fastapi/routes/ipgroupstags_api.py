@@ -205,6 +205,7 @@ async def delete_ip_group_tag(user_id: int, ip_group_tag_id: int, metadata: Requ
     try:
         if ip_groups_tags_functions.verify_user_existence(user_id):
             ThreadingManager().run_thread(IPGroupsTags.delete_ip_group_tag, 'w', ip_group_tag_id)
+            ThreadingManager().run_thread(IPGroupsTags.verify_autoincrement_id, 'r')
             ip_groups_tags_functions.create_transaction_log(
                 action="DELETE",
                 table="ip_groups_tags",
@@ -234,6 +235,7 @@ async def delete_ip_groups_tags_bulk(
     try:
         if ip_groups_tags_functions.verify_user_existence(user_id):
             ThreadingManager().run_thread(IPGroupsTags.bulk_delete_ip_group_tags, 'w', request.tags_ids)
+            ThreadingManager().run_thread(IPGroupsTags.verify_autoincrement_id, 'r')
             ip_groups_tags_functions.create_transaction_log(
                 action="DELETE",
                 table="ip_groups_tags",
@@ -259,6 +261,7 @@ async def delete_ip_groups_tags(user_id: int, metadata: Request, token: dict = D
     try:
         if ip_groups_tags_functions.verify_user_existence(user_id):
             ThreadingManager().run_thread(IPGroupsTags.delete_ip_group_tags, 'wx')
+            ThreadingManager().run_thread(IPGroupsTags.verify_autoincrement_id, 'r')
             ip_groups_tags_functions.create_transaction_log(
                 action="DELETE",
                 table="ip_groups_tags",

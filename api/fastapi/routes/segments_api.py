@@ -184,6 +184,7 @@ async def delete_segments(user_id: int, metadata: Request, site_id:int, token: d
     try:
         if segments_functions.verify_user_existence(user_id):
             ThreadingManager().run_thread(IPSegment.delete_ip_segments_by_site, 'w', site_id)
+            ThreadingManager().run_thread(IPSegment.verify_autoincrement_id, 'r')
             segments_functions.create_transaction_log(
                 action="DELETE",
                 table="segments",
@@ -208,6 +209,7 @@ async def delete_segments(user_id: int, metadata: Request, token: dict = Depends
     try:
         if segments_functions.verify_user_existence(user_id):
             ThreadingManager().run_thread(IPSegment.delete_ip_segments, 'wx')
+            ThreadingManager().run_thread(IPSegment.verify_autoincrement_id, 'r')
             segments_functions.create_transaction_log(
                 action="DELETE",
                 table="segments",
@@ -232,6 +234,7 @@ async def delete_segment(user_id: int, metadata: Request, segment_id: int, token
     try:
         if segments_functions.verify_user_existence(user_id):
             ThreadingManager().run_thread(IPSegment.delete_ip_segment, 'rxc', segment_id)
+            ThreadingManager().run_thread(IPSegment.verify_autoincrement_id, 'r')
             segments_functions.create_transaction_log(
                 action="DELETE",
                 table="segments",
@@ -256,6 +259,7 @@ async def bulk_delete_segments(user_id: int, metadata: Request, request: Segment
     try:
         if segments_functions.verify_user_existence(user_id):
             ThreadingManager().run_thread(IPSegment.bulk_delete_ip_segments, 'w', request.segments_ids)
+            ThreadingManager().run_thread(IPSegment.verify_autoincrement_id, 'r')
             segments_functions.create_transaction_log(
                 action="DELETE",
                 table="segments",

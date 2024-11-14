@@ -14,6 +14,9 @@ sites_functions = APIFunctions()
 class SiteBulkDeleteBase(BaseModel):
     sites_ids: List[int]
 
+class SiteBulkInsertBase(BaseModel):
+    sites: List[dict]
+
 @sites_router.get("/sites/")
 async def get_sites(user_id: int, metadata: Request, token: dict = Depends(verify_jwt)):
     try:
@@ -148,6 +151,7 @@ async def delete_site(user_id: int, metadata: Request, site_id: int, token: dict
     try:
         if sites_functions.verify_user_existence(user_id):
             ThreadingManager().run_thread(Site.delete_site, 'w', site_id)
+            ThreadingManager().run_thread(Site.verify_autoincrement_id, 'r')
             sites_functions.create_transaction_log(
                 action="DELETE",
                 table="sites",
@@ -172,6 +176,7 @@ async def bulk_delete_sites(user_id: int, metadata: Request, request: SiteBulkDe
     try:
         if sites_functions.verify_user_existence(user_id):
             ThreadingManager().run_thread(Site.bulk_delete_sites, 'w', request.sites_ids)
+            ThreadingManager().run_thread(Site.verify_autoincrement_id, 'r')
             sites_functions.create_transaction_log(
                 action="DELETE",
                 table="sites",
@@ -195,7 +200,8 @@ async def bulk_delete_sites(user_id: int, metadata: Request, request: SiteBulkDe
 async def delete_all_sites(user_id: int, metadata: Request, token: dict = Depends(verify_jwt)):
     try:
         if sites_functions.verify_user_existence(user_id):
-            ThreadingManager().run_thread(Site.delete_all_sites, 'wx')
+            ThreadingManager().run_thread(Site.delete_sites, 'wx')
+            ThreadingManager().run_thread(Site.verify_autoincrement_id, 'r')
             sites_functions.create_transaction_log(
                 action="DELETE",
                 table="sites",
@@ -210,5 +216,44 @@ async def delete_all_sites(user_id: int, metadata: Request, token: dict = Depend
     except Exception as e:
         return {
             'message': f"Failed to delete sites: {str(e)}",
+            'backend_status': 400
+        }
+
+@sites_router.post("/bulk/insert/sites/")
+async def bulk_insert_sites(
+        user_id: int,
+        metadata: Request,
+        request: SiteBulkInsertBase,
+        token: dict = Depends(verify_jwt)
+):
+    try:
+        if sites_functions.verify_user_existence(user_id):
+            sites = [
+                SiteEntity(
+                    site_id=int(),
+                    fk_region_id=site['fk_region_id'],
+                    site_name=site['site_name'],
+                    region_name=str(),
+                    site_segment=site['site_segment']
+                )
+                for site in request.sites
+            ]
+            ThreadingManager().run_thread(Site.bulk_insert_sites, 'w', sites)
+            sites_functions.create_transaction_log(
+                action="POST",
+                table="sites",
+                user_id=int(user_id),
+                description="Sites bulk inserted successfully",
+                public=str(str(metadata.client.host) + ':' + str(metadata.client.port))
+            )
+            return {
+                'message': "Sites bulk inserted successfully",
+                'backend_status': 200
+            }
+        else:
+            raise Exception("User not registered in the system")
+    except Exception as e:
+        return {
+            'message': f"Failed to bulk insert sites: {str(e)}",
             'backend_status': 400
         }

@@ -273,9 +273,11 @@ class ARPFunctions:
                 # Delete ARP entries from the database
                 if list_arp:
                     ThreadingManager().run_thread(ARP.bulk_delete_arps, 'w', list_arp)
+                    ThreadingManager().run_thread(ARP.verify_autoincrement_id, 'r')
                 # Delete IPGroup entries from the database
                 elif list_ip_groups:
                     ThreadingManager().run_thread(IPGroups.bulk_delete_ip_groups, 'w', list_ip_groups)
+                    ThreadingManager().run_thread(IPGroups.verify_autoincrement_id, 'r')
 
                 print(f'ARP entries deleted: {len(list_arp)}')
         except Exception as e:  

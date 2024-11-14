@@ -308,6 +308,7 @@ async def delete_ip_group(user_id: int, ip_group_id: int, metadata: Request, tok
     try:
         if ip_groups_functions.verify_user_existence(user_id):
             ThreadingManager().run_thread(IPGroups.delete_ip_group, 'w', ip_group_id)
+            ThreadingManager().run_thread(IPGroups.verify_autoincrement_id, 'r')
             ip_groups_functions.create_transaction_log(
                 action="DELETE",
                 table="ip_groups",
@@ -334,6 +335,7 @@ async def delete_ip_groups_bulk(user_id: int, metadata: Request, request: IPGrou
     try:
         if ip_groups_functions.verify_user_existence(user_id):
             ThreadingManager().run_thread(IPGroups.bulk_delete_ip_groups, 'w', request.ip_groups_ids)
+            ThreadingManager().run_thread(IPGroups.verify_autoincrement_id, 'r')
             ip_groups_functions.create_transaction_log(
                 action="DELETE",
                 table="ip_groups",
@@ -360,6 +362,7 @@ async def delete_ip_groups(user_id: int, metadata: Request, token: dict = Depend
     try:
         if ip_groups_functions.verify_user_existence(user_id):
             ThreadingManager().run_thread(IPGroups.delete_ip_groups, 'wx')
+            ThreadingManager().run_thread(IPGroups.verify_autoincrement_id, 'r')
             ip_groups_functions.create_transaction_log(
                 action="DELETE",
                 table="ip_groups",
@@ -386,6 +389,7 @@ async def delete_blacklist_by_site(user_id: int, site_id: int, metadata: Request
         if ip_groups_functions.verify_user_existence(user_id):
             group_metadata = {'site_id': site_id, 'group': 'blacklist'}
             ThreadingManager().run_thread(IPGroups.delete_ip_group_by_site, 'w', group_metadata)
+            ThreadingManager().run_thread(IPGroups.verify_autoincrement_id, 'r')
             ip_groups_functions.create_transaction_log(
                 action="DELETE",
                 table="ip_groups",
@@ -412,6 +416,7 @@ async def delete_authorized_by_site(user_id: int, site_id: int, metadata: Reques
         if ip_groups_functions.verify_user_existence(user_id):
             group_metadata = {'site_id': site_id, 'group': 'authorized'}
             ThreadingManager().run_thread(IPGroups.delete_ip_group_by_site, 'w', group_metadata)
+            ThreadingManager().run_thread(IPGroups.verify_autoincrement_id, 'r')
             ip_groups_functions.create_transaction_log(
                 action="DELETE",
                 table="ip_groups",

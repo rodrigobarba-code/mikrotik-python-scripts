@@ -220,6 +220,7 @@ def delete_user(user_idx: int, metadata: Request, user_id: int, token: dict = De
     try:
         if users_functions.verify_user_existence(user_idx):
             ThreadingManager().run_thread(User.delete_user, 'w', user_id)
+            ThreadingManager().run_thread(User.verify_autoincrement_id, 'r')
             users_functions.create_transaction_log(
                 action="DELETE",
                 table="users",
@@ -245,6 +246,7 @@ def bulk_delete_users(user_idx: int, metadata: Request, request: UserBulkDeleteB
     try:
         if users_functions.verify_user_existence(user_idx):
             ThreadingManager().run_thread(User.bulk_delete_users, 'w', request.users_ids)
+            ThreadingManager().run_thread(User.verify_autoincrement_id, 'r')
             users_functions.create_transaction_log(
                 action="DELETE",
                 table="users",
@@ -270,7 +272,8 @@ def bulk_delete_users(user_idx: int, metadata: Request, request: UserBulkDeleteB
 def delete_users(user_idx: int, metadata: Request, token: dict = Depends(verify_jwt)):
     try:
         if users_functions.verify_user_existence(user_idx):
-            ThreadingManager().run_thread(User.delete_users, 'wx')
+            ThreadingManager().run_thread(User.delete_all_users, 'wx')
+            ThreadingManager().run_thread(User.verify_autoincrement_id, 'r')
             users_functions.create_transaction_log(
                 action="DELETE",
                 table="users",

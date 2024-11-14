@@ -194,6 +194,7 @@ async def delete_arps(user_id: int, metadata: Request, token: dict = Depends(ver
     try:
         if arps_functions.verify_user_existence(user_id):
             ThreadingManager().run_thread(ARP.delete_all_arps, 'wx')
+            ThreadingManager().run_thread(ARP.verify_autoincrement_id, 'r')
             arps_functions.create_transaction_log(
                 action="DELETE",
                 table="arps",
@@ -218,6 +219,7 @@ async def delete_arp(user_id: int, metadata: Request, arp_id: str, token: dict =
     try:
         if arps_functions.verify_user_existence(user_id):
             ThreadingManager().run_thread(ARP.delete_arp, 'w', arp_id)
+            ThreadingManager().run_thread(ARP.verify_autoincrement_id, 'r')
             arps_functions.create_transaction_log(
                 action="DELETE",
                 table="arp",
@@ -242,6 +244,7 @@ async def bulk_delete_arps(user_id: int, metadata: Request, request: ARPBulkDele
     try:
         if arps_functions.verify_user_existence(user_id):
             ThreadingManager().run_thread(ARP.bulk_delete_arps, 'w', request.arps_ids)
+            ThreadingManager().run_thread(ARP.verify_autoincrement_id, 'r')
             arps_functions.create_transaction_log(
                 action="DELETE",
                 table="arps",

@@ -10,6 +10,7 @@ class RouterEntity:
         router_description,  # Router Description
         router_brand,  # Router Brand
         router_model,  # Router Model
+        router_serial,
         fk_site_id,  # Foreign Key Site ID
         router_ip,  # Router IP
         router_mac,  # Router MAC
@@ -22,6 +23,7 @@ class RouterEntity:
         self.router_description = router_description
         self.router_brand = router_brand
         self.router_model = router_model
+        self.router_serial = router_serial
         self.fk_site_id = fk_site_id
         self.router_ip = router_ip
         self.router_mac = router_mac
@@ -39,6 +41,7 @@ class RouterEntity:
             assert isinstance(self.router_description, str)  # Verify if Router Description is a String
             assert isinstance(self.router_brand, str)  # Verify if Router Brand is a String
             assert isinstance(self.router_model, str)  # Verify if Router Model is a String
+            assert isinstance(self.router_serial, str)  # Verify if Router Serial is a String
             assert isinstance(self.fk_site_id, int)  # Verify if Foreign Key Site ID is an Integer
             assert isinstance(self.router_ip, str)  # Verify if Router IP is a String
             assert isinstance(self.router_mac, str)  # Verify if Router MAC is a String

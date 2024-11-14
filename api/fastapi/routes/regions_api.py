@@ -14,6 +14,9 @@ regions_functions = APIFunctions()
 class RegionBulkDeleteBase(BaseModel):
     regions_ids: List[int]
 
+class RegionBulkInsertBase(BaseModel):
+    regions: List[dict]
+
 @regions_router.get("/regions/")
 async def get_regions(user_id: int, metadata: Request, token: dict = Depends(verify_jwt)):
     try:
@@ -133,6 +136,7 @@ async def delete_region(user_id: str, metadata: Request, region_id: int, token: 
     try:
         if regions_functions.verify_user_existence(user_id):
             ThreadingManager().run_thread(Region.delete_region, 'w', region_id)
+            ThreadingManager().run_thread(Region.verify_autoincrement_id, 'r')
             regions_functions.create_transaction_log(
                 action="DELETE",
                 table="regions",
@@ -157,6 +161,7 @@ async def bulk_delete_regions(user_id: str, metadata: Request, request: RegionBu
     try:
         if regions_functions.verify_user_existence(user_id):
             ThreadingManager().run_thread(Region.bulk_delete_regions, 'w', request.regions_ids)
+            ThreadingManager().run_thread(Region.verify_autoincrement_id, 'r')
             regions_functions.create_transaction_log(
                 action="DELETE",
                 table="regions",
@@ -181,6 +186,7 @@ async def delete_all_regions(user_id: int, metadata: Request, token: dict = Depe
     try:
         if regions_functions.verify_user_existence(user_id):
             ThreadingManager().run_thread(Region.delete_all_regions, 'wx')
+            ThreadingManager().run_thread(Region.verify_autoincrement_id, 'r')
             regions_functions.create_transaction_log(
                 action="DELETE",
                 table="regions",
@@ -197,5 +203,41 @@ async def delete_all_regions(user_id: int, metadata: Request, token: dict = Depe
     except Exception as e:
         return {
             'message': f"Failed to delete all regions: {str(e)}",
+            'backend_status': 400
+        }
+
+@regions_router.post("/bulk/insert/regions/")
+async def bulk_insert_regions(
+        user_id: int,
+        metadata: Request,
+        request: RegionBulkInsertBase,
+        token: dict = Depends(verify_jwt)
+):
+    try:
+        if regions_functions.verify_user_existence(user_id):
+            regions = [
+                RegionEntity(
+                    region_id=int(),
+                    region_name=region['region_name']
+                )
+                for region in request.regions
+            ]
+            ThreadingManager().run_thread(Region.bulk_insert_regions, 'w', regions)
+            regions_functions.create_transaction_log(
+                action="POST",
+                table="regions",
+                user_id=int(user_id),
+                description="Regions bulk inserted successfully",
+                public=str(str(metadata.client.host) + ':' + str(metadata.client.port))
+            )
+            return {
+                'message': "Regions bulk inserted successfully",
+                'backend_status': 200
+            }
+        else:
+            raise Exception("User not registered in the system")
+    except Exception as e:
+        return {
+            'message': f"Failed to bulk insert regions: {str(e)}",
             'backend_status': 400
         }
