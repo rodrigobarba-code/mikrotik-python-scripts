@@ -47,7 +47,7 @@ class RouterDetails {
 // Class for handling router details
 
 $(document).ready(() => {
-    $('.verify-router-connection').on('click', async function () {
+    $(document).on('click', '.verify-router-connection', async function() {
         const id = $(this).attr('id');
         let router_id = parseInt(id.split('-')[3]);
 
