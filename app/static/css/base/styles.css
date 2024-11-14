@@ -12,6 +12,10 @@
     }
 }
 
+.text {
+    color: var(--text-color);
+}
+
 .float-container {
     position: absolute;
     z-index: 1000;
@@ -137,4 +141,49 @@
 .form-control:focus, .form-select:focus {
     background-color: var(--hover-color);
     color: var(--text-color);
+}
+
+.card {
+    background-color: var(--active-color);
+    color: var(--text-color);
+    border-radius: 20px;
+}
+
+
+.dashboard-jumbotron {
+    background: linear-gradient(90deg, #4fb76c, #57cc95, #3bb8ce);
+    background-size: cover;
+    width: 100%;
+    min-height: 200px;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+}
+
+/* Container behind card-tops*/
+.card-top-container {
+    transform: translateY(-50%);
+}
+
+/* Container behind card-tops*/
+.card-container {
+}
+
+.overview-container {
+    color: white;
+}
+
+.overview-container h1 {
+    padding-left: 2rem;
+}
+
+.card-top {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 30px;
+    position: relative;
+    z-index: 1;
+}
+
+.dashboard-content {
 }

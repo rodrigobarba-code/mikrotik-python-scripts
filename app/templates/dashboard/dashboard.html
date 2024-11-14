@@ -2,5 +2,81 @@
 
 {% block title %} Dashboard {% endblock %}
 
+{% block head %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/base/styles.css') }}">
+{% endblock %}
+
+{% block scripts %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
 {% block content %}
+
+    <!-- Dashboard Jumbotron -->
+    <section class="dashboard-jumbotron">
+        <div class="container-fluid py-5 overview-container">
+            <h1 class="display-5 fw-bold">Overview</h1>
+        </div>
+    </section>
+    <!-- Dashboard Jumbotron -->
+
+    <!-- Overview Card-Top -->
+    <div class="container card-top-container">
+        <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12 card-container">
+                <div class="d-flex justify-content-evenly">
+                    <div class="card card-top">
+                        <div class="card-body">
+                            <h5 class="card-title">Total IPs</h5>
+                            <span class="badge rounded-pill bg-dark">
+                                {{ dashboard_data.total_ips.total }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="card card-top">
+                        <div class="card-body">
+                            <h5 class="card-title">Anomalies found</h5>
+                            <span class="badge rounded-pill bg-dark">
+                                {{ dashboard_data.total_ips.count_arps }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="card card-top">
+                        <div class="card-body">
+                            <h5 class="card-title">Blacklist/Authorized found</h5>
+                            <span class="badge rounded-pill bg-dark">
+                                {{ dashboard_data.total_ips.count_ip_groups }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Overview Card-Top -->
+
+    <!-- Dashboard Content -->
+    <div class="container-fluid">
+        <div class="container">
+            <div class="row">
+                <!-- Panel 1 -->
+                <div class="col-lg-4 col-md-6 col-sm-12 dashboard-content">
+                    <div class="card p-3">
+                        <h5 class="card-title">Assigned Private IP</h5>
+
+                        <!-- Selector para elegir el tipo de estadísticas -->
+                        <label for="statsFilter" class="form-label">Select a site:</label>
+                        <select id="statsFilter" class="form-select mb-3">
+                            {% for site in sites %}
+                                <option value="{{ site[0] }}">{{ site[1] }}</option>
+                            {% endfor %}
+                        </select>
+                        <!-- Canvas para el gráfico -->
+                        <canvas id="myChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Dashboard Content -->
 {% endblock %}
