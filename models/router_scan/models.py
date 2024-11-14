@@ -53,7 +53,7 @@ class ARP(Base):
     @staticmethod
     def verify_autoincrement_id(session):
         try:
-            if session.query(ARP).all() is None:
+            if not session.query(ARP).all():
                 session.execute(text("ALTER TABLE arp AUTO_INCREMENT = 1"))
         except Exception as e:
             raise e

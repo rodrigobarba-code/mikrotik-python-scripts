@@ -25,7 +25,7 @@ class Region(Base):
     @staticmethod
     def verify_autoincrement_id(session):
         try:
-            if session.query(Region).all() is None:
+            if not session.query(Region).all():
                 session.execute(text("ALTER TABLE regions AUTO_INCREMENT = 1"))
         except Exception as e:
             raise RegionError()

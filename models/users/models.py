@@ -36,7 +36,7 @@ class User(Base):
     @staticmethod
     def verify_autoincrement_id(session):
         try:
-            if session.query(User).all() is None:
+            if not session.query(User).all():
                 session.execute(text("ALTER TABLE users AUTO_INCREMENT = 1"))
         except Exception as e:
             raise e
@@ -289,7 +289,7 @@ class UserLog(Base):
     @staticmethod
     def verify_autoincrement_id(session):
         try:
-            if session.query(UserLog).all() is None:
+            if not session.query(UserLog).all():
                 session.execute(text("ALTER TABLE users_log AUTO_INCREMENT = 1"))
         except Exception as e:
             raise e

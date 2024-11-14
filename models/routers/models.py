@@ -45,7 +45,7 @@ class Router(Base):
     @staticmethod
     def verify_autoincrement_id(session):
         try:
-            if session.query(Router).all() is None:
+            if not session.query(Router).all():
                 session.execute(text("ALTER TABLE routers AUTO_INCREMENT = 1"))
         except Exception as e:
             raise e

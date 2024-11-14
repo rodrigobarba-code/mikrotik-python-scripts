@@ -45,7 +45,7 @@ class IPSegment(Base):
     @staticmethod
     def verify_autoincrement_id(session):
         try:
-            if session.query(IPSegment).all() is None:
+            if not session.query(IPSegment).all():
                 session.execute(text("ALTER TABLE ip_segment AUTO_INCREMENT = 1"))
         except Exception as e:
             raise e
@@ -354,7 +354,7 @@ class IPGroupsTags(Base):
     @staticmethod
     def verify_autoincrement_id(session):
         try:
-            if session.query(IPGroupsTags).all() is None:
+            if not session.query(IPGroupsTags).all():
                 session.execute(text("ALTER TABLE ip_groups_tags AUTO_INCREMENT = 1"))
         except Exception as e:
             raise e
@@ -547,7 +547,7 @@ class IPGroupsToIPGroupsTags(Base):
     @staticmethod
     def verify_autoincrement_id(session):
         try:
-            if session.query(IPGroupsToIPGroupsTags).all() is None:
+            if not session.query(IPGroupsToIPGroupsTags).all():
                 session.execute(text("ALTER TABLE ip_groups_to_ip_groups_tags AUTO_INCREMENT = 1"))
         except Exception as e:
             raise e
@@ -728,7 +728,7 @@ class IPGroups(Base):
     @staticmethod
     def verify_autoincrement_id(session):
         try:
-            if session.query(IPGroups).all() is None:
+            if not session.query(IPGroups).all():
                 session.execute(text("ALTER TABLE ip_groups AUTO_INCREMENT = 1"))
         except Exception as e:
             raise e
