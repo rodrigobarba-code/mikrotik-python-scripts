@@ -5,6 +5,7 @@ from app.functions import get_verified_jwt_header
 from app.decorators import RequirementsDecorators as restriction
 from flask import render_template, redirect, url_for, flash, request, jsonify, session
 
+
 @regions_bp.route('/', methods=['GET'])
 @restriction.login_required
 def regions():
@@ -32,6 +33,7 @@ def regions():
     except Exception as e:
         flash(str(e), 'danger')
         return redirect(url_for('regions.regions'))
+
 
 @regions_bp.route('/add', methods=['GET', 'POST'])
 @restriction.login_required
@@ -61,6 +63,7 @@ def add_region():
         'regions/form_regions.html',
         region=None
     )
+
 
 @regions_bp.route('/update/<int:region_id>', methods=['GET', 'POST'])
 @restriction.login_required
@@ -111,6 +114,7 @@ def update_region(region_id):
         flash(str(e), 'danger')
         return redirect(url_for('regions.regions'))
 
+
 @regions_bp.route('/delete/<int:region_id>', methods=['GET'])
 @restriction.login_required
 @restriction.admin_required
@@ -131,6 +135,7 @@ def delete_region(region_id):
     except Exception as e:
         flash(str(e), 'danger')
     return redirect(url_for('regions.regions'))
+
 
 @regions_bp.route('/delete/bulk', methods=['POST'])
 @restriction.login_required
@@ -160,6 +165,7 @@ def bulk_delete_region():
         flash(str(e), 'danger')
         return jsonify({'message': 'Failed to delete regions', 'error': str(e)}), 500
 
+
 @regions_bp.route('/delete/all', methods=['POST'])
 @restriction.login_required
 @restriction.admin_required
@@ -178,6 +184,50 @@ def delete_all_regions():
                 raise Exception(response.json().get('message'))
         elif response.status_code == 500:
             return jsonify({'message': 'Failed to delete regions'}), 500
-    except Exception as e:  
-        flash(str(e), 'danger')  
+    except Exception as e:
+        flash(str(e), 'danger')
         return jsonify({'message': 'Failed to delete regions', 'error': str(e)}), 500
+
+
+@regions_bp.route('/import/excel', methods=['POST'])
+@restriction.login_required
+@restriction.admin_required
+def import_regions_from_excel():
+    try:
+        import pandas as pd
+
+        file = request.files['file']
+
+        if file.filename.split('.')[-1] not in ['xls', 'xlsx']:
+            raise Exception('Invalid file format')
+
+        df = pd.read_excel(file)
+        df = df.where(pd.notnull(df), None)
+
+        json_region_list = []
+        for index, row in df.iterrows():
+            region = {
+                'region_name': row['Region Name']
+            }
+            json_region_list.append(region)
+
+        response = requests.post(
+            'http://localhost:8080/api/private/bulk/insert/regions/',
+            json={'regions': json_region_list},
+            headers=get_verified_jwt_header(),
+            params={'user_id': session.get('user_id')}
+        )
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                flash(response.json().get('message'), 'success')
+                return jsonify(
+                    {'message': response.json().get('message')}
+                ), 200
+            else:
+                raise Exception(response.json().get('message'))
+        elif response.status_code == 500:
+            raise Exception('Failed to import regions from excel')
+    except Exception as e:
+        flash(str(e), 'danger')
+        return jsonify({'message': str(e)}), 500
+    return redirect(url_for('regions.regions'))

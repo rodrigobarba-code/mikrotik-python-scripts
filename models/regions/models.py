@@ -1,10 +1,11 @@
 from .. import Base
-from sqlalchemy import func, delete
+from sqlalchemy import func, delete, text
 from sqlalchemy import Column, Integer, String
 
 from models.sites.models import Site
 from models.regions.exceptions import *
 from entities.region import RegionEntity
+
 
 class Region(Base):
     __tablename__ = 'regions'  
@@ -20,6 +21,14 @@ class Region(Base):
             'region_id': self.region_id,  
             'region_name': self.region_name  
         }
+
+    @staticmethod
+    def verify_autoincrement_id(session):
+        try:
+            if not session.query(Region).all():
+                session.execute(text("ALTER TABLE regions AUTO_INCREMENT = 1"))
+        except Exception as e:
+            raise RegionError()
 
     @staticmethod
     def add_region(session, region):
@@ -142,3 +151,33 @@ class Region(Base):
             return r_list  
         except Exception as e:  
             raise RegionError()
+
+    @staticmethod
+    def bulk_insert_regions(session, regions: list[RegionEntity]) -> None:
+        """
+        Bulk insert regions into the database
+        :param session: SQLAlchemy session
+        :param regions: List of RegionEntity objects
+        :return: None
+        """
+
+        try:
+            # Create a list for regions
+            region_list = []
+
+            # Iterate over the list of regions
+            for region in regions:
+                # Verify if the region already exists
+                if not session.query(Region).filter(func.lower(Region.region_name) == func.lower(region.region_name)).first():
+                    # Append the region to the list
+                    region_list.append(
+                        Region(
+                            region_name=region.region_name
+                        )
+                    )
+
+            # Bulk insert the regions
+            session.bulk_save_objects(region_list)
+        except Exception as e:
+            # Raise the exception
+            raise e

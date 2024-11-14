@@ -234,3 +234,48 @@ def delete_all_sites():
     except Exception as e:
         flash(str(e), 'danger')
         return jsonify({'message': 'Failed to delete sites', 'error': str(e)}), 500
+
+@sites_bp.route('/import/excel', methods=['POST'])
+@restriction.login_required
+@restriction.admin_required
+def import_sites_from_excel():
+    try:
+        import pandas as pd
+
+        file = request.files['file']
+
+        if file.filename.split('.')[-1] not in ['xls', 'xlsx']:
+            raise Exception('Invalid file format')
+
+        df = pd.read_excel(file)
+        df = df.where(pd.notnull(df), None)
+
+        json_site_list = []
+        for index, row in df.iterrows():
+            site = {
+                'site_name': row['Site Name'],
+                'fk_region_id': int(row['Region ID']),
+                'site_segment': int(row['Segment'])
+            }
+            json_site_list.append(site)
+
+        response = requests.post(
+            'http://localhost:8080/api/private/bulk/insert/sites/',
+            json={'sites': json_site_list},
+            headers=get_verified_jwt_header(),
+            params={'user_id': session.get('user_id')}
+        )
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                flash(response.json().get('message'), 'success')
+                return jsonify(
+                    {'message': response.json().get('message')}
+                ), 200
+            else:
+                raise Exception(response.json().get('message'))
+        elif response.status_code == 500:
+            raise Exception('Failed to import sites from excel')
+    except Exception as e:
+        flash(str(e), 'danger')
+        return jsonify({'message': str(e)}), 500
+    return redirect(url_for('sites.sites'))

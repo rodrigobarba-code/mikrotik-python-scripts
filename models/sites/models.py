@@ -1,5 +1,5 @@
 from .. import Base
-from sqlalchemy import func, delete
+from sqlalchemy import func, delete, text
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy import Column, Integer, String, ForeignKey
 
@@ -27,6 +27,14 @@ class Site(Base):
             'site_name': self.site_name,  
             'site_segment': self.site_segment  
         }
+
+    @staticmethod
+    def verify_autoincrement_id(session):
+        try:
+            if not session.query(Site).all():
+                session.execute(text("ALTER TABLE sites AUTO_INCREMENT = 1"))
+        except Exception as e:
+            raise SiteError()
 
     @staticmethod
     def add_site(session, site):
@@ -185,3 +193,34 @@ class Site(Base):
                 return False
         except Exception as e:
             raise SiteError()
+
+    @staticmethod
+    def bulk_insert_sites(session, sites: list[SiteEntity]) -> None:
+        """
+        Bulk insert sites into the database
+        :param session: SQLAlchemy session
+        :param sites: List of sites to be inserted
+        :return: None
+        """
+
+        try:
+            # Create a list for the sites
+            site_list = []
+
+            # Iterate over the list of sites
+            for site in sites:
+                # Verify if the site already exists
+                if not session.query(Site).filter(
+                        func.lower(Site.site_name) == func.lower(site.site_name)).first():
+                    # Append the site to the list
+                    site_list.append(Site(
+                        fk_region_id=site.fk_region_id,
+                        site_name=site.site_name,
+                        site_segment=site.site_segment
+                    ))
+
+            # Bulk insert the sites
+            session.bulk_save_objects(site_list)
+        except Exception as e:
+            # Raise the exception
+            raise e

@@ -1,4 +1,5 @@
 from .. import Base
+from sqlalchemy import text
 from entities.router import RouterEntity
 from sqlalchemy.orm import relationship, backref
 from models.routers.functions import RoutersFunctions
@@ -11,7 +12,8 @@ class Router(Base):
     router_name = Column(String(128), nullable=False)  
     router_description = Column(String(256), nullable=False)  
     router_brand = Column(String(128), nullable=False)  
-    router_model = Column(String(128), nullable=False)  
+    router_model = Column(String(128), nullable=False)
+    router_serial = Column(String(128), nullable=True)
     fk_site_id = Column(Integer, ForeignKey('sites.site_id'), nullable=False)  
     router_ip = Column(String(16), nullable=False)  
     router_mac = Column(String(32), nullable=False)  
@@ -30,7 +32,8 @@ class Router(Base):
             'router_name': self.router_name,  
             'router_description': self.router_description,  
             'router_brand': self.router_brand,  
-            'router_model': self.router_model,  
+            'router_model': self.router_model,
+            'router_serial': self.router_serial,
             'fk_site_id': self.fk_site_id,  
             'router_ip': self.router_ip,  
             'router_mac': self.router_mac,  
@@ -38,6 +41,14 @@ class Router(Base):
             'router_password': self.router_password,  
             'allow_scan': self.allow_scan  
         }
+
+    @staticmethod
+    def verify_autoincrement_id(session):
+        try:
+            if not session.query(Router).all():
+                session.execute(text("ALTER TABLE routers AUTO_INCREMENT = 1"))
+        except Exception as e:
+            raise e
 
     @staticmethod
     def add_router(session, router: RouterEntity):
@@ -49,7 +60,8 @@ class Router(Base):
                     router_name=router.router_name,  
                     router_description=router.router_description,  
                     router_brand=router.router_brand,  
-                    router_model=router.router_model,  
+                    router_model=router.router_model,
+                    router_serial=router.router_serial,
                     fk_site_id=router.fk_site_id,  
                     router_ip=router.router_ip,  
                     router_mac=router.router_mac,
@@ -73,7 +85,8 @@ class Router(Base):
                 old_router.router_name = new_router.router_name  
                 old_router.router_description = new_router.router_description  
                 old_router.router_brand = new_router.router_brand  
-                old_router.router_model = new_router.router_model  
+                old_router.router_model = new_router.router_model
+                old_router.router_serial = new_router.router_serial
                 old_router.fk_site_id = new_router.fk_site_id  
                 old_router.router_ip = new_router.router_ip  
                 old_router.router_mac = new_router.router_mac  
@@ -98,7 +111,8 @@ class Router(Base):
                         router_description=str(),  
                         router_brand=str(),  
                         router_model=str(),  
-                        fk_site_id=int(),  
+                        router_serial=str(),
+                        fk_site_id=int(),
                         router_ip=str(),  
                         router_mac=str(),  
                         router_username=str(),  
@@ -145,7 +159,8 @@ class Router(Base):
                         router_name=str(),  
                         router_description=str(),  
                         router_brand=str(),  
-                        router_model=str(),  
+                        router_model=str(),
+                        router_serial=str(),
                         fk_site_id=int(),  
                         router_ip=str(),  
                         router_mac=str(),  
@@ -173,7 +188,8 @@ class Router(Base):
                 router_name=router.router_name,  
                 router_description=router.router_description,  
                 router_brand=router.router_brand,  
-                router_model=router.router_model,  
+                router_model=router.router_model,
+                router_serial=router.router_serial,
                 fk_site_id=router.fk_site_id,  
                 router_ip=router.router_ip,  
                 router_mac=router.router_mac,  
@@ -232,6 +248,7 @@ class Router(Base):
                         router_description=router.router_description,
                         router_brand=router.router_brand,
                         router_model=router.router_model,
+                        router_serial=router.router_serial,
                         fk_site_id=router.fk_site_id,
                         router_ip=router.router_ip,
                         router_mac=router.router_mac,

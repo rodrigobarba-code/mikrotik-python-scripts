@@ -1,9 +1,8 @@
 from .. import Base
-# from entities.arp import ARPTag
 from entities.arp import ARPEntity
 from sqlalchemy.orm import relationship, backref
 from models.router_scan.functions import ARPFunctions
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, Enum
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, Enum, text
 
 
 class ARP(Base):
@@ -50,6 +49,14 @@ class ARP(Base):
             'arp_duplicity': self.arp_duplicity,
             'arp_duplicity_indexes': self.arp_duplicity_indexes
         }
+
+    @staticmethod
+    def verify_autoincrement_id(session):
+        try:
+            if not session.query(ARP).all():
+                session.execute(text("ALTER TABLE arp AUTO_INCREMENT = 1"))
+        except Exception as e:
+            raise e
 
     @staticmethod
     def add_arp(session, arp: ARPEntity):
@@ -424,135 +431,3 @@ class ARP(Base):
             session.bulk_save_objects(ip_groups)
         except Exception as e:
             raise e
-
-
-"""
-class ARPTags(Base):
-    __tablename__ = 'arp_tag'  
-
-    arp_tag_id = Column(Integer, primary_key=True, nullable=False)  
-    fk_arp_id = Column(Integer, ForeignKey('arp.arp_id'), nullable=False)  
-    arp_tag_value = Column(String(255), nullable=False)
-    
-    arp = relationship('ARP', backref=backref('arp_tag', lazy=True))  
-
-    def __repr__(self):
-        return f'<ARPTag {self.arp_tag_id}>'  
-
-    def to_dict(self):
-        return {
-            'arp_tag_id': self.arp_tag_id,  
-            'fk_arp_id': self.fk_arp_id,  
-            'arp_tag_value': self.arp_tag_value  
-        }
-
-    @staticmethod
-    def add_arp_tag(session, arp_tag: ARPTag):
-        try:
-            if (session.query(ARPTags).filter(
-                ARPTags.fk_arp_id == arp_tag.fk_arp_id,  
-                ARPTags.arp_tag_value == arp_tag.arp_tag_value  
-            ).first() is None):
-                arp_tag_obj = ARPTags(  
-                    fk_arp_id=arp_tag.fk_arp_id,  
-                    arp_tag_value=arp_tag.arp_tag_value  
-                )
-                session.add(arp_tag_obj)
-        except Exception as e:  
-            raise e
-
-    @staticmethod
-    def delete_arp_tag(session, arp_tag_id):
-        try:  
-            arp_tag = session.query(ARPTags).get(arp_tag_id)
-            session.delete(arp_tag)
-        except Exception as e:  
-            raise e
-
-    @staticmethod
-    def delete_all_arp_tags(session):
-        try:  
-            session.query(ARPTags).delete()
-        except Exception as e:
-            raise e
-
-    @staticmethod
-    def delete_arp_tags(session, arp_id):
-        try:  
-            session.query(ARPTags).filter(ARPTags.fk_arp_id == arp_id).delete()
-        except Exception as e:  
-            raise e
-
-    @staticmethod
-    def get_arp_tags(session, arp_id):
-        try:  
-            arp_tags = session.query(ARPTags).filter(ARPTags.fk_arp_id == arp_id).all()
-            obj_list = []  
-            for arp_tag in arp_tags:  
-                obj_list.append(arp_tag.arp_tag_value)  
-            return obj_list  
-        except Exception as e:  
-            raise e
-
-    @staticmethod
-    def assign_first_tag(session) -> None:
-        '''
-        Assign the first tag to the ARP objects
-        :param session: Database session
-        :return: None
-        '''
-
-        try:
-            # Create a list of ARP objects to add
-            to_add = []
-
-            # Get available ARP tags defined in the system
-            arp_item = None
-            arp_tags = ARPTag.get_tags()
-
-            # Get all ARP objects from the database
-            arps = session.query(ARP).all()
-
-            # Iterate on the ARP objects and assign the first tag to each ARP object
-            for arp in arps:
-                unused = True
-                # Verify if the ARP object has any tags assigned
-                if arp.arp_ip.startswith("10."):
-                    # Check if the ARP object already has a internal connection tag or private IP tag
-                    if session.query(ARPTags).filter(
-                            ARPTags.fk_arp_id == arp.arp_id, ARPTags.arp_tag_value == arp_tags['INTERNAL_CONNECTION']
-                                                             or ARPTags.arp_tag_value == arp_tags['PRIVATE_IP']
-                    ).first() is None:
-                        # Because it is an internal connection, assign the INTERNAL_CONNECTION tag and the PRIVATE_IP tag
-                        arp_temp = ARPTags(
-                            arp_tag_id=int(),
-                            fk_arp_id=arp.arp_id,
-                            arp_tag_value=arp_tags['INTERNAL_CONNECTION']
-                        )
-                        to_add.append(arp_temp)
-                        arp_item = arp_tags['PRIVATE_IP']
-                        unused = False
-                else:
-                    # Check if the ARP object already has a external connection tag or public IP tag
-                    if session.query(ARPTags).filter(
-                            ARPTags.fk_arp_id == arp.arp_id, ARPTags.arp_tag_value == arp_tags['PUBLIC_IP']
-                    ).first() is None:
-                        # Because it is an external connection, assign the PUBLIC_IP tag
-                        arp_item = arp_tags['PUBLIC_IP']
-                        unused = False
-
-                if unused is False:
-                    # Otherwise, assign the missing tag to the ARP object
-                    arp_tag = ARPTags(
-                        arp_tag_id=int(),
-                        fk_arp_id=arp.arp_id,
-                        arp_tag_value=arp_item
-                    )
-                    to_add.append(arp_tag)
-
-            if to_add is not None:
-                # If there are ARP tags to add, add them to the database
-                session.bulk_save_objects(to_add)
-        except Exception as e:
-            raise e
-"""
