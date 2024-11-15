@@ -11,11 +11,14 @@ from utils.threading_manager import ThreadingManager
 sites_router = APIRouter()
 sites_functions = APIFunctions()
 
+
 class SiteBulkDeleteBase(BaseModel):
     sites_ids: List[int]
 
+
 class SiteBulkInsertBase(BaseModel):
     sites: List[dict]
+
 
 @sites_router.get("/sites/")
 async def get_sites(user_id: int, metadata: Request, token: dict = Depends(verify_jwt)):
@@ -52,6 +55,7 @@ async def get_sites(user_id: int, metadata: Request, token: dict = Depends(verif
             'backend_status': 400
         }
 
+
 @sites_router.get("/site/{site_id}")
 async def get_site(user_id: int, metadata: Request, site_id: int, token: dict = Depends(verify_jwt)):
     try:
@@ -84,8 +88,50 @@ async def get_site(user_id: int, metadata: Request, site_id: int, token: dict = 
             'backend_status': 400
         }
 
+
+@sites_router.get("/sites/available/")
+async def get_available_sites(
+        user_id: int,
+        metadata: Request,
+        token: dict = Depends(verify_jwt)
+):
+    try:
+        if sites_functions.verify_user_existence(user_id):
+            request = ThreadingManager().run_thread(Site.get_available_sites, 'r')
+            site_list = [
+                {
+                    "site_id": site.site_id,
+                    "fk_region_id": site.fk_region_id,
+                    "region_name": site.region_name,
+                    "site_name": site.site_name,
+                    "site_segment": site.site_segment
+                }
+                for site in request
+            ]
+            sites_functions.create_transaction_log(
+                action="GET",
+                table="sites",
+                user_id=int(user_id),
+                description="Available sites retrieved successfully",
+                public=str(str(metadata.client.host) + ':' + str(metadata.client.port))
+            )
+            return {
+                'message': "Available sites retrieved successfully",
+                'sites': site_list,
+                'backend_status': 200
+            }
+        else:
+            raise Exception("User not registered in the system")
+    except Exception as e:
+        return {
+            'message': f"Failed to retrieve available sites: {str(e)}",
+            'backend_status': 400
+        }
+
+
 @sites_router.post("/site/")
-async def add_site(user_id: int, metadata: Request, fk_region_id: int, site_name: str, site_segment: int, token: dict = Depends(verify_jwt)):
+async def add_site(user_id: int, metadata: Request, fk_region_id: int, site_name: str, site_segment: int,
+                   token: dict = Depends(verify_jwt)):
     try:
         if sites_functions.verify_user_existence(user_id):
             site = SiteEntity(
@@ -115,8 +161,10 @@ async def add_site(user_id: int, metadata: Request, fk_region_id: int, site_name
             'backend_status': 400
         }
 
+
 @sites_router.put("/site/{site_id}")
-async def update_site(user_id: int, metadata: Request, site_id: int, fk_region_id: int, site_name: str, site_segment: int, token: dict = Depends(verify_jwt)):
+async def update_site(user_id: int, metadata: Request, site_id: int, fk_region_id: int, site_name: str,
+                      site_segment: int, token: dict = Depends(verify_jwt)):
     try:
         if sites_functions.verify_user_existence(user_id):
             site = SiteEntity(
@@ -146,6 +194,7 @@ async def update_site(user_id: int, metadata: Request, site_id: int, fk_region_i
             'backend_status': 400
         }
 
+
 @sites_router.delete("/site/{site_id}")
 async def delete_site(user_id: int, metadata: Request, site_id: int, token: dict = Depends(verify_jwt)):
     try:
@@ -171,8 +220,10 @@ async def delete_site(user_id: int, metadata: Request, site_id: int, token: dict
             'backend_status': 400
         }
 
+
 @sites_router.delete("/sites/bulk/")
-async def bulk_delete_sites(user_id: int, metadata: Request, request: SiteBulkDeleteBase, token: dict = Depends(verify_jwt)):
+async def bulk_delete_sites(user_id: int, metadata: Request, request: SiteBulkDeleteBase,
+                            token: dict = Depends(verify_jwt)):
     try:
         if sites_functions.verify_user_existence(user_id):
             ThreadingManager().run_thread(Site.bulk_delete_sites, 'w', request.sites_ids)
@@ -196,6 +247,7 @@ async def bulk_delete_sites(user_id: int, metadata: Request, request: SiteBulkDe
             'backend_status': 400
         }
 
+
 @sites_router.delete("/sites/")
 async def delete_all_sites(user_id: int, metadata: Request, token: dict = Depends(verify_jwt)):
     try:
@@ -218,6 +270,7 @@ async def delete_all_sites(user_id: int, metadata: Request, token: dict = Depend
             'message': f"Failed to delete sites: {str(e)}",
             'backend_status': 400
         }
+
 
 @sites_router.post("/bulk/insert/sites/")
 async def bulk_insert_sites(
