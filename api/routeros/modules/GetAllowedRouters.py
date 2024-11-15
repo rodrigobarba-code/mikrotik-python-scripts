@@ -1,8 +1,12 @@
 from models.routers.models import Router
 
+
 class GetAllowedRouters:
     @staticmethod
     def get(session) -> list[dict]:
+        from utils.password_manager import PasswordManager
+        pm = PasswordManager()
+
         try:
             router_list = []
             routers = session.query(Router).filter(Router.allow_scan == 1).all()
@@ -13,7 +17,7 @@ class GetAllowedRouters:
                     'ip': router.router_ip,
                     'mac': router.router_mac,
                     'username': router.router_username,
-                    'password': router.router_password
+                    'password': pm.decrypt_password(router.router_password),
                 }
                 router_list.append(router_dict)
             return router_list
