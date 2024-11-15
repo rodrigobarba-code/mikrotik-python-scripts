@@ -8,6 +8,94 @@
 
 {% block scripts %}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Datos iniciales para el gráfico
+        const siteData = {{ dashboard_data.assigned_private_ip_per_site | tojson }};
+        let chart;
+
+        // Inicializar gráfico
+        function initializeChart(labels, data) {
+            const ctx = document.getElementById('myChart').getContext('2d');
+            ctx.width = 1200;  // Ajusta el ancho del canvas para que tenga suficiente espacio
+            ctx.height = 400;  // Ajusta la altura según sea necesario
+            chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'IP Quantity',
+                        data: data,
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1,
+                        borderRadius: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    scales: {
+                        x: {
+                            ticks: {
+                                autoSkip: false,          // Desactiva autoSkip para mostrar todos los ticks
+                                maxTicksLimit: 63,        // Garantiza que se vean todos los 63 segmentos
+                                minRotation: 0,           // Mantén las etiquetas en su posición original
+                                maxRotation: 45,          // Rota si es necesario
+                            },
+                            categoryPercentage: 0.9,     // Reduce el tamaño de cada barra
+                            barPercentage: 0.8,         // Reduce el porcentaje de la barra si usas barras
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                autoSkip: true,
+                                maxTicksLimit: 10,
+                            },
+                        },
+                    },
+                    layout: {
+                        padding: {
+                            left: 20,
+                            right: 20,
+                            top: 20,
+                            bottom: 20
+                        }
+                    }
+                }
+            });
+        }
+
+        // Actualizar gráfico con nuevos datos
+        function updateChart(labels, data) {
+            chart.data.labels = labels;
+            chart.data.datasets[0].data = data;
+            chart.update();
+        }
+
+        // Obtener datos del sitio seleccionado y actualizar el gráfico
+        document.getElementById('statsFilter').addEventListener('change', function () {
+            const selectedSite = this.value;
+            const siteSegments = siteData[selectedSite]?.by_segment || [];
+
+            const labels = siteSegments.map(segment => Object.keys(segment)[0]);
+            const data = siteSegments.map(segment => Object.values(segment)[0].quantity);
+
+            if (chart) {
+                updateChart(labels, data);
+            } else {
+                initializeChart(labels, data);
+            }
+        });
+
+        // Inicialización del gráfico con el primer sitio
+        const initialSite = Object.keys(siteData)[0];
+        if (initialSite) {
+            const initialSegments = siteData[initialSite]?.by_segment || [];
+            const labels = initialSegments.map(segment => Object.keys(segment)[0]);
+            const data = initialSegments.map(segment => Object.values(segment)[0].quantity);
+            initializeChart(labels, data);
+        }
+    </script>
 {% endblock %}
 
 {% block content %}
@@ -60,7 +148,7 @@
         <div class="container">
             <div class="row">
                 <!-- Panel 1 -->
-                <div class="col-lg-4 col-md-6 col-sm-12 dashboard-content">
+                <div class="col-lg-12 col-md-6 col-sm-12 dashboard-content">
                     <div class="card p-3">
                         <h5 class="card-title">Assigned Private IP</h5>
 

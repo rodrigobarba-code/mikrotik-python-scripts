@@ -22,7 +22,6 @@ def fetch_url(url, user_id):
         elif response.status_code == 500:
             raise Exception('Failed to fetch data from the server')
     except Exception as e:
-        flash(str(e), 'danger')
         return None  # Return None in case of an error
 
 
