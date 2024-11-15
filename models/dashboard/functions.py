@@ -8,6 +8,7 @@ class DashboardFunctions:
     @staticmethod
     def get_assigned_ip_per_site(type: str) -> dict:
         # Import the model here to avoid circular imports
+        from models.sites.models import Site
         from models.routers.models import Router
         from models.ip_management.models import IPGroups
         from utils.threading_manager import ThreadingManager
@@ -110,6 +111,7 @@ class DashboardFunctions:
     @staticmethod
     def get_available_ip_per_site(type: str) -> dict:
         # Import the model here to avoid circular imports
+        from models.sites.models import Site
         from models.routers.models import Router
         from models.ip_management.models import IPGroups
         from utils.threading_manager import ThreadingManager
