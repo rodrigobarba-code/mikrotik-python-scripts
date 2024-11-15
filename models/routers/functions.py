@@ -2,6 +2,8 @@ import re
 import ipaddress
 from sqlalchemy import func
 from models.routers.exceptions import *
+from models.sites.exceptions import SiteError
+
 
 class RoutersFunctions:
     def __init__(self):  
@@ -63,6 +65,10 @@ class RoutersFunctions:
                             func.lower(model.router_mac) == func.lower(router.router_mac)).first().router_id,
                         router_mac=router.router_mac  
                     )
+
+                if session.query(model).filter(model.fk_site_id == router.fk_site_id).count() >= 1:
+                    raise SiteError()
+
                 return True  
             
             elif operation in ["delete", "get"]:  

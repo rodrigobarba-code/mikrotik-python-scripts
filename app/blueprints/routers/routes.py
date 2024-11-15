@@ -25,7 +25,7 @@ async def get_site_name(site_id: int) -> str:
 def get_available_sites() -> list[SiteEntity]:
     site_list = []
     response = requests.get(
-        'http://localhost:8080/api/private/sites/',
+        'http://localhost:8080/api/private/sites/available/',
         headers=get_verified_jwt_header(),
         params={'user_id': session.get('user_id')}
     )
