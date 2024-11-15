@@ -307,7 +307,7 @@ class RouterAPI:
             # Get the IP scan data from the router
             ip_scan_data = RouterAPI.communicate_data(
                 router_api_instance.get_api(),
-                ['/tool/ip-scan', '=interface=bridgeAPs', '=duration=180s']
+                ['/tool/ip-scan', '=interface=bridgeAPs', '=duration=90s']
             )
 
             # Return the IP scan data
