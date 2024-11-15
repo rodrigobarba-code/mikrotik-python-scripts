@@ -8,7 +8,7 @@ class DashboardFunctions:
     @staticmethod
     def get_assigned_ip_per_site(type: str) -> dict:
         # Import the model here to avoid circular imports
-        from models.sites.models import Site
+        from models.routers.models import Router
         from models.ip_management.models import IPGroups
         from utils.threading_manager import ThreadingManager
 
@@ -30,8 +30,9 @@ class DashboardFunctions:
 
             for site_id, site_name in site_list:
                 # Verify if the site has a router
+
                 if ThreadingManager().run_thread(
-                        Site.verify_site_has_router,
+                        Router.verify_if_router_has_segments,
                         'rx',
                         site_id
                 ) is True:
@@ -109,7 +110,7 @@ class DashboardFunctions:
     @staticmethod
     def get_available_ip_per_site(type: str) -> dict:
         # Import the model here to avoid circular imports
-        from models.sites.models import Site
+        from models.routers.models import Router
         from models.ip_management.models import IPGroups
         from utils.threading_manager import ThreadingManager
 
@@ -132,7 +133,7 @@ class DashboardFunctions:
             for site_id, site_name in site_list:
                 # Verify if the site has a router
                 if ThreadingManager().run_thread(
-                    Site.verify_site_has_router,
+                    Router.verify_if_router_has_segments,
                     'rx',
                     site_id
                 ) is True:
@@ -274,7 +275,7 @@ class DashboardFunctions:
     def get_total_segments_per_site() -> dict:
         # Import the model here to avoid circular imports
         from models.sites.models import Site
-        from models.ip_management.models import IPGroups
+        from models.routers.models import Router
         from utils.threading_manager import ThreadingManager
 
         try:
@@ -305,7 +306,7 @@ class DashboardFunctions:
             for site_id, site_name in site_list:
                 # Verify if the site has a router
                 if ThreadingManager().run_thread(
-                    Site.verify_site_has_router,
+                    Router.verify_if_router_has_segments,
                     'rx',
                     site_id
                 ) is True:
