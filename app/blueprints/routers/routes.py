@@ -31,16 +31,19 @@ def get_available_sites() -> list[SiteEntity]:
     )
     if response.status_code == 200:
         if response.json().get('backend_status') == 200:
-            site_list = [
-                SiteEntity(
-                    site_id=site.get('site_id'),
-                    fk_region_id=site.get('fk_region_id'),
-                    region_name=str(),
-                    site_name=site.get('site_name'),
-                    site_segment=site.get('site_segment')
-                )
-                for site in response.json().get('sites')
-            ]
+            if response.json().get('sites'):
+                site_list = [
+                    SiteEntity(
+                        site_id=site.get('site_id'),
+                        fk_region_id=site.get('fk_region_id'),
+                        region_name=str(),
+                        site_name=site.get('site_name'),
+                        site_segment=site.get('site_segment')
+                    )
+                    for site in response.json().get('sites')
+                ]
+            else:
+                return []
         else:
             raise Exception(response.json().get('message'))
     elif response.status_code == 500:
@@ -79,9 +82,12 @@ def routers():
                 raise Exception(response.json().get('message'))
         elif response.status_code == 500:
             raise Exception('Failed to retrieve routers')
+
+        site_list = get_available_sites()
         return render_template(
             'routers/routers.html',
             switch_scan_status=switch_scan_status['enable'],
+            site_list=site_list if site_list else -1,
             router_list=router_list,
             router=None,
         )
@@ -127,11 +133,14 @@ def add_router():
 
     try:
         site_list = get_available_sites()
-        return render_template(
-            'routers/form_routers.html',
-            site_list=site_list,
-            router=None
-        )
+        if site_list:
+            return render_template(
+                'routers/form_routers.html',
+                site_list=site_list if site_list else -1,
+                router=None
+            )
+        else:
+            raise Exception('Oops! No sites available, so you can not add a router')
     except Exception as e:
         flash(str(e), 'danger')
         return redirect(url_for('routers.routers'))
@@ -206,10 +215,10 @@ def update_router(router_id):
 
     try:
         site_list = get_available_sites()
-        return render_template(  
-            'routers/form_routers.html',  
-            site_list=site_list,  
-            router=router  
+        return render_template(
+            'routers/form_routers.html',
+            site_list=site_list,
+            router=router
         )
     except Exception as e:  
         flash(str(e), 'danger')  

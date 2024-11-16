@@ -74,7 +74,7 @@
                     <div class="col-12">
                         <div class="form-group">
                             <label for="fk_site_id">Available Router Sites</label>
-                            <select class="form-select" id="fk_site_id" name="fk_site_id" required>
+                            <select class="form-select" id="fk_site_id" name="fk_site_id" required {% if site_list == [] %} disabled {% endif %}>
                                 <option value="" selected disabled>Select a Site</option>
                                 {% for site in site_list %}
                                     <option value="{{ site.site_id }}"
