@@ -14,13 +14,37 @@
         <!-- Navigation -->
         <ul class="nav-links">
             {% for item in menu_items %}
-                {% if item == 'separator' %}
-                    <hr class="w-75 text">
-                {% elif item.submenu %}
-                    <li class="">
-                        <div class="iocn-link">
+                {% if session['user_privileges'] in item.privileges %}
+                    {% if item == 'separator' %}
+                        <hr class="w-75 text">
+                    {% elif item.submenu %}
+                        <li class="">
+                            <div class="iocn-link">
+                                <a {% if item.endpoint != '#' %} href="{{ url_for(item.endpoint) }}" {% endif %}>
+                                    <i class="{{ item.icon }}" style="{{ item.style }}"></i>
+                                    {% if item.marquee %}
+                                        <marquee direction="left" scrollamount="4"><span
+                                                class="link_name">{{ item.name }}</span></marquee>
+                                    {% else %}
+                                        <span class="link_name">{{ item.name }}</span>
+                                    {% endif %}
+                                </a>
+                                <i class='bx bxs-chevron-down arrow text'></i>
+                            </div>
+                            <ul class="sub-menu">
+                                {% for sub_item in item.submenu %}
+                                    {% if sub_item == 'separator' %}
+                                        <hr class="w-75 text">
+                                    {% else %}
+                                        <li><a href="{{ url_for(sub_item.endpoint) }}">{{ sub_item.name }}</a></li>
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li>
                             <a {% if item.endpoint != '#' %} href="{{ url_for(item.endpoint) }}" {% endif %}>
-                                <i class="{{ item.icon }}" style="{{ item.style }}"></i>
+                                <i class="{{ item.icon }}"></i>
                                 {% if item.marquee %}
                                     <marquee direction="left" scrollamount="4"><span
                                             class="link_name">{{ item.name }}</span></marquee>
@@ -28,34 +52,12 @@
                                     <span class="link_name">{{ item.name }}</span>
                                 {% endif %}
                             </a>
-                            <i class='bx bxs-chevron-down arrow text'></i>
-                        </div>
-                        <ul class="sub-menu">
-                            {% for sub_item in item.submenu %}
-                                {% if sub_item == 'separator' %}
-                                    <hr class="w-75 text">
-                                {% else %}
-                                    <li><a href="{{ url_for(sub_item.endpoint) }}">{{ sub_item.name }}</a></li>
-                                {% endif %}
-                            {% endfor %}
-                        </ul>
-                    </li>
-                {% else %}
-                    <li>
-                        <a {% if item.endpoint != '#' %} href="{{ url_for(item.endpoint) }}" {% endif %}>
-                            <i class="{{ item.icon }}"></i>
-                            {% if item.marquee %}
-                                <marquee direction="left" scrollamount="4"><span
-                                        class="link_name">{{ item.name }}</span></marquee>
-                            {% else %}
-                                <span class="link_name">{{ item.name }}</span>
-                            {% endif %}
-                        </a>
-                        <ul class="sub-menu blank">
-                            <li><a class="link_name" {% if item.endpoint != '#' %}
-                                   href="{{ url_for(item.endpoint) }}" {% endif %}>{{ item.name }}</a></li>
-                        </ul>
-                    </li>
+                            <ul class="sub-menu blank">
+                                <li><a class="link_name" {% if item.endpoint != '#' %}
+                                       href="{{ url_for(item.endpoint) }}" {% endif %}>{{ item.name }}</a></li>
+                            </ul>
+                        </li>
+                    {% endif %}
                 {% endif %}
             {% endfor %}
         </ul>

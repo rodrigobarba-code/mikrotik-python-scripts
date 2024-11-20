@@ -340,7 +340,6 @@ def toggle_switch_scan_status():
 
 @routers_bp.route('/verify/credentials/')
 @restriction.login_required
-@restriction.admin_required
 def verify_router_credentials():
     try:
         router_ip = request.args.get('router_ip')
@@ -378,7 +377,6 @@ def verify_router_credentials():
 
 @routers_bp.route('/verify/<int:router_id>')
 @restriction.login_required
-@restriction.admin_required
 def verify_router(router_id):
     try:
         response = requests.get(

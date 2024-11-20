@@ -25,12 +25,14 @@ class Sidebar:
             'name': 'Dashboard',  # Name of the menu item
             'icon': 'bx bx-tachometer bx-sm icon',  # Icon of the menu item
             'endpoint': 'dashboard.dashboard',  # Endpoint of the menu item
+            'privileges': ['admin', 'employee'],  # Admin menu item
             'submenu': None  # Submenu of the menu item
         },
         {
             'name': 'Databases',  # Name of the menu item
             'icon': 'fa-regular fa-database icon',  # Icon of the menu item
             'endpoint': '#',  # Endpoint of the menu item, if endpoint is # then it is a dropdown menu
+            'privileges': ['admin', 'employee'],  # Admin menu item
             'submenu': [  # Submenu of the menu item
                 {'name': 'Regions', 'endpoint': 'regions.regions'},  # Name and endpoint of the submenu item
                 {'name': 'Sites', 'endpoint': 'sites.sites'},  # Name and endpoint of the submenu item
@@ -42,6 +44,7 @@ class Sidebar:
             'name': 'Users',  # Name of the menu item
             'icon': 'fa-regular fa-circle-user icon',  # Icon of the menu item
             'endpoint': '#',  # Endpoint of the menu item, if endpoint is # then it is a dropdown menu
+            'privileges': ['admin'],  # Admin menu item
             'submenu': [  # Submenu of the menu item
                 {'name': 'Users', 'endpoint': 'users.users'},  # Name and endpoint of the submenu item
                 {'name': 'Log', 'endpoint': 'users.log'}  # Name and endpoint of the submenu item
@@ -51,6 +54,7 @@ class Sidebar:
             'name': 'Router Scan',  # Name of the menu item
             'icon': 'fa-regular fa-satellite-dish icon',  # Icon of the menu item
             'endpoint': 'router_scan.scan',  # Endpoint of the menu item
+            'privileges': ['admin', 'employee'],  # Admin menu item
             'submenu': None  # Submenu of the menu item
         },
         {
@@ -58,6 +62,7 @@ class Sidebar:
             'icon': 'fa-regular fa-ethernet icon',  # Icon of the menu item
             'marquee': False,  # Marquee menu item
             'endpoint': 'ip_management.ip_management',
+            'privileges': ['admin', 'employee'],  # Admin menu item
             # Endpoint of the menu item, if endpoint is # then it is a dropdown menu
             'submenu': None  # Submenu of the menu item
         }

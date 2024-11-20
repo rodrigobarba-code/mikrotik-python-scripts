@@ -13,13 +13,23 @@
 {% endblock %}
 {% block content %}
     <!-- Tags Jumbotron -->
-    <section class="tags-jumbotron">
-        <div class="p-5 mb-4 base-jumbotron">
-            <div class="container-fluid py-5">
-                <h1 class="display-5 fw-bold ">IP Groups Tags</h1>
-                <p class="col-md-8 fs-4">You can create, update, delete and view all IP Groups Tags here.</p>
-                <a href="{{ url_for( 'ip_management.add_ip_group_tag' ) }}" class="btn btn-primary btn-lg"><i
-                        class="fa-solid fa-plus"></i> Create New Tag</a>
+    <section class="tags-jumbotron pt-5 mb-3">
+        <div class="container-fluid py-5 d-flex flex-column flex-md-row">
+            <div class="d-flex col-md-1 order-md-1 order-2 text-md-start text-center my-md-0 my-3 justify-content-center align-items-center">
+                <button class="btn btn-c-return">
+                    <a href="{{ url_for('ip_management.ip_management_options_by_site', site_id=site_id) }}"
+                       class="text-decoration-none text-dark" style="font-size: 2.5rem">
+                        <i class="fa-solid fa-backward" style="color: white"></i>
+                    </a>
+                </button>
+            </div>
+            <div class="col-md-11 order-md-2 order-1">
+                <h1 class="display-5 fw-bold">IP Groups Tags</h1>
+                {% if session['user_privileges'] == 'admin' %}
+                <p class="col-md-8 fs-4">Here you can manage the IP Groups Tags.</p>
+                {% else %}
+                <p class="col-md-8 fs-4">Here you can view the IP Groups Tags.</p>
+                {% endif %}
             </div>
         </div>
     </section>
@@ -32,14 +42,16 @@
                 <div class="col-12 col-md-8 text-left">
                     <h2 class="tags-database-title"><b>Available</b> IP Groups Tags</h2>
                 </div>
+                {% if session['user_privileges'] == 'admin' %}
                 <div class="col-12 col-md-4 d-flex justify-content-end">
                     <button type="button" class="btn btn-md btn-danger me-2" id="delete-select">
-                        <i class="fa-solid fa-square-minus"></i>
+                        <i class="fa-solid fa-square-minus"></i>&nbsp; Delete selected
                     </button>
                     <button type="button" class="btn btn-md btn-dark" id="delete-all">
-                        <i class="fa-solid fa-trash"></i>
+                        <i class="fa-solid fa-trash"></i>&nbsp; Delete all
                     </button>
                 </div>
+                {% endif %}
             </div>
         </div>
     </section>

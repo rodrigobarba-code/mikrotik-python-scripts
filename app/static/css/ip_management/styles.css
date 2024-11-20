@@ -406,6 +406,33 @@ a:hover {
     transform: scale(1.1) rotate(-90deg);
 }
 
+.custom-card-disabled {
+    background-color: var(--hover-color);
+    position: relative;
+    width: 100%;
+    height: 50px;
+    border-radius: 30px;
+    overflow: hidden;
+}
+
+.custom-card-disabled::before {
+    content: '';
+    position: absolute;
+    width: 150%;
+    height: 150%;
+    top: -25%;
+    left: 20%;
+    background: linear-gradient(117deg, rgb(71, 64, 64) 39.2%, rgba(255, 255, 255, 1) 156.2%);
+    transform: rotate(-45deg);
+    z-index: 0;
+    transition: var(--tran-03);
+}
+
+.custom-card-disabled:hover::before {
+    background: linear-gradient(117deg, rgb(71, 64, 64) 39.2%, rgba(255, 255, 255, 1) 156.2%);
+    transform: scale(1.1) rotate(-90deg);
+}
+
 @media (max-width: 768px) {
     .ip-seat {
         width: 50px;
