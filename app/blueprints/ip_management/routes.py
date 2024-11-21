@@ -779,10 +779,11 @@ def get_tag(tag_id: int) -> IPGroupsTagsEntity:
 @restriction.login_required
 def ip_group_tags():
     try:
+        site_id = request.args.get('site_id')
         return render_template(
             'ip_management/ip_groups_tags.html',
             tags=get_tags(),
-            site_id=request.args.get('site_id')
+            site_id=site_id
         )
     except Exception as e:
         flash(str(e), 'danger')

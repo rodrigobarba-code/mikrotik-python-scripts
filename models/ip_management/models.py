@@ -1569,7 +1569,11 @@ class IPGroups(Base):
         try:
             # Delete all IPs with duplicity from the database
             for i in session.query(IPGroups).filter(IPGroups.ip_duplicity == True).all():
+                # Delete the IP group from the database
                 session.delete(i)
+
+                # Commit the changes
+                session.commit()
         except Exception as e:
             raise e
 
@@ -1590,5 +1594,8 @@ class IPGroups(Base):
 
                 # Update the IP group in the database
                 ip_group.ip_duplicity = True
+
+                # Save updates
+                session.commit()
         except Exception as e:
             raise e

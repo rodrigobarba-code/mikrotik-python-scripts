@@ -30,6 +30,9 @@
                 {% else %}
                 <p class="col-md-8 fs-4">Here you can view the IP Groups Tags.</p>
                 {% endif %}
+                <a href="{{ url_for('ip_management.add_ip_group_tag') }}" class="btn btn-lg btn-primary">
+                    <i class="fa-solid fa-plus"></i>&nbsp; Add IP Group Tag
+                </a>
             </div>
         </div>
     </section>

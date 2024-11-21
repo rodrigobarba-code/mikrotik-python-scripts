@@ -472,13 +472,17 @@ class RouterAPI:
             # Clean the ARP data from the database
             ThreadingManager().run_thread(ARP.delete_all_arps, 'wx')
 
+            # Restore autoincrement ID
+            ThreadingManager().run_thread(ARP.verify_autoincrement_id, 'wx')
+
             # Verify if there are IP Group data to insert
             if to_update:
                 # Insert the ARP data to the database
                 ThreadingManager().run_thread(ARP.bulk_insert_from_ip_groups, 'w', to_update)
 
                 # Change duplicity status to True
-                ThreadingManager().run_thread(IPGroups.change_duplicity_to_true, 'wx')
+                ip_group_ids = [int(ip_group.ip_group_id) for ip_group in to_update]
+                ThreadingManager().run_thread(IPGroups.change_duplicity_to_true, 'rx', ip_group_ids)
 
                 # Delete IP Group data with duplicity as True
                 ThreadingManager().run_thread(IPGroups.delete_duplicity_on_table, 'wx')
