@@ -9,97 +9,78 @@
 {% block scripts %}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // Datos iniciales para el gráfico
-        const siteData = {{ dashboard_data.assigned_private_ip_per_site | tojson }};
-        let chart;
-
-        // Inicializar gráfico
-        function initializeChart(labels, data) {
+        document.addEventListener("DOMContentLoaded", function () {
+            const chartData = {{ dashboard_data|tojson }};
+            const publicIpsData = {{ public_ips_data|tojson }};
+            const totalIpsData = {{ total_ips_data|tojson }};
             const ctx = document.getElementById('myChart').getContext('2d');
-            ctx.width = 1200;  // Ajusta el ancho del canvas para que tenga suficiente espacio
-            ctx.height = 400;  // Ajusta la altura según sea necesario
-            chart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'IP Quantity',
-                        data: data,
-                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                        borderColor: 'rgba(54, 162, 235, 1)',
-                        borderWidth: 1,
-                        borderRadius: 10
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    scales: {
-                        x: {
-                            ticks: {
-                                autoSkip: false,          // Desactiva autoSkip para mostrar todos los ticks
-                                maxTicksLimit: 63,        // Garantiza que se vean todos los 63 segmentos
-                                minRotation: 0,           // Mantén las etiquetas en su posición original
-                                maxRotation: 45,          // Rota si es necesario
-                            },
-                            categoryPercentage: 0.9,     // Reduce el tamaño de cada barra
-                            barPercentage: 0.8,         // Reduce el porcentaje de la barra si usas barras
-                        },
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                autoSkip: true,
-                                maxTicksLimit: 10,
-                            },
-                        },
+            let currentChart;
+
+            // Función para inicializar o actualizar el gráfico
+            function updateChart(site, segment) {
+                const data = chartData[site];
+                const assigned = data.assigned.find(s => Object.keys(s)[0] === segment);
+                const available = data.available.find(s => Object.keys(s)[0] === segment);
+
+                const assignedQuantity = assigned ? Object.values(assigned)[0].quantity : 0;
+                const availableQuantity = available ? Object.values(available)[0].quantity : 0;
+
+                const chartConfig = {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Assigned', 'Available'],
+                        datasets: [{
+                            label: 'Private IPs',
+                            data: [assignedQuantity, availableQuantity],
+                            backgroundColor: ['#FF6384', '#36A2EB'],
+                        }]
                     },
-                    layout: {
-                        padding: {
-                            left: 20,
-                            right: 20,
-                            top: 20,
-                            bottom: 20
-                        }
-                    }
+                };
+
+                if (currentChart) {
+                    currentChart.destroy();
                 }
-            });
-        }
 
-        // Actualizar gráfico con nuevos datos
-        function updateChart(labels, data) {
-            chart.data.labels = labels;
-            chart.data.datasets[0].data = data;
-            chart.update();
-        }
-
-        // Obtener datos del sitio seleccionado y actualizar el gráfico
-        document.getElementById('statsFilter').addEventListener('change', function () {
-            const selectedSite = this.value;
-            const siteSegments = siteData[selectedSite]?.by_segment || [];
-
-            const labels = siteSegments.map(segment => Object.keys(segment)[0]);
-            const data = siteSegments.map(segment => Object.values(segment)[0].quantity);
-
-            if (chart) {
-                updateChart(labels, data);
-            } else {
-                initializeChart(labels, data);
+                currentChart = new Chart(ctx, chartConfig);
             }
-        });
 
-        // Inicialización del gráfico con el primer sitio
-        const initialSite = Object.keys(siteData)[0];
-        if (initialSite) {
-            const initialSegments = siteData[initialSite]?.by_segment || [];
-            const labels = initialSegments.map(segment => Object.keys(segment)[0]);
-            const data = initialSegments.map(segment => Object.values(segment)[0].quantity);
-            initializeChart(labels, data);
-        }
+            // Función para actualizar los filtros
+            function updateFilters() {
+                const siteSelect = document.getElementById('siteFilter');
+                const segmentSelect = document.getElementById('segmentFilter');
+                const selectedSite = siteSelect.value;
+
+                segmentSelect.innerHTML = '';
+                if (chartData[selectedSite]) {
+                    chartData[selectedSite].assigned.forEach(segment => {
+                        const segmentKey = Object.keys(segment)[0];
+                        const option = document.createElement('option');
+                        option.value = segmentKey;
+                        option.textContent = segmentKey;
+                        segmentSelect.appendChild(option);
+                    });
+                }
+
+                updateChart(selectedSite, segmentSelect.value);
+            }
+
+            // Agregar evento change al select de sitios
+            document.getElementById('siteFilter').addEventListener('change', updateFilters);
+
+            // Agregar evento change al select de segmentos
+            document.getElementById('segmentFilter').addEventListener('change', function () {
+                const siteSelect = document.getElementById('siteFilter');
+                const segmentSelect = document.getElementById('segmentFilter');
+                updateChart(siteSelect.value, segmentSelect.value);
+            });
+
+            // Inicializar los filtros al cargar la página
+            updateFilters();
+        });
     </script>
 {% endblock %}
 
 {% block content %}
-
     <!-- Dashboard Jumbotron -->
     <section class="dashboard-jumbotron">
         <div class="container-fluid py-5 overview-container">
@@ -116,24 +97,24 @@
                     <div class="card card-top">
                         <div class="card-body">
                             <h5 class="card-title">Total IPs</h5>
-                            <span class="badge rounded-pill bg-dark">
-                                {{ dashboard_data.total_ips.total }}
+                            <span class="badge rounded-pill">
+                                {{ total_ips_data.total }}
                             </span>
                         </div>
                     </div>
                     <div class="card card-top">
                         <div class="card-body">
                             <h5 class="card-title">Anomalies found</h5>
-                            <span class="badge rounded-pill bg-dark">
-                                {{ dashboard_data.total_ips.count_arps }}
+                            <span class="badge rounded-pill">
+                                {{ total_ips_data.count_arps }}
                             </span>
                         </div>
                     </div>
                     <div class="card card-top">
                         <div class="card-body">
                             <h5 class="card-title">Blacklist/Authorized found</h5>
-                            <span class="badge rounded-pill bg-dark">
-                                {{ dashboard_data.total_ips.count_ip_groups }}
+                            <span class="badge rounded-pill">
+                                {{ total_ips_data.count_ip_groups }}
                             </span>
                         </div>
                     </div>
@@ -148,19 +129,47 @@
         <div class="container">
             <div class="row">
                 <!-- Panel 1 -->
-                <div class="col-lg-12 col-md-6 col-sm-12 dashboard-content">
+                <div class="col-lg-4 col-md-6 col-sm-12 dashboard-content">
                     <div class="card p-3">
-                        <h5 class="card-title">Assigned Private IP</h5>
+                        <h5 class="card-title">Assigned vs Available Private IP</h5>
 
                         <!-- Selector para elegir el tipo de estadísticas -->
-                        <label for="statsFilter" class="form-label">Select a site:</label>
-                        <select id="statsFilter" class="form-select mb-3">
+                        <label for="siteFilter" class="form-label">Select a site:</label>
+                        <select id="siteFilter" class="form-select mb-3">
                             {% for site in sites %}
-                                <option value="{{ site[0] }}">{{ site[1] }}</option>
+                                <option value="{{ site[1] }}">{{ site[1] }}</option>
                             {% endfor %}
+                        </select>
+
+                        <!-- Selector para elegir el segmento -->
+                        <label for="segmentFilter" class="form-label">Select a segment:</label>
+                        <select id="segmentFilter" class="form-select mb-3">
+                            <!-- Opciones de segmento se llenarán dinámicamente -->
                         </select>
                         <!-- Canvas para el gráfico -->
                         <canvas id="myChart"></canvas>
+                    </div>
+                </div>
+                <!-- Panel 2 -->
+                <div class="col-lg-4 col-md-6 col-sm-12 dashboard-content">
+                    <div class="card p-3">
+                        <h5 class="card-title">Assigned vs Available Public IP</h5>
+
+                        <!-- Selector para elegir el tipo de estadísticas -->
+                        <label for="site-select" class="form-label">Select a site:</label>
+                        <select id="site-select" class="form-select mb-3">
+                            {% for site in sites %}
+                                <option value="{{ site[1] }}">{{ site[1] }}</option>
+                            {% endfor %}
+                        </select>
+
+                        <!-- Selector para elegir el segmento -->
+                        <label for="segment-select" class="form-label">Select a segment:</label>
+                        <select id="segment-select" class="form-select mb-3">
+                            <!-- Opciones de segmento se llenarán dinámicamente -->
+                        </select>
+                        <!-- Canvas para el gráfico -->
+                        <canvas id="publicIpChart"></canvas>
                     </div>
                 </div>
             </div>

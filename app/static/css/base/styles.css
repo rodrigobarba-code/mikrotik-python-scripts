@@ -151,7 +151,9 @@
 
 
 .dashboard-jumbotron {
-    background: linear-gradient(90deg, #4fb76c, #57cc95, #3bb8ce);
+    background: url(
+    "../../img/dashboard_banner.svg"
+    ) no-repeat center, linear-gradient(90deg, #4fb76c, #57cc95, #3bb8ce);
     background-size: cover;
     width: 100%;
     min-height: 200px;
@@ -183,6 +185,21 @@
     border-radius: 30px;
     position: relative;
     z-index: 1;
+    transition: var(--tran-05);
+    width: 400px;
+    height: 100px;
+}
+
+.card-top:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
+    backdrop-filter: blur(20px);
+    transition: var(--tran-05);
+}
+
+.card-top .badge {
+    font-size: 1.5rem;
+    background: var(--sidebar-color);
 }
 
 .dashboard-content {

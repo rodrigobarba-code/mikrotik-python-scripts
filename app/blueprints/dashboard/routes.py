@@ -60,28 +60,50 @@ def get_site_names():
         return None  # Return None in case of an error
 
 
-# Dashboard Main Route
 @dashboard_bp.route('/', methods=['GET'])
-@restriction.login_required  # Login Required Decorator
-@restriction.admin_required  # Admin Required Decorator
+@restriction.login_required  # Requiere inicio de sesión
+@restriction.admin_required  # Requiere permisos de administrador
 def dashboard():
-    # Get user_id from session
+    # Obtener el user_id desde la sesión
     user_id = session.get('user_id')
 
-    # Using ThreadPoolExecutor to fetch multiple URLs concurrently
+    # Usar ThreadPoolExecutor para llamar a los endpoints simultáneamente
     with ThreadPoolExecutor(max_workers=10) as executor:
-        # Execute all fetch URL calls concurrently
-        future_to_key = {executor.submit(fetch_url, url, user_id): key for key, url in urls.items()}
-        results = {}
+        # Llamar a los endpoints necesarios
+        assigned_future = executor.submit(fetch_url, urls['assigned_private_ip_per_site'], user_id)
+        available_future = executor.submit(fetch_url, urls['available_private_ip_per_site'], user_id)
+        available_public_future = executor.submit(fetch_url, urls['available_public_ip_per_site'], user_id)
+        assigned_public_future = executor.submit(fetch_url, urls['assigned_public_ip_per_site'], user_id)
+        total_ips_future = executor.submit(fetch_url, urls['total_ips'], user_id)
 
-        # Wait for all futures to complete
-        for future in as_completed(future_to_key):
-            key = future_to_key[future]
-            data = future.result()
-            results[key] = data
+        # Obtener resultados
+        assigned_data = assigned_future.result()
+        available_data = available_future.result()
+        available_public_data = available_public_future.result()
+        assigned_public_data = assigned_public_future.result()
+        total_ips_data = total_ips_future.result()
 
+    # Procesar los datos combinados por sitio
+    combined_data = {}
+    for site, site_data in assigned_data.items():
+        combined_data[site] = {
+            "assigned": site_data["by_segment"],
+            "available": available_data.get(site, {}).get("by_segment", [])
+        }
+
+    # Procesar los datos de IPs públicas
+    public_ips_data = {}
+    for site, site_data in assigned_public_data.items():
+        public_ips_data[site] = {
+            "assigned": site_data["by_segment"],
+            "available": available_public_data.get(site, {}).get("by_segment", [])
+        }
+
+    # Renderizar el template con los datos preparados
     return render_template(
         'dashboard/dashboard.html',
-        dashboard_data=results,
-        sites=get_site_names()
-    )  # Rendering Dashboard Template
+        dashboard_data=combined_data,  # Datos combinados de IPs asignadas y disponibles
+        public_ips_data=public_ips_data,  # Datos de IPs púb
+        total_ips_data=total_ips_data,  # Datos de total_ips
+        sites=get_site_names()  # Lista de sitios para los filtros
+    )
