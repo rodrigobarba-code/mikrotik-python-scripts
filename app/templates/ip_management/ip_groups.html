@@ -53,20 +53,22 @@
                         IP Groups</h2>
                 </div>
                 <div class="col-12 col-md-5 d-flex justify-content-end">
-                    {% if is_blacklist %}
-                        <button type="button" class="btn btn-md btn-warning me-2" id="move-select-to-authorized">
-                            <i class="fa-solid fa-star"></i>
+                    {% if session['user_privileges'] == 'admin' %}
+                        {% if is_blacklist %}
+                            <button type="button" class="btn btn-md btn-warning me-2" id="move-select-to-authorized">
+                                <i class="fa-solid fa-star"></i>
+                            </button>
+                            <button type="button" class="btn btn-md btn-success me-2" id="move-all-to-authorized">
+                                <i class="fa-solid fa-star"></i>
+                            </button>
+                        {% endif %}
+                        <button type="button" class="btn btn-md btn-danger me-2" id="delete-select">
+                            <i style="font-size: large" class="fa-solid fa-trash-can-plus"></i>
                         </button>
-                        <button type="button" class="btn btn-md btn-success me-2" id="move-all-to-authorized">
-                            <i class="fa-solid fa-star"></i>
+                        <button type="button" class="btn btn-md btn-dark" id="delete-all">
+                            <i style="font-size: large" class="fa-solid fa-trash-can-xmark"></i>
                         </button>
                     {% endif %}
-                    <button type="button" class="btn btn-md btn-danger me-2" id="delete-select">
-                        <i style="font-size: large" class="fa-solid fa-trash-can-plus"></i>
-                    </button>
-                    <button type="button" class="btn btn-md btn-dark" id="delete-all">
-                        <i style="font-size: large" class="fa-solid fa-trash-can-xmark"></i>
-                    </button>
                 </div>
             </div>
         </div>
@@ -131,23 +133,25 @@
                             <td><i class="no_identified">No Tags</i></td>
                         {% endif %}
                         <td>
-                            <a href="{{ url_for('ip_management.update_ip_group', ip_group_id=ip_group[0].ip_group_id, site_id=site_id) }}"
-                               type="button"
-                               class="btn btn-sm btn-warning"><i class="fa-solid fa-edit"></i></a>
-                            <button type="button" id="delete-button-blacklist-{{ ip_group[0].ip_group_id }}"
-                                    class="btn btn-sm btn-danger"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#delete-modal"
-                                    data-id="{{ ip_group[0].ip_group_id }}"
-                                    data-type="blacklist"
-                                    data-url="{{ url_for('ip_management.delete_ip_group', ip_group_id=ip_group[0].ip_group_id, site_id=site_id) }}"
-                                    data-name="{{ ip_group[0].ip_group_ip }}"
-                            ><i class="fa-solid fa-trash"></i></button>
-                            {% if is_blacklist %}
-                                <a href="{{ url_for('ip_management.transfer_to_authorized', ip_group_id=ip_group[0].ip_group_id, site_id=site_id) }}"
+                            {% if session['user_privileges'] == 'admin' %}
+                                <a href="{{ url_for('ip_management.update_ip_group', ip_group_id=ip_group[0].ip_group_id, site_id=site_id) }}"
                                    type="button"
-                                   class="btn btn-sm btn-info"><i class="fa-solid fa-right-left"></i>
-                                </a>
+                                   class="btn btn-sm btn-warning"><i class="fa-solid fa-edit"></i></a>
+                                <button type="button" id="delete-button-blacklist-{{ ip_group[0].ip_group_id }}"
+                                        class="btn btn-sm btn-danger"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#delete-modal"
+                                        data-id="{{ ip_group[0].ip_group_id }}"
+                                        data-type="blacklist"
+                                        data-url="{{ url_for('ip_management.delete_ip_group', ip_group_id=ip_group[0].ip_group_id, site_id=site_id) }}"
+                                        data-name="{{ ip_group[0].ip_group_ip }}"
+                                ><i class="fa-solid fa-trash"></i></button>
+                                {% if is_blacklist %}
+                                    <a href="{{ url_for('ip_management.transfer_to_authorized', ip_group_id=ip_group[0].ip_group_id, site_id=site_id) }}"
+                                       type="button"
+                                       class="btn btn-sm btn-info"><i class="fa-solid fa-right-left"></i>
+                                    </a>
+                                {% endif %}
                             {% endif %}
                             <!-- Show Details Button -->
                             {{ show_details_button(ip_group[0].ip_group_id, url_for('ip_management.get_ip_group_details'), 'Blacklist' if is_blacklist else 'Authorized') }}

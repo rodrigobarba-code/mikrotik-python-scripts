@@ -1,7 +1,4 @@
 import requests
-
-from api.fastapi.routes.sites_api import get_site
-from models.ip_management.models import IPGroups
 from . import ip_management_bp
 from entities.site import SiteEntity
 from entities.region import RegionEntity
@@ -156,7 +153,6 @@ def get_segments_by_site(site_id) -> list:
 
 @ip_management_bp.route('/', methods=['GET'])
 @restriction.login_required
-@restriction.admin_required
 def ip_management():
     try:
         available_sites_obj = get_sites()
@@ -201,7 +197,6 @@ def ip_management():
 
 @ip_management_bp.route('/options/<site_id>', methods=['GET'])
 @restriction.login_required
-@restriction.admin_required
 def ip_management_options_by_site(site_id):
     try:
         site_id = site_id
@@ -218,7 +213,6 @@ def ip_management_options_by_site(site_id):
 
 @ip_management_bp.route('/segments/<int:site_id>', methods=['GET'])
 @restriction.login_required
-@restriction.admin_required
 def ip_segment(site_id):
     try:
         site_id = site_id
@@ -314,7 +308,6 @@ def delete_segments(site_id):
 
 @ip_management_bp.route('/segment/details/', methods=['GET'])
 @restriction.login_required
-@restriction.admin_required
 def get_ip_segment_details():
     try:
         id = request.args.get('id')
@@ -407,7 +400,6 @@ def get_blacklist(site_id: int) -> list:
 
 @ip_management_bp.route('/blacklist/<int:site_id>', methods=['GET'])
 @restriction.login_required
-@restriction.admin_required
 def blacklist(site_id: int):
     try:
         site_name = get_site_name(site_id, get_sites())
@@ -448,7 +440,6 @@ def get_authorized(site_id: int) -> list:
 
 @ip_management_bp.route('/authorized/<int:site_id>', methods=['GET'])
 @restriction.login_required
-@restriction.admin_required
 def authorized(site_id: int):
     try:
         site_name = get_site_name(site_id, get_sites())
@@ -467,7 +458,6 @@ def authorized(site_id: int):
 
 @ip_management_bp.route('/blacklist/delete/bulk', methods=['POST'])
 @restriction.login_required
-@restriction.admin_required
 def bulk_delete_blacklist():
     data = request.get_json()
     blacklist_ids = data.get('items_ids', [])
@@ -497,7 +487,6 @@ def bulk_delete_blacklist():
 
 @ip_management_bp.route('/ip/group/delete/<int:ip_group_id>/<int:site_id>', methods=['GET'])
 @restriction.login_required
-@restriction.admin_required
 def delete_ip_group(ip_group_id, site_id):
     try:
         response = requests.delete(
@@ -523,7 +512,6 @@ def delete_ip_group(ip_group_id, site_id):
 
 @ip_management_bp.route('/ip/group/transfer/authorized/<int:ip_group_id>/<int:site_id>', methods=['GET'])
 @restriction.login_required
-@restriction.admin_required
 def transfer_to_authorized(ip_group_id, site_id):
     try:
         response = requests.put(
@@ -549,7 +537,6 @@ def transfer_to_authorized(ip_group_id, site_id):
 
 @ip_management_bp.route('/ip/group/transfer/all/authorized/<int:site_id>', methods=['POST'])
 @restriction.login_required
-@restriction.admin_required
 def transfer_all_to_authorized(site_id):
     try:
         response = requests.put(
@@ -575,7 +562,6 @@ def transfer_all_to_authorized(site_id):
 
 @ip_management_bp.route('/ip/group/transfer/bulk/authorized/', methods=['POST'])
 @restriction.login_required
-@restriction.admin_required
 def transfer_bulk_to_authorized():
     data = request.get_json()
     ip_group_ids = data.get('items_ids', [])
@@ -604,7 +590,6 @@ def transfer_bulk_to_authorized():
 
 @ip_management_bp.route('/ip/group/delete/bulk', methods=['POST'])
 @restriction.login_required
-@restriction.admin_required
 def bulk_delete_ip_group():
     data = request.get_json()
     ip_group_ids = data.get('items_ids', [])
@@ -634,7 +619,6 @@ def bulk_delete_ip_group():
 
 @ip_management_bp.route('/ip/group/delete/all/<int:site_id>', methods=['POST'])
 @restriction.login_required
-@restriction.admin_required
 def delete_all_ip_groups(site_id):
     try:
         is_blacklist = request.args.get('is_blacklist')
@@ -663,7 +647,6 @@ def delete_all_ip_groups(site_id):
 
 @ip_management_bp.route('ip-group/update/<int:site_id>/<int:ip_group_id>', methods=['GET', 'POST'])
 @restriction.login_required
-@restriction.admin_required
 def update_ip_group(site_id, ip_group_id):
     try:
         is_blacklist = False
@@ -794,12 +777,13 @@ def get_tag(tag_id: int) -> IPGroupsTagsEntity:
 
 @ip_management_bp.route('/ip/group/tags/', methods=['GET'])
 @restriction.login_required
-@restriction.admin_required
 def ip_group_tags():
     try:
+        site_id = request.args.get('site_id')
         return render_template(
             'ip_management/ip_groups_tags.html',
-            tags=get_tags()
+            tags=get_tags(),
+            site_id=site_id
         )
     except Exception as e:
         flash(str(e), 'danger')
@@ -959,7 +943,6 @@ def delete_all_ip_group_tags():
 
 @ip_management_bp.route('/ip/segments/<int:site_id>', methods=['GET'])
 @restriction.login_required
-@restriction.admin_required
 def available_ip_segments(site_id):
     try:
         site_name = get_site_name(site_id, get_sites())
@@ -978,9 +961,12 @@ def available_ip_segments(site_id):
                 # Extraemos los segmentos y separamos la IP de la máscara
                 segments = []
                 for segment_data in availables_data:
-                    for segment, _ in segment_data.items():
+                    for segment, value in segment_data.items():
                         ip, subnet_mask = segment.split('/')
-                        segments.append({'ip': ip, 'subnet_mask': subnet_mask})
+                        if value == -1:
+                            segments.append({'ip': ip, 'subnet_mask': subnet_mask, 'is_disabled': True})
+                        else:
+                            segments.append({'ip': ip, 'subnet_mask': subnet_mask, 'is_disabled': False})
 
                 return render_template(
                     'ip_management/available_ip_segments.html',
@@ -999,7 +985,6 @@ def available_ip_segments(site_id):
 
 @ip_management_bp.route('/ip/available/<int:site_id>', methods=['GET'])
 @restriction.login_required
-@restriction.admin_required
 def ip_available(site_id):
     try:
         segment = request.args.get('segment')  # Obtener el segmento desde la URL

@@ -431,3 +431,40 @@ class ARP(Base):
             session.bulk_save_objects(ip_groups)
         except Exception as e:
             raise e
+
+    @staticmethod
+    def bulk_insert_from_ip_groups(session, ip_groups: list) -> None:
+        """
+        Bulk insert ARP objects from the IPGroups table
+        :param session: Database session
+        :param ip_groups: List of IPGroups objects to insert
+        :return: None
+        """
+
+        try:
+            # Create a list of ARP objects to insert
+            arps = []
+
+            # Iterate on the IPGroups objects and create the ARP objects
+            for ip_group in ip_groups:
+                arps.append(ARP(
+                    fk_ip_address_id=ip_group.fk_ip_segment_id,
+                    arp_ip=ip_group.ip_group_ip,
+                    arp_mac=ip_group.ip_group_mac,
+                    arp_alias=ip_group.ip_group_alias,
+                    arp_tag='Public IP' if ip_group.ip_group_type == 'public' else 'Private IP',
+                    arp_interface=ip_group.ip_group_interface,
+                    arp_is_dhcp=ip_group.ip_is_dhcp,
+                    arp_is_invalid=False,
+                    arp_is_dynamic=ip_group.ip_is_dynamic,
+                    arp_is_complete=ip_group.ip_is_complete,
+                    arp_is_disabled=ip_group.ip_is_disabled,
+                    arp_is_published=ip_group.ip_is_published,
+                    arp_duplicity=ip_group.ip_duplicity,
+                    arp_duplicity_indexes=ip_group.ip_duplicity_indexes
+                ))
+
+            # Add the ARP objects to the ARP table
+            session.bulk_save_objects(arps)
+        except Exception as e:
+            raise e

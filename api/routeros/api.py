@@ -1,12 +1,11 @@
 import asyncio
-from threading import Thread
-
 import ros_api
+from mac_vendor_lookup import MacLookup, BaseMacLookup
 
+from api.fastapi.routes.routers_api import delete_router
+from entities.ip_groups import IPGroupsEntity
 from utils.threading_manager import ThreadingManager
 
-from entities.arp import ARPEntity
-# from models.router_scan.models import ARPTags
 from models.router_scan.functions import ARPFunctions
 
 from entities.ip_segment import IPSegmentEntity
@@ -97,6 +96,8 @@ class RouterAPI:
         """
 
         try:
+
+
             # List of IP segments
             ip_list = []
 
@@ -188,7 +189,11 @@ class RouterAPI:
 
         try:
             # List of ARP data
-            arp_list = []
+            ip_group_list = []
+
+            # Set the cache path for the MAC lookup
+            BaseMacLookup.cache_path = "./mac.txt"
+            mac = MacLookup()
 
             # Get a list of all allowed routers
             routers = ThreadingManager().run_thread(GetAllowedRouters.get, 'r')
@@ -206,7 +211,7 @@ class RouterAPI:
                 router_api_instance.set_api()
 
                 # Create a list of ARP data for that one router
-                arp_region_list = []
+                ip_group_region_list = []
 
                 # Get the IP segments by router ID
                 ip_segments_by_router = ThreadingManager().run_thread(
@@ -234,54 +239,55 @@ class RouterAPI:
                     # If there is a match, create an instance of the ARPEntity class with the data
                     if ip_segment[0] is True:
                         # Create an instance of the ARPEntity class with the data
-                        arp_obj = ARPEntity(
-                            arp_id=int(),
-                            fk_ip_address_id=int(ip_segment[1]),
-                            arp_ip=arp['address'],
-                            arp_mac="" if 'mac-address' not in arp else arp['mac-address'],
-                            arp_alias=ARPFunctions.assign_alias(str(arp['address']), queue_dict),
-                            arp_tag=ARPFunctions.determine_arp_tag(str(arp['address'])),
-                            arp_interface=arp['interface'],
-                            arp_is_dhcp=True if arp['dynamic'] == 'true' else False,
-                            arp_is_invalid=True if arp['invalid'] == 'true' else False,
-                            arp_is_dynamic=True if arp['dynamic'] == 'true' else False,
-                            arp_is_complete=True if arp['complete'] == 'true' else False,
-                            arp_is_disabled=True if arp['disabled'] == 'true' else False,
-                            arp_is_published=True if arp['published'] == 'true' else False
+                        ip_group_obj = IPGroupsEntity(
+                            ip_group_id=int(),
+                            fk_ip_segment_id=int(ip_segment[1]),
+                            ip_group_name=ARPFunctions.determine_arp_name(arp['dynamic'], arp['complete'], '' if 'mac-address' not in arp else arp['mac-address'],),
+                            ip_group_type='public' if ARPFunctions.determine_arp_tag(arp['address']) == 'Public IP' else 'private',
+                            ip_group_alias=ARPFunctions.assign_alias(arp['address'], queue_dict),
+                            ip_group_description="No description",
+                            ip_group_ip=arp['address'],
+                            ip_group_mask=ThreadingManager().run_thread(ARPFunctions.determine_arp_mask, 'rx', ip_segment[1]),
+                            ip_group_mac="" if 'mac-address' not in arp else arp['mac-address'],
+                            ip_group_mac_vendor='',
+                            ip_group_interface=arp['interface'],
+                            ip_group_comment="No comment",
+                            ip_is_dhcp=True if arp['dynamic'] == 'true' else False,
+                            ip_is_dynamic=True if arp['dynamic'] == 'true' else False,
+                            ip_is_complete=True if arp['complete'] == 'true' else False,
+                            ip_is_disabled=True if arp['disabled'] == 'true' else False,
+                            ip_is_published=True if arp['published'] == 'true' else False,
+                            ip_duplicity=False,
+                            ip_duplicity_indexes=""
                         )
 
                         # Validate if the ARP datatype is correct
-                        arp_obj.validate_arp()
+                        ip_group_obj.validate_ip_group()
 
                         # Concatenate the ARP data to the list
-                        arp_region_list.append(arp_obj)
+                        ip_group_region_list.append(ip_group_obj)
                     else:
                         # If there is no match, don't add the ARP data to the list
                         # print(arp['address'] + ' not found in the IP segments')
                         pass
 
                 # Concatenate the ARP data to the list
-                arp_list.extend(arp_region_list)
-            return arp_list
+                ip_group_list.extend(ip_group_region_list)
+            return ip_group_list
         except Exception as e:
             print(str('Error: get_arp_data: ' + str(e)))
 
     @staticmethod
-    async def add_arp_data(arp_list: list[ARPEntity]) -> None:
+    async def add_arp_data(ip_group_list: list[IPGroupsEntity]) -> None:
         """
         Add available ARP data to the database
-        :param arp_list: List of ARP data
+        :param ip_group_list: List of ARP data
         :return: None
         """
-        from models.router_scan.models import ARP
 
         try:
-            # Validate all ARP data
-            for arp in arp_list:
-                arp.validate_arp()
-
             # Delete all ARP data from the database that are in database but not in the router
-            ThreadingManager().run_thread(ARPFunctions.arp_bulk_insert_and_validation, 'w', arp_list)
+            ThreadingManager().run_thread(ARPFunctions.place_ip_group_on_table, 'w', ip_group_list)
         except Exception as e:
             print(str('Error: add_arp_data: ' + str(e)))
 
@@ -443,44 +449,9 @@ class RouterAPI:
             from models.router_scan.models import ARP
             from models.ip_management.models import IPGroups
 
-            # Get all ARP data from the database
-            insert_duplicity_arp, remove_duplicity_arp = [], []
-            arp_data = ThreadingManager().run_thread(ARP.get_arps, 'r')
-
             # Get all IP Groups from the database
-            insert_duplicity_ip_group, remove_duplicity_ip_group = [], []
+            to_update = []
             ip_groups = ThreadingManager().run_thread(IPGroups.get_ip_groups, 'r')
-
-            for arp_data_entry in arp_data:
-                # Get the IP and MAC address from the ARP data
-                ip_main = arp_data_entry.arp_ip
-                mac_main = arp_data_entry.arp_mac
-
-                # Find duplicates in the IP scan data
-                duplicates = RouterAPI.find_duplicates(ip_scan_data, ip_main, mac_main)
-
-                # Verify if there are duplicates and ARP data has duplicity as False
-                if duplicates != '' and arp_data_entry.ip_duplicity is False:
-                    # Set the ARP data duplicity to True and add the duplicates to the ARP data
-                    arp_data_entry.arp_duplicity = True
-                    arp_data_entry.arp_duplicity_indexes = duplicates
-
-                    # Add the ARP data to the insert list
-                    insert_duplicity_arp.append(arp_data_entry)
-
-                elif duplicates == '' and arp_data_entry.ip_duplicity is True:
-                    # Append ARP ID to the remove list
-                    remove_duplicity_arp.append(arp_data_entry.arp_id)
-
-            # Verify if there are ARP data to insert
-            if insert_duplicity_arp:
-                # Insert the ARP data with duplicity
-                ThreadingManager().run_thread(ARP.bulk_update_duplicity, 'w', insert_duplicity_arp)
-            elif remove_duplicity_arp:
-                # Remove the ARP data with duplicity
-                ThreadingManager().run_thread(ARP.bulk_delete_duplicity, 'w', remove_duplicity_arp)
-                ThreadingManager().run_thread(ARP.move_to_ip_groups, 'w', insert_duplicity_arp)
-                ThreadingManager().run_thread(ARP.verify_autoincrement_id, 'r')
 
             for ip_group in ip_groups:
                 # Get the IP and MAC address from the ARP data
@@ -492,26 +463,31 @@ class RouterAPI:
 
                 # Verify if there are duplicates and ARP data has duplicity as False
                 if duplicates != '' and ip_group[0].ip_duplicity is False:
-                    # Set the ARP data duplicity to True and add the duplicates to the ARP data
+                    # Create IP Group object with duplicity
                     ip_group[0].ip_duplicity = True
                     ip_group[0].ip_duplicity_indexes = duplicates
 
-                    # Add the ARP data to the insert list
-                    insert_duplicity_ip_group.append(ip_group[0])
+                    to_update.append(ip_group[0])
 
-                elif duplicates == '' and ip_group[0].ip_duplicity is True:
-                    # Append ARP ID to the remove list
-                    remove_duplicity_ip_group.append(ip_group[0].ip_group_id)
+            # Clean the ARP data from the database
+            ThreadingManager().run_thread(ARP.delete_all_arps, 'wx')
+
+            # Restore autoincrement ID
+            ThreadingManager().run_thread(ARP.verify_autoincrement_id, 'wx')
 
             # Verify if there are IP Group data to insert
-            if insert_duplicity_ip_group:
-                # Insert the IP Group data with duplicity
-                ThreadingManager().run_thread(IPGroups.bulk_update_duplicity, 'w', insert_duplicity_ip_group)
-                ThreadingManager().run_thread(IPGroups.move_to_arps, 'w', insert_duplicity_ip_group)
-                ThreadingManager().run_thread(IPGroups.verify_autoincrement_id, 'r')
-            elif remove_duplicity_ip_group:
-                # Remove the IP Group data with duplicity
-                ThreadingManager().run_thread(IPGroups.bulk_delete_duplicity, 'w', remove_duplicity_ip_group)
+            if to_update:
+                # Insert the ARP data to the database
+                ThreadingManager().run_thread(ARP.bulk_insert_from_ip_groups, 'w', to_update)
+
+                # Change duplicity status to True
+                ip_group_ids = [int(ip_group.ip_group_id) for ip_group in to_update]
+                ThreadingManager().run_thread(IPGroups.change_duplicity_to_true, 'rx', ip_group_ids)
+
+                # Delete IP Group data with duplicity as True
+                ThreadingManager().run_thread(IPGroups.delete_duplicity_on_table, 'wx')
+
+            print('IP duplicity resolved, we found ' + str(len(to_update)) + ' duplicities')
         except Exception as e:
             print(str('Error: resolve_ip_duplicity: ' + str(e)))
 
