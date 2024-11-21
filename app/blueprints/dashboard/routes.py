@@ -61,8 +61,7 @@ def get_site_names():
 
 
 @dashboard_bp.route('/', methods=['GET'])
-@restriction.login_required  # Requiere inicio de sesión
-@restriction.admin_required  # Requiere permisos de administrador
+@restriction.login_required  # Login Required Decorator
 def dashboard():
     # Obtener el user_id desde la sesión
     user_id = session.get('user_id')

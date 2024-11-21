@@ -16,6 +16,11 @@
     color: var(--text-color);
 }
 
+.btn {
+    border-radius: 25px !important;
+    padding: 10px 15px; !important;
+}
+
 .float-container {
     position: absolute;
     z-index: 1000;
