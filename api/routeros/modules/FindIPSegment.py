@@ -27,24 +27,27 @@ class FindIPSegment:
 
             # Iterate over the IP Segments
             for segment in ip_segments:
-                # Check if the mask is /32 (special case)
-                if segment.ip_segment_mask == '32':
-                    # Compare the ARP IP directly with the segment's IP
-                    if ip == ipaddress.ip_address(segment.ip_segment_ip) or ip == ipaddress.ip_address(segment.ip_segment_network):
-                        # print(f"Found IP {arp_ip} as a /32 match with Segment ID {segment.ip_segment_id}")
-                        return [True, int(segment.ip_segment_id)]
-                else:
-                    # Create a network object with the IP and Mask for non /32 networks
-                    network_str = f"{segment.ip_segment_ip}/{segment.ip_segment_mask}"
-                    network = ipaddress.ip_network(network_str, strict=False)
+                # Check if the IP Segment is enabled
+                if segment.ip_segment_is_disabled is False:
+                    # Check if the mask is /32 (special case)
+                    if segment.ip_segment_mask == '32':
+                        # Compare the ARP IP directly with the segment's IP
+                        if ip == ipaddress.ip_address(segment.ip_segment_ip) or ip == ipaddress.ip_address(
+                                segment.ip_segment_network):
+                            # print(f"Found IP {arp_ip} as a /32 match with Segment ID {segment.ip_segment_id}")
+                            return [True, int(segment.ip_segment_id)]
+                    else:
+                        # Create a network object with the IP and Mask for non /32 networks
+                        ip_range = f"{segment.ip_segment_network}/{segment.ip_segment_mask}"
+                        network = list(ipaddress.ip_network(ip_range, True).hosts())
 
-                    # Debugging: Print to see if networks are being constructed correctly
-                    # print(f"Checking IP: {arp_ip} in Network: {network_str}")
+                        # Debugging: Print to see if networks are being constructed correctly
+                        # print(f"Checking IP: {arp_ip} in Network: {network_str}")
 
-                    # Check if the IP is in the network
-                    if ip in network:
-                        # print(f"Found IP {arp_ip} in Network {network_str} with Segment ID {segment.ip_segment_id}")
-                        return [True, int(segment.ip_segment_id)]
+                        # Check if the IP is in the network
+                        if ip in network:
+                            # print(f"Found IP {arp_ip} in Network {network_str} with Segment ID {segment.ip_segment_id}")
+                            return [True, int(segment.ip_segment_id)]
 
             # Return False and None if the IP Segment was not found
             # print(f"Could not find IP {ip} in any IP Segment")
