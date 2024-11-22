@@ -1283,6 +1283,8 @@ class IPGroups(Base):
                     if available_ips:
                         a_list = available_ips
 
+
+
                     # Append the available authorized IP groups to the list
                     authorized_list.append(
                         {
