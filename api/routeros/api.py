@@ -2,7 +2,9 @@ import asyncio
 import ros_api
 from mac_vendor_lookup import MacLookup, BaseMacLookup
 
-from api.fastapi.routes.routers_api import delete_router
+from flask_socketio import emit
+from websockets.socketio_manager import SocketIOManager
+
 from entities.ip_groups import IPGroupsEntity
 from utils.threading_manager import ThreadingManager
 
@@ -498,22 +500,149 @@ class RouterAPI:
         :return: None
         """
         try:
+            # Create variables for the message and percentage
+            message = ''
+            percent = 0
+
+            # Get socket instance
+            socketio = SocketIOManager.get_instance()
+
+            # Set the scan status to IN PROGRESS
+            SocketIOManager.set_scan_status(1)
+
+            """Get IP Segments"""
+
             # Get the IP segments data and add it to the database
             ip_data = await RouterAPI.get_ip_data()
+
+            # Set the message and percentage for the scan status
+            percent = 25
+            message = 'Obtaining IP segments data from the available routers'
+
+            # Set the message and percentage for the scan status
+            SocketIOManager.set_message(message)
+            SocketIOManager.set_percent(percent)
+
+            # Emit the scan status to the frontend
+            socketio.emit(
+                'scan_status',
+                {
+                    'scan_status': message,
+                    'percentage': percent
+                }
+            )
+
+            """Add IP Segments"""
+
+            # Add the IP segments data to the database
             await RouterAPI.add_ip_data(ip_data)
+
+            # Set the message and percentage for the scan status
+            percent = 50
+            message = 'Adding IP segments data to the database'
+
+            # Set the message and percentage for the scan status
+            SocketIOManager.set_message(message)
+            SocketIOManager.set_percent(percent)
+
+            socketio.emit(
+                'scan_status',
+                {
+                    'scan_status': message,
+                    'percentage': percent
+                }
+            )
+
+            """Get ARP Data"""
 
             # Get the ARP data and add it to the database
             arp_data = await RouterAPI.get_arp_data()
+
+            # Set the message and percentage for the scan status
+            percent = 75
+            message = 'Getting ARP data from the available routers'
+
+            # Set the message and percentage for the scan status
+            SocketIOManager.set_message(message)
+            SocketIOManager.set_percent(percent)
+
+            # Emit the scan status to the frontend
+            socketio.emit(
+                'scan_status',
+                {
+                    'scan_status': message,
+                    'percentage': percent
+                }
+            )
+
+            """Add ARP Data"""
+
+            # Add the ARP data to the database
             await RouterAPI.add_arp_data(arp_data)
+
+            # Set the message and percentage for the scan status
+            percent = 85
+            message = 'Adding ARP data to the database'
+
+            # Set the message and percentage for the scan status
+            socketio.emit(
+                'scan_status',
+                {
+                    'scan_status': message,
+                    'percentage': percent
+                }
+            )
+
+            """Get IP Scan Data"""
 
             # Get IP Scan information
             raw_ip_scan_data = RouterAPI.run_concurrent_ip_scan()
             cleaned_ip_scan_data = RouterAPI.clean_raw_ip_scan_data(raw_ip_scan_data)
 
+            # Set the message and percentage for the scan status
+            percent = 95
+            message = 'Running IP Scan for all available routers'
+
+            # Set the message and percentage for the scan status
+            SocketIOManager.set_message(message)
+            SocketIOManager.set_percent(percent)
+
+            # Emit the scan status to the frontend
+            socketio.emit(
+                'scan_status',
+                {
+                    'scan_status': message,
+                    'percentage': percent
+                }
+            )
+
+            """Resolve IP Duplicity"""
+
             # Resolve the IP Scan data
             await RouterAPI.resolve_ip_duplicity(cleaned_ip_scan_data)
 
+            # Set the message and percentage for the scan status
+            percent = 100
+            message = 'Resolving IP duplicity using IP Scan data'
+
+            # Set the message and percentage for the scan status
+            socketio.emit(
+                'scan_status',
+                {
+                    'scan_status': message,
+                    'percentage': percent
+                }
+            )
+
+            """Finish ARP Scan"""
+
+            # Emit the scan status to the frontend
+            socketio.emit('scan_complete', {'scan_status': 'ARP scan finished'})
+
             # Set the scan status to IDLE
+            SocketIOManager.set_scan_status(0)
+
+            # Print the ARP scan finished message
             print('ARP scan finished')
         except Exception as e:
             print(str('Error: arp_scan: ' + str(e)))

@@ -17,7 +17,6 @@ class RequirementsDecorators:
             return f(*args, **kwargs)  # Return the function
 
         return decorated_function  # Return the decorated function
-
     # Decorator for login requirements
 
     # Decorator for admin requirements
@@ -31,7 +30,21 @@ class RequirementsDecorators:
             return f(*args, **kwargs)  # Return the function
 
         return decorated_function  # Return the decorated function
-
     # Decorator for admin requirements
+
+    # Decorator for check scan status
+    @staticmethod
+    def check_scan_status(f):
+        from websockets.socketio_manager import SocketIOManager
+
+        @wraps(f)  # Wraps the function to keep the original function name
+        def decorated_function(*args, **kwargs):
+            # If the scan status is not True
+            if SocketIOManager.get_scan_status():
+                return redirect(url_for('router_scan.loading_screen'))  # Redirect to the loading screen
+
+            return f(*args, **kwargs)  # Return the function
+
+        return decorated_function  # Return the decorated function
 
 # Class for Requirements Decorators

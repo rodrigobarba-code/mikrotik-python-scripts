@@ -128,6 +128,7 @@ def get_current_changelog() -> dict:
 
 @home_bp.route('/', methods=['GET'])
 @restriction.login_required
+@restriction.check_scan_status
 def home():
     try:
         download_nextcloud_images()
