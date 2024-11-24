@@ -18,9 +18,15 @@
         <div class="p-5 mb-4 base-jumbotron">
             <div class="container-fluid py-5">
                 <h1 class="display-5 fw-bold">Routers</h1>
-                <p class="col-md-8 fs-4">Lorem Ipsum</p>
+                {% if session['user_privileges'] == 'admin' %}
+                    <p class="col-md-8 fs-4">Here you can view, add, update, delete and import from Excel routers.</p>
+                {% else %}
+                    <p class="col-md-8 fs-4">Here you can view routers.</p>
+                {% endif %}
+                {% if session['user_privileges'] == 'admin' %}
                 <a href="{{ url_for('routers.add_router') }}" class="btn btn-primary btn-lg" type="button"><i
                         class="fa-solid fa-plus"></i> Create New Router</a>
+                {% endif %}
             </div>
         </div>
     </section>
@@ -28,18 +34,21 @@
 
     <!-- Routers Database -->
     <section class="routers-database pt-3 text">
-        <div class="container w-100 align-items-center">
+        <div class="container w-75 align-items-center">
             <div class="row">
                 <div class="col-8 col-md-7 text-left">
                     <h2 class="routers-database-title"><b>Available</b> Routers</h2>
                 </div>
                 <div class="col-12 col-md-5 d-flex justify-content-end">
+                    {% if session['user_privileges'] == 'admin' %}
                     <button data-flag="{{ 'True' if switch_scan_status else 'False' }}" data-url="{{ url_for('routers.toggle_switch_scan_status') }}" type="button" id="switch-allow-scan" class="btn btn-md btn-{{ 'success' if switch_scan_status else 'secondary' }} {{ 'blinking-green' if switch_scan_status else '' }} me-2">
                         <i style="font-size: large" class="fa-solid fa-light-switch"></i>
                     </button>
+                    {% endif %}
                     <button type="button" id="verify-all-routers-connection-button" class="btn btn-md btn-success me-2">
                         <i style="font-size: large" class="fa-solid fa-cloud-check"></i>
                     </button>
+                    {% if session['user_privileges'] == 'admin' %}
                     {{ excel_import_file(url_for('routers.import_routers_from_excel'), 'Routers', url_for('routers.routers'), url_for('static', filename='files/routers.xlsx')) }}
                     <button type="button" class="btn btn-md btn-danger me-2" id="delete-select"
                             data-bs-target="#delete-select-modal">
@@ -49,6 +58,7 @@
                             data-bs-target="#delete-all-modal">
                         <i style="font-size: large" class="fa-solid fa-trash-can-xmark"></i>
                     </button>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -70,7 +80,9 @@
                 <thead>
                 <tr>
                     <th scope="col"></th>
+                    {% if session['user_privileges'] == 'admin' %}
                     <th scope="col">#</th>
+                    {% endif %}
                     <th scope="col">Router Name</th>
                     <th scope="col">Router Description</th>
                     <th scope="col">Allow Scan</th>
@@ -80,9 +92,11 @@
                 <tbody>
                 {% for router in router_list %}
                     <tr>
+                        {% if session['user_privileges'] == 'admin' %}
                         <td class="text-center"><label for="router-{{ router.router_id }}"></label>
                             <input type="checkbox" class="form-check-input" id="router-{{ router.router_id }}">
                         </td>
+                        {% endif %}
                         <td>{{ router.router_id }}</td>
                         <td>{{ router.router_name }}</td>
                         <td>{{ router.router_description }}</td>
@@ -94,6 +108,7 @@
                             </h5>
                         </td>
                         <td>
+                            {% if session['user_privileges'] == 'admin' %}
                             <a href="{{ url_for('routers.update_router', router_id=router.router_id) }}" type="button"
                                class="btn btn-sm btn-warning"><i class="fa-solid fa-edit"></i></a>
                             <button type="button" id="delete-button-router-{{ router.router_id }}"
@@ -105,6 +120,7 @@
                                     data-url="{{ url_for('routers.delete_router', router_id=router.router_id) }}"
                                     data-name="{{ router.router_name }}"
                             ><i class="fa-solid fa-trash"></i></button>
+                            {% endif %}
                             {{ show_details_button(router.router_id, url_for('routers.get_router_details'), 'Router') }}
                             <button id="verify-router-connection-{{ router.router_id }}" data-id="{{ router.router_id }}" class="btn btn-sm btn-success verify-router-connection" type="button">
                                 <i class="fa-solid fa-cloud-check"></i>

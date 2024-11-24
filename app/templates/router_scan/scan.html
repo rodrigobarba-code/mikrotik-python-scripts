@@ -7,6 +7,9 @@
 {% block scripts %}
     <script src="{{ url_for('static', filename='js/router_scan/scripts.js') }}"></script>
     <script>
+        document.getElementById('start-btn').addEventListener('click', function() {
+            window.location.href = '/router/scan/loading';
+        });
         deleteAllModal("{{ url_for('router_scan.delete_all_arps_ips') }}", "{{ url_for('router_scan.scan') }}", 'scans');
         deleteSelectModal("{{ url_for('router_scan.bulk_delete_arp_ips') }}", "{{ url_for('router_scan.scan') }}", 'scan');
     </script>
@@ -17,9 +20,15 @@
         <div class="p-5 mb-4 base-jumbotron">
             <div class="container-fluid py-5">
                 <h1 class="display-5 fw-bold">Router Scan</h1>
-                <p class="col-md-8 fs-4">Lorem Ipsum</p>
+                {% if session['user_privileges'] == 'admin' %}
+                <p class="col-md-8 fs-4">Scan your network for ARP entries</p>
+                {% else %}
+                <p class="col-md-8 fs-4">View Duplicate IP entries</p>
+                {% endif %}
+                {% if session['user_privileges'] == 'admin' %}
                 <a id="start-btn" class="btn btn-primary btn-lg" type="button">
                     <i class="fa-solid fa-magnifying-glass-plus"></i> Scan </a>
+                {% endif %}
             </div>
         </div>
     </section>
@@ -30,18 +39,20 @@
         <div class="container w-75">
             <div class="row">
                 <div class="col-12 col-md-8 text-left">
-                    <h2 class="regions-database-title"><b>ARP List</b> Available</h2>
+                    <h2 class="regions-database-title"><b>Duplicate IP</b> Entries</h2>
                 </div>
+                {% if session['user_privileges'] == 'admin' %}
                 <div class="col-12 col-md-4 d-flex justify-content-end">
                     <button type="button" class="btn btn-md btn-danger me-2" data-bs-toggle="modal" id="delete-select"
                             data-bs-target="#delete-select-modal">
-                        <i class="fa-solid fa-square-minus"></i>&nbsp; Delete Selected
+                        <i class="fa-solid fa-square-minus"></i>
                     </button>
                     <button type="button" class="btn btn-md btn-dark" data-bs-toggle="modal" id="delete-all"
                             data-bs-target="#delete-all-modal">
-                        <i class="fa-solid fa-trash"></i>&nbsp; Delete All
+                        <i class="fa-solid fa-trash"></i>
                     </button>
                 </div>
+                {% endif %}
             </div>
         </div>
     </section>
@@ -62,7 +73,9 @@
                 <thead>
                 <tr>
                     <th scope="col"></th>
+                    {% if session['user_privileges'] == 'admin' %}
                     <th scope="col">#</th>
+                    {% endif %}
                     <th scope="col">ARP Alias</th>
                     <th scope="col">ARP IP Address</th>
                     <th scope="col">ARP IP Segment</th>
@@ -108,6 +121,7 @@
                         </td>
                         <td class="text-center">
                             {{ show_details_button(arp['id'], url_for('router_scan.get_scan_details'), 'ARP') }}
+                            {% if session['user_privileges'] == 'admin' %}
                             <button type="button" id="delete-button-scan-{{ arp['id'] }}"
                                     class="btn btn-sm btn-danger"
                                     data-bs-toggle="modal"
@@ -117,6 +131,7 @@
                                     data-url="{{ url_for('router_scan.delete_arp_ip', arp_id=arp['id']) }}"
                                     data-name="{{ arp['alias'] }}"
                             ><i class="fa-solid fa-trash"></i></button>
+                            {% endif %}
                         </td>
                     </tr>
                 {% endfor %}

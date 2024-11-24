@@ -139,3 +139,14 @@ def get_scan_details():
             return jsonify({'message': 'Failed to get ARP details'}), 500
     except Exception as e:  
         return jsonify({'message': 'Failed to get ARP details', 'error': str(e)}), 500
+
+@scan_bp.route('/loading')
+@restriction.check_scan_status
+def loading_screen():
+    from websockets.socketio_manager import SocketIOManager
+
+    try:
+        return render_template('loading_scan_view.html')
+    except Exception as e:
+        flash(str(e), 'danger')
+        return redirect(url_for('router_scan.scan'))

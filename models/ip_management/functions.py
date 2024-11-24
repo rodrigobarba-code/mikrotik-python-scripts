@@ -119,8 +119,7 @@ class IPAddressesFunctions:
 
             # Get the IP Groups from the database where IPs are authorized
             ip_groups = session.query(IPGroups).filter(
-                IPGroups.fk_ip_segment_id == ip_segment_id,
-                IPGroups.ip_group_name == 'authorized'
+                IPGroups.fk_ip_segment_id == ip_segment_id
             ).all()
 
             # Create a set of all IPs from the IP Groups
@@ -135,12 +134,13 @@ class IPAddressesFunctions:
                 raise ValueError(f"IP Segment with ID {ip_segment_id} not found.")
 
             # Get the IP Segment IP and Mask
-            ip_segment_ip = ip_segment.ip_segment_ip
+            ip_segment_ip = ip_segment.ip_segment_network
             ip_segment_mask = ip_segment.ip_segment_mask
 
             # Ensure valid network address (handles the 'host bits set' issue)
             try:
-                network = ipaddress.IPv4Network(f"{ip_segment_ip}/{ip_segment_mask}", strict=False)
+                ip_range = f"{ip_segment_ip}/{ip_segment_mask}"
+                network = list(ipaddress.ip_network(ip_range, True).hosts())
             except ValueError as e:
                 raise ValueError(f"Invalid network: {e}")
 

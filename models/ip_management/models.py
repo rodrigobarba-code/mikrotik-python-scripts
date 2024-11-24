@@ -734,86 +734,51 @@ class IPGroups(Base):
             raise e
 
     @staticmethod
-    def bulk_add_ip_groups(session, ip_groups: list[IPGroupsEntity]) -> None:
+    def bulk_add_ip_groups(session, ip_group_list: list) -> None:
         """
         Add a list of IP groups to the database in bulk
-        :arg session: The database session
-        :arg ip_groups: The list of IP Groups Entity to possibly add to the database
+        :param session: The database session
+        :param ip_group_list: The list of IP groups to add to the database
         :return: None
         """
         try:
-            # Create a list of IPGroups objects obtained from router
-            bulk_list = [IPGroups(
-                fk_ip_segment_id=ip_group.fk_ip_segment_id,
-                ip_group_name=ip_group.ip_group_name,
-                ip_group_type=ip_group.ip_group_type,
-                ip_group_alias=ip_group.ip_group_alias,
-                ip_group_description=ip_group.ip_group_description,
-                ip_group_ip=ip_group.ip_group_ip,
-                ip_group_mask=ip_group.ip_group_mask,
-                ip_group_mac=ip_group.ip_group_mac,
-                ip_group_mac_vendor=ip_group.ip_group_mac_vendor,
-                ip_group_interface=ip_group.ip_group_interface,
-                ip_group_comment=ip_group.ip_group_comment,
-                ip_is_dhcp=ip_group.ip_is_dhcp,
-                ip_is_dynamic=ip_group.ip_is_dynamic,
-                ip_is_complete=ip_group.ip_is_complete,
-                ip_is_disabled=ip_group.ip_is_disabled,
-                ip_is_published=ip_group.ip_is_published,
-                ip_duplicity=ip_group.ip_duplicity,
-                ip_duplicity_indexes=ip_group.ip_duplicity_indexes
-            ) for ip_group in ip_groups]
+            session.bulk_save_objects(ip_group_list)
+        except Exception as e:
+            raise e
 
-            # Create a list of IPGroups objects to add to the database
-            to_add = []
+    @staticmethod
+    def bulk_update_ip_groups(session, ip_group_list: list) -> None:
+        """
+        Update a list of IP groups in the database in bulk
+        :param session: The database session
+        :param ip_group_list: The list of IP groups to update in the database
+        :return: None
+        """
+        try:
+            # Iterate on the list of IP groups
+            for ip_group in ip_group_list:
+                # Get the IP group from the database based on the IP group ID
+                ip_group_x = session.query(IPGroups).filter_by(
+                    ip_group_ip=ip_group.ip_group_ip,
+                    ip_group_interface=ip_group.ip_group_interface
+                ).first()
 
-            # Iterate on the bulk list and check if the IP group exists in the database
-            for ip_group in bulk_list:
-                # Verify if the IP group exists in the database, based on the IP address, mask and interface
-                if (IPAddressesFunctions.validate_ip_group_exists(
-                        session,
-                        ip_group.ip_group_ip,
-                        ip_group.ip_group_mac
-                )):
-                    # If it does not exist, add it to the list
-                    to_add.append(ip_group)
-                else:
-                    # If it exists, update the IP group in the database
-
-                    # Get the IP group from the database based on the IP address, mask and interface
-                    old_ip_group = session.query(IPGroups).filter(
-                        IPGroups.ip_group_ip == ip_group.ip_group_ip,
-                        IPGroups.ip_group_mac == ip_group.ip_group_mac
-                    ).first()
-
-                    group_name = 'blacklist'
-                    if (ip_group.ip_is_dynamic is True and ip_group.ip_is_complete is False) or (
-                            ip_group.ip_is_dynamic is False and ip_group.ip_is_complete is True):
-                        group_name = 'blacklist'
-                    elif ip_group.ip_is_dynamic is True and ip_group.ip_is_complete is True:
-                        group_name = 'authorized'
-
-                    # Update the IP group in the database
-                    old_ip_group.fk_ip_segment_id = ip_group.fk_ip_segment_id
-                    old_ip_group.ip_group_name = group_name
-                    old_ip_group.ip_group_type = ip_group.ip_group_type
-                    old_ip_group.ip_group_alias = ip_group.ip_group_alias
-                    old_ip_group.ip_group_description = ip_group.ip_group_description
-                    old_ip_group.ip_group_mac = ip_group.ip_group_mac
-                    old_ip_group.ip_group_mac_vendor = ip_group.ip_group_mac_vendor
-                    old_ip_group.ip_group_interface = ip_group.ip_group_interface
-                    old_ip_group.ip_group_comment = ip_group.ip_group_comment
-                    old_ip_group.ip_is_dhcp = ip_group.ip_is_dhcp
-                    old_ip_group.ip_is_dynamic = ip_group.ip_is_dynamic
-                    old_ip_group.ip_is_complete = ip_group.ip_is_complete
-                    old_ip_group.ip_is_disabled = ip_group.ip_is_disabled
-                    old_ip_group.ip_is_published = ip_group.ip_is_published
-                    old_ip_group.ip_duplicity = ip_group.ip_duplicity
-                    old_ip_group.ip_duplicity_indexes = ip_group.ip_duplicity_indexes
-
-            # if there are IP groups to add, add them to the database in bulk
-            if to_add:
-                session.bulk_save_objects(to_add)
+                # Update the IP group in the database
+                ip_group_x.ip_group_name = ip_group.ip_group_name
+                ip_group_x.ip_group_type = ip_group.ip_group_type
+                ip_group_x.ip_group_ip = ip_group.ip_group_ip
+                ip_group_x.ip_group_mask = ip_group.ip_group_mask
+                ip_group_x.ip_group_mac = ip_group.ip_group_mac
+                ip_group_x.ip_group_mac_vendor = ip_group.ip_group_mac_vendor
+                ip_group_x.ip_group_interface = ip_group.ip_group_interface
+                ip_group_x.ip_group_comment = ip_group.ip_group_comment
+                ip_group_x.ip_is_dhcp = ip_group.ip_is_dhcp
+                ip_group_x.ip_is_dynamic = ip_group.ip_is_dynamic
+                ip_group_x.ip_is_complete = ip_group.ip_is_complete
+                ip_group_x.ip_is_disabled = ip_group.ip_is_disabled
+                ip_group_x.ip_is_published = ip_group.ip_is_published
+                ip_group_x.ip_duplicity = ip_group.ip_duplicity
+                ip_group_x.ip_duplicity_indexes = ip_group.ip_duplicity_indexes
         except Exception as e:
             raise e
 
@@ -1013,20 +978,20 @@ class IPGroups(Base):
             raise e
 
     @staticmethod
-    def bulk_delete_ip_groups(session, ip_group_ids) -> None:
+    def bulk_delete_ip_groups(session, ip_group_list: list) -> None:
         """
-        Delete a list of IP groups from the database in bulk
+        Delete a list of IP groups from the database
         :param session: The database session
-        :param ip_group_ids: The list of IP group IDs to delete
+        :param ip_group_list: The list of IP groups to delete
         :return: None
         """
-        try:
-            # Delete assigned tags to the IP groups
-            session.query(IPGroupsToIPGroupsTags).filter(
-                IPGroupsToIPGroupsTags.fk_ip_group_id.in_(ip_group_ids)).delete(synchronize_session=False)
 
-            # Delete the IP groups from the database
-            session.query(IPGroups).filter(IPGroups.ip_group_id.in_(ip_group_ids)).delete(synchronize_session=False)
+        try:
+            # Delete the tags assigned to the IP groups and the IP groups from the database
+            session.query(IPGroupsToIPGroupsTags).filter(IPGroupsToIPGroupsTags.fk_ip_group_id.in_(
+                [ip_group.ip_group_id for ip_group in ip_group_list])).delete(synchronize_session=False)
+            session.query(IPGroups).filter(IPGroups.ip_group_id.in_([ip_group.ip_group_id for ip_group in ip_group_list])).delete(
+                synchronize_session=False)
         except Exception as e:
             raise e
 
@@ -1318,6 +1283,8 @@ class IPGroups(Base):
                     if available_ips:
                         a_list = available_ips
 
+
+
                     # Append the available authorized IP groups to the list
                     authorized_list.append(
                         {
@@ -1591,5 +1558,46 @@ class IPGroups(Base):
 
             # Add the ARP objects to the database
             session.bulk_save_objects(arps)
+        except Exception as e:
+            raise e
+
+    @staticmethod
+    def delete_duplicity_on_table(session) -> None:
+        """
+        Delete all duplicity from the IP groups table
+        :param session: The database session
+        :return: None
+        """
+        try:
+            # Delete all IPs with duplicity from the database
+            for i in session.query(IPGroups).filter(IPGroups.ip_duplicity == True).all():
+                # Delete the IP group from the database
+                session.delete(i)
+
+                # Commit the changes
+                session.commit()
+        except Exception as e:
+            raise e
+
+    @staticmethod
+    def change_duplicity_to_true(session, ip_group_ids: list[int]) -> None:
+        """
+        Change the duplicity of an IP group to True
+        :param session: The database session
+        :param ip_group_ids: The list of IP group IDs
+        :return: None
+        """
+
+        try:
+            # Iterate on the list of IP group IDs
+            for ip_group_id in ip_group_ids:
+                # Get the IP group from the database based on the IP group ID
+                ip_group = session.query(IPGroups).get(ip_group_id)
+
+                # Update the IP group in the database
+                ip_group.ip_duplicity = True
+
+                # Save updates
+                session.commit()
         except Exception as e:
             raise e

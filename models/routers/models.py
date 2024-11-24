@@ -367,3 +367,29 @@ class Router(Base):
         except Exception as e:
             # Raise the exception
             raise e
+
+    @staticmethod
+    def verify_if_router_has_segments(session, site_id) -> bool:
+        """
+        Verify if the router has segments
+        :param session: SQLAlchemy session
+        :param site_id: Site ID
+        :return: True if the router has segments, False otherwise
+        """
+        try:
+            # Import the Site and IPSegment classes
+            from models.sites.models import Site
+            from models.ip_management.models import IPSegment
+
+            # Get routers from the database using the site id
+            routers = session.query(Router).filter(Router.fk_site_id == site_id).first()
+
+            # Verify if the router has segments
+            if session.query(IPSegment).filter(IPSegment.fk_router_id == routers.router_id).first():
+                return True
+            else:
+                return False
+
+            return False
+        except Exception as e:
+            raise e
