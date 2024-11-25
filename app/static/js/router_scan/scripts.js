@@ -1,34 +1,13 @@
-let socket = io();
+// Initiate the scan and redirect to the loading page
+socketio = io.connect();
 
+// Start the scan
 document.getElementById('start-btn').addEventListener('click', function() {
-    Swal.fire({
-        icon: 'info',
-        title: 'Scanning router...',
-        text: 'Please wait while we scan the routers...',
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-        showConfirmButton: false,
-        didOpen: () => {
-            Swal.showLoading();
-        }
-    });
-
-    socket.emit('start_scan');
+    socketio.emit('init_scan');
 });
 
-socket.on('router_scan_finished', function() {
-    Swal.fire({
-        icon: 'success',
-        title: 'Router scan finished!',
-        text: 'The scan has been completed successfully, you can now view the results.',
-        confirmButtonText: 'View results',
-        showCancelButton: true,
-        allowOutsideClick: false,
-        cancelButtonText: 'Close',
-        cancelButtonColor: '#d33'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            window.location.href = '/router/scan/';
-        }
-    });
+// Redirect to the loading page
+socketio.on('redirect_to_loading', function(data) {
+    socketio.emit(data.action);
+    window.location.href = data.url;
 });

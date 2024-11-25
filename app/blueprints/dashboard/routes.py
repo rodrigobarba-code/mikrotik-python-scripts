@@ -62,7 +62,10 @@ def get_site_names():
 
 @dashboard_bp.route('/', methods=['GET'])
 @restriction.login_required  # Login Required Decorator
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
 def dashboard():
+    return render_template('dashboard/dashboard.html')  # Rendering Dashboard Template
+
     # Obtener el user_id desde la sesión
     user_id = session.get('user_id')
 
