@@ -1,36 +1,92 @@
+"""
+# Version: 1.0
+This file contains the RouterAPI class that is used to communicate with the RouterOS API.
+Also, the RouterAPI class is the kernel of the ARP scan process, as it contains all the methods to communicate with the RouterOS API.
+
+The RouterAPI class contains the following methods:
+    - __init__:
+        Initializes the RouterAPI class
+    - get_scan_status:
+        Gets the scan status
+    - set_scan_status:
+        Sets the scan status
+    - get_credentials:
+        Gets the credentials
+    - set_credentials:
+        Sets the credentials
+    - get_api:
+        Gets the API
+    - set_api:
+        Sets the API
+    - retrieve_data:
+        Retrieves data from the router
+    - communicate_data:
+        Communicates data with the router
+    - verify_router_connection:
+        Verifies the router connection
+    - get_ip_data:
+        Gets IP data from all available routers
+    - add_ip_data:
+        Adds IP data to the database
+    - get_arp_data:
+        Gets ARP data from all available routers
+    - add_arp_data:
+        Adds ARP data to the database
+    - ip_scan:
+        Runs IP scan for a specific router
+    - run_concurrent_ip_scan:
+        Runs IP scan concurrently for all available routers
+    - clean_raw_ip_scan_data:
+        Cleans the raw IP scan data dictionary
+    - find_duplicates:
+        Finds duplicates in the IP scan list
+    - resolve_ip_duplicity:
+        Resolves IP duplicity
+    - arp_scan:
+        Scans ARP data from all available routers
+"""
+
+# Import the necessary libraries
 import asyncio
 import ros_api
+
+# Import the mac_vendor_lookup library
 from mac_vendor_lookup import MacLookup, BaseMacLookup
 
-from flask_socketio import emit
-from websockets.socketio_manager import SocketIOManager
-
+# Import the necessary classes for entities
 from entities.ip_groups import IPGroupsEntity
-from utils.threading_manager import ThreadingManager
-
-from models.router_scan.functions import ARPFunctions
-
 from entities.ip_segment import IPSegmentEntity
+
+# Import the necessary classes for models
 from models.ip_management.models import IPSegment
+from models.router_scan.functions import ARPFunctions
 from models.ip_management.functions import IPAddressesFunctions
 
+# Import the necessary classes for threading and socketio
+from utils.threading_manager import ThreadingManager
+from websockets.socketio_manager import SocketIOManager
+
+# Import the necessary modules for the API
 from api.routeros.modules.FindIPSegment import FindIPSegment
 from api.routeros.modules.GetAllowedRouters import GetAllowedRouters
 
-
 class RouterAPI:
-    POSSIBLE_SCAN_STATUS = ['IDLE', 'IN PROGRESS']
+    router = None  # Router instance
+    credentials = None  # Credentials dictionary
 
-    router = None
-    credentials = None
-    scan_status = None
-
+    # Constructor for the RouterAPI class
     def __init__(
             self,
             host,
             user,
             password
     ):
+        """
+        Initialize the RouterAPI class
+        :param host: Hostname or IP address
+        :param user: Username of Router Mikrotik
+        :param password: Password of Router Mikrotik
+        """
         self.router = None
         self.credentials = {
             'host': host,
@@ -38,32 +94,48 @@ class RouterAPI:
             'password': password
         }
 
-    @staticmethod
-    def get_scan_status():
-        return RouterAPI.scan_status
-
-    def set_scan_status(self, status):
-        self.scan_status = {'status': status}
-
+    # Get credentials
     def get_credentials(self):
+        """
+        Get the credentials for the RouterAPI
+        :return: Dictionary of credentials
+        """
         return self.credentials
 
+    # Set credentials
     def set_credentials(
             self,
             host=None,
             user=None,
             password=None
     ):
+        """
+        Set the credentials for the RouterAPI
+        :param host: Hostname or IP address
+        :param user: Username of Router Mikrotik
+        :param password: Password of Router Mikrotik
+        :return: None
+        """
         self.credentials = {
             'host': host,
             'user': user,
             'password': password
         }
 
+    # Get API Router instance
     def get_api(self):
+        """
+        Get the API connection
+        :return: API Router instance
+        """
         return self.router
 
+    # Set API Router instance
     def set_api(self):
+        """
+        Set the API connection
+        :return: None
+        """
         self.router = ros_api.Api(
             self.credentials['host'],
             self.credentials['user'],
@@ -72,24 +144,49 @@ class RouterAPI:
             use_ssl=True
         )
 
+    # Retrieve data from the router, using the talk method, which is a synchronous method
     @staticmethod
     def retrieve_data(router, command) -> dict:
-        return router.talk(command)
+        """
+        Retrieve data from the router
+        :param router: RouterAPI instance
+        :param command: Command to retrieve data
+        :return: Dictionary of data
+        """
+        try:
+            return router.talk(command)
+        except Exception as e:
+            print(str('Error: retrieve_data: ' + str(e)))
 
+    # Communicate data with the router, using the communicate method, which is an asynchronous method and can send multiple commands and parameters
     @staticmethod
     def communicate_data(router, command: list[str]) -> dict:
+        """
+        Communicate data with the router
+        :param router: RouterAPI instance
+        :param command: Command to communicate
+        :return:
+        """
         try:
             return router.communicate(command)
         except Exception as e:
             print(str('Error: communicate_data: ' + str(e)))
 
+    # Verify the router connection
+    @staticmethod
     def verify_router_connection(router) -> bool:
+        """
+        Verify the router connection
+        :param router:  RouterAPI instance
+        :return: True if the connection is successful, False otherwise
+        """
         try:
             router.talk('/system/resource/print')
             return True
         except (Exception, asyncio.TimeoutError) as e:
             raise e
 
+    # Get IP data from all available routers
     @staticmethod
     async def get_ip_data() -> list:
         """
@@ -98,8 +195,6 @@ class RouterAPI:
         """
 
         try:
-
-
             # List of IP segments
             ip_list = []
 
@@ -164,6 +259,7 @@ class RouterAPI:
         except Exception as e:
             print(str('Error: get_ip_data: ' + str(e)))
 
+    # Add IP data to the database
     @staticmethod
     async def add_ip_data(ip_list: list[IPSegmentEntity]) -> None:
         """
@@ -182,6 +278,7 @@ class RouterAPI:
         except Exception as e:
             print(str('Error: add_ip_data: ' + str(e)))
 
+    # Get ARP data from all available routers
     @staticmethod
     async def get_arp_data() -> list:
         """
@@ -279,6 +376,7 @@ class RouterAPI:
         except Exception as e:
             print(str('Error: get_arp_data: ' + str(e)))
 
+    # Add ARP data to the database
     @staticmethod
     async def add_arp_data(ip_group_list: list[IPGroupsEntity]) -> None:
         """
@@ -293,6 +391,7 @@ class RouterAPI:
         except Exception as e:
             print(str('Error: add_arp_data: ' + str(e)))
 
+    # Run IP scan for a specific router
     @staticmethod
     def ip_scan(router: dict) -> dict:
         """
@@ -324,6 +423,7 @@ class RouterAPI:
         except Exception as e:
             raise Exception(f"Error: ip_scan: {e}")
 
+    # Run IP scan concurrently for all available routers
     @staticmethod
     def run_concurrent_ip_scan() -> dict:
         """
@@ -380,6 +480,7 @@ class RouterAPI:
         except Exception as e:
             print(f"Error: run_concurrent_ip_scan: {e}")
 
+    # Clean the raw IP scan data dictionary
     @staticmethod
     def clean_raw_ip_scan_data(raw_dict: dict) -> list[dict]:
         """
@@ -408,6 +509,7 @@ class RouterAPI:
         # Return the cleaned dictionary
         return cleaned_list
 
+    # Find duplicates in the IP scan list
     @staticmethod
     def find_duplicates(ip_scan_list: list[dict], ip_main: str, mac_main: str) -> str:
         """
@@ -444,6 +546,7 @@ class RouterAPI:
         else:
             return ''
 
+    # Resolve IP duplicity
     @staticmethod
     async def resolve_ip_duplicity(ip_scan_data: list) -> None:
         try:
@@ -493,6 +596,7 @@ class RouterAPI:
         except Exception as e:
             print(str('Error: resolve_ip_duplicity: ' + str(e)))
 
+    # Scan ARP data from all available routers
     @staticmethod
     async def arp_scan():
         """
@@ -585,6 +689,10 @@ class RouterAPI:
             message = 'Adding ARP data to the database'
 
             # Set the message and percentage for the scan status
+            SocketIOManager.set_message(message)
+            SocketIOManager.set_percent(percent)
+
+            # Set the message and percentage for the scan status
             socketio.emit(
                 'scan_status',
                 {
@@ -622,7 +730,7 @@ class RouterAPI:
             await RouterAPI.resolve_ip_duplicity(cleaned_ip_scan_data)
 
             # Set the message and percentage for the scan status
-            percent = 100
+            percent = 99
             message = 'Resolving IP duplicity using IP Scan data'
 
             # Set the message and percentage for the scan status

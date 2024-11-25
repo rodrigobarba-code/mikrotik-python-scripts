@@ -7,9 +7,6 @@
 {% block scripts %}
     <script src="{{ url_for('static', filename='js/router_scan/scripts.js') }}"></script>
     <script>
-        document.getElementById('start-btn').addEventListener('click', function() {
-            window.location.href = '/router/scan/loading';
-        });
         deleteAllModal("{{ url_for('router_scan.delete_all_arps_ips') }}", "{{ url_for('router_scan.scan') }}", 'scans');
         deleteSelectModal("{{ url_for('router_scan.bulk_delete_arp_ips') }}", "{{ url_for('router_scan.scan') }}", 'scan');
     </script>

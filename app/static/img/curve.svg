@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" preserveAspectRatio="xMidYMid" width="640" height="480" style="shape-rendering: auto; display: block; background: rgb(38, 1, 41);" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <g>
+    <g>
+      <rect x="206.2267578419273" y="154.67006838144547" width="227.54648431614538" height="170.65986323710905" fill="none" stroke="#260129" stroke-width="53.32" transform="rotate(0 320 240)"></rect>
+      <animateTransform attributeName="transform" type="rotate" calcMode="spline" repeatCount="indefinite" dur="2.5s" begin="0s" keyTimes="0;0.5;1" keySplines="0.3 0 0.7 1;0.3 0 0.7 1" values="3 320 240;-3 320 240;3 320 240"></animateTransform>
+    </g>
+    <g>
+      <rect x="188.45351568385462" y="141.34013676289095" width="263.09296863229076" height="197.31972647421807" fill="none" stroke="#240c31" stroke-width="53.32" transform="rotate(0.42 320 240)"></rect>
+      <animateTransform attributeName="transform" type="rotate" calcMode="spline" repeatCount="indefinite" dur="2.5s" begin="-0.10s" keyTimes="0;0.5;1" keySplines="0.3 0 0.7 1;0.3 0 0.7 1" values="3.42 320 240;-2.58 320 240;3.42 320 240"></animateTransform>
+    </g>
+    <g>
+      <rect x="170.6802735257819" y="128.01020514433645" width="298.6394529484362" height="223.97958971132712" fill="none" stroke="#231739" stroke-width="53.32" transform="rotate(0.83 320 240)"></rect>
+      <animateTransform attributeName="transform" type="rotate" calcMode="spline" repeatCount="indefinite" dur="2.5s" begin="-0.21s" keyTimes="0;0.5;1" keySplines="0.3 0 0.7 1;0.3 0 0.7 1" values="3.83 320 240;-2.17 320 240;3.83 320 240"></animateTransform>
+    </g>
+    <g>
+      <rect x="152.90703136770924" y="114.68027352578193" width="334.1859372645815" height="250.63945294843614" fill="none" stroke="#212241" stroke-width="53.32" transform="rotate(1.25 320 240)"></rect>
+      <animateTransform attributeName="transform" type="rotate" calcMode="spline" repeatCount="indefinite" dur="2.5s" begin="-0.31s" keyTimes="0;0.5;1" keySplines="0.3 0 0.7 1;0.3 0 0.7 1" values="4.25 320 240;-1.75 320 240;4.25 320 240"></animateTransform>
+    </g>
+    <g>
+      <rect x="135.13378920963652" y="101.3503419072274" width="369.73242158072696" height="277.2993161855452" fill="none" stroke="#1f2d49" stroke-width="53.32" transform="rotate(1.67 320 240)"></rect>
+      <animateTransform attributeName="transform" type="rotate" calcMode="spline" repeatCount="indefinite" dur="2.5s" begin="-0.42s" keyTimes="0;0.5;1" keySplines="0.3 0 0.7 1;0.3 0 0.7 1" values="4.67 320 240;-1.33 320 240;4.67 320 240"></animateTransform>
+    </g>
+    <g>
+      <rect x="117.36054705156383" y="88.02041028867288" width="405.27890589687235" height="303.95917942265424" fill="none" stroke="#1e3851" stroke-width="53.32" transform="rotate(2.08 320 240)"></rect>
+      <animateTransform attributeName="transform" type="rotate" calcMode="spline" repeatCount="indefinite" dur="2.5s" begin="-0.52s" keyTimes="0;0.5;1" keySplines="0.3 0 0.7 1;0.3 0 0.7 1" values="5.08 320 240;-0.92 320 240;5.08 320 240"></animateTransform>
+    </g>
+    <g>
+      <rect x="99.58730489349114" y="74.69047867011835" width="440.8253902130177" height="330.6190426597633" fill="none" stroke="#1c4359" stroke-width="53.32" transform="rotate(2.50 320 240)"></rect>
+      <animateTransform attributeName="transform" type="rotate" calcMode="spline" repeatCount="indefinite" dur="2.5s" begin="-0.63s" keyTimes="0;0.5;1" keySplines="0.3 0 0.7 1;0.3 0 0.7 1" values="5.50 320 240;-0.50 320 240;5.50 320 240"></animateTransform>
+    </g>
+    <g>
+      <rect x="81.81406273541845" y="61.360547051563856" width="476.3718745291631" height="357.2789058968723" fill="none" stroke="#1a4e61" stroke-width="53.32" transform="rotate(2.92 320 240)"></rect>
+      <animateTransform attributeName="transform" type="rotate" calcMode="spline" repeatCount="indefinite" dur="2.5s" begin="-0.73s" keyTimes="0;0.5;1" keySplines="0.3 0 0.7 1;0.3 0 0.7 1" values="5.92 320 240;-0.08 320 240;5.92 320 240"></animateTransform>
+    </g>
+    <g>
+      <rect x="64.04082057734576" y="48.0306154330093" width="511.9183588453085" height="383.9387691339814" fill="none" stroke="#195969" stroke-width="53.32" transform="rotate(3.33 320 240)"></rect>
+      <animateTransform attributeName="transform" type="rotate" calcMode="spline" repeatCount="indefinite" dur="2.5s" begin="-0.83s" keyTimes="0;0.5;1" keySplines="0.3 0 0.7 1;0.3 0 0.7 1" values="6.33 320 240;0.33 320 240;6.33 320 240"></animateTransform>
+    </g>
+    <g>
+      <rect x="46.267578419273036" y="34.70068381445478" width="547.4648431614539" height="410.59863237109045" fill="none" stroke="#176471" stroke-width="53.32" transform="rotate(3.75 320 240)"></rect>
+      <animateTransform attributeName="transform" type="rotate" calcMode="spline" repeatCount="indefinite" dur="2.5s" begin="-0.94s" keyTimes="0;0.5;1" keySplines="0.3 0 0.7 1;0.3 0 0.7 1" values="6.75 320 240;0.75 320 240;6.75 320 240"></animateTransform>
+    </g>
+    <g>
+      <rect x="28.494336261200374" y="21.37075219590028" width="583.0113274775993" height="437.25849560819944" fill="none" stroke="#156f79" stroke-width="53.32" transform="rotate(4.17 320 240)"></rect>
+      <animateTransform attributeName="transform" type="rotate" calcMode="spline" repeatCount="indefinite" dur="2.5s" begin="-1.04s" keyTimes="0;0.5;1" keySplines="0.3 0 0.7 1;0.3 0 0.7 1" values="7.17 320 240;1.17 320 240;7.17 320 240"></animateTransform>
+    </g>
+    <g>
+      <rect x="10.721094103127655" y="8.040820577345755" width="618.5578117937447" height="463.9183588453085" fill="none" stroke="#147a81" stroke-width="53.32" transform="rotate(4.58 320 240)"></rect>
+      <animateTransform attributeName="transform" type="rotate" calcMode="spline" repeatCount="indefinite" dur="2.5s" begin="-1.15s" keyTimes="0;0.5;1" keySplines="0.3 0 0.7 1;0.3 0 0.7 1" values="7.58 320 240;1.58 320 240;7.58 320 240"></animateTransform>
+    </g>
+    <g>
+      <rect x="-7.052148054945064" y="-5.289111041208741" width="654.1042961098901" height="490.5782220824175" fill="none" stroke="#12868a" stroke-width="53.32" transform="rotate(5 320 240)"></rect>
+      <animateTransform attributeName="transform" type="rotate" calcMode="spline" repeatCount="indefinite" dur="2.5s" begin="-1.25s" keyTimes="0;0.5;1" keySplines="0.3 0 0.7 1;0.3 0 0.7 1" values="8 320 240;2 320 240;8 320 240"></animateTransform>
+    </g>
+    <g>
+      <rect x="-24.825390213017727" y="-18.619042659763295" width="689.6507804260355" height="517.2380853195266" fill="none" stroke="#119192" stroke-width="53.32" transform="rotate(5.42 320 240)"></rect>
+      <animateTransform attributeName="transform" type="rotate" calcMode="spline" repeatCount="indefinite" dur="2.5s" begin="-1.35s" keyTimes="0;0.5;1" keySplines="0.3 0 0.7 1;0.3 0 0.7 1" values="8.42 320 240;2.42 320 240;8.42 320 240"></animateTransform>
+    </g>
+    <g>
+      <rect x="-42.598632371090446" y="-31.94897427831779" width="725.1972647421809" height="543.8979485566356" fill="none" stroke="#0f9c9a" stroke-width="53.32" transform="rotate(5.83 320 240)"></rect>
+      <animateTransform attributeName="transform" type="rotate" calcMode="spline" repeatCount="indefinite" dur="2.5s" begin="-1.46s" keyTimes="0;0.5;1" keySplines="0.3 0 0.7 1;0.3 0 0.7 1" values="8.83 320 240;2.83 320 240;8.83 320 240"></animateTransform>
+    </g>
+    <g>
+      <rect x="-60.37187452916311" y="-45.27890589687229" width="760.7437490583262" height="570.5578117937446" fill="none" stroke="#0da7a2" stroke-width="53.32" transform="rotate(6.25 320 240)"></rect>
+      <animateTransform attributeName="transform" type="rotate" calcMode="spline" repeatCount="indefinite" dur="2.5s" begin="-1.56s" keyTimes="0;0.5;1" keySplines="0.3 0 0.7 1;0.3 0 0.7 1" values="9.25 320 240;3.25 320 240;9.25 320 240"></animateTransform>
+    </g>
+    <g>
+      <rect x="-78.14511668723583" y="-58.6088375154269" width="796.2902333744717" height="597.2176750308538" fill="none" stroke="#0cb2aa" stroke-width="53.32" transform="rotate(6.67 320 240)"></rect>
+      <animateTransform attributeName="transform" type="rotate" calcMode="spline" repeatCount="indefinite" dur="2.5s" begin="-1.67s" keyTimes="0;0.5;1" keySplines="0.3 0 0.7 1;0.3 0 0.7 1" values="9.67 320 240;3.67 320 240;9.67 320 240"></animateTransform>
+    </g>
+    <g>
+      <rect x="-95.91835884530849" y="-71.9387691339814" width="831.836717690617" height="623.8775382679628" fill="none" stroke="#0abdb2" stroke-width="53.32" transform="rotate(7.08 320 240)"></rect>
+      <animateTransform attributeName="transform" type="rotate" calcMode="spline" repeatCount="indefinite" dur="2.5s" begin="-1.77s" keyTimes="0;0.5;1" keySplines="0.3 0 0.7 1;0.3 0 0.7 1" values="10.08 320 240;4.08 320 240;10.08 320 240"></animateTransform>
+    </g>
+    <g>
+      <rect x="-113.69160100338121" y="-85.26870075253589" width="867.3832020067624" height="650.5374015050718" fill="none" stroke="#08c8ba" stroke-width="53.32" transform="rotate(7.50 320 240)"></rect>
+      <animateTransform attributeName="transform" type="rotate" calcMode="spline" repeatCount="indefinite" dur="2.5s" begin="-1.88s" keyTimes="0;0.5;1" keySplines="0.3 0 0.7 1;0.3 0 0.7 1" values="10.50 320 240;4.50 320 240;10.50 320 240"></animateTransform>
+    </g>
+    <g>
+      <rect x="-131.46484316145393" y="-98.59863237109045" width="902.9296863229079" height="677.1972647421809" fill="none" stroke="#07d3c2" stroke-width="53.32" transform="rotate(7.92 320 240)"></rect>
+      <animateTransform attributeName="transform" type="rotate" calcMode="spline" repeatCount="indefinite" dur="2.5s" begin="-1.98s" keyTimes="0;0.5;1" keySplines="0.3 0 0.7 1;0.3 0 0.7 1" values="10.92 320 240;4.92 320 240;10.92 320 240"></animateTransform>
+    </g>
+    <g>
+      <rect x="-149.2380853195266" y="-111.92856398964494" width="938.4761706390532" height="703.8571279792899" fill="none" stroke="#05deca" stroke-width="53.32" transform="rotate(8.33 320 240)"></rect>
+      <animateTransform attributeName="transform" type="rotate" calcMode="spline" repeatCount="indefinite" dur="2.5s" begin="-2.08s" keyTimes="0;0.5;1" keySplines="0.3 0 0.7 1;0.3 0 0.7 1" values="11.33 320 240;5.33 320 240;11.33 320 240"></animateTransform>
+    </g>
+    <g>
+      <rect x="-167.0113274775993" y="-125.25849560819944" width="974.0226549551986" height="730.5169912163989" fill="none" stroke="#03e9d2" stroke-width="53.32" transform="rotate(8.75 320 240)"></rect>
+      <animateTransform attributeName="transform" type="rotate" calcMode="spline" repeatCount="indefinite" dur="2.5s" begin="-2.19s" keyTimes="0;0.5;1" keySplines="0.3 0 0.7 1;0.3 0 0.7 1" values="11.75 320 240;5.75 320 240;11.75 320 240"></animateTransform>
+    </g>
+    <g>
+      <rect x="-184.78456963567203" y="-138.588427226754" width="1009.569139271344" height="757.176854453508" fill="none" stroke="#02f4da" stroke-width="53.32" transform="rotate(9.17 320 240)"></rect>
+      <animateTransform attributeName="transform" type="rotate" calcMode="spline" repeatCount="indefinite" dur="2.5s" begin="-2.29s" keyTimes="0;0.5;1" keySplines="0.3 0 0.7 1;0.3 0 0.7 1" values="12.17 320 240;6.17 320 240;12.17 320 240"></animateTransform>
+    </g>
+    <g>
+      <rect x="-202.5578117937447" y="-151.9183588453085" width="1045.1156235874894" height="783.836717690617" fill="none" stroke="#00ffe2" stroke-width="53.32" transform="rotate(9.58 320 240)"></rect>
+      <animateTransform attributeName="transform" type="rotate" calcMode="spline" repeatCount="indefinite" dur="2.5s" begin="-2.40s" keyTimes="0;0.5;1" keySplines="0.3 0 0.7 1;0.3 0 0.7 1" values="12.58 320 240;6.58 320 240;12.58 320 240"></animateTransform>
+    </g>
+    <g></g>
+  </g>
+  <!-- [ldio] generated by https://loading.io -->
+</svg>

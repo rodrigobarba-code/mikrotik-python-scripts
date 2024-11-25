@@ -32,19 +32,36 @@ class RequirementsDecorators:
         return decorated_function  # Return the decorated function
     # Decorator for admin requirements
 
-    # Decorator for check scan status
+    # Decorator for scan requirements
     @staticmethod
-    def check_scan_status(f):
+    def scan_required(f):
         from websockets.socketio_manager import SocketIOManager
 
         @wraps(f)  # Wraps the function to keep the original function name
         def decorated_function(*args, **kwargs):
             # If the scan status is not True
-            if SocketIOManager.get_scan_status():
+            if SocketIOManager.get_scan_status() == 0:
+                return redirect(url_for('home.home'))  # Redirect to the loading screen
+
+            return f(*args, **kwargs)  # Return the function
+
+        return decorated_function  # Return the decorated function
+    # Decorator for scan requirements
+
+    # Decorator for scan in progress requirements
+    @staticmethod
+    def redirect_to_loading_screen(f):
+        from websockets.socketio_manager import SocketIOManager
+
+        @wraps(f)  # Wraps the function to keep the original function name
+        def decorated_function(*args, **kwargs):
+            # If the scan status is not True
+            if SocketIOManager.get_scan_status() == 1:
                 return redirect(url_for('router_scan.loading_screen'))  # Redirect to the loading screen
 
             return f(*args, **kwargs)  # Return the function
 
         return decorated_function  # Return the decorated function
+    # Decorator for scan in progress requirements
 
 # Class for Requirements Decorators

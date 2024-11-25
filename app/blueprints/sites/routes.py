@@ -29,7 +29,8 @@ def get_available_regions() -> list[RegionEntity]:
     return region_list
 
 @sites_bp.route('/', methods=['GET'])
-@restriction.login_required  
+@restriction.login_required
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
 def sites():
     try:
         response = requests.get(
@@ -64,7 +65,8 @@ def sites():
 
 @sites_bp.route('/add', methods=['GET', 'POST'])
 @restriction.login_required  
-@restriction.admin_required  
+@restriction.admin_required
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
 def add_site():
     if request.method == 'POST':  
         try:
@@ -102,7 +104,8 @@ def add_site():
 
 @sites_bp.route('/update/<int:site_id>', methods=['GET', 'POST'])
 @restriction.login_required  
-@restriction.admin_required  
+@restriction.admin_required
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
 def update_site(site_id):
     try:
         response = requests.get(
@@ -166,7 +169,8 @@ def update_site(site_id):
 
 @sites_bp.route('/delete/<int:site_id>', methods=['GET'])
 @restriction.login_required  
-@restriction.admin_required  
+@restriction.admin_required
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
 def delete_site(site_id):
     try:
         response = requests.delete(
@@ -187,7 +191,8 @@ def delete_site(site_id):
 
 @sites_bp.route('/delete/bulk', methods=['POST'])
 @restriction.login_required  
-@restriction.admin_required  
+@restriction.admin_required
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
 def bulk_delete_site():
     data = request.get_json()
     sites_ids = data.get('items_ids', [])
@@ -214,7 +219,8 @@ def bulk_delete_site():
 
 @sites_bp.route('/delete/all', methods=['POST'])
 @restriction.login_required  
-@restriction.admin_required  
+@restriction.admin_required
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
 def delete_all_sites():
     try:  
         response = requests.delete(
@@ -238,6 +244,7 @@ def delete_all_sites():
 @sites_bp.route('/import/excel', methods=['POST'])
 @restriction.login_required
 @restriction.admin_required
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
 def import_sites_from_excel():
     try:
         import pandas as pd

@@ -59,6 +59,10 @@ def get_nexcloud_local_images() -> list:
     return files
 
 def get_time_status() -> str:
+    """
+    This function gets the current time and returns a message depending on the time
+    :return: A message depending on the current time
+    """
     try:
         # Import the time module
         import time
@@ -127,10 +131,11 @@ def get_current_changelog() -> dict:
 
 
 @home_bp.route('/', methods=['GET'])
-@restriction.login_required
-@restriction.check_scan_status
+@restriction.login_required  # Redirect to the login page if the user is not logged in
+@restriction.redirect_to_loading_screen  # Redirect to the loading screen if the user is not loaded
 def home():
     try:
+        # Download the images from the Next Cloud server
         download_nextcloud_images()
     except Exception as e:
         print(f"Error while downloading images: {str(e)}")
