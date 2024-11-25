@@ -264,10 +264,26 @@ class DashboardFunctions:
                 'r'
             )
 
+            # Get all Blacklist IP Groups on the database
+            blacklist = [
+                ip_group[0]
+                for ip_group in ip_groups
+                if ip_group[0].ip_group_name == 'blacklist'
+            ]
+
+            # Get all Authorized IP Groups on the database
+            authorized = [
+                ip_group[0]
+                for ip_group in ip_groups
+                if ip_group[0].ip_group_name == 'authorized'
+            ]
+
             # Return the dictionary
             return {
                 'count_arps': len(arps),
                 'count_ip_groups': len(ip_groups),
+                'count_blacklist': len(blacklist),
+                'count_authorized': len(authorized),
                 'total': len(arps) + len(ip_groups)
             }
         except Exception as e:
