@@ -15,6 +15,7 @@ from flask import render_template, redirect, url_for, flash, request, jsonify, s
 # Setiings Main Route
 @settings_bp.route('/', methods=['GET'])
 @restriction.login_required
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
 def settings():
     return render_template('settings/settings.html', user_id=session.get('user_id'))
 
@@ -24,6 +25,7 @@ def settings():
 # Update User Settings (Profile Information) Route with api
 @settings_bp.route('/update', methods=['POST'])
 @restriction.login_required
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
 def update_settings():
     if request.method == 'POST':
         try:
@@ -66,6 +68,7 @@ def update_settings():
 # Change user password Route with api
 @settings_bp.route('/update-password', methods=['POST'])
 @restriction.login_required
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
 def update_password():
     if request.method == 'POST':
         try:
@@ -106,6 +109,7 @@ def update_password():
 # Account Deletion Route with api but check password before deletion
 @settings_bp.route('/delete', methods=['POST'])
 @restriction.login_required
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
 def delete_account():
     import time
     is_deleted = False

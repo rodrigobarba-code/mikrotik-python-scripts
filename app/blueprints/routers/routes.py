@@ -51,7 +51,8 @@ def get_available_sites() -> list[SiteEntity]:
     return site_list
 
 @routers_bp.route('/', methods=['GET'])
-@restriction.login_required  
+@restriction.login_required
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
 def routers():
     try:
         response = requests.get(
@@ -97,7 +98,8 @@ def routers():
 
 @routers_bp.route('/add', methods=['GET', 'POST'])
 @restriction.login_required  
-@restriction.admin_required   
+@restriction.admin_required
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
 def add_router():
     if request.method == 'POST':  
         try:  
@@ -147,7 +149,8 @@ def add_router():
 
 @routers_bp.route('/update/<int:router_id>', methods=['GET', 'POST'])
 @restriction.login_required  
-@restriction.admin_required  
+@restriction.admin_required
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
 def update_router(router_id):
     try:
         response = requests.get(
@@ -226,7 +229,8 @@ def update_router(router_id):
 
 @routers_bp.route('/delete/<int:router_id>', methods=['GET'])
 @restriction.login_required  
-@restriction.admin_required  
+@restriction.admin_required
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
 def delete_router(router_id):
     try:  
         response = requests.delete(
@@ -247,7 +251,8 @@ def delete_router(router_id):
 
 @routers_bp.route('/delete/bulk', methods=['POST'])
 @restriction.login_required  
-@restriction.admin_required  
+@restriction.admin_required
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
 def bulk_delete_router():
     data = request.get_json()  
     routers_ids = data.get('items_ids', [])  
@@ -274,7 +279,8 @@ def bulk_delete_router():
 
 @routers_bp.route('/delete/all', methods=['POST'])
 @restriction.login_required  
-@restriction.admin_required  
+@restriction.admin_required
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
 def delete_all_routers():
     try:  
         response = requests.delete(
@@ -296,6 +302,7 @@ def delete_all_routers():
         return jsonify({'message': 'Failed to delete routers', 'error': str(e)}), 500
 
 @routers_bp.route('/get_router_details/', methods=['GET'])
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
 async def get_router_details():
     try:
         router_id = request.args.get('id')
@@ -331,6 +338,7 @@ async def get_router_details():
 @routers_bp.route('/toggle/switch/scan/status/', methods=['GET'])
 @restriction.login_required
 @restriction.admin_required
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
 def toggle_switch_scan_status():
     try:
         switch_scan_status['enable'] = not switch_scan_status['enable']
@@ -340,6 +348,7 @@ def toggle_switch_scan_status():
 
 @routers_bp.route('/verify/credentials/')
 @restriction.login_required
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
 def verify_router_credentials():
     try:
         router_ip = request.args.get('router_ip')
@@ -377,6 +386,7 @@ def verify_router_credentials():
 
 @routers_bp.route('/verify/<int:router_id>')
 @restriction.login_required
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
 def verify_router(router_id):
     try:
         response = requests.get(
@@ -409,6 +419,7 @@ def verify_router(router_id):
 @routers_bp.route('/verify/all')
 @restriction.login_required
 @restriction.admin_required
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
 def verify_all_routers():
     try:
         response = requests.get(
@@ -444,6 +455,7 @@ def verify_all_routers():
 @routers_bp.route('/import/excel', methods=['POST'])
 @restriction.login_required
 @restriction.admin_required
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
 def import_routers_from_excel():
     try:
         import pandas as pd

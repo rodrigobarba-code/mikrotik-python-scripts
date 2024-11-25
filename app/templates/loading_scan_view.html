@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Title -->
+    <title>Router Scanning Tool - In Progress</title>
+    <!-- Title -->
+
+    <!-- Socket IO -->
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <!-- Socket IO -->
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap -->
+
+    <!-- Font Awesome -->
+    <script src="https://kit.fontawesome.com/8562bd2fa0.js" crossorigin="anonymous"></script>
+
+    <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.6.0/css/all.css">
+
+    <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.6.0/css/sharp-duotone-solid.css">
+
+    <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.6.0/css/sharp-thin.css">
+
+    <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.6.0/css/sharp-solid.css">
+
+    <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.6.0/css/sharp-regular.css">
+
+    <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.6.0/css/sharp-light.css">
+    <!-- Font Awesome -->
+
+    <!-- Custom CSS -->
+    <link href="{{ url_for('static', filename='css/router_scan/scanning.css') }}" rel="stylesheet">
+    <!-- Custom CSS -->
+</head>
+<body>
+<!-- Audio Element -->
+<audio id="audio-element" loop>
+    <source src="{{ url_for('static', filename='audio/a.mp3') }}" type="audio/mpeg">
+    Your browser does not support the audio element.
+</audio>
+<!-- Audio Element -->
+
+<!-- Container -->
+<div class="loading-container">
+    <img src="{{ url_for('static', filename='img/scan.svg') }}" alt="Loading" class="scan-svg">
+    <h1 class="text-center">Router Scanning Tool</h1>
+    <p id="">At this moment, the tool is scanning the network for available routers.</p>
+    <p id="" class="">Please wait... The process may take a few minutes.</p>
+    <div class="progress-container">
+        <div class="progress" style="height: 20px;">
+            <div
+                    id="progress-bar"
+                    class="progress-bar progress-bar-animated"
+                    role="progressbar"
+                    style="width: 0%;"
+                    aria-valuenow="0"
+                    aria-valuemin="0"
+                    aria-valuemax="100">
+                0%
+            </div>
+        </div>
+        <p id="status-text" class="text-center mt-3">Status: Starting...</p>
+        <button class="btn btn-primary mt-3 music-button" id="toggleButton"> Play Music
+        </button>
+        <button class="btn btn-danger mt-3" onclick="window.location.href = '/auth/logout'"> Log out
+        </button>
+    </div>
+</div>
+<!-- Container -->
+
+<!-- Footer Sticky -->
+<footer id="footer-main" class="bg-dark text-white text-center p-3 fixed-bottom">
+    <div class="d-flex justify-content-center align-items-center">
+        <p class="mb-0 me-2">Powered by</p>
+        <img src="{{ url_for('static', filename='img/seven_suite_icon.svg') }}" alt="Logo" class="footer-logo"
+             style="height: 30px;">
+    </div>
+</footer>
+<!-- Footer Sticky -->
+
+<script src="{{ url_for('static', filename='js/router_scan/scanning.js') }}"></script>
+</body>
+</html>

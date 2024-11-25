@@ -13,7 +13,7 @@ async def scan_routeros(user_id: str, metadata: Request):
     try:
         if scan_functions.verify_user_existence(user_id):
             if True:
-                await asyncio.create_task(RouterAPI.arp_scan())
+                asyncio.create_task(RouterAPI.arp_scan())
                 scan_functions.create_transaction_log(
                     action='GET',
                     table='scan',

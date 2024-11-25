@@ -2,11 +2,14 @@ from app import create_app  # Import the create_app function from the app packag
 
 # Import the necessary classes and functions from the Flask and threading packages
 from threading import Thread
-from websockets import socketio
+from websockets.socketio_manager import SocketIOManager
 from app.config import AppConfig, UserJobs, Sidebar
 
 # Create the Flask app using the create_app function
 flask_app = create_app()
+
+# Get the SocketIO instance from the SocketIOManager class
+socketio = SocketIOManager.get_instance()
 
 # Inject the metadata into the Flask app for use in on all templates
 @flask_app.context_processor

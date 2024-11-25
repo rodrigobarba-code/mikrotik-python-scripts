@@ -8,6 +8,7 @@ from flask import render_template, redirect, url_for, flash, request, jsonify, s
 
 @regions_bp.route('/', methods=['GET'])
 @restriction.login_required
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
 def regions():
     try:
         response = requests.get(
@@ -38,6 +39,7 @@ def regions():
 @regions_bp.route('/add', methods=['GET', 'POST'])
 @restriction.login_required
 @restriction.admin_required
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
 def add_region():
     if request.method == 'POST':
         try:
@@ -68,6 +70,7 @@ def add_region():
 @regions_bp.route('/update/<int:region_id>', methods=['GET', 'POST'])
 @restriction.login_required
 @restriction.admin_required
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
 def update_region(region_id):
     if request.method == 'POST':
         try:
@@ -118,6 +121,7 @@ def update_region(region_id):
 @regions_bp.route('/delete/<int:region_id>', methods=['GET'])
 @restriction.login_required
 @restriction.admin_required
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
 def delete_region(region_id):
     try:
         response = requests.delete(
@@ -140,6 +144,7 @@ def delete_region(region_id):
 @regions_bp.route('/delete/bulk', methods=['POST'])
 @restriction.login_required
 @restriction.admin_required
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
 def bulk_delete_region():
     data = request.get_json()
     regions_ids = data.get('items_ids', [])
@@ -169,6 +174,7 @@ def bulk_delete_region():
 @regions_bp.route('/delete/all', methods=['POST'])
 @restriction.login_required
 @restriction.admin_required
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
 def delete_all_regions():
     try:
         response = requests.delete(
@@ -192,6 +198,7 @@ def delete_all_regions():
 @regions_bp.route('/import/excel', methods=['POST'])
 @restriction.login_required
 @restriction.admin_required
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
 def import_regions_from_excel():
     try:
         import pandas as pd

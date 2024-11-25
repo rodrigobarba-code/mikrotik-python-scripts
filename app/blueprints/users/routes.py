@@ -10,6 +10,7 @@ from flask import render_template, redirect, url_for, flash, request, jsonify, s
 @users_bp.route('/')
 @restriction.login_required
 @restriction.admin_required
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
 def users():
     try:
         response = requests.get(
@@ -47,6 +48,7 @@ def users():
 @users_bp.route('/add', methods=['GET', 'POST'])
 @restriction.login_required
 @restriction.admin_required
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
 def add_user():
     if request.method == 'POST':
         try:
@@ -88,6 +90,7 @@ def add_user():
 @users_bp.route('/update/<user_id>', methods=['GET', 'POST'])
 @restriction.login_required
 @restriction.admin_required
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
 def update_user(user_id):
     try:
         response = requests.get(
@@ -157,6 +160,7 @@ def update_user(user_id):
 @users_bp.route('/delete/<int:user_id>', methods=['GET'])
 @restriction.login_required
 @restriction.admin_required
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
 def delete_user(user_id):
     try:
         response = requests.delete(
@@ -179,6 +183,7 @@ def delete_user(user_id):
 @users_bp.route('/delete/bulk', methods=['POST'])
 @restriction.login_required
 @restriction.admin_required
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
 def bulk_delete_user():
     data = request.get_json()
     users_ids = data.get('items_ids', [])
@@ -206,6 +211,7 @@ def bulk_delete_user():
 @users_bp.route('/delete_all_users', methods=['POST'])
 @restriction.login_required
 @restriction.admin_required
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
 def delete_all_users():
     try:
         response = requests.delete(
@@ -229,6 +235,7 @@ def delete_all_users():
 @users_bp.route('/log', methods=['GET'])
 @restriction.login_required
 @restriction.admin_required
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
 def log():
     try:
         response = requests.get(
@@ -270,6 +277,7 @@ def log():
 @users_bp.route('/delete_from_date_user_log', methods=['POST'])
 @restriction.login_required
 @restriction.admin_required
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
 def delete_from_date_user_log():
     data = request.get_json()
     date = data.get('date', None)

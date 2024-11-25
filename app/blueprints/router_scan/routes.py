@@ -5,6 +5,7 @@ from app.decorators import RequirementsDecorators as restriction
 from flask import render_template, request, redirect, url_for, flash, session, jsonify
 
 @scan_bp.route('/', methods=['GET', 'POST'])
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
 def scan():
     arp_list = []
     response = requests.get(
@@ -27,7 +28,8 @@ def scan():
 
 @scan_bp.route('/delete/<arp_id>', methods=['GET'])
 @restriction.login_required  
-@restriction.admin_required  
+@restriction.admin_required
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
 def delete_arp_ip(arp_id):
     try:  
         response = requests.delete(
@@ -52,7 +54,8 @@ def delete_arp_ip(arp_id):
 
 @scan_bp.route('/delete/bulk', methods=['POST'])
 @restriction.login_required  
-@restriction.admin_required  
+@restriction.admin_required
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
 def bulk_delete_arp_ips():
     data = request.get_json()
     arps_ids = data.get('items_ids', [])  
@@ -81,7 +84,8 @@ def bulk_delete_arp_ips():
 
 @scan_bp.route('/delete/all', methods=['POST'])
 @restriction.login_required  
-@restriction.admin_required  
+@restriction.admin_required
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
 def delete_all_arps_ips():
     try:  
         response = requests.delete(
@@ -102,6 +106,7 @@ def delete_all_arps_ips():
         return jsonify({'message': 'Failed to delete ARP IPs', 'error': str(e)}), 500
 
 @scan_bp.route('/get_scan_details/', methods=['GET'])
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
 def get_scan_details():
     try:
         arp_id = request.args.get('id')
@@ -139,3 +144,15 @@ def get_scan_details():
             return jsonify({'message': 'Failed to get ARP details'}), 500
     except Exception as e:  
         return jsonify({'message': 'Failed to get ARP details', 'error': str(e)}), 500
+
+@scan_bp.route('/loading', methods=['GET'])
+@restriction.login_required
+@restriction.scan_required
+def loading_screen():
+    try:
+        # Redirect to the loading screen
+        return render_template('loading_scan_view.html')
+    except Exception as e:
+        # Flash the error message
+        flash(str(e), 'danger')
+        return redirect(url_for('router_scan.scan'))
