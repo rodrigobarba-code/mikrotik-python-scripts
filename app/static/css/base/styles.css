@@ -18,7 +18,8 @@
 
 .btn {
     border-radius: 25px !important;
-    padding: 10px 15px; !important;
+    padding: 10px 15px;
+!important;
 }
 
 .float-container {
@@ -208,4 +209,69 @@
 }
 
 .dashboard-content {
+}
+
+
+.hover-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-hover {
+    position: absolute;
+    top: 50%;
+    right: -120px;
+    transform: translateY(-50%);
+    padding: 10px 20px;
+    background-color: var(--sidebar-color);
+    color: var(--text-color);
+    border-radius: 30px;
+    font-size: 14px;
+    text-decoration: none;
+    transition: var(--tran-05);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.hover-card:hover .btn-hover {
+    right: 20px;
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.btn-hover:hover {
+    background-color: var(--hover-color);
+    color: var(--text-color);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    transform: scale(1.1) translateY(-50%);
+}
+
+/* Media Queries for Responsive Design */
+@media (max-width: 768px) {
+    .card-top {
+        min-width: fit-content;
+        margin: 10px;
+    }
+
+    .dashboard-content {
+        padding-bottom: 1.5rem;
+    }
+
+    .card-top-container {
+        overflow-x: auto;
+        overflow-y: hidden;
+    }
+
+    .hover-card {
+        transition: transform 0.3s ease;
+    }
+
+    .hover-card:hover {
+        transform: scale(1.05);
+    }
+
+    .btn-hover {
+        right: 0;
+        scale: 0.8;
+    }
 }

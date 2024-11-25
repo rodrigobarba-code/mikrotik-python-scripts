@@ -13,11 +13,70 @@
             const chartData = {{ dashboard_data|tojson }};
             const publicIpsData = {{ public_ips_data|tojson }};
             const totalIpsData = {{ total_ips_data|tojson }};
-            const ctx = document.getElementById('myChart').getContext('2d');
-            let currentChart;
+            const ctxPrivate = document.getElementById('myChart').getContext('2d');
+            const ctxPublic = document.getElementById('publicIpChart').getContext('2d');
+            let currentPrivateChart;
+            let currentPublicChart;
 
-            // Función para inicializar o actualizar el gráfico
-            function updateChart(site, segment) {
+            function createGradient(ctx, colorStart, colorEnd) {
+                const width = ctx.canvas.width;   // Ancho del canvas
+                const height = ctx.canvas.height; // Alto del canvas
+
+                const gradient = ctx.createLinearGradient(0, 0, width, height);
+                gradient.addColorStop(0, colorStart);
+                gradient.addColorStop(1, colorEnd);
+                return gradient;
+            }
+
+            // Función para actualizar el gráfico con gradientes
+            function createChart(ctx, assignedQuantity, availableQuantity, isPublic = false) {
+                const assignedGradient = createGradient(
+                    ctx,
+                    isPublic ? '#FF4500' : '#FF0000',
+                    isPublic ? '#FFAA00' : '#FFD700'
+                );
+                const availableGradient = createGradient(
+                    ctx,
+                    isPublic ? '#1E90FF' : '#00008B',
+                    isPublic ? '#87CEEB' : '#00BFFF'
+                );
+
+                return new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Assigned', 'Available'],
+                        datasets: [{
+                            label: isPublic ? 'Public IPs' : 'Private IPs',
+                            data: [assignedQuantity, availableQuantity],
+                            backgroundColor: [assignedGradient, availableGradient],
+                            borderWidth: 0, // Sin borde
+                            hoverBorderColor: 'rgba(255, 255, 255, 0.5)',
+                            hoverBorderWidth: 2,
+                            borderRadius: [30, 30],
+                            spacing: -30
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        cutout: '70%',
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: {
+                                    font: {
+                                        size: 14
+                                    },
+                                    usePointStyle: true,
+                                    pointStyle: 'rectRounded'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Función para inicializar o actualizar el gráfico privado
+            function updatePrivateChart(site, segment) {
                 const data = chartData[site];
                 const assigned = data.assigned.find(s => Object.keys(s)[0] === segment);
                 const available = data.available.find(s => Object.keys(s)[0] === segment);
@@ -25,26 +84,24 @@
                 const assignedQuantity = assigned ? Object.values(assigned)[0].quantity : 0;
                 const availableQuantity = available ? Object.values(available)[0].quantity : 0;
 
-                const chartConfig = {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['Assigned', 'Available'],
-                        datasets: [{
-                            label: 'Private IPs',
-                            data: [assignedQuantity, availableQuantity],
-                            backgroundColor: ['#FF6384', '#36A2EB'],
-                        }]
-                    },
-                };
-
-                if (currentChart) {
-                    currentChart.destroy();
-                }
-
-                currentChart = new Chart(ctx, chartConfig);
+                if (currentPrivateChart) currentPrivateChart.destroy();
+                currentPrivateChart = createChart(ctxPrivate, assignedQuantity, availableQuantity);
             }
 
-            // Función para actualizar los filtros
+            // Función para inicializar o actualizar el gráfico público
+            function updatePublicChart(site, segment) {
+                const data = publicIpsData[site];
+                const assigned = data.assigned.find(s => Object.keys(s)[0] === segment);
+                const available = data.available.find(s => Object.keys(s)[0] === segment);
+
+                const assignedQuantity = assigned ? Object.values(assigned)[0].quantity : 0;
+                const availableQuantity = available ? Object.values(available)[0].quantity : 0;
+
+                if (currentPublicChart) currentPublicChart.destroy();
+                currentPublicChart = createChart(ctxPublic, assignedQuantity, availableQuantity, true);
+            }
+
+            // Función para actualizar los filtros y gráficos
             function updateFilters() {
                 const siteSelect = document.getElementById('siteFilter');
                 const segmentSelect = document.getElementById('segmentFilter');
@@ -61,23 +118,49 @@
                     });
                 }
 
-                updateChart(selectedSite, segmentSelect.value);
+                updatePrivateChart(selectedSite, segmentSelect.value);
             }
 
-            // Agregar evento change al select de sitios
-            document.getElementById('siteFilter').addEventListener('change', updateFilters);
+            function updatePublicFilters() {
+                const siteSelect = document.getElementById('site-select');
+                const segmentSelect = document.getElementById('segment-select');
+                const selectedSite = siteSelect.value;
 
-            // Agregar evento change al select de segmentos
+                segmentSelect.innerHTML = '';
+                if (publicIpsData[selectedSite]) {
+                    publicIpsData[selectedSite].assigned.forEach(segment => {
+                        const segmentKey = Object.keys(segment)[0];
+                        const option = document.createElement('option');
+                        option.value = segmentKey;
+                        option.textContent = segmentKey;
+                        segmentSelect.appendChild(option);
+                    });
+                }
+
+                updatePublicChart(selectedSite, segmentSelect.value);
+            }
+
+            // Eventos para actualizar gráficos
+            document.getElementById('siteFilter').addEventListener('change', updateFilters);
             document.getElementById('segmentFilter').addEventListener('change', function () {
                 const siteSelect = document.getElementById('siteFilter');
                 const segmentSelect = document.getElementById('segmentFilter');
-                updateChart(siteSelect.value, segmentSelect.value);
+                updatePrivateChart(siteSelect.value, segmentSelect.value);
+            });
+
+            document.getElementById('site-select').addEventListener('change', updatePublicFilters);
+            document.getElementById('segment-select').addEventListener('change', function () {
+                const siteSelect = document.getElementById('site-select');
+                const segmentSelect = document.getElementById('segment-select');
+                updatePublicChart(siteSelect.value, segmentSelect.value);
             });
 
             // Inicializar los filtros al cargar la página
             updateFilters();
+            updatePublicFilters();
         });
     </script>
+
 {% endblock %}
 
 {% block content %}
@@ -102,12 +185,13 @@
                             </span>
                         </div>
                     </div>
-                    <div class="card card-top">
+                    <div class="card card-top hover-card">
                         <div class="card-body">
                             <h5 class="card-title">Anomalies found</h5>
                             <span class="badge rounded-pill">
                                 {{ total_ips_data.count_arps }}
                             </span>
+                            <a href="{{ url_for('router_scan.scan') }}" class="btn-hover">View Details</a>
                         </div>
                     </div>
                     <div class="card card-top">
@@ -125,15 +209,15 @@
     <!-- Overview Card-Top -->
 
     <!-- Dashboard Content -->
-    <div class="container-fluid">
+    <div class="container-fluid dashboard-content-container">
         <div class="container">
             <div class="row">
                 <!-- Panel 1 -->
                 <div class="col-lg-4 col-md-6 col-sm-12 dashboard-content">
                     <div class="card p-3">
-                        <h5 class="card-title">Assigned vs Available Private IP</h5>
+                        <h5 class="card-title">Assigned and Available Private IP</h5>
 
-                        <!-- Selector para elegir el tipo de estadísticas -->
+                        <!-- Selector for site -->
                         <label for="siteFilter" class="form-label">Select a site:</label>
                         <select id="siteFilter" class="form-select mb-3">
                             {% for site in sites %}
@@ -141,21 +225,20 @@
                             {% endfor %}
                         </select>
 
-                        <!-- Selector para elegir el segmento -->
+                        <!-- Segment selector -->
                         <label for="segmentFilter" class="form-label">Select a segment:</label>
                         <select id="segmentFilter" class="form-select mb-3">
-                            <!-- Opciones de segmento se llenarán dinámicamente -->
                         </select>
-                        <!-- Canvas para el gráfico -->
+                        <!-- Canvas for the chart -->
                         <canvas id="myChart"></canvas>
                     </div>
                 </div>
                 <!-- Panel 2 -->
                 <div class="col-lg-4 col-md-6 col-sm-12 dashboard-content">
                     <div class="card p-3">
-                        <h5 class="card-title">Assigned vs Available Public IP</h5>
+                        <h5 class="card-title">Assigned and Available Public IP</h5>
 
-                        <!-- Selector para elegir el tipo de estadísticas -->
+                        <!-- Selector for choose the site -->
                         <label for="site-select" class="form-label">Select a site:</label>
                         <select id="site-select" class="form-select mb-3">
                             {% for site in sites %}
@@ -163,12 +246,11 @@
                             {% endfor %}
                         </select>
 
-                        <!-- Selector para elegir el segmento -->
+                        <!-- Segment selector -->
                         <label for="segment-select" class="form-label">Select a segment:</label>
                         <select id="segment-select" class="form-select mb-3">
-                            <!-- Opciones de segmento se llenarán dinámicamente -->
                         </select>
-                        <!-- Canvas para el gráfico -->
+                        <!-- Canvas for the chart -->
                         <canvas id="publicIpChart"></canvas>
                     </div>
                 </div>
