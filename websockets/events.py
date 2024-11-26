@@ -52,6 +52,21 @@ def scan_process(socketio) -> None:
         # Set the scan status to 2, or scanning
         asyncio.run(RouterAPI.arp_scan())
 
+    @socketio.on('error_on_scan')
+    def error_on_scan_routeros() -> None:
+        """
+        Function to emit an error event
+        :return: None
+        """
+
+        # Emit the error event to show an error message
+        socketio.emit(
+            'error',
+            {
+                'url': '/router/scan',
+            }
+        )
+
     # Event to get the general status of the scan process
     @socketio.on('get_general_status')
     def scan_status_routeros() -> None:

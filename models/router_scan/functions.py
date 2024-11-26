@@ -172,13 +172,16 @@ class ARPFunctions:
             print(str(e))
 
     @staticmethod
-    def place_ip_group_on_table(session, incoming_ip_group_list: list):
+    def place_ip_group_on_table(session, incoming_ip_group_list: list) -> tuple:
         try:
             # Import the IPGroups model
             from models.ip_management.models import IPGroups
 
             # Create a list of IPs for the incoming IP Groups
             incoming_ip_list = [ip_group.ip_group_ip for ip_group in incoming_ip_group_list]
+
+            # Variables to store the insert, update, and delete operations
+            inserted, updated, deleted = 0, 0, 0
 
             # Create list to store insert and update operations
             insert_list, update_list, delete_list = [], [], []
@@ -223,14 +226,20 @@ class ARPFunctions:
 
             # Insert the IP Groups
             if insert_list:
+                inserted = len(insert_list)
                 ThreadingManager().run_thread(IPGroups.bulk_add_ip_groups, 'w', insert_list)
 
             # Update the IP Groups
             if update_list:
+                updated = len(update_list)
                 ThreadingManager().run_thread(IPGroups.bulk_update_ip_groups, 'w', update_list)
 
             # Delete the IP Groups
             if delete_list:
+                deleted = len(delete_list)
                 ThreadingManager().run_thread(IPGroups.bulk_delete_ip_groups, 'w', delete_list)
+
+            # Return the number of inserted, updated, and deleted IP Groups
+            return inserted, updated, deleted
         except Exception as e:
             print(str(e))

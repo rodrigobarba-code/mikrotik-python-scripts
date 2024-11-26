@@ -69,6 +69,7 @@ from websockets.socketio_manager import SocketIOManager
 # Import the necessary modules for the API
 from api.routeros.modules.FindIPSegment import FindIPSegment
 from api.routeros.modules.GetAllowedRouters import GetAllowedRouters
+from api.routeros.modules.CreateNotification import CreateNotification
 
 class RouterAPI:
     router = None  # Router instance
@@ -261,7 +262,7 @@ class RouterAPI:
 
     # Add IP data to the database
     @staticmethod
-    async def add_ip_data(ip_list: list[IPSegmentEntity]) -> None:
+    async def add_ip_data(ip_list: list[IPSegmentEntity]) -> tuple:
         """
         Add available IP segments to the database
         :param ip_list: List of IP segments
@@ -274,7 +275,10 @@ class RouterAPI:
                 ip.validate_ip_segment()
 
             # Add all IP segments to the database in bulk
-            ThreadingManager().run_thread(IPSegment.bulk_add_ip_segments, 'w', ip_list)
+            added_ip_segments, updated_ip_segments = ThreadingManager().run_thread(IPSegment.bulk_add_ip_segments, 'rxc', ip_list)
+
+            # Return the added and updated IP segments
+            return added_ip_segments, updated_ip_segments
         except Exception as e:
             print(str('Error: add_ip_data: ' + str(e)))
 
@@ -378,7 +382,7 @@ class RouterAPI:
 
     # Add ARP data to the database
     @staticmethod
-    async def add_arp_data(ip_group_list: list[IPGroupsEntity]) -> None:
+    async def add_arp_data(ip_group_list: list[IPGroupsEntity]) -> tuple:
         """
         Add available ARP data to the database
         :param ip_group_list: List of ARP data
@@ -387,7 +391,10 @@ class RouterAPI:
 
         try:
             # Delete all ARP data from the database that are in database but not in the router
-            ThreadingManager().run_thread(ARPFunctions.place_ip_group_on_table, 'w', ip_group_list)
+            added_ip_groups, updated_ip_groups, deleted_ip_groups = ThreadingManager().run_thread(ARPFunctions.place_ip_group_on_table, 'rxc', ip_group_list)
+
+            # Return the added and updated ARP data
+            return added_ip_groups, updated_ip_groups, deleted_ip_groups
         except Exception as e:
             print(str('Error: add_arp_data: ' + str(e)))
 
@@ -548,11 +555,14 @@ class RouterAPI:
 
     # Resolve IP duplicity
     @staticmethod
-    async def resolve_ip_duplicity(ip_scan_data: list) -> None:
+    async def resolve_ip_duplicity(ip_scan_data: list) -> int:
         try:
             # Import the ARP class and IP Group class
             from models.router_scan.models import ARP
             from models.ip_management.models import IPGroups
+
+            # Variables to update
+            updated = 0
 
             # Get all IP Groups from the database
             to_update = []
@@ -582,6 +592,9 @@ class RouterAPI:
 
             # Verify if there are IP Group data to insert
             if to_update:
+                # Increment the updated variable
+                updated += len(to_update)
+
                 # Insert the ARP data to the database
                 ThreadingManager().run_thread(ARP.bulk_insert_from_ip_groups, 'w', to_update)
 
@@ -593,6 +606,8 @@ class RouterAPI:
                 ThreadingManager().run_thread(IPGroups.delete_duplicity_on_table, 'wx')
 
             print('IP duplicity resolved, we found ' + str(len(to_update)) + ' duplicities')
+
+            return updated
         except Exception as e:
             print(str('Error: resolve_ip_duplicity: ' + str(e)))
 
@@ -639,7 +654,7 @@ class RouterAPI:
             """Add IP Segments"""
 
             # Add the IP segments data to the database
-            await RouterAPI.add_ip_data(ip_data)
+            added_ip_segments, updated_ip_segments = await RouterAPI.add_ip_data(ip_data)
 
             # Set the message and percentage for the scan status
             percent = 50
@@ -682,7 +697,7 @@ class RouterAPI:
             """Add ARP Data"""
 
             # Add the ARP data to the database
-            await RouterAPI.add_arp_data(arp_data)
+            added_ip_groups, updated_ip_groups, deleted_ip_groups = await RouterAPI.add_arp_data(arp_data)
 
             # Set the message and percentage for the scan status
             percent = 85
@@ -727,7 +742,7 @@ class RouterAPI:
             """Resolve IP Duplicity"""
 
             # Resolve the IP Scan data
-            await RouterAPI.resolve_ip_duplicity(cleaned_ip_scan_data)
+            duplicity = await RouterAPI.resolve_ip_duplicity(cleaned_ip_scan_data)
 
             # Set the message and percentage for the scan status
             percent = 99
@@ -747,10 +762,45 @@ class RouterAPI:
             # Emit the scan status to the frontend
             socketio.emit('scan_complete', {'scan_status': 'ARP scan finished'})
 
+            # Create a notification object for the ARP scan
+            notification = CreateNotification(
+                added_ip_segments=added_ip_segments,
+                updated_ip_segments=updated_ip_segments,
+                added_ip_groups=added_ip_groups,
+                updated_ip_groups=updated_ip_groups,
+                deleted_ip_groups=deleted_ip_groups,
+                duplicity=duplicity
+            )
+
+            # Create a success notification
+            notification.create_success_notification()
+
             # Set the scan status to IDLE
             SocketIOManager.set_scan_status(0)
 
             # Print the ARP scan finished message
             print('ARP scan finished')
         except Exception as e:
+            # Create a notification object for the ARP scan
+            CreateNotification().create_error_notification(
+                str('arp_scan: ' + str(e))
+            )
+
+            # Get socket instance
+            socketio = SocketIOManager.get_instance()
+
+            # Set the scan status to IDLE
+            SocketIOManager.set_scan_status(0)
+
+            # Emit the scan error to the frontend
+            socketio.emit(
+                'scan_error',
+                {
+                    'title_error': 'What! An error occurred while scanning the network.',
+                    'body_error': 'While scanning the network, an error occurred. Please try again.',
+                    'code_error': str('arp_scan: ' + str(e))
+                }
+            )
+
+            # Set the scan status to IDLE
             print(str('Error: arp_scan: ' + str(e)))

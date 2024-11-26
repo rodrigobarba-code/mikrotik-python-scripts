@@ -51,7 +51,7 @@ class IPSegment(Base):
             raise e
 
     @staticmethod
-    def bulk_add_ip_segments(session, ip_segments: list[IPSegmentEntity]) -> None:
+    def bulk_add_ip_segments(session, ip_segments: list[IPSegmentEntity]) -> tuple:
         """
         Add a list of IP segments to the database in bulk
         :arg session: The database session
@@ -60,6 +60,10 @@ class IPSegment(Base):
         """
 
         try:
+            # Variables to stored added and updated IP segments
+            added = 0
+            updated = 0
+
             # Create a list of IPSegment objects obtained from router
             bulk_list = [IPSegment(
                 fk_router_id=ip_segment.fk_router_id,
@@ -89,6 +93,9 @@ class IPSegment(Base):
                 )):
                     # If it does not exist, add it to the list
                     to_add.append(ip_segment)
+
+                    # Increment the added counter
+                    added += 1
                 else:
                     # If it exists, update the IP segment in the database
 
@@ -110,9 +117,14 @@ class IPSegment(Base):
                     ip_segment.ip_segment_is_dynamic = ip_segment.ip_segment_is_dynamic
                     ip_segment.ip_segment_is_disabled = ip_segment.ip_segment_is_disabled
 
+                    # Increment the updated counter
+                    updated += 1
+
             # if there are IP segments to add, add them to the database in bulk
             if to_add:
                 session.bulk_save_objects(to_add)
+
+            return added, updated
         except Exception as e:
             raise e
 
