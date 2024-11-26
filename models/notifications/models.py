@@ -1,3 +1,4 @@
+from app.blueprints.notifications.routes import notifications
 from .. import Base
 from sqlalchemy import delete, text, update
 from sqlalchemy import Column, Integer, String, Enum
@@ -122,6 +123,29 @@ class Notification(Base):
         try:
             # Check if Notifications are not found
             session.execute(delete(Notification))  # Delete All Notifications
+        except Exception as e:
+            raise NotificationError()
+
+    @staticmethod
+    def get_notifications(session) -> list:
+        """
+        Get Notifications
+        :param session: Database context session
+        :return: List of Notifications
+        """
+        try:
+            # Return Notifications
+            return [
+                NotificationEntity(
+                    notification_id=notification.notification_id,  # Notification ID
+                    notification_title=notification.notification_title,  # Notification Title
+                    notification_body=notification.notification_body,  # Notification Body
+                    notification_type=notification.notification_type,  # Notification Type
+                    notification_datetime=notification.notification_datetime,  # Notification Datetime
+                    is_archived=notification.is_archived  # Is Archived
+                )
+                for notification in session.query(Notification).all()  # Get Notifications
+            ]
         except Exception as e:
             raise NotificationError()
 

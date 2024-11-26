@@ -1,0 +1,115 @@
+.jumbotron-notifications {
+    color: #fff;
+    border-radius: 30px;
+    background-image: linear-gradient(120deg, #e0c3fc 0%, #8ec5fc 100%);
+}
+
+#notification-bell {
+    width: 10%;
+    height: auto;
+    margin-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+    #notification-bell {
+        width: 20px;
+        height: 20px;
+    }
+}
+
+@keyframes blinking {
+    0% {
+        scale: 1;
+    }
+
+    50% {
+        scale: 1.1;
+    }
+
+    100% {
+        scale: 1;
+    }
+}
+
+.bell {
+    animation: blinking 1s infinite;
+}
+
+@media (max-width: 576px) {
+    #notification-bell {
+        width: 15px;
+        height: 15px;
+    }
+}
+
+.notifications-subtitle {
+    margin: 0 !important;
+    padding: 2px !important;
+}
+
+.notification-datetime {
+    margin: 0 !important;
+    padding: 2px !important;
+}
+
+#show-archived {
+    /* Add glassmorphism effect */
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(10px);
+    border-radius: 10px;
+    padding: 10px;
+    margin: 5px;
+    color: #7a7a7a;
+    border: 1px solid #fff;
+    transition: all 0.2s ease-in-out;
+}
+
+#show-archived:hover {
+    scale: 1.05;
+}
+
+.notification {
+    border-radius: 30px;
+    padding: 10px;
+    margin: 5px;
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(10px);
+    border: 1px solid #fff;
+    transition: all 0.2s ease-in-out;
+}
+
+.notification:hover {
+    scale: 1.025;
+}
+
+.btn-custom {
+    width: 40px;
+    height: 40px;
+    border-radius: 30px;
+    padding: 10px;
+    margin: 5px;
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(10px);
+    border: 1px solid #fff;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-custom:hover {
+    scale: 1.05;
+}
+
+.custom-swal-button {
+    border-radius: 20px;
+    background-color: #007bff;
+    color: #fff;
+    font-size: 16px;
+    padding: 10px 20px;
+    border: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.custom-swal-button:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+}
