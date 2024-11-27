@@ -18,7 +18,7 @@ async def get_notifications(
 ):
     try:
         if notifications_functions.verify_user_existence(user_id):
-            request = ThreadingManager().run_thread(Notification.get_notifications, 'r', user_id)
+            request = ThreadingManager().run_thread(Notification.get_notifications, 'r')
             notifications = [
                 {
                     'id': notification.notification_id,
@@ -46,5 +46,28 @@ async def get_notifications(
     except Exception as e:
         return {
             'message': f"Failed to retrieve notifications: {str(e)}",
+            'backend_status': 400
+        }
+
+@notifications_router.get('/notifications/unread')
+async def get_unread_notifications(
+        metadata: Request,
+        token: dict = Depends(verify_jwt)
+):
+    try:
+        if True:
+            request = ThreadingManager().run_thread(Notification.get_notifications, 'r')
+            temp = [
+                i for i in request if i.is_archived == 0
+            ]
+            count = len(temp)
+            return {
+                'message': "Unread notifications retrieved successfully",
+                'count': count,
+                'backend_status': 200
+            }
+    except Exception as e:
+        return {
+            'message': f"Failed to retrieve unread notifications: {str(e)}",
             'backend_status': 400
         }
