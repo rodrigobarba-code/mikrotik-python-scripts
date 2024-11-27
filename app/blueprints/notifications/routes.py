@@ -39,11 +39,52 @@ def get_notifications() -> list:
         return []
 
 # Dashboard Main Route
-@notifications_bp.route('/', methods=['GET'])
+@notifications_bp.route('/all', methods=['GET'])
 @restriction.login_required  # Login Required Decorator
 @restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
 def notifications():
+    notifications = [
+        i
+        for i in get_notifications()
+        if not i.is_archived
+    ]
     return render_template(
         'notifications/notifications.html',
-        notification_list=get_notifications()
+        notification_list=notifications
     )
+
+@notifications_bp.route('/archive', methods=['GET'])
+@restriction.login_required  # Login Required Decorator
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
+def archived_notifications():
+    archive_notifications = [
+        i
+        for i in get_notifications()
+        if i.is_archived
+    ]
+    return render_template(
+        'notifications/notifications.html',
+        notification_list=archive_notifications
+    )
+
+@notifications_bp.route('/archive/<int:notification_id>', methods=['POST'])
+@restriction.login_required  # Login Required Decorator
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
+def archive_notification(notification_id: int):
+    try:
+        response = requests.put(
+            f'http://localhost:8080/api/private/notifications/{notification_id}',
+            headers=get_verified_jwt_header(),
+            params={'user_id': session.get('user_id')}
+        )
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                flash('Notification archived successfully', 'success')
+                return jsonify({'status': 'success'})
+            else:
+                raise Exception(response.json().get('message'))
+        elif response.status_code == 500:
+            raise Exception('Failed to archive notification')
+    except Exception as e:
+        flash(f'Error: {str(e)}', 'danger')
+        return jsonify({'status': 'error'})

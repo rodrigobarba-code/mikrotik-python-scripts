@@ -1,3 +1,11 @@
+p {
+    margin-bottom: 0 !important;
+}
+
+.container {
+    padding: 0 !important;
+}
+
 .jumbotron-notifications {
     color: #fff;
     border-radius: 30px;
@@ -31,8 +39,16 @@
     }
 }
 
+.text {
+    color: var(--text-color) !important;
+}
+
 .bell {
     animation: blinking 1s infinite;
+}
+
+.fa-bell {
+    color: white;
 }
 
 @media (max-width: 576px) {
@@ -53,14 +69,14 @@
 }
 
 #show-archived {
-    /* Add glassmorphism effect */
-    background: rgba(255, 255, 255, 0.5);
+    height: max-content;
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     backdrop-filter: blur(10px);
     border-radius: 10px;
-    padding: 10px;
-    margin: 5px;
-    color: #7a7a7a;
-    border: 1px solid #fff;
+    padding: 5px 10px 5px 10px;
+    color: white;
     transition: all 0.2s ease-in-out;
 }
 
@@ -69,12 +85,14 @@
 }
 
 .notification {
+    color: white;
     border-radius: 30px;
     padding: 10px;
     margin: 5px;
-    background: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     backdrop-filter: blur(10px);
-    border: 1px solid #fff;
     transition: all 0.2s ease-in-out;
 }
 
@@ -88,9 +106,10 @@
     border-radius: 30px;
     padding: 10px;
     margin: 5px;
-    background: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     backdrop-filter: blur(10px);
-    border: 1px solid #fff;
     transition: all 0.2s ease-in-out;
 }
 
@@ -112,4 +131,67 @@
 .custom-swal-button:hover {
     background-color: #0056b3;
     transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+    .box-actions {
+        width: 100%;
+        justify-content: end;
+    }
+}
+
+.paginationjs {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 6px;
+    color: var(--text-color) !important;
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+    border-radius: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.paginationjs .paginationjs-page,
+.paginationjs .paginationjs-prev,
+.paginationjs .paginationjs-next {
+    color: var(--text-color) !important;
+    background: rgba(0, 0, 0, 0.3);
+    border: none;
+    padding: 5px 5px;
+    margin: 0 5px;
+    font-size: 14px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border-radius: 30px;
+}
+
+.paginationjs .paginationjs-page > a,
+.paginationjs .paginationjs-prev > a,
+.paginationjs .paginationjs-next > a {
+    background-color: transparent !important;
+    color: var(--text-color) !important;
+}
+
+.paginationjs-prev,
+.paginationjs-next {
+    border-radius: 30px !important;
+}
+
+.paginationjs .paginationjs-page:hover,
+.paginationjs .paginationjs-prev:hover,
+.paginationjs .paginationjs-next:hover {
+    background: rgba(255, 255, 255, 0.3);
+    color: var(--text-color) !important;
+    transform: scale(1.05);
+}
+
+.paginationjs .paginationjs-page.active {
+    background-color: var(--text-color-not-active) !important;
+    color: var(--text-color) !important;
+    font-weight: bold;
+    border: none;
 }

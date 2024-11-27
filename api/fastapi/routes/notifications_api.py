@@ -48,3 +48,31 @@ async def get_notifications(
             'message': f"Failed to retrieve notifications: {str(e)}",
             'backend_status': 400
         }
+
+@notifications_router.put('/notifications/{notification_id}')
+async def archive_notification(
+        notification_id: int,
+        metadata: Request,
+        token: dict = Depends(verify_jwt)
+):
+    try:
+        request = ThreadingManager().run_thread(Notification.archive_notification, 'w', notification_id)
+        if request:
+            notifications_functions.create_transaction_log(
+                action="PUT",
+                table="notifications",
+                user_id=int(token.get('user_id')),
+                description="Notification archived successfully",
+                public=str(str(metadata.client.host) + ':' + str(metadata.client.port))
+            )
+            return {
+                'message': "Notification archived successfully",
+                'backend_status': 200
+            }
+        else:
+            raise Exception("Failed to archive notification")
+    except Exception as e:
+        return {
+            'message': f"Failed to archive notification: {str(e)}",
+            'backend_status': 400
+        }
