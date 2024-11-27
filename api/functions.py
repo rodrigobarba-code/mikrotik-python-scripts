@@ -13,7 +13,8 @@ class APIFunctions:
             raise e
 
     @staticmethod
-    def create_transaction_log(user_id: int, description: str, action: str, table: str, public: str, local: str = '') -> None:
+    def create_transaction_log(user_id: int, description: str, action: str, table: str, public: str,
+                               local: str = '') -> None:
         from datetime import datetime
         from entities.user_log import UserLogEntity
         from models.users.models import User, UserLog
