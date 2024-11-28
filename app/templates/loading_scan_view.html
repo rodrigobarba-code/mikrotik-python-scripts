@@ -46,14 +46,13 @@
 <!-- Container -->
 <div class="loading-container">
     <img src="{{ url_for('static', filename='img/scan.svg') }}" alt="Loading" class="scan-svg">
-    <h1 class="text-center">Router Scanning Tool</h1>
-    <p id="">At this moment, the tool is scanning the network for available routers.</p>
-    <p id="" class="">Please wait... The process may take a few minutes.</p>
+    <h1 id="title-text" class="text-center">Router Scanning Tool</h1>
+    <p id="body-text">At this moment, the tool is scanning the network for available routers. Please wait... The process may take a few minutes.</p>
     <div class="progress-container">
         <div class="progress" style="height: 20px;">
             <div
                     id="progress-bar"
-                    class="progress-bar progress-bar-animated"
+                    class="progress-bar"
                     role="progressbar"
                     style="width: 0%;"
                     aria-valuenow="0"

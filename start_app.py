@@ -2,6 +2,7 @@ from app import create_app  # Import the create_app function from the app packag
 
 # Import the necessary classes and functions from the Flask and threading packages
 from threading import Thread
+from app.functions import get_unread_notifications
 from websockets.socketio_manager import SocketIOManager
 from app.config import AppConfig, UserJobs, Sidebar
 
@@ -18,7 +19,8 @@ def injects():
         metadata=AppConfig.METADATA,
         menu_items=Sidebar.menu_items,
         job_display=UserJobs.job_display,
-        profile_menu_items=Sidebar.profile_menu_items
+        profile_menu_items=Sidebar.profile_menu_items,
+        unread_notifications={'count': get_unread_notifications()}
     )
 
 # Function to start the Flask app, and running it with a web socket

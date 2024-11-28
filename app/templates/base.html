@@ -87,7 +87,7 @@
 {% from "macros.html" import sidebar, messages %}
 
 <!-- Sidebar -->
-{{ sidebar(menu_items, profile_menu_items, job_display) }}
+{{ sidebar(menu_items, profile_menu_items, job_display, unread_notifications) }}
 <!-- Sidebar -->
 
 <!-- Content -->
@@ -160,6 +160,10 @@
 <!-- External JavaScript -->
 <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
 <!-- External JavaScript -->
+
+<!-- Date FNS -->
+<script src="https://cdn.jsdelivr.net/npm/date-fns@2.30.0/dist/date-fns.min.js"></script>
+<!-- Date FNS -->
 
 <!-- Custom External JavaScript -->
 {% block scripts %}

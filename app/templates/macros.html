@@ -1,5 +1,5 @@
 <!-- Macro for sidebar -->
-{% macro sidebar(menu_items, profile_menu_items, job_display) %}
+{% macro sidebar(menu_items, profile_menu_items, job_display, unread_notifications) %}
     <div id="sidebar" class="sidebar close">
         <div class="logo-details">
             <a class="a-logo" href="{{ url_for('home.home') }}" id="logo-link">
@@ -43,19 +43,67 @@
                         </li>
                     {% else %}
                         <li>
-                            <a {% if item.endpoint != '#' %} href="{{ url_for(item.endpoint) }}" {% endif %}>
-                                <i class="{{ item.icon }}"></i>
-                                {% if item.marquee %}
-                                    <marquee direction="left" scrollamount="4"><span
-                                            class="link_name">{{ item.name }}</span></marquee>
+                            {% if item.name == 'Notifications' %}
+                                {% if unread_notifications.count > 0 %}
+                                    <a {% if item.endpoint != '#' %} href="{{ url_for(item.endpoint) }}" {% endif %}>
+                                        <i class="{{ item.icon }}">
+                                            {% if unread_notifications.count > 4 %}
+                                                {% set a = '5+' %}
+                                            {% else %}
+                                                {% set a = unread_notifications.count %}
+                                            {% endif %}
+
+                                            {% if unread_notifications.count == 1 %}
+                                                {% set left_movement = 36 %}
+                                            {% elif unread_notifications.count > 1 and unread_notifications.count <= 4 %}
+                                                {% set left_movement = 34 %}
+                                            {% elif unread_notifications.count > 4 %}
+                                                {% set left_movement = 28 %}
+                                            {% endif %}
+
+                                            <span id="bell-number" style="left: {{ left_movement }}px" class="badge rounded-pill">{{ a }}</span>
+                                        </i>
+                                        {% if item.marquee %}
+                                            <marquee direction="left" scrollamount="4"><span
+                                                    class="link_name">{{ item.name }}</span></marquee>
+                                        {% else %}
+                                            <span class="link_name">{{ item.name }}</span>
+                                        {% endif %}
+                                    </a>
+                                    <ul class="sub-menu blank">
+                                        <li><a class="link_name" {% if item.endpoint != '#' %}
+                                               href="{{ url_for(item.endpoint) }}" {% endif %}>{{ item.name }}</a></li>
+                                    </ul>
                                 {% else %}
-                                    <span class="link_name">{{ item.name }}</span>
+                                    <a {% if item.endpoint != '#' %} href="{{ url_for(item.endpoint) }}" {% endif %}>
+                                        <i class="{{ item.icon }}"></i>
+                                        {% if item.marquee %}
+                                            <marquee direction="left" scrollamount="4"><span
+                                                    class="link_name">{{ item.name }}</span></marquee>
+                                        {% else %}
+                                            <span class="link_name">{{ item.name }}</span>
+                                        {% endif %}
+                                    </a>
+                                    <ul class="sub-menu blank">
+                                        <li><a class="link_name" {% if item.endpoint != '#' %}
+                                               href="{{ url_for(item.endpoint) }}" {% endif %}>{{ item.name }}</a></li>
+                                    </ul>
                                 {% endif %}
-                            </a>
-                            <ul class="sub-menu blank">
-                                <li><a class="link_name" {% if item.endpoint != '#' %}
-                                       href="{{ url_for(item.endpoint) }}" {% endif %}>{{ item.name }}</a></li>
-                            </ul>
+                            {% else %}
+                                <a {% if item.endpoint != '#' %} href="{{ url_for(item.endpoint) }}" {% endif %}>
+                                    <i class="{{ item.icon }}"></i>
+                                    {% if item.marquee %}
+                                        <marquee direction="left" scrollamount="4"><span
+                                                class="link_name">{{ item.name }}</span></marquee>
+                                    {% else %}
+                                        <span class="link_name">{{ item.name }}</span>
+                                    {% endif %}
+                                </a>
+                                <ul class="sub-menu blank">
+                                    <li><a class="link_name" {% if item.endpoint != '#' %}
+                                           href="{{ url_for(item.endpoint) }}" {% endif %}>{{ item.name }}</a></li>
+                                </ul>
+                            {% endif %}
                         </li>
                     {% endif %}
                 {% endif %}

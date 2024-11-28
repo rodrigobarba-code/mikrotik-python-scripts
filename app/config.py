@@ -22,6 +22,13 @@ class Sidebar:
     # Sidebar menu items
     menu_items = [
         {
+            'name': 'Notifications',  # Name of the menu item
+            'icon': 'bx bx-bell bx-sm icon',  # Icon of the menu item
+            'endpoint': 'notifications.notifications',  # Endpoint of the menu item
+            'privileges': ['admin', 'employee'],  # Admin menu item
+            'submenu': None  # Submenu of the menu item
+        },
+        {
             'name': 'Dashboard',  # Name of the menu item
             'icon': 'bx bx-tachometer bx-sm icon',  # Icon of the menu item
             'endpoint': 'dashboard.dashboard',  # Endpoint of the menu item

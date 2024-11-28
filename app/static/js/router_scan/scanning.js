@@ -1,5 +1,7 @@
 let progress = 0;
 const progressBar = document.getElementById('progress-bar');
+const titleText = document.getElementById('title-text');
+const bodyText = document.getElementById('body-text');
 const statusText = document.getElementById('status-text');
 
 const toggleButton = document.getElementById('toggleButton');
@@ -10,10 +12,10 @@ toggleButton.addEventListener('click', function() {
         audio.play().catch(function(error) {
             console.error('Error while playing audio:', error);
         });
-        toggleButton.textContent = 'Pause Music'; // Cambiar texto del botón
+        toggleButton.textContent = 'Pause Music';
     } else {
         audio.pause();
-        toggleButton.textContent = 'Play Music'; // Cambiar texto del botón
+        toggleButton.textContent = 'Play Music';
     }
 });
 
@@ -39,6 +41,27 @@ function updateProgressBar(text, percentage) {
 
 socket.on('scan_status', function(data) {
     updateProgressBar(data.scan_status, data.percentage);
+});
+
+socket.on('scan_error', function(data) {
+    progressBar.style.width = `0`;
+    progressBar.innerText = ``;
+
+    statusText.innerText = `Status: ${data.code_error}`;
+
+    titleText.innerText = data.title_error;
+    bodyText.innerText = data.body_error;
+
+    audio.pause();
+
+    setInterval(function() {
+        socket.emit('error_on_scan');
+    }, 5000);
+});
+
+
+socket.on('error', function(data) {
+    window.location.href = data.url;
 });
 
 socket.on('scan_complete', function(_) {

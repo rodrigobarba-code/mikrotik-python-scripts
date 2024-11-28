@@ -16,6 +16,7 @@ from app.blueprints.profile import profile_bp
 from app.blueprints.router_scan import scan_bp
 from app.blueprints.settings import settings_bp
 from app.blueprints.dashboard import dashboard_bp
+from app.blueprints.notifications import notifications_bp
 from app.blueprints.ip_management import ip_management_bp
 # Importing Blueprints
 
@@ -37,6 +38,7 @@ def create_app():
     app.register_blueprint(scan_bp, url_prefix='/router/scan')  # Registering the router_scan blueprint
     app.register_blueprint(settings_bp, url_prefix='/settings')  # Registering the settings blueprint
     app.register_blueprint(dashboard_bp, url_prefix='/dashboard')  # Registering the dashboard blueprint
+    app.register_blueprint(notifications_bp, url_prefix='/notifications')  # Registering the notifications blueprint
     app.register_blueprint(ip_management_bp, url_prefix='/ip/management')  # Registering the ip_management blueprint
     # Registering the blueprints
 
