@@ -46,25 +46,114 @@ document.addEventListener("DOMContentLoaded", function () {
     const allNotifications = Array.from(document.querySelectorAll('#notifications-container .notification'));
     const container = document.getElementById('notifications-container');
 
-    $('#pagination-container').pagination({
-        dataSource: allNotifications,
-        pageSize: 5,
-        callback: function (data, pagination) {
-            container.innerHTML = '';
-            data.forEach(notification => {
-                container.appendChild(notification);
-            });
-        }
+    if (allNotifications.length !== 0) {
+        $('#pagination-container').pagination({
+            dataSource: allNotifications,
+            pageSize: 5,
+            showPageNumbers: false,
+            showNavigator: true,
+            callback: function (data, pagination) {
+                container.innerHTML = '';
+                data.forEach(notification => {
+                    container.appendChild(notification);
+                })
+            }
+        });
+    }
+});
+
+$(document).ready(function () {
+    if ($('.pagination-container .paginationjs').length > 0) {
+        $('#show-archived').css({
+            'margin-left': '1rem'
+        });
+    }
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+        new bootstrap.Tooltip(tooltipTriggerEl);
     });
 });
 
 function archiveNotification(notificationId) {
+    Swal.fire({
+        title: 'Archiving Notification',
+        html: 'Please wait while we archive the notification...',
+        showCancelButton: false,
+        showConfirmButton: false,
+        allowOutsideClick: false,
+        willOpen: () => {
+            Swal.showLoading();
+        }
+    });
     fetch(`/notifications/archive/${notificationId}`, {
         method: 'POST',
     })
         .then(response => {
             if (response.ok) {
-                return response.json();
+                Swal.fire({
+                    title: 'Notification Archived',
+                    icon: 'success',
+                    showCancelButton: false,
+                    showConfirmButton: false
+                });
+                window.location.reload();
+            }
+        });
+}
+
+function restoreNotification(notificationId) {
+    Swal.fire({
+        title: 'Restoring Notification',
+        html: 'Please wait while we restore the notification...',
+        showCancelButton: false,
+        showConfirmButton: false,
+        allowOutsideClick: false,
+        willOpen: () => {
+            Swal.showLoading();
+        }
+    });
+    fetch(`/notifications/restore/${notificationId}`, {
+        method: 'POST',
+    })
+        .then(response => {
+            if (response.ok) {
+                Swal.fire({
+                    title: 'Notification Restored',
+                    icon: 'success',
+                    showCancelButton: false,
+                    showConfirmButton: false
+                });
+                window.location.reload();
+            }
+        });
+}
+
+function deleteNotification(notificationId) {
+    Swal.fire({
+        title: 'Deleting Notification',
+        html: 'Please wait while we delete the notification...',
+        allowOutsideClick: false,
+        showCancelButton: false,
+        showConfirmButton: false,
+        willOpen: () => {
+            Swal.showLoading();
+        }
+    });
+    fetch(`/notifications/delete/${notificationId}`, {
+        method: 'POST',
+    })
+        .then(response => {
+            if (response.ok) {
+                Swal.fire({
+                    title: 'Notification Deleted',
+                    icon: 'success',
+                    showCancelButton: false,
+                    showConfirmButton: false
+                });
+                window.location.reload();
             }
         });
 }

@@ -49,19 +49,101 @@ async def get_notifications(
             'backend_status': 400
         }
 
-@notifications_router.put('/notifications/{notification_id}')
-async def archive_notification(
-        notification_id: int,
+
+@notifications_router.get('/notifications/unarchived')
+async def get_unarchived_notifications(
+        user_id: int,
         metadata: Request,
         token: dict = Depends(verify_jwt)
 ):
     try:
-        request = ThreadingManager().run_thread(Notification.archive_notification, 'w', notification_id)
-        if request:
+        if notifications_functions.verify_user_existence(user_id):
+            request = ThreadingManager().run_thread(Notification.get_unarchived_notifications, 'r', user_id)
+            notifications = [
+                {
+                    'id': notification.notification_id,
+                    'title': notification.notification_title,
+                    'body': notification.notification_body,
+                    'type': notification.notification_type,
+                    'date': notification.notification_datetime,
+                    'is_archived': notification.is_archived
+                } for notification in request
+            ]
+            notifications_functions.create_transaction_log(
+                action="GET",
+                table="notifications",
+                user_id=int(user_id),
+                description="Unarchived notifications retrieved successfully",
+                public=str(str(metadata.client.host) + ':' + str(metadata.client.port))
+            )
+            return {
+                'message': "Unarchived notifications retrieved successfully",
+                'notifications': notifications,
+                'backend_status': 200
+            }
+        else:
+            raise Exception("User not registered in the system")
+    except Exception as e:
+        return {
+            'message': f"Failed to retrieve unarchived notifications: {str(e)}",
+            'backend_status': 400
+        }
+
+
+@notifications_router.get('/notifications/archived')
+async def get_archived_notifications(
+        user_id: int,
+        metadata: Request,
+        token: dict = Depends(verify_jwt)
+):
+    try:
+        if notifications_functions.verify_user_existence(user_id):
+            request = ThreadingManager().run_thread(Notification.get_archived_notifications, 'r', user_id)
+            notifications = [
+                {
+                    'id': notification.notification_id,
+                    'title': notification.notification_title,
+                    'body': notification.notification_body,
+                    'type': notification.notification_type,
+                    'date': notification.notification_datetime,
+                    'is_archived': notification.is_archived
+                } for notification in request
+            ]
+            notifications_functions.create_transaction_log(
+                action="GET",
+                table="notifications",
+                user_id=int(user_id),
+                description="Archived notifications retrieved successfully",
+                public=str(str(metadata.client.host) + ':' + str(metadata.client.port))
+            )
+            return {
+                'message': "Archived notifications retrieved successfully",
+                'notifications': notifications,
+                'backend_status': 200
+            }
+        else:
+            raise Exception("User not registered in the system")
+    except Exception as e:
+        return {
+            'message': f"Failed to retrieve archived notifications: {str(e)}",
+            'backend_status': 400
+        }
+
+
+@notifications_router.put('/notification/{notification_id}')
+async def archive_notification(
+        notification_id: int,
+        user_id: int,
+        metadata: Request,
+        token: dict = Depends(verify_jwt)
+):
+    try:
+        if notifications_functions.verify_user_existence(user_id):
+            ThreadingManager().run_thread(Notification.archive_notification, 'w', notification_id)
             notifications_functions.create_transaction_log(
                 action="PUT",
                 table="notifications",
-                user_id=int(token.get('user_id')),
+                user_id=int(user_id),
                 description="Notification archived successfully",
                 public=str(str(metadata.client.host) + ':' + str(metadata.client.port))
             )
@@ -70,16 +152,76 @@ async def archive_notification(
                 'backend_status': 200
             }
         else:
-            raise Exception("Failed to archive notification")
+            raise Exception("User not registered in the system")
     except Exception as e:
         return {
             'message': f"Failed to archive notification: {str(e)}",
             'backend_status': 400
         }
 
+
+@notifications_router.put('/notification/{notification_id}/restore')
+async def restore_notification(
+        notification_id: int,
+        user_id: int,
+        metadata: Request,
+        token: dict = Depends(verify_jwt)
+):
+    try:
+        if notifications_functions.verify_user_existence(user_id):
+            ThreadingManager().run_thread(Notification.unarchive_notification, 'w', notification_id)
+            notifications_functions.create_transaction_log(
+                action="PUT",
+                table="notifications",
+                user_id=int(user_id),
+                description="Notification unarchived successfully",
+                public=str(str(metadata.client.host) + ':' + str(metadata.client.port))
+            )
+            return {
+                'message': "Notification unarchived successfully",
+                'backend_status': 200
+            }
+        else:
+            raise Exception("User not registered in the system")
+    except Exception as e:
+        return {
+            'message': f"Failed to unarchive notification: {str(e)}",
+            'backend_status': 400
+        }
+
+
+@notifications_router.delete('/notification/{notification_id}')
+async def delete_notification(
+        notification_id: int,
+        user_id: int,
+        metadata: Request,
+        token: dict = Depends(verify_jwt)
+):
+    try:
+        if notifications_functions.verify_user_existence(user_id):
+            ThreadingManager().run_thread(Notification.delete_notification, 'w', notification_id)
+            notifications_functions.create_transaction_log(
+                action="DELETE",
+                table="notifications",
+                user_id=int(user_id),
+                description="Notification deleted successfully",
+                public=str(str(metadata.client.host) + ':' + str(metadata.client.port))
+            )
+            return {
+                'message': "Notification deleted successfully",
+                'backend_status': 200
+            }
+        else:
+            raise Exception("User not registered in the system")
+    except Exception as e:
+        return {
+            'message': f"Failed to delete notification: {str(e)}",
+            'backend_status': 400
+        }
+
+
 @notifications_router.get('/notifications/unread')
 async def get_unread_notifications(
-        metadata: Request,
         token: dict = Depends(verify_jwt)
 ):
     try:

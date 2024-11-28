@@ -9,7 +9,7 @@ p {
 .jumbotron-notifications {
     color: #fff;
     border-radius: 30px;
-    background-image: linear-gradient(120deg, #e0c3fc 0%, #8ec5fc 100%);
+    background: linear-gradient(90deg, #1CB5E0 0%, #000851 100%);
 }
 
 #notification-bell {
@@ -69,15 +69,17 @@ p {
 }
 
 #show-archived {
-    height: max-content;
+    display: flex;
+    align-items: center;
     background: rgba(255, 255, 255, 0.2);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
     border: 1px solid rgba(255, 255, 255, 0.2);
     backdrop-filter: blur(10px);
     border-radius: 10px;
     padding: 5px 10px 5px 10px;
+    height: 53.6px;
     color: white;
-    transition: all 0.2s ease-in-out;
+    transition: scale 0.2s ease-in-out;
 }
 
 #show-archived:hover {
@@ -194,4 +196,94 @@ p {
     color: var(--text-color) !important;
     font-weight: bold;
     border: none;
+}
+
+.paginationjs-prev a,
+.paginationjs-next a {
+    font-size: 25px !important;
+}
+
+.paginationjs-nav {
+    margin-right: 10px;
+}
+
+body:not(.dark) .jumbotron-notifications {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.jumbotron-notifications.archived {
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+    border-radius: 30px;
+    color: var(--text-color) !important;
+}
+
+.notification {
+    overflow: hidden;
+}
+
+.box-actions {
+    transition: var(--tran-03);
+}
+
+.notification:hover .box-actions {
+    transform: translateX(0);
+}
+
+.box-actions {
+    transform: translateX(70px);
+}
+
+.box-actions button > i {
+    font-size: 20px;
+}
+
+.box-actions.archived .btn-custom {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 35px !important;
+    height: 35px !important;
+}
+
+.box-actions.archived button > i {
+    font-size: 15px;
+}
+
+.options {
+    display: flex;
+    justify-content: start;
+    align-items: center;
+}
+
+/* Phone */
+@media (max-width: 576px) {
+    .notifications-title {
+        text-align: center;
+    }
+
+    .notification-title {
+        margin-top: 10px;
+    }
+
+    .box-actions {
+        transform: translateX(0);
+    }
+
+    .options {
+        justify-content: center;
+        align-items: end;
+    }
+
+    #show-archived {
+        margin-top: 10px;
+    }
+}
+
+/* Tablet */
+@media (min-width: 770px) and (max-width: 1024px) {
+    .box-actions {
+        transform: translateX(0);
+    }
 }

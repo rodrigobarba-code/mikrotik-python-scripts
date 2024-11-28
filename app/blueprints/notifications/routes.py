@@ -1,20 +1,21 @@
 # Importing Required Libraries
 import requests
 from . import notifications_bp
-from entities.notification import NotificationEntity
 from app.functions import get_verified_jwt_header
+from entities.notification import NotificationEntity
+from flask import render_template, flash, jsonify, session
 from app.decorators import RequirementsDecorators as restriction
-from flask import render_template, redirect, url_for, flash, request, jsonify, session
 
-# Get notifications
-def get_notifications() -> list:
+
+# Get unarchived notifications
+def get_unarchived_notifications() -> list:
     """
     Get notifications from the API
     :return: list
     """
     try:
         response = requests.get(
-            'http://localhost:8080/api/private/notifications/',
+            'http://localhost:8080/api/private/notifications/unarchived/',
             headers=get_verified_jwt_header(),
             params={'user_id': session.get('user_id')}
         )
@@ -38,34 +39,62 @@ def get_notifications() -> list:
         print(f'Error: {str(e)}')
         return []
 
+
+# Get archived notifications
+def get_archived_notifications() -> list:
+    """
+    Get notifications from the API
+    :return: list
+    """
+    try:
+        response = requests.get(
+            'http://localhost:8080/api/private/notifications/archived/',
+            headers=get_verified_jwt_header(),
+            params={'user_id': session.get('user_id')}
+        )
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                return [
+                    NotificationEntity(
+                        notification_id=notification.get('id'),
+                        notification_title=notification.get('title'),
+                        notification_body=notification.get('body'),
+                        notification_type=notification.get('type'),
+                        notification_datetime=notification.get('date'),
+                        is_archived=notification.get('is_archived')
+                    ) for notification in response.json().get('notifications')
+                ]
+            else:
+                raise Exception(response.json().get('message'))
+        elif response.status_code == 500:
+            raise Exception('Failed to retrieve regions')
+    except Exception as e:
+        print(f'Error: {str(e)}')
+        return []
+
+
 # Dashboard Main Route
-@notifications_bp.route('/all', methods=['GET'])
+@notifications_bp.route('/', methods=['GET'])
 @restriction.login_required  # Login Required Decorator
 @restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
 def notifications():
-    notifications = [
-        i
-        for i in get_notifications()
-        if not i.is_archived
-    ]
     return render_template(
         'notifications/notifications.html',
-        notification_list=notifications
+        notification_list=get_unarchived_notifications(),
+        archived=False
     )
 
-@notifications_bp.route('/archive', methods=['GET'])
+
+@notifications_bp.route('/archived', methods=['GET'])
 @restriction.login_required  # Login Required Decorator
 @restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
 def archived_notifications():
-    archive_notifications = [
-        i
-        for i in get_notifications()
-        if i.is_archived
-    ]
     return render_template(
         'notifications/notifications.html',
-        notification_list=archive_notifications
+        notification_list=get_archived_notifications(),
+        archived=True
     )
+
 
 @notifications_bp.route('/archive/<int:notification_id>', methods=['POST'])
 @restriction.login_required  # Login Required Decorator
@@ -73,18 +102,64 @@ def archived_notifications():
 def archive_notification(notification_id: int):
     try:
         response = requests.put(
-            f'http://localhost:8080/api/private/notifications/{notification_id}',
+            f'http://localhost:8080/api/private/notification/{notification_id}',
             headers=get_verified_jwt_header(),
             params={'user_id': session.get('user_id')}
         )
         if response.status_code == 200:
             if response.json().get('backend_status') == 200:
                 flash('Notification archived successfully', 'success')
-                return jsonify({'status': 'success'})
+                return jsonify({'status': 'success'}), 200
             else:
                 raise Exception(response.json().get('message'))
         elif response.status_code == 500:
             raise Exception('Failed to archive notification')
     except Exception as e:
         flash(f'Error: {str(e)}', 'danger')
-        return jsonify({'status': 'error'})
+        return jsonify({'status': 'error'}), 500
+
+
+@notifications_bp.route('/restore/<int:notification_id>', methods=['POST'])
+@restriction.login_required  # Login Required Decorator
+@restriction.redirect_to_loading_screen  # Redirect to Loading
+def restore_notification(notification_id: int):
+    try:
+        response = requests.put(
+            f'http://localhost:8080/api/private/notification/{notification_id}/restore/',
+            headers=get_verified_jwt_header(),
+            params={'user_id': session.get('user_id')}
+        )
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                flash('Notification unarchived successfully', 'success')
+                return jsonify({'status': 'success'}), 200
+            else:
+                raise Exception(response.json().get('message'))
+        elif response.status_code == 500:
+            raise Exception('Failed to unarchive notification')
+    except Exception as e:
+        flash(f'Error: {str(e)}', 'danger')
+        return jsonify({'status': 'error'}), 500
+
+
+@notifications_bp.route('/delete/<int:notification_id>', methods=['POST'])
+@restriction.login_required  # Login Required Decorator
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
+def delete_notification(notification_id: int):
+    try:
+        response = requests.delete(
+            f'http://localhost:8080/api/private/notification/{notification_id}',
+            headers=get_verified_jwt_header(),
+            params={'user_id': session.get('user_id')}
+        )
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                flash('Notification deleted successfully', 'success')
+                return jsonify({'status': 'success'}), 200
+            else:
+                raise Exception(response.json().get('message'))
+        elif response.status_code == 500:
+            raise Exception('Failed to delete notification')
+    except Exception as e:
+        flash(f'Error: {str(e)}', 'danger')
+        return jsonify({'status': 'error'}), 500

@@ -1,10 +1,17 @@
 {% extends 'base.html' %}
 
-{% block title %} Notifications {% endblock %}
+{% block title %}
+    {% if archived %}
+        Archived Notifications
+    {% else %}
+        Notifications
+    {% endif %}
+{% endblock %}
 
 {% block head %}
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/notifications/styles.css') }}">
 {% endblock %}
+
 {% block scripts %}
     <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.9/dayjs.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.9/plugin/relativeTime.js"></script>
@@ -12,93 +19,157 @@
 {% endblock %}
 
 {% block content %}
-    <div class="container mx-auto">
-        <div class="container w-75 jumbotron-notifications">
+    <div class="container mx-auto mt-4">
+        <div class="container w-75 jumbotron-notifications {{ 'archived' if archived else '' }}">
             <div class="row">
                 <div class="d-flex flex-column col-12 col-md-12 col-lg-12 p-4 justify-content-center align-items-center">
-                    <h2 class="notifications-title"><b>Notifications</b> Center</h2>
-                    <hr class="notifications-hr" style="width: 75%; color: #f8f9fa; height: 2px;">
-                    <p class="notifications-subtitle">Here you can view the notifications of the system.</p>
-                    <p class="notifications-subtitle">Also, you can archive the notifications that you have already
-                        read.</p>
+                    <h2 class="notifications-title">
+                        {% if archived %}
+                            <b>Archived</b> Notifications
+                        {% else %}
+                            <b>Notifications</b> Center
+                        {% endif %}
+                    </h2>
+                    <hr class="notifications-hr"
+                        style="width: 75%; color: {{ 'var(--text-color)' if archived else 'white' }}; height: 2px;">
+                    <p class="notifications-subtitle text-center w-75">
+                        {% if archived %}
+                            Here you can find all the archived notifications.
+                            Also, you can restore them by clicking on the 'Restore' button.
+                            Or you can delete them by clicking on the 'Delete' button.
+                        {% else %}
+                            Here you can find all the notifications.
+                            Also, you can archive them by clicking on the 'Archive' button.
+                        {% endif %}
+                    </p>
                 </div>
             </div>
         </div>
 
         <div class="container w-75 mt-3">
             <div class="row">
-                <div class="d-flex flex-row col-12 col-md-12 col-lg-12 m-2 justify-content-start align-items-center">
-                    <div id="pagination-container" class="pagination-container me-3 text"></div>
-                    <button type="button" id="show-archived" class="btn btn-md me-3 text"
-                            data-bs-target="#delete-all-modal">
-                        Show Archived
-                    </button>
+                <div class="options d-flex flex-column flex-md-row flex-lg-row col-12 col-md-12 col-lg-12">
+                    <div id="pagination-container" class="pagination-container text"></div>
+                    <a type="button" id="show-archived" class="btn btn-md text"
+                       data-bs-target="#delete-all-modal" href="
+                            {% if archived %}
+                                {{ url_for('notifications.notifications') }}
+                            {% else %}
+                                {{ url_for('notifications.archived_notifications') }}
+                            {% endif %}">
+                        {% if archived %}
+                            Show Notifications
+                        {% else %}
+                            Show Archived
+                        {% endif %}
+                    </a>
                 </div>
             </div>
         </div>
 
-        <div id="notifications-container" class="container w-75 notifications-container mt-4">
-            {% if notification_list %}
+        <div id="notifications-container" class="container w-75 notifications-container mt-3">
+            {% if notification_list != [] %}
                 {% for notification in notification_list %}
-                    {% if notification.is_archived == 0 %}
-                        {% set c = '' %}
-                        {% if notification.notification_type == 'error' %}
-                            {% set c = '#f50b0b' %}
-                        {% elif notification.notification_type == 'warning' %}
-                            {% set c = '#f5a50b' %}
-                        {% elif notification.notification_type == 'success' %}
-                            {% set c = '#4df50b' %}
-                        {% else %}
-                            {% set c = '#3b82f6' %}
-                        {% endif %}
-                        <div
-                                class="notification d-flex flex-column flex-md-row flex-lg-row align-items-center p-3 mb-3">
-                            <div class="box-bell order-1 order-md-1 ms-0 ms-md-2 ms-lg-2 me-0 me-md-2 me-lg-2 mb-2 mb-md-0 mb-lg-0 flex-shrink-1">
+                    {% set c = '' %}
+                    {% if notification.notification_type == 'error' %}
+                        {% set c = '#ff6e6e' %}
+                    {% elif notification.notification_type == 'warning' %}
+                        {% set c = '#f5bc4e' %}
+                    {% elif notification.notification_type == 'success' %}
+                        {% set c = '#7fd45f' %}
+                    {% else %}
+                        {% set c = '#3b82f6' %}
+                    {% endif %}
+                    <div
+                            class="notification d-flex flex-column flex-md-row flex-lg-row align-items-center p-3 mb-3">
+                        <div class="box-bell order-1 order-md-1 ms-0 ms-md-2 ms-lg-2 me-0 me-md-2 me-lg-2 mb-2 mb-md-0 mb-lg-0 flex-shrink-1">
 
-                                <i class="bell fa-duotone fa-solid fa-bell text" style="font-size: 40px"></i>
-                            </div>
-                            <div class="box-body order-2 order-md-2 flex-grow-1 ms-2">
-                                <h4 class="notification-title text">
-                                    {% if notification.notification_type == 'error' %}
-                                        <span class="badge rounded-pill" style="background-color: {{ c }}">Error</span>
-                                    {% elif notification.notification_type == 'warning' %}
-                                        <span class="badge rounded-pill"
-                                              style="background-color: {{ c }}">Warning</span>
-                                    {% elif notification.notification_type == 'success' %}
-                                        <span class="badge rounded-pill"
-                                              style="background-color: {{ c }}">Success</span>
-                                    {% else %}
-                                        <span class="badge rounded-pill"
-                                              style="background-color: {{ c }}">Information</span>
-                                    {% endif %}
-                                </h4>
-                                <p class="notification-content text">{{ notification.notification_title }}</p>
-                                <p class="notification-datetime text"
-                                   data-datetime="{{ notification.notification_datetime }}"></p>
-                            </div>
-                            <div class="box-actions mt-2 mt-md-0 mt-lg-0 order-3 order-md-3 d-flex flex-row flex-md-column flex-lg-column align-items-center flex-shrink-1">
-                                <!-- Button to show more details -->
-                                <button type="button"
-                                        class="btn btn-custom btn-md show-details-btn"
-                                        data-body="{{ notification.notification_body }}">
-                                    <i style="color: #3b82f6; font-size: 20px"
-                                       class="fa-duotone fa-solid fa-file-magnifying-glass"></i>
-                                </button>
-                                <!-- Button to archive the notification -->
+                            <i class="bell fa-duotone fa-solid fa-bell text" style="font-size: 40px"></i>
+                        </div>
+                        <div class="box-body order-2 order-md-2 flex-grow-1 ms-2">
+                            <h4 class="notification-title text">
+                                {% if notification.notification_type == 'error' %}
+                                    <span class="badge rounded-pill" style="background-color: {{ c }}">Error</span>
+                                {% elif notification.notification_type == 'warning' %}
+                                    <span class="badge rounded-pill"
+                                          style="background-color: {{ c }}">Warning</span>
+                                {% elif notification.notification_type == 'success' %}
+                                    <span class="badge rounded-pill"
+                                          style="background-color: {{ c }}">Success</span>
+                                {% else %}
+                                    <span class="badge rounded-pill"
+                                          style="background-color: {{ c }}">Information</span>
+                                {% endif %}
+                            </h4>
+                            <p class="notification-content text">{{ notification.notification_title }}</p>
+                            <p class="notification-datetime text"
+                               data-datetime="{{ notification.notification_datetime }}"></p>
+                        </div>
+                        <div class="box-actions mt-2 mt-md-0 mt-lg-0 order-3 order-md-3 d-flex flex-row flex-md-column flex-lg-column align-items-center flex-shrink-1 {{ 'archived' if archived else '' }}">
+                            <!-- Button to show more details -->
+                            <button type="button"
+                                    class="btn btn-custom btn-md show-details-btn"
+                                    data-body="{{ notification.notification_body }}"
+                                    data-bs-toggle="tooltip"
+                                    data-bs-placement="top"
+                                    title="Show Details"
+                            >
+                                <i style="color: #3b82f6;"
+                                   class="fa-duotone fa-solid fa-file-magnifying-glass"></i>
+                            </button>
+                            <!-- Button to archive the notification -->
+                            {% if not archived %}
                                 <button type="button" class="btn btn-custom btn-md" id="archive-notification"
-                                        onclick="archiveNotification({{ notification.notification_id }})">
-                                    <i style="color: #75cc64; font-size: 20px"
+                                        onclick="archiveNotification({{ notification.notification_id }})"
+                                        data-bs-toggle="tooltip"
+                                        data-bs-placement="top"
+                                        title="Archive Notification"
+                                >
+                                    <i style="color: #75cc64;"
                                        class="fa-duotone fa-solid fa-box-archive"></i>
                                 </button>
-                            </div>
+                            {% else %}
+                                <!-- Button to restore the notification -->
+                                <button type="button" class="btn btn-custom btn-md" id="restore-notification"
+                                        onclick="restoreNotification({{ notification.notification_id }})"
+                                        data-bs-toggle="tooltip"
+                                        data-bs-placement="top"
+                                        title="Restore Notification"
+                                >
+                                <i style="color: #75cc64;" class="fa-duotone fa-solid fa-inbox"></i>
+                                <!-- Button to delete the notification -->
+                                <button type="button" class="btn btn-custom btn-md" id="delete-notification"
+                                        onclick="deleteNotification({{ notification.notification_id }})"
+                                        data-bs-toggle="tooltip"
+                                        data-bs-placement="top"
+                                        title="Delete Notification"
+                                >
+                                    <i style="color: #f50b0b;"
+                                       class="fa-duotone fa-solid fa-trash"></i>
+                                </button>
+                            {% endif %}
                         </div>
-                    {% endif %}
+                    </div>
                 {% endfor %}
             {% else %}
                 <div style="color: white" class="d-flex flex-column align-items-center pt-4">
-                    <i class="fa-duotone fa-solid fa-bell-slash mb-2" style="color: #f8f9fa; font-size: 50px"></i>
-                    <h2 class="notifications-title">No notifications found</h2>
-                    <p class="notifications-subtitle">There are no notifications to show.</p>
+                    <i class="fa-duotone fa-solid fa-bell-slash mb-2"
+                       style="color: var(--text-color); font-size: 50px"></i>
+                    <h2 class="notifications-title text-center" style="color: var(--text-color)">
+                        {% if archived %}
+                            No Archived Notifications
+                        {% else %}
+                            Well Done! You have no notifications.
+                        {% endif %}
+                    </h2>
+                    <p class="notifications-subtitle text-center" style="color: var(--text-color)">
+                        {% if archived %}
+                            There are no archived notifications.
+                        {% else %}
+                            You have no notifications, so you can relax.
+                            Also, you can check the notifications later.
+                        {% endif %}
+                    </p>
                 </div>
             {% endif %}
         </div>
