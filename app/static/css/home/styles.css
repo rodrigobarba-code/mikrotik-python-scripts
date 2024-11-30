@@ -11,12 +11,15 @@ h1, h2 {
 @keyframes move-gradient {
     0% {
         background-position: 0% 50%;
+        rotate: 0deg;
     }
     50% {
         background-position: 100% 50%;
+        rotate: 180deg;
     }
     100% {
         background-position: 0% 50%;
+        rotate: 360deg;
     }
 }
 
@@ -27,7 +30,7 @@ h1, h2 {
     background-clip: text;
     -webkit-text-fill-color: transparent;
 
-    animation: move-gradient 2s infinite linear;
+    animation: move-gradient 5s infinite linear;
 }
 
 #welcome-text {
@@ -60,22 +63,8 @@ h1, h2 {
     width: 97%;
     position: relative;
     height: 20.5rem;
+    z-index: 2;
     background-color: var(--sidebar-color);
-}
-
-.box::before, .box::after {
-    content: '';
-    position: absolute;
-    top: -1px;
-    left: -1px;
-    background: radial-gradient(circle farthest-corner at 10% 20%, rgba(2, 37, 78, 1) 0%, rgba(4, 56, 126, 1) 19.7%, rgba(85, 245, 221, 1) 100.2%);
-    background-size: 400%;
-    width: calc(100% + 1px);
-    height: calc(100% + 1px);
-    border-radius: 1rem;
-    z-index: -1;
-
-    animation: glowing 10s linear infinite;
 }
 
 /* Rotate Glowing Animation */
@@ -124,11 +113,13 @@ h1, h2 {
     height: 6rem;
     background-color: var(--nav-items);
     border-radius: 100%;
-    transition: var(--tran-05);
+    transition: transform 0.5s ease, box-shadow 0.5s ease;
 }
 
 .shortcut-icon:hover {
-    scale: 1.1;
+    transform: scale(1.1);
+    box-shadow: 0 0 10px 1px rgb(12, 70, 143),
+    0 0 18px 1px rgb(38, 184, 161);
 }
 
 .shortcut-icon i {
@@ -296,6 +287,8 @@ h1, h2 {
 @media (max-width: 768px) {
     .app-container {
         height: 21rem;
+        width: 94%;
+        margin-left: 8px;
     }
 
     .applications {
@@ -313,6 +306,11 @@ h1, h2 {
 
     .application-text p {
         font-size: 1rem;
+    }
+
+    .changelog-outer-container {
+        margin-top: 1.5rem;
+        width: 94%;
     }
 }
 
@@ -338,11 +336,21 @@ h1, h2 {
     .application-text p {
         font-size: 1rem;
     }
+
+    .changelog-outer-container {
+        margin-top: 0.1rem;
+    }
 }
 
 /* Carousel Container */
 
 /* Changelog Container */
+
+.changelog-outer-container {
+    margin-top: 1.5rem;
+    background-color: var(--sidebar-color);
+    border-radius: 1rem;
+}
 
 .changelog-container {
     color: var(--text-color);
@@ -353,10 +361,13 @@ h1, h2 {
     overflow-y: scroll;
 }
 
+.changelog {
+    overflow-y: hidden;
+}
+
 .timeline {
     position: relative;
     padding: 20px 0;
-    margin: 20px 0;
 }
 
 .timeline::before {

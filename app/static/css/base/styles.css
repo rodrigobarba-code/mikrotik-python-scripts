@@ -143,3 +143,45 @@
     background-color: var(--hover-color);
     color: var(--text-color);
 }
+
+.delete-button-action-confirm {
+    color: white;
+    border-radius: 20px;
+    transition: var(--tran-05);
+    background-color: var(--accent);
+}
+
+.delete-button-action-confirm:hover {
+    transform: scale(1.1);
+    background-color: var(--primary-color);
+}
+
+.delete-button-action-cancel {
+    color: white;
+    border-radius: 20px;
+    background-color: #bb4430;
+    transition: var(--tran-05);
+}
+
+.delete-button-action-cancel:hover {
+    transform: scale(1.1);
+    background-color: #a33b27;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.swal2-warning {
+    border-color: #bb4430 !important;
+    color: #bb4430 !important;
+    animation: pulse 1s infinite !important;
+}

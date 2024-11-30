@@ -130,7 +130,7 @@
                                     data-bs-toggle="modal"
                                     data-bs-target="#delete-modal"
                                     data-id="{{ tag.ip_group_tag_id }}"
-                                    data-type="region"
+                                    data-type="tag"
                                     data-url="{{ url_for('ip_management.delete_ip_group_tag', tag_id=tag.ip_group_tag_id) }}"
                                     data-name="{{ tag.ip_group_tag_name }}"
                             ><i class="fa-solid fa-trash"></i></button>
@@ -144,7 +144,6 @@
     <!-- Tags Table -->
 
     <!-- Delete Modals -->
-    <div class="delete-modal-container">{{ delete_modal() }}</div>
     <div class="delete-select-modal-container">{{ delete_select_modal() }}</div>
     <div class="delete-all-modal-container">{{ delete_all_modal() }}</div>
     <!-- Delete Modals -->

@@ -11,7 +11,7 @@ $(document).ready(function () {
     // Assign title to top link
     $('#top-link').text(title);  // Assign the title to the top link
 
-    // Assign Data Table to regions table
+    // Assign Data Table to table
     $("#datatable-object").DataTable({
         'info': true,  // Enable pagination information
         'paging': true,  // Enable pagination
@@ -21,25 +21,41 @@ $(document).ready(function () {
         'responsive': true,  // Enable responsive
         'lengthChange': true,  // Enable number of items to display
     });
-    // Assign Data Table to regions table
+    // Assign Data Table to table
 
-    $('#delete-modal').on('show.bs.modal', function (event) {
-        // Extract info from data-* attributes
-        var button = $(event.relatedTarget);  // Button that triggered the modal
-        // Extract info from data-* attributes
-        var url = button.data('url');  // Extract info from data-url attribute
-        var id = button.data('id');  // Extract info from data-id attribute
-        var name = button.data('name');  // Extract info from data-name attribute
-        var type = button.data('type');  // Extract info from data-type attribute
-        // Extract info from data-* attributes
+    $('#datatable-object').on('click', '[data-bs-target]', function () {
+        let id = $(this).data('id');
+        let url = $(this).data('url');
+        let name = $(this).data('name');
+        let type = $(this).data('type');
 
-        // Update the modal's content
-        var modal = $(this);  // Modal that triggered the event
-        modal.find('#modal-type').text(type);  // Update the modal's type
-        modal.find('#modal-name').text(name);  // Update the modal's name
-        modal.find('#modal-id').text(id);  // Update the modal's id
-        modal.find('#modal-delete-url').attr('href', url);  // Update the modal's delete url
-        // Update the modal's content
+        Swal.fire({
+            title: 'Are you sure you want to delete this ' + type + ' called ' + name + '?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Confirm',
+            cancelButtonText: 'Cancel',
+            customClass: {
+                confirmButton: 'delete-button-action-confirm',
+                cancelButton: 'delete-button-action-cancel',
+                icon: 'delete-button-action-icon',
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Deleting ' + name,
+                    icon: 'info',
+                    text: 'Please wait while we delete ' + name + '.',
+                    showCancelButton: false,
+                    showConfirmButton: false,
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();  // Show the loading icon
+                    },
+                });
+                window.location.href = url;
+            }
+        });
     });
 });
 
