@@ -2,5 +2,462 @@
 
 {% block title %} Dashboard {% endblock %}
 
+{% block head %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/dashboard/styles.css') }}">
+{% endblock %}
+
+{% block scripts %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const chartData = {{ dashboard_data|tojson }};
+            const publicIpsData = {{ public_ips_data|tojson }};
+            const segmentsData = {{ segments_data|tojson }};
+
+            const ctxPrivate = document.getElementById('myChart').getContext('2d');
+            const ctxPublic = document.getElementById('publicIpChart').getContext('2d');
+            const ctxSegments = document.getElementById('segmentsChart').getContext('2d');
+
+            let currentPrivateChart;
+            let currentPublicChart;
+            let currentSegmentsChart;
+
+            // Función para crear un degradado aleatorio
+            function createRandomGradient(ctx, width, height) {
+                const gradient = ctx.createLinearGradient(0, 0, width, 0);
+                const color1 = `hsl(${Math.random() * 360}, 70%, 75%)`; // Color de inicio
+                const color2 = `hsl(${Math.random() * 360}, 70%, 50%)`; // Color de fin
+
+                gradient.addColorStop(0, color1);
+                gradient.addColorStop(1, color2);
+
+                return gradient;
+            }
+
+
+            // Función para crear la gráfica de pastel para segmentos por sitio
+            function createSegmentsPieChart(ctx, segmentsData) {
+                // Preparación de datos de la gráfica
+                const labels = Object.keys(segmentsData).filter(site => site !== 'total');
+                const data = labels.map(site => segmentsData[site].quantity);
+                const backgroundGradients = labels.map((_, index) => createRandomGradient(ctx, 200, 200));
+
+                let segmentChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: data,
+                            backgroundColor: backgroundGradients,
+                            borderWidth: 0,
+                            hoverBorderColor: 'rgba(255, 255, 255, 0.5)',
+                            hoverBorderWidth: 2,
+                            borderRadius: 30,
+                            spacing: -120
+
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        cutout: '70%',
+                        plugins: {
+                            legend: {
+                                display: false,
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (tooltipItem) {
+                                        const value = tooltipItem.raw || 0;
+                                        const percentage = labels.map(site => segmentsData[site].percentage);
+                                        return `${value} segments (${percentage[tooltipItem.dataIndex].toFixed(2)}%)`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+
+                return segmentChart;
+            }
+
+            // Inicializar el gráfico de segmentos al cargar la página
+            currentSegmentsChart = createSegmentsPieChart(ctxSegments, segmentsData);
+
+            function createGradient(ctx, colorStart, colorEnd) {
+                const width = ctx.canvas.width;   // Ancho del canvas
+                const height = ctx.canvas.height; // Alto del canvas
+
+                const gradient = ctx.createLinearGradient(0, 0, width, height);
+                gradient.addColorStop(0, colorStart);
+                gradient.addColorStop(1, colorEnd);
+                return gradient;
+            }
+
+            // Función para actualizar el gráfico con gradientes
+            function createChart(ctx, assignedQuantity, availableQuantity, isPublic = false) {
+                const assignedGradient = createGradient(
+                    ctx,
+                    isPublic ? '#FF4500' : '#FF0000',
+                    isPublic ? '#FFAA00' : '#FFD700'
+                );
+                const availableGradient = createGradient(
+                    ctx,
+                    isPublic ? '#1E90FF' : '#00008B',
+                    isPublic ? '#87CEEB' : '#00BFFF'
+                );
+
+                let chart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Assigned', 'Available'],
+                        datasets: [{
+                            label: isPublic ? 'Public IPs' : 'Private IPs',
+                            data: [assignedQuantity, availableQuantity],
+                            backgroundColor: [assignedGradient, availableGradient],
+                            borderWidth: 0, // Sin borde al principio
+                            hoverBorderColor: 'rgba(255, 255, 255, 0.5)',
+                            hoverBorderWidth: 2,
+                            borderRadius: [30, 30], // Borde redondeado durante la animación
+                            spacing: -30 // Espaciado durante la animación
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        cutout: '70%',
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: {
+                                    font: {
+                                        size: 14,
+                                        weight: 'bold',
+                                    },
+                                    usePointStyle: true,
+                                    pointStyle: 'rectRounded'
+                                }
+                            }
+                        },
+                        animation: {
+                            onComplete: function () {
+                                // Verifica si no hay datos en asignado o disponible
+                                if (assignedQuantity === 0 || availableQuantity === 0) {
+                                    // Elimina el borderRadius y el spacing después de la animación si no hay datos
+                                    this.data.datasets[0].borderRadius = [0, 0]; // Sin borde redondeado
+                                    this.data.datasets[0].spacing = 0; // Sin espaciado
+                                    this.update(); // Actualiza el gráfico para reflejar el cambio
+                                }
+                            }
+                        }
+                    }
+                });
+
+                return chart;
+            }
+
+            // Función para inicializar o actualizar el gráfico privado
+            function updatePrivateChart(site, segment) {
+                const data = chartData[site];
+                const assigned = data.assigned.find(s => Object.keys(s)[0] === segment);
+                const available = data.available.find(s => Object.keys(s)[0] === segment);
+
+                const assignedQuantity = assigned ? Object.values(assigned)[0].quantity : 0;
+                const availableQuantity = available ? Object.values(available)[0].quantity : 0;
+
+                if (currentPrivateChart) currentPrivateChart.destroy();
+                currentPrivateChart = createChart(ctxPrivate, assignedQuantity, availableQuantity);
+            }
+
+            // Función para inicializar o actualizar el gráfico público
+            function updatePublicChart(site, segment) {
+                const data = publicIpsData[site];
+                const assigned = data.assigned.find(s => Object.keys(s)[0] === segment);
+                const available = data.available.find(s => Object.keys(s)[0] === segment);
+
+                const assignedQuantity = assigned ? Object.values(assigned)[0].quantity : 0;
+                const availableQuantity = available ? Object.values(available)[0].quantity : 0;
+
+                if (currentPublicChart) currentPublicChart.destroy();
+                currentPublicChart = createChart(ctxPublic, assignedQuantity, availableQuantity, true);
+            }
+
+            // Función para actualizar los filtros y gráficos
+            function updateFilters() {
+                const siteSelect = document.getElementById('siteFilter');
+                const segmentSelect = document.getElementById('segmentFilter');
+                const selectedSite = siteSelect.value;
+
+                segmentSelect.innerHTML = '';
+                if (chartData[selectedSite]) {
+                    chartData[selectedSite].assigned.forEach(segment => {
+                        const segmentKey = Object.keys(segment)[0];
+                        const option = document.createElement('option');
+                        option.value = segmentKey;
+                        option.textContent = segmentKey;
+                        segmentSelect.appendChild(option);
+                    });
+                }
+
+                updatePrivateChart(selectedSite, segmentSelect.value);
+            }
+
+            function updatePublicFilters() {
+                const siteSelect = document.getElementById('site-select');
+                const segmentSelect = document.getElementById('segment-select');
+                const selectedSite = siteSelect.value;
+
+                segmentSelect.innerHTML = '';
+                if (publicIpsData[selectedSite]) {
+                    publicIpsData[selectedSite].assigned.forEach(segment => {
+                        const segmentKey = Object.keys(segment)[0];
+                        const option = document.createElement('option');
+                        option.value = segmentKey;
+                        option.textContent = segmentKey;
+                        segmentSelect.appendChild(option);
+                    });
+                }
+
+                updatePublicChart(selectedSite, segmentSelect.value);
+            }
+
+            // Eventos para actualizar gráficos
+            document.getElementById('siteFilter').addEventListener('change', updateFilters);
+            document.getElementById('segmentFilter').addEventListener('change', function () {
+                const siteSelect = document.getElementById('siteFilter');
+                const segmentSelect = document.getElementById('segmentFilter');
+                updatePrivateChart(siteSelect.value, segmentSelect.value);
+            });
+
+            document.getElementById('site-select').addEventListener('change', updatePublicFilters);
+            document.getElementById('segment-select').addEventListener('change', function () {
+                const siteSelect = document.getElementById('site-select');
+                const segmentSelect = document.getElementById('segment-select');
+                updatePublicChart(siteSelect.value, segmentSelect.value);
+            });
+
+            // Inicializar los filtros al cargar la página
+            updateFilters();
+            updatePublicFilters();
+        });
+    </script>
+    <script>
+        $(document).ready(function () {
+            // Paginación principal
+            $('#main-pagination-container').pagination({
+                dataSource: function (done) {
+                    var sections = $('.section').toArray();
+                    done(sections);
+                },
+                pageSize: 1,  // Mostrar una sección por página
+                showPrevious: true,
+                showNext: true,
+                showPageNumbers: false,
+                showNavigator: true,
+                callback: function (data, pagination) {
+                    $('.section').hide();  // Ocultar todas las secciones
+
+                    // Mostrar la sección actual
+                    data.forEach(function (section) {
+                        $(section).show();
+                    });
+
+                    // Inicializar la paginación anidada para la sección actual
+                    data.forEach(function (section, index) {
+                        var sectionPagination = $(section).find('.card-body .pagination');
+                        sectionPagination.pagination({
+                            dataSource: function (done) {
+                                var items = $(section).find('.card-body .mac-list .item').toArray();
+                                done(items);
+                            },
+                            pageSize: 1,  // Número de items por página en cada sección
+                            showPrevious: true,
+                            showNext: true,
+                            showPageNumbers: false,
+                            showNavigator: false,
+                            callback: function (data, pagination) {
+                                $(section).find('.card-body .mac-list .item').hide();  // Ocultar todos los ítems
+
+                                // Mostrar los ítems de la página actual
+                                data.forEach(function (item) {
+                                    $(item).show();
+                                });
+                            }
+                        });
+                    });
+                }
+            });
+        });
+    </script>
+{% endblock %}
 {% block content %}
+
+    <!-- Dashboard -->
+    <div class="dashboard-bg">
+
+        <!-- Dashboard Jumbotron -->
+        <section class="dashboard-jumbotron">
+            <div class="container-fluid py-5 overview-container">
+                <h1 class="display-5 fw-bold">Overview</h1>
+            </div>
+        </section>
+        <!-- Dashboard Jumbotron -->
+
+        <!-- Overview Card-Top -->
+        <div class="container card-top-container">
+            <div class="row">
+                <div class="col-lg-12 col-md-12 col-sm-12 card-container">
+                    <div class="d-flex justify-content-evenly">
+                        <div class="card card-top">
+                            <div class="card-body">
+                                <h5 class="card-title">Total IPs</h5>
+                                <span class="badge rounded-pill text">
+                                {{ total_ips_data.total }}
+                            </span>
+                            </div>
+                        </div>
+                        <div class="card card-top hover-card">
+                            <div class="card-body">
+                                <h5 class="card-title text-card">Anomalies found<i
+                                        class="fa-solid fa-circle-exclamation ps-2"></i>
+                                </h5>
+                                <span class="badge rounded-pill text">
+                                {{ total_ips_data.count_arps }}
+                            </span>
+                                <a href="{{ url_for('router_scan.scan') }}" class="btn-hover">View Details</a>
+                            </div>
+                        </div>
+                        <div class="card card-top">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-6 text-center">
+                                        <h6 class="text-card">Blacklist</h6>
+                                        <span class="badge rounded-pill text">
+                                    {{ total_ips_data.count_blacklist }}
+                                    </span>
+                                    </div>
+                                    <div class="col-6 text-center">
+                                        <h6 class="text-card">Authorized</h6>
+                                        <span class="badge rounded-pill text">
+                                    {{ total_ips_data.count_authorized }}
+                                    </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Overview Card-Top -->
+
+        <!-- Dashboard Content -->
+        <div class="container-fluid dashboard-content-container">
+            <div class="container">
+                <div class="row main-row">
+                    <!-- Panel 1 -->
+                    <div class="col-lg-4 col-md-6 col-sm-12 dashboard-content">
+                        <div class="card card-bottom p-3">
+                            <h5 class="card-title">Assigned and Available Private IP</h5>
+
+                            <!-- Selector for site -->
+                            <label for="siteFilter" class="form-label">Select a site:</label>
+                            <select id="siteFilter" class="form-select mb-3">
+                                {% for site in sites %}
+                                    <option value="{{ site[1] }}">{{ site[1] }}</option>
+                                {% endfor %}
+                            </select>
+
+                            <!-- Segment selector -->
+                            <label for="segmentFilter" class="form-label">Select a segment:</label>
+                            <select id="segmentFilter" class="form-select mb-3">
+                            </select>
+                            <!-- Canvas for the chart -->
+                            <canvas id="myChart"></canvas>
+                        </div>
+                    </div>
+                    <!-- Panel 2 -->
+                    <div class="col-lg-4 col-md-6 col-sm-12 dashboard-content">
+                        <div class="card card-bottom p-3">
+                            <h5 class="card-title">Assigned and Available Public IP</h5>
+
+                            <!-- Selector for choose the site -->
+                            <label for="site-select" class="form-label">Select a site:</label>
+                            <select id="site-select" class="form-select mb-3">
+                                {% for site in sites %}
+                                    <option value="{{ site[1] }}">{{ site[1] }}</option>
+                                {% endfor %}
+                            </select>
+
+                            <!-- Segment selector -->
+                            <label for="segment-select" class="form-label">Select a segment:</label>
+                            <select id="segment-select" class="form-select mb-3">
+                            </select>
+                            <!-- Canvas for the chart -->
+                            <canvas id="publicIpChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Panel Container -->
+                    <div class="col-lg-4 col-md-12 col-sm-12 dashboard-content d-flex flex-column">
+                        <!-- Flex container for large devices -->
+                        <div class="d-lg-flex flex-lg-column h-100">
+                            <!-- Panel 3 -->
+                            <div class="panel-3 flex-grow-1">
+                                <div class="card card-bottom p-3 d-flex h-100">
+                                    <div>
+                                        <h5 class="card-title align-items-center">Duplicated IPs</h5>
+                                    </div>
+                                    <div class="duplicated-ips-container">
+                                        {% if duplicated_ips %}
+                                            {% for key, value in duplicated_ips.items() %}
+                                                <div class="card inner-card section" id="section-{{ loop.index }}">
+                                                    <div class="card-body">
+                                                        <div class="d-flex align-items-center">
+                                                            <div class="flex-col>">
+                                                                <h6 class="badge rounded-pill ip-badge">{{ key }}</h6>
+                                                            </div>
+                                                            <div class="flex-col">
+                                                                <h6 class="ps-1"> in <span
+                                                                        class="fw-bold">{{ value.segment }}</span></h6>
+                                                            </div>
+                                                        </div>
+                                                        <h6>MAC incidences:</h6>
+                                                        <div class="mac-list">
+                                                            {% for mac in value.indexes %}
+                                                                <div class="item list-group">
+                                                                    <h6 class="list-group-item">{{ mac }}</h6>
+                                                                </div>
+                                                            {% endfor %}
+                                                        </div>
+                                                        <div class="d-flex justify-content-center">
+                                                            <div id="pagination-{{ loop.index }}"
+                                                                 class="pagination"></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                        {% else %}
+                                            <p>No duplicated IPs found</p>
+                                        {% endif %}
+                                    </div>
+                                    <div id="main-pagination-container" class="pagination pt-2 justify-content-center">
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Panel 4 -->
+                            <div class="panel-4 flex-grow-1 pt-2">
+                                <div class="card card-bottom p-3 h-100">
+                                    <h5 class="card-title">IP Segments per Site</h5>
+                                    <!-- Canvas for the total segment chart -->
+                                    <canvas id="segmentsChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <!-- Dashboard Content-->
+        </div>
+    </div>
+    <!-- Dashboard -->
 {% endblock %}

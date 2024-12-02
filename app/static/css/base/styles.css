@@ -12,9 +12,14 @@
     }
 }
 
+.text {
+    color: var(--text-color);
+}
+
 .btn {
     border-radius: 25px !important;
-    padding: 10px 15px; !important;
+    padding: 10px 15px;
+!important;
 }
 
 .float-container {
@@ -142,4 +147,10 @@
 .form-control:focus, .form-select:focus {
     background-color: var(--hover-color);
     color: var(--text-color);
+}
+
+.card {
+    background-color: var(--active-color);
+    color: var(--text-color);
+    border-radius: 20px;
 }
