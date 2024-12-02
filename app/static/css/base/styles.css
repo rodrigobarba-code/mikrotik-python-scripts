@@ -12,9 +12,14 @@
     }
 }
 
+.text {
+    color: var(--text-color);
+}
+
 .btn {
     border-radius: 25px !important;
-    padding: 10px 15px; !important;
+    padding: 10px 15px;
+!important;
 }
 
 .float-container {
@@ -184,4 +189,9 @@
     border-color: #bb4430 !important;
     color: #bb4430 !important;
     animation: pulse 1s infinite !important;
+
+.card {
+    background-color: var(--active-color);
+    color: var(--text-color);
+    border-radius: 20px;
 }

@@ -135,9 +135,9 @@ class DashboardFunctions:
             for site_id, site_name in site_list:
                 # Verify if the site has a router
                 if ThreadingManager().run_thread(
-                    Router.verify_if_router_has_segments,
-                    'rx',
-                    site_id
+                        Router.verify_if_router_has_segments,
+                        'rx',
+                        site_id
                 ) is True:
                     # Initialize the list by segment and total count by site
                     by_segment = []
@@ -212,7 +212,6 @@ class DashboardFunctions:
 
     @staticmethod
     def get_duplicated_ip_with_indexes() -> dict:
-        # Import the model here to avoid circular imports
         from models.router_scan.models import ARP
         from utils.threading_manager import ThreadingManager
 
@@ -230,17 +229,37 @@ class DashboardFunctions:
             for arp in arps:
                 # Get the ARP IP
                 ip = arp.arp_ip
+                segment_id = arp.fk_ip_address_id
+
+                # Retrieve the segment using ARP.get_segment
+                segment = ThreadingManager().run_thread(
+                    ARP.get_segment, 'rx',
+                    segment_id
+                )
 
                 # Verify if the IP is already in the dictionary
-                if ip in return_dict.keys():
-                    # Append the index to the dictionary
-                    return_dict[ip].append(arp.arp_duplicity_indexes)
+                if ip in return_dict:
+                    # Append a dictionary with the index and segment to the existing list
+                    return_dict[ip] = {
+                        "indexes": [
+                            i for i in arp.arp_duplicity_indexes.split(', ')
+                        ],
+                        'segment_id': segment_id,
+                        "segment": segment
+                    }
                 else:
-                    # Initialize the list with the index
-                    return_dict[ip] = [arp.arp_duplicity_indexes]
+                    # Initialize the list with the index and segment
+                    return_dict[ip] = {
+                        "indexes": [
+                            i for i in arp.arp_duplicity_indexes.split(', ')
+                        ],
+                        'segment_id': segment_id,
+                        "segment": segment
+                    }
 
             # Return the dictionary
             return return_dict
+
         except Exception as e:
             raise e
 
@@ -324,9 +343,9 @@ class DashboardFunctions:
             for site_id, site_name in site_list:
                 # Verify if the site has a router
                 if ThreadingManager().run_thread(
-                    Router.verify_if_router_has_segments,
-                    'rx',
-                    site_id
+                        Router.verify_if_router_has_segments,
+                        'rx',
+                        site_id
                 ) is True:
                     # Get all the Segments from the database by site
                     segments = ThreadingManager().run_thread(
