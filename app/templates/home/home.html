@@ -37,7 +37,7 @@
                                 <div class="d-flex flex-column align-items-center justify-content-center shortcut">
                                     <a href="{{ url_for('dashboard.dashboard') }}">
                                         <div class="d-flex justify-content-center align-items-center shortcut-icon">
-                                            <i style="color: #80ED99" class="fa-solid fa-gauge-circle-bolt"></i>
+                                            <i style="color: #0B6477" class="fa-solid fa-gauge-circle-bolt"></i>
                                         </div>
                                     </a>
                                     <div class="shortcut-text text-center">
@@ -47,7 +47,7 @@
                                 <div class="d-flex flex-column align-items-center justify-content-center shortcut">
                                     <a href="{{ url_for('sites.sites') }}">
                                         <div class="d-flex justify-content-center align-items-center shortcut-icon">
-                                            <i style="color: #45DFB1" class="fa-solid fa-earth-americas"></i>
+                                            <i style="color: #0B6477" class="fa-solid fa-earth-americas"></i>
                                         </div>
                                     </a>
                                     <div class="shortcut-text text-center">
@@ -57,7 +57,7 @@
                                 <div class="d-flex flex-column align-items-center justify-content-center shortcut">
                                     <a href="{{ url_for('routers.routers') }}">
                                         <div class="d-flex justify-content-center align-items-center shortcut-icon">
-                                            <i style="color: #0AD1C8" class="fas fa-router"></i>
+                                            <i style="color: #0B6477" class="fas fa-router"></i>
                                         </div>
                                     </a>
                                     <div class="shortcut-text text-center">
@@ -67,7 +67,7 @@
                                 <div class="d-flex flex-column align-items-center justify-content-center shortcut">
                                     <a href="{{ url_for('ip_management.ip_management') }}">
                                         <div class="d-flex justify-content-center align-items-center shortcut-icon">
-                                            <i style="color: #14919B" class="fa-duotone fa-solid fa-sitemap"></i>
+                                            <i style="color: #0B6477" class="fa-duotone fa-solid fa-sitemap"></i>
                                         </div>
                                     </a>
                                     <div class="shortcut-text text-center">
@@ -87,7 +87,7 @@
                                 <div class="d-flex flex-column align-items-center justify-content-center shortcut">
                                     <a href="{{ url_for('users.users') }}">
                                         <div class="d-flex justify-content-center align-items-center shortcut-icon">
-                                            <i style="color: #80ED99" class="fa-solid fa-users"></i>
+                                            <i style="color: #0B6477" class="fa-solid fa-users"></i>
                                         </div>
                                     </a>
                                     <div class="shortcut-text text-center">
@@ -186,23 +186,29 @@
     <!-- Carousel Container -->
 
     <!-- Changelog Container -->
-    <div class="container changelog-container mt-4">
-        <h1 class="text-center pt-4">Changelog &nbsp; <i class="fa-solid fa-diagram-sankey"></i></h1>
-        <div class="timeline">
-            {% for log in changelog %}
-                <div class="timeline-item">
-                    <h5>{{ log['version'] }} - {{ log['date'] }}</h5>
-                    {% for change in log['changes'] %}
-                        <p>
-                            <span class="tag {{ change['type'] }}">{{ change['title'] }}</span> {{ change['description'] }}
-                        </p>
-                    {% endfor %}
-                </div>
-            {% endfor %}
+    <div class="container changelog-outer-container">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="text p-3">Changelog</h1>
+            </div>
+        </div>
+        <div class="row changelog-container">
+            <div class="timeline changelog">
+                {% for log in changelog %}
+                    <div class="timeline-item">
+                        <h5>{{ log['version'] }} - {{ log['date'] }}</h5>
+                        {% for change in log['changes'] %}
+                            <p>
+                                <span class="tag {{ change['type'] }}">{{ change['title'] }}</span> {{ change['description'] }}
+                            </p>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+            </div>
         </div>
     </div>
     <!-- Changelog Container -->
 
     <!-- Footer -->
-    <div class="container mt-2">&nbsp;</div>
+    <div class="container mt-1">&nbsp;</div>
 {% endblock %}
