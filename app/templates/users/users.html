@@ -93,7 +93,7 @@
                                     data-bs-toggle="modal"
                                     data-bs-target="#delete-modal"
                                     data-id="{{ user.user_id }}"
-                                    data-type="site"
+                                    data-type="user"
                                     data-url="{{ url_for('users.delete_user', user_id=user.user_id) }}"
                                     data-name="{{ user.user_username }}"
                             ><i class="fa-solid fa-trash"></i></button>
@@ -107,7 +107,6 @@
     <!-- Users Table -->
 
     <!-- Delete Modals -->
-    <div class="delete-modal-container">{{ delete_modal() }}</div>
     <div class="delete-select-modal-container">{{ delete_select_modal() }}</div>
     <div class="delete-all-modal-container">{{ delete_all_modal() }}</div>
     <!-- Delete Modals -->
