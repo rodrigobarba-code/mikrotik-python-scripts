@@ -1,0 +1,151 @@
+{% from 'macros.html' import delete_modal, delete_select_modal, delete_all_modal %}
+{% extends 'base.html' %}
+{% block title %} IP Groups Tags {% endblock %}
+{% block head %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/ip_management/styles.css') }}">
+{% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/ip_management/scripts.js') }}"></script>
+    <script>
+        deleteAllModal("{{ url_for('ip_management.delete_all_ip_group_tags') }}", "{{ url_for('ip_management.ip_group_tags') }}", 'tags');
+        deleteSelectModal("{{ url_for('ip_management.bulk_delete_ip_group_tag') }}", "{{ url_for('ip_management.ip_group_tags') }}", 'tag');
+    </script>
+{% endblock %}
+{% block content %}
+    <!-- Tags Jumbotron -->
+    <section class="tags-jumbotron pt-5 mb-3">
+        <div class="container-fluid py-5 d-flex flex-column flex-md-row">
+            <div class="d-flex col-md-1 order-md-1 order-2 text-md-start text-center my-md-0 my-3 justify-content-center align-items-center">
+                <button class="btn btn-c-return">
+                    <a href="{{ url_for('ip_management.ip_management_options_by_site', site_id=site_id) }}"
+                       class="text-decoration-none text-dark" style="font-size: 2.5rem">
+                        <i class="fa-solid fa-backward" style="color: white"></i>
+                    </a>
+                </button>
+            </div>
+            <div class="col-md-11 order-md-2 order-1">
+                <h1 class="display-5 fw-bold">IP Groups Tags</h1>
+                {% if session['user_privileges'] == 'admin' %}
+                <p class="col-md-8 fs-4">Here you can manage the IP Groups Tags.</p>
+                {% else %}
+                <p class="col-md-8 fs-4">Here you can view the IP Groups Tags.</p>
+                {% endif %}
+                <a href="{{ url_for('ip_management.add_ip_group_tag') }}" class="btn btn-lg btn-primary">
+                    <i class="fa-solid fa-plus"></i>&nbsp; Add IP Group Tag
+                </a>
+            </div>
+        </div>
+    </section>
+    <!-- Tags Jumbotron -->
+
+    <!-- Tags Database -->
+    <section class="tags-database pt-3 text">
+        <div class="container w-75">
+            <div class="row">
+                <div class="col-12 col-md-8 text-left">
+                    <h2 class="tags-database-title"><b>Available</b> IP Groups Tags</h2>
+                </div>
+                {% if session['user_privileges'] == 'admin' %}
+                <div class="col-12 col-md-4 d-flex justify-content-end">
+                    <button type="button" class="btn btn-md btn-danger me-2" id="delete-select">
+                        <i class="fa-solid fa-square-minus"></i>&nbsp; Delete selected
+                    </button>
+                    <button type="button" class="btn btn-md btn-dark" id="delete-all">
+                        <i class="fa-solid fa-trash"></i>&nbsp; Delete all
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+    <!-- Tags Database -->
+
+    <!-- Tags Separator -->
+    <section class="tags-separator">
+        <div class="container w-75">
+            <hr class="text">
+        </div>
+    </section>
+    <!-- Tags Separator -->
+
+    <!-- Tags Table -->
+    <section class="tags-table hide-scroll pt-3 pb-3">
+        <div class="container w-75 text" id="tags-table-c">
+            <table class="table table-responsive" id="datatable-object">
+                <thead class="text">
+                <tr>
+                    <th scope="col"></th>
+                    <th scope="col">Tag ID</th>
+                    <th scope="col">Color</th>
+                    <th scope="col">Text Color</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Description</th>
+                    <th scope="col">Actions</th>
+                </tr>
+                </thead>
+                <tbody class="text">
+                {% for tag in tags %}
+                    <tr>
+                        <!-- Checkbox -->
+                        <td class="text-center"><label for="tag-{{ tag.ip_group_tag_id }}"></label>
+                            <input type="checkbox" class="form-check-input" id="tag-{{ tag.ip_group_tag_id }}">
+                        </td>
+
+                        <!-- Identifier -->
+                        <td>{{ tag.ip_group_tag_id }}</td>
+
+                        <!-- Color -->
+                        <td>
+                            <span class="badge"
+                                  style="background-color: {{ tag.ip_group_tag_color }}; color: {{ tag.ip_group_tag_text_color }};">
+                                {{ tag.ip_group_tag_color }}
+                            </span>
+                        </td>
+
+                        <!-- Text Color -->
+                        <td>
+                            <span class="badge"
+                                  style="background-color: {{ tag.ip_group_tag_text_color }}; color: {{ tag.ip_group_tag_color }};">
+                                {{ tag.ip_group_tag_text_color }}
+                            </span>
+                        </td>
+
+                        <!-- Name -->
+                        <td>{{ tag.ip_group_tag_name }}</td>
+
+                        <!-- Description -->
+                        {% if tag.ip_group_tag_description %}
+                            <td>{{ tag.ip_group_tag_description }}</td>
+                        {% else %}
+                            <td class="fw-light" style="color: lightslategray">No description available</td>
+                        {% endif %}
+
+                        <!-- Actions -->
+                        <td>
+                            <a href="{{ url_for('ip_management.update_ip_group_tag', tag_id=tag.ip_group_tag_id) }}"
+                               type="button"
+                               class="btn btn-sm btn-warning"><i class="fa-solid fa-edit"></i></a>
+                            <button type="button" id="delete-button-tags-{{ tag.ip_group_tag_id }}"
+                                    class="btn btn-sm btn-danger"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#delete-modal"
+                                    data-id="{{ tag.ip_group_tag_id }}"
+                                    data-type="region"
+                                    data-url="{{ url_for('ip_management.delete_ip_group_tag', tag_id=tag.ip_group_tag_id) }}"
+                                    data-name="{{ tag.ip_group_tag_name }}"
+                            ><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+    <!-- Tags Table -->
+
+    <!-- Delete Modals -->
+    <div class="delete-modal-container">{{ delete_modal() }}</div>
+    <div class="delete-select-modal-container">{{ delete_select_modal() }}</div>
+    <div class="delete-all-modal-container">{{ delete_all_modal() }}</div>
+    <!-- Delete Modals -->
+{% endblock %}

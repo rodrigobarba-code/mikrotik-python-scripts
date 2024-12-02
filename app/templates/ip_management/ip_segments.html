@@ -1,4 +1,4 @@
-{% from 'macros.html' import delete_modal, delete_select_modal, delete_all_modal %}
+{% from 'macros.html' import delete_modal, delete_select_modal, delete_all_modal, show_details_button %}
 {% extends 'base.html' %}
 {% block title %} IP Management &#10095; Sites &#10095; Options &#10095; IP Segments {{ site_name }} {% endblock %}
 {% block head %}
@@ -7,9 +7,8 @@
 {% block scripts %}
     <script src="{{ url_for('static', filename='js/ip_management/scripts.js') }}"></script>
     <script>
-        const segmentDetails = new SegmentsDetails('{{ url_for('ip_management.get_ip_segment_details') }}');
-        deleteAllModal("{{ url_for('ip_management.delete_all_segments') }}", "{{ url_for('ip_management.ip_management') }}", 'segments');
-        deleteSelectModal("{{ url_for('ip_management.bulk_delete_segment') }}", "{{ url_for('ip_management.ip_management') }}", 'segment');
+        deleteAllModal("{{ url_for('ip_management.delete_segments', site_id=site_id) }}", "{{ url_for('ip_management.ip_segment', site_id=site_id) }}", 'segments');
+        deleteSelectModal("{{ url_for('ip_management.bulk_delete_segment') }}", "{{ url_for('ip_management.ip_segment', site_id=site_id) }}", 'segment');
     </script>
 {% endblock %}
 {% block content %}
@@ -18,43 +17,48 @@
         <div class="container-fluid py-5 d-flex flex-column flex-md-row">
             <div class="d-flex col-md-1 order-md-1 order-2 text-md-start text-center my-md-0 my-3 justify-content-center align-items-center">
                 <button class="btn btn-c-return">
-                    <a href="{{ url_for('ip_management.ip_management_options_by_site', site_id=site_id) }}" class="text-decoration-none text-dark" style="font-size: 2.5rem">
+                    <a href="{{ url_for('ip_management.ip_management_options_by_site', site_id=site_id) }}"
+                       class="text-decoration-none text-dark" style="font-size: 2.5rem">
                         <i class="fa-solid fa-backward" style="color: white"></i>
                     </a>
                 </button>
             </div>
             <div class="col-md-11 order-md-2 order-1">
                 <h1 class="display-5 fw-bold">IP Segments for {{ site_name }}</h1>
-                <p class="col-md-8 fs-4">Lorem Ipsum</p>
+                {% if session['user_privileges'] == 'admin' %}
+                <p class="col-md-8 fs-4">Here you can manage the IP Segments for the site {{ site_name }}.</p>
+                {% else %}
+                <p class="col-md-8 fs-4">Here you can view the IP Segments for the site {{ site_name }}.</p>
+                {% endif %}
             </div>
         </div>
     </section>
     <!-- IP Segments Jumbotron -->
 
     <!-- IP Segments Database -->
-    <section class="segments-database pt-3">
+    <section class="segments-database pt-3 text">
         <div class="container w-75">
             <div class="row">
                 <div class="col-12 col-md-8 text-left">
                     <h2 class="regions-database-title"><b>Available</b> IP Segments</h2>
                 </div>
+                {% if session['user_privileges'] == 'admin' %}
                 <div class="col-12 col-md-4 d-flex justify-content-end">
-                    <button type="button" class="btn btn-md btn-danger me-2" data-bs-toggle="modal" id="delete-select"
-                            data-bs-target="#delete-select-modal">
+                    <button type="button" class="btn btn-md btn-danger me-2" id="delete-select">
                         <i class="fa-solid fa-square-minus"></i>&nbsp; Delete Selected
                     </button>
-                    <button type="button" class="btn btn-md btn-dark" data-bs-toggle="modal" id="delete-all"
-                            data-bs-target="#delete-all-modal">
+                    <button type="button" class="btn btn-md btn-dark" id="delete-all">
                         <i class="fa-solid fa-trash"></i>&nbsp; Delete All
                     </button>
                 </div>
+                {% endif %}
             </div>
         </div>
     </section>
     <!-- IP Segments Database -->
 
     <!-- IP Segments Separator -->
-    <section class="segments-separator">
+    <section class="segments-separator text">
         <div class="container w-75">
             <hr>
         </div>
@@ -62,9 +66,9 @@
     <!-- IP Segments Separator -->
 
     <!-- IP Segments Table -->
-    <section class="segments-table hide-scroll pt-3 pb-3">
+    <section class="segments-table hide-scroll pt-3 pb-3 text">
         <div class="container w-75" id="regions-table-c">
-            <table class="table table-responsive" id="datatable-object">
+            <table class="table table-responsive text" id="datatable-object">
                 <thead>
                 <tr>
                     <th scope="col"></th>
@@ -81,41 +85,44 @@
                     {% for ip_segment in ip_segment_list %}
                         <tr>
                             <td class="text-center"><label for="segment-{{ ip_segment.ip_segment_id }}"></label>
-                                <input type="checkbox" class="form-check-input" id="segment-{{ ip_segment.ip_segment_id }}">
+                                <input type="checkbox" class="form-check-input"
+                                       id="segment-{{ ip_segment.ip_segment_id }}">
                             </td>
                             <th scope="row">{{ ip_segment.ip_segment_id }}</th>
                             <td>{{ ip_segment.ip_segment_ip }}</td>
                             <td>{{ ip_segment.ip_segment_mask }}</td>
                             <td>{{ ip_segment.ip_segment_network }}</td>
 
-                            {% if ip_segment.ip_segment_tag.value == 'Public IP' %}
-                                {% set badge_class = 'primary' %}
-                            {% elif ip_segment.ip_segment_tag.value == 'Private IP' %}
-                                {% set badge_class = 'success' %}
-                            {% elif ip_segment.ip_segment_tag.value == '' %}
-                                {% set badge_class = 'warning' %}
+                            {% if ip_segment.ip_segment_tag == 'PUBLIC_IP' %}
+                                {% set badge_color = '#0B6477' %}
+                                {% set badge_text = 'Public' %}
+                            {% elif ip_segment.ip_segment_tag == 'PRIVATE_IP' %}
+                                {% set badge_color = '#0AD1C8' %}
+                                {% set badge_text = 'Private' %}
+                            {% elif ip_segment.ip_segment_tag == '' %}
+                                {% set badge_color = '#80ED99' %}
+                                {% set badge_text = 'No Tag' %}
                             {% else %}
-                                {% set badge_class = 'secondary' %}
+                                {% set badge_color = '#213A57' %}
+                                {% set badge_text = 'Unknown' %}
                             {% endif %}
 
                             <td>
-                                <span class="badge bg-{{ badge_class }}">{{ ip_segment.ip_segment_tag.value }}</span>
+                                <span class="badge" style="background-color: {{ badge_color }}">{{ badge_text }}</span>
                             </td>
                             <td>
+                                {% if session['user_privileges'] == 'admin' %}
                                 <button type="button" id="delete-button-segment-{{ ip_segment.ip_segment_id }}"
                                         class="btn btn-sm btn-danger"
                                         data-bs-toggle="modal"
                                         data-bs-target="#delete-modal"
                                         data-id="{{ ip_segment.ip_segment_id }}"
                                         data-type="segment"
-                                        data-url="{{ url_for('ip_management.delete_segment', segment_id=ip_segment.ip_segment_id) }}"
+                                        data-url="{{ url_for('ip_management.delete_segment', segment_id=ip_segment.ip_segment_id, site_id=site_id) }}"
                                         data-name="{{ ip_segment.ip_segment_ip }}"
                                 ><i class="fa-solid fa-trash"></i></button>
-                                <button id="show-segment-details" type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal"
-                                        data-bs-target="#arp-details-modal" data-id="{{ ip_segment.id }}"
-                                        onclick="segmentDetails.show('{{ ip_segment.ip_segment_id }}')">
-                                    <i class="fa-solid fa-eye"></i>
-                                </button>
+                                {% endif %}
+                                {{ show_details_button(ip_segment.ip_segment_id, url_for('ip_management.get_ip_segment_details'), 'Segment') }}
                             </td>
                         </tr>
                     {% endfor %}
@@ -132,64 +139,4 @@
     <div class="delete-select-modal-container">{{ delete_select_modal() }}</div>
     <div class="delete-all-modal-container">{{ delete_all_modal() }}</div>
     <!-- Delete Modals -->
-
-    <!-- IP Segment Details Modal -->
-    <section class="segments-details-modal">
-        <div class="modal fade" id="detailsModal" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="detailsModalLabel"><strong>IP Segment</strong> Details</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="container">
-                            <div class="row">
-                                <div class="col-12">
-                                    <p><strong>IP Segment ID: </strong> <span id="ip-segment-id-d"></span></p>
-                                </div>
-                                <div class="col-12">
-                                    <p><strong>Router: </strong> <span id="ip-segment-router-d"></span></p>
-                                </div>
-                                <div class="col-12">
-                                    <p><strong>Segment IP: </strong> <span id="ip-segment-ip-d"></span></p>
-                                </div>
-                                <div class="col-12">
-                                    <p><strong>Segment Mask: </strong> <span id="ip-segment-mask-d"></span></p>
-                                </div>
-                                <div class="col-12">
-                                    <p><strong>Segment Network: </strong> <span id="ip-segment-network-d"></span></p>
-                                </div>
-                                <div class="col-12">
-                                    <p><strong>Interface: </strong> <span id="ip-segment-interface-d"></span></p>
-                                </div>
-                                <div class="col-12">
-                                    <p><strong>Actual Interface: </strong> <span id="ip-segment-actual-iface-d"></span></p>
-                                </div>
-                                <div class="col-12">
-                                    <p><strong>Segment Tag: </strong> <span id="ip-segment-tag-d"></span></p>
-                                </div>
-                                <div class="col-12">
-                                    <p><strong>Segment Description: </strong> <span id="ip-segment-comment-d"></span></p>
-                                </div>
-                                <div class="col-12">
-                                    <p><strong>Segment is Invalid: </strong> <span id="ip-segment-is_invalid-d"></span></p>
-                                </div>
-                                <div class="col-12">
-                                    <p><strong>Segment is Dynamic: </strong> <span id="ip-segment-is_dynamic-d"></span></p>
-                                </div>
-                                <div class="col-12">
-                                    <p><strong>Segment is Disabled: </strong> <span id="ip-segment-is_disabled-d"></span></p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    <!-- IP Segment Details Modal -->
 {% endblock %}

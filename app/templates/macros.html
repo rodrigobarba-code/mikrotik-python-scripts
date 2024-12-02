@@ -1,66 +1,136 @@
 <!-- Macro for sidebar -->
-{% macro sidebar(menu_items, profile_menu_items, job_display) %}
-    <div class="sidebar close">
+{% macro sidebar(menu_items, profile_menu_items, job_display, unread_notifications) %}
+    <div id="sidebar" class="sidebar close">
         <div class="logo-details">
             <a class="a-logo" href="{{ url_for('home.home') }}" id="logo-link">
                 <img class="logo-icon" alt="Seven Suite Logo"
-                     src="{{ url_for('static', filename='img/seven_suite_icon.svg') }}">
+                     src="{{ url_for('static', filename='img/seven_suite_icon.svg') }}"
+                >
                 <span class="logo_name">Seven&nbsp;Suite</span>
             </a>
         </div>
+        <img id="toggle-sidebar" class="toggle" src="{{ url_for('static', filename='img/svg/toggle-button.svg') }}"
+             alt="Toggle">
+        <!-- Navigation -->
         <ul class="nav-links">
             {% for item in menu_items %}
-                {% if item == 'separator' %}
-                    <hr class="w-75" style="color: white">
-                {% elif item.submenu %}
-                    <li>
-                        <div class="iocn-link">
-                            <a {% if item.endpoint != '#' %} href="{{ url_for(item.endpoint) }}" {% endif %}>
-                                <i class="{{ item.icon }}"></i>
-                                {% if item.marquee %}
-                                    <marquee direction="left" scrollamount="4"><span class="link_name">{{ item.name }}</span></marquee>
+                {% if session['user_privileges'] in item.privileges %}
+                    {% if item == 'separator' %}
+                        <hr class="w-75 text">
+                    {% elif item.submenu %}
+                        <li class="">
+                            <div class="iocn-link">
+                                <a {% if item.endpoint != '#' %} href="{{ url_for(item.endpoint) }}" {% endif %}>
+                                    <i class="{{ item.icon }}" style="{{ item.style }}"></i>
+                                    {% if item.marquee %}
+                                        <marquee direction="left" scrollamount="4"><span
+                                                class="link_name">{{ item.name }}</span></marquee>
+                                    {% else %}
+                                        <span class="link_name">{{ item.name }}</span>
+                                    {% endif %}
+                                </a>
+                                <i class='bx bxs-chevron-down arrow text'></i>
+                            </div>
+                            <ul class="sub-menu">
+                                {% for sub_item in item.submenu %}
+                                    {% if sub_item == 'separator' %}
+                                        <hr class="w-75 text">
+                                    {% else %}
+                                        <li><a href="{{ url_for(sub_item.endpoint) }}">{{ sub_item.name }}</a></li>
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li>
+                            {% if item.name == 'Notifications' %}
+                                {% if unread_notifications.count > 0 %}
+                                    <a {% if item.endpoint != '#' %} href="{{ url_for(item.endpoint) }}" {% endif %}>
+                                        <i class="{{ item.icon }}">
+                                            {% if unread_notifications.count > 4 %}
+                                                {% set a = '5+' %}
+                                            {% else %}
+                                                {% set a = unread_notifications.count %}
+                                            {% endif %}
+
+                                            {% if unread_notifications.count == 1 %}
+                                                {% set left_movement = 36 %}
+                                            {% elif unread_notifications.count > 1 and unread_notifications.count <= 4 %}
+                                                {% set left_movement = 34 %}
+                                            {% elif unread_notifications.count > 4 %}
+                                                {% set left_movement = 28 %}
+                                            {% endif %}
+
+                                            <span id="bell-number" style="left: {{ left_movement }}px" class="badge rounded-pill">{{ a }}</span>
+                                        </i>
+                                        {% if item.marquee %}
+                                            <marquee direction="left" scrollamount="4"><span
+                                                    class="link_name">{{ item.name }}</span></marquee>
+                                        {% else %}
+                                            <span class="link_name">{{ item.name }}</span>
+                                        {% endif %}
+                                    </a>
+                                    <ul class="sub-menu blank">
+                                        <li><a class="link_name" {% if item.endpoint != '#' %}
+                                               href="{{ url_for(item.endpoint) }}" {% endif %}>{{ item.name }}</a></li>
+                                    </ul>
                                 {% else %}
-                                    <span class="link_name">{{ item.name }}</span>
+                                    <a {% if item.endpoint != '#' %} href="{{ url_for(item.endpoint) }}" {% endif %}>
+                                        <i class="{{ item.icon }}"></i>
+                                        {% if item.marquee %}
+                                            <marquee direction="left" scrollamount="4"><span
+                                                    class="link_name">{{ item.name }}</span></marquee>
+                                        {% else %}
+                                            <span class="link_name">{{ item.name }}</span>
+                                        {% endif %}
+                                    </a>
+                                    <ul class="sub-menu blank">
+                                        <li><a class="link_name" {% if item.endpoint != '#' %}
+                                               href="{{ url_for(item.endpoint) }}" {% endif %}>{{ item.name }}</a></li>
+                                    </ul>
                                 {% endif %}
-                            </a>
-                            <i class='bx bxs-chevron-down arrow'></i>
-                        </div>
-                        <ul class="sub-menu">
-                            {% for sub_item in item.submenu %}
-                                {% if sub_item == 'separator' %}
-                                    <hr class="w-75" style="color: white">
-                                {% else %}
-                                    <li><a href="{{ url_for(sub_item.endpoint) }}">{{ sub_item.name }}</a></li>
-                                {% endif %}
-                            {% endfor %}
-                        </ul>
-                    </li>
-                {% else %}
-                    <li>
-                        <a {% if item.endpoint != '#' %} href="{{ url_for(item.endpoint) }}" {% endif %}>
-                            <i class="{{ item.icon }}"></i>
-                            {% if item.marquee %}
-                                <marquee direction="left" scrollamount="4"><span class="link_name">{{ item.name }}</span></marquee>
                             {% else %}
-                                <span class="link_name">{{ item.name }}</span>
+                                <a {% if item.endpoint != '#' %} href="{{ url_for(item.endpoint) }}" {% endif %}>
+                                    <i class="{{ item.icon }}"></i>
+                                    {% if item.marquee %}
+                                        <marquee direction="left" scrollamount="4"><span
+                                                class="link_name">{{ item.name }}</span></marquee>
+                                    {% else %}
+                                        <span class="link_name">{{ item.name }}</span>
+                                    {% endif %}
+                                </a>
+                                <ul class="sub-menu blank">
+                                    <li><a class="link_name" {% if item.endpoint != '#' %}
+                                           href="{{ url_for(item.endpoint) }}" {% endif %}>{{ item.name }}</a></li>
+                                </ul>
                             {% endif %}
-                        </a>
-                        <ul class="sub-menu blank">
-                            <li><a class="link_name" {% if item.endpoint != '#' %}
-                                   href="{{ url_for(item.endpoint) }}" {% endif %}>{{ item.name }}</a></li>
-                        </ul>
-                    </li>
+                        </li>
+                    {% endif %}
                 {% endif %}
             {% endfor %}
         </ul>
+
         <div class="user-actions">
-            <ul class="bg-dark dropdown-menu position-relative d-flex gap-1 p-2 rounded-3" data-bs-theme="dark">
+            <ul class="dropdown-menu position-relative d-flex gap-1 p-2 ">
                 {% for item in profile_menu_items %}
-                    <li>
+                    <li class="">
                         {% if item == 'separator' %}
-                            <hr class="dropdown-divider">
+                            <hr class="dropdown-divider text">
+                        {% elif item.name == 'Theme Switch' %}
+                            <div class="d-flex align-items-center">
+                                <a id="{{ item.name | lower | replace(' ', '-') }}-button"
+                                   class="dropdown-item rounded-3 text"
+                                        {% if item.endpoint != '#' %}
+                                   href="{{ url_for(item.endpoint) }}" {% endif %}>
+                                    <i class="{{ item.icon }}"></i>&nbsp; {{ item.name }}
+                                </a>
+                                <div class="toggle-switch">
+                                    <span class="switch"></span>
+                                </div>
+                            </div>
                         {% else %}
-                            <a id="{{ item.name | lower | replace(' ', '-') }}-button" class="dropdown-item rounded-2"
+                            <a id="{{ item.name | lower | replace(' ', '-') }}-button"
+                               class="dropdown-item rounded-3 text"
                                     {% if item.endpoint != '#' %} href="{{ url_for(item.endpoint) }}" {% endif %}>
                                 <i class="{{ item.icon }}"></i>&nbsp; {{ item.name }}
                             </a>
@@ -74,32 +144,72 @@
                 <img src="{{ session['user_avatar'] }}" alt="profileImg">
             </div>
             <div class="name-job">
-                <div class="profile_name">{{ session['user_name'] }} {{ session['user_lastname'] }}</div>
-                <div class="job">{{ job_display[session['user_privileges']] }}</div>
+                <div class="profile_name text">{{ session['user_name'] }} {{ session['user_lastname'] }}</div>
+                <div class="job text">{{ job_display[session['user_privileges']] }}</div>
             </div>
         </div>
     </div>
 {% endmacro %}
 <!-- Macro for sidebar -->
 
-<!-- Macro for messages -->
 <!-- Macro for notification section -->
 {% macro messages() %}
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="container-fluid pt-2 pb-2 alert-container">
-                    <div class="alert alert-{{ category }} alert-dismissible show fade" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"
-                                data-bs-target=".alert-container"></button>
-                    </div>
-                </div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-    {% block content %}
-    {% endblock %}
+    <!-- Notyf Notification Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const notyf = new Notyf({
+                duration: 5000, // Duration of the notification
+                ripple: true,   // Enable ripple effect
+                dismissible: true,
+                position: {
+                    x: 'center',
+                    y: 'top'
+                },
+                types: [
+                    {
+                        type: 'error',
+                        background: 'linear-gradient(90deg, rgba(255,114,75,1) 0%, rgba(244,46,46,1) 47%, rgba(255,136,0,1) 100%)',
+                        icon: {
+                            className: 'material-icons',
+                            tagName: 'i',
+                            text: 'error_outline'
+                        }
+                    },
+                    {
+                        type: 'success',
+                        background: 'linear-gradient(90deg, rgba(134,227,149,1) 0%, rgba(50,193,83,1) 57%, rgba(0,91,27,1) 100%)',
+                        icon: {
+                            className: 'material-icons',
+                            tagName: 'i',
+                            text: 'check_circle_outline'
+                        }
+                    }
+                ]
+            });
+
+            // Flash messages passed from the server
+            const messages = {{ get_flashed_messages(with_categories=True) | tojson }};
+
+            if (messages.length > 0) {
+                messages.forEach(function (message) {
+                    const category = message[0];  // First element is the category
+                    const text = message[1];      // Second element is the message itself
+
+                    // Display Notyf notification based on the category
+                    if (category === 'danger') {
+                        notyf.error(text);  // Trigger error notification
+                    } else if (category === 'success') {
+                        notyf.success(text);  // Trigger success notification
+                    } else {
+                        console.warn('Unknown message category:', category);
+                    }
+                });
+            } else {
+                console.log("No messages to display.");
+            }
+        });
+    </script>
+    <!-- Notyf Notification Script -->
 {% endmacro %}
 <!-- Macro for notification section -->
 
@@ -224,15 +334,16 @@
 <!-- Macros for recyclable components -->
 <!-- Macro for the search bar -->
 {% macro search_bar_with_checkbox(col, col_md, col_lg, type, section, data) %}
-    <div class="col-{{col}} col-md-{{col_md}} col-lg-{{col_lg}}">
+    <div class="col-{{ col }} col-md-{{ col_md }} col-lg-{{ col_lg }}">
         <div class="form-group position-relative">
-            <select id="searchbar-{{section}}-{{type}}" class="form-control select2 searchbar" placeholder="Search by {{type}}" style="width: 100%; border-radius: 10px;">
+            <select id="searchbar-{{ section }}-{{ type }}" class="form-control select2 searchbar"
+                    placeholder="Search by {{ type }}" style="width: 100%; border-radius: 10px;">
                 <option value=""></option>
                 {% for item in data %}
                     <option value="{{ item['value'] }}">{{ item['value'] }}</option>
                 {% endfor %}
             </select>
-            <div id="float-container-{{section}}-{{type}}" class="list-group mt-1 float-container"></div>
+            <div id="float-container-{{ section }}-{{ type }}" class="list-group mt-1 float-container"></div>
         </div>
     </div>
     <script> initializeSearchBar('{{ section }}', '{{ type }}') </script>
@@ -254,4 +365,16 @@
     </button>
 {% endmacro %}
 <!-- Macro for show details button -->
+
+<!-- Macro for Excel importing file -->
+{% macro excel_import_file(url, type, redirect_url, template_url) %}
+    <button class="btn btn-sm btn-primary me-2"
+            type="button" data-bs-toggle="modal"
+            data-bs-target="#import-modal"
+            onclick="importExcel('{{ url }}', '{{ type }}', '{{ redirect_url }}', '{{ template_url }}')"
+    >
+        <i class="fa-solid fa-file-import" style="font-size: large"></i>
+    </button>
+{% endmacro %}
 <!-- Macros for recyclable components -->
+<!-- Macros for settings -->

@@ -1,4 +1,4 @@
-{% from 'macros.html' import delete_modal, delete_select_modal, delete_all_modal %}
+{% from 'macros.html' import delete_modal, delete_select_modal, delete_all_modal, excel_import_file %}
 {% extends 'base.html' %}
 {% block title %} Regions {% endblock %}
 {% block head %}
@@ -16,32 +16,43 @@
     <section class="regions-jumbotron">
         <div class="p-5 mb-4 base-jumbotron">
             <div class="container-fluid py-5">
-                <h1 class="display-5 fw-bold">Regions</h1>
-                <p class="col-md-8 fs-4">Lorem Ipsum</p>
+                <h1 class="display-5 fw-bold ">Regions</h1>
+                <p class="col-md-8 fs-4">
+                {% if session['user_privileges'] == 'admin' %}
+                    Here you can manage the regions of the system. You can create, update, delete, import regions from an Excel file.
+                {% else %}
+                    Here you can view the regions of the system.
+                {% endif %}
+                </p>
+                {% if session['user_privileges'] == 'admin' %}
                 <a href="{{ url_for('regions.add_region') }}" class="btn btn-primary btn-lg" type="button"><i
                         class="fa-solid fa-plus"></i> Create New Region</a>
+                {% endif %}
             </div>
         </div>
     </section>
     <!-- Regions Jumbotron -->
 
     <!-- Regions Database -->
-    <section class="regions-database pt-3">
+    <section class="regions-database pt-3 text">
         <div class="container w-75">
             <div class="row">
                 <div class="col-12 col-md-8 text-left">
                     <h2 class="regions-database-title"><b>Available</b> Regions</h2>
                 </div>
+                {% if session['user_privileges'] == 'admin' %}
                 <div class="col-12 col-md-4 d-flex justify-content-end">
-                    <button type="button" class="btn btn-md btn-danger me-2" data-bs-toggle="modal" id="delete-select"
+                    {{ excel_import_file(url_for('regions.import_regions_from_excel'), 'Regions', url_for('regions.regions'), url_for('static', filename='files/regions.xlsx')) }}
+                    <button type="button" class="btn btn-md btn-danger me-2" id="delete-select"
                             data-bs-target="#delete-select-modal">
-                        <i class="fa-solid fa-square-minus"></i>&nbsp; Delete Selected
+                        <i class="fa-solid fa-square-minus"></i>
                     </button>
-                    <button type="button" class="btn btn-md btn-dark" data-bs-toggle="modal" id="delete-all"
+                    <button type="button" class="btn btn-md btn-dark" id="delete-all"
                             data-bs-target="#delete-all-modal">
-                        <i class="fa-solid fa-trash"></i>&nbsp; Delete All
+                        <i class="fa-solid fa-trash"></i>
                     </button>
                 </div>
+                {% endif %}
             </div>
         </div>
     </section>
@@ -50,31 +61,38 @@
     <!-- Regions Separator -->
     <section class="regions-separator">
         <div class="container w-75">
-            <hr>
+            <hr class="text">
         </div>
     </section>
     <!-- Regions Separator -->
 
     <!-- Regions Table -->
     <section class="regions-table hide-scroll pt-3 pb-3">
-        <div class="container w-75" id="regions-table-c">
+        <div class="container w-75 text" id="regions-table-c">
             <table class="table table-responsive" id="datatable-object">
-                <thead>
+                <thead class="text">
                 <tr>
+                    {% if session['user_privileges'] == 'admin' %}
                     <th scope="col"></th>
+                    {% endif %}
                     <th scope="col">#</th>
                     <th scope="col">Region's Name</th>
+                    {% if session['user_privileges'] == 'admin' %}
                     <th scope="col">Actions</th>
+                    {% endif %}
                 </tr>
                 </thead>
-                <tbody>
+                <tbody class="text">
                 {% for region in region_list %}
                     <tr>
+                        {% if session['user_privileges'] == 'admin' %}
                         <td class="text-center"><label for="region-{{ region.region_id }}"></label>
                             <input type="checkbox" class="form-check-input" id="region-{{ region.region_id }}">
                         </td>
+                        {% endif %}
                         <th scope="row">{{ region.region_id }}</th>
                         <td>{{ region.region_name }}</td>
+                        {% if session['user_privileges'] == 'admin' %}
                         <td>
                             <a href="{{ url_for('regions.update_region', region_id=region.region_id) }}" type="button"
                                class="btn btn-sm btn-warning"><i class="fa-solid fa-edit"></i></a>
@@ -88,6 +106,7 @@
                                     data-name="{{ region.region_name }}"
                             ><i class="fa-solid fa-trash"></i></button>
                         </td>
+                        {% endif %}
                     </tr>
                 {% endfor %}
                 </tbody>

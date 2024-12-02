@@ -14,6 +14,11 @@
     width: auto;
 }
 
-.user-profile-info{
+.user-profile-info {
     text-align: center;
+}
+
+.text {
+    color: var(--text-color);
+    transition: var(--tran-03);
 }

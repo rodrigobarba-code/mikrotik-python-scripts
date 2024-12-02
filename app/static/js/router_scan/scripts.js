@@ -1,35 +1,13 @@
-var socket = io();
-var progressStarted = false;
-var progressFinished = false;
+// Initiate the scan and redirect to the loading page
+socketio = io.connect();
 
+// Start the scan
 document.getElementById('start-btn').addEventListener('click', function() {
-    // Remove the 'hidden' attribute to show the progress bar container
-    document.getElementById('pb-container').removeAttribute('hidden');
-
-    // Emit the 'start_progress' event to the server
-    socket.emit('start_arp_scan');
-
-    // Set the progressStarted flag to true
-    progressStarted = true;
+    socketio.emit('init_scan');
 });
 
-socket.on('finish_arp_scan', function() {
-    // Set the progressFinished flag to true
-    progressFinished = true;
-    progressStarted = false
-
-    // Check if the progress is finished
-    if (progressFinished) {
-        // Hide the progress bar container
-        document.getElementById('pb-container').setAttribute('hidden', 'true');
-    }
-
-    // Reload the page
-    location.reload();
+// Redirect to the loading page
+socketio.on('redirect_to_loading', function(data) {
+    socketio.emit(data.action);
+    window.location.href = data.url;
 });
-
-window.onload = function() {
-    if (progressStarted == true) {
-        document.getElementById('pb-container').removeAttribute('hidden');
-    }
-}

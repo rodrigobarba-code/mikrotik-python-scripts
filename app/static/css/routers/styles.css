@@ -10,3 +10,19 @@
     min-height: 300px;
     z-index: 2;
 }
+
+.blinking-green {
+    animation: blinking-shadow 1.5s infinite;
+    box-shadow: 0 0 6px 3px rgba(40, 167, 69, 0.8);
+}
+
+@keyframes blinking-shadow {
+    0% { box-shadow: 0 0 10px 5px rgba(40, 167, 69, 1); }
+    50% { box-shadow: 0 0 12px 6px rgba(40, 167, 69, 0.5); }
+    100% { box-shadow: 0 0 10px 5px rgba(40, 167, 69, 1); }
+}
+
+.text {
+    color: var(--text-color);
+    transition: var(--tran-03);
+}

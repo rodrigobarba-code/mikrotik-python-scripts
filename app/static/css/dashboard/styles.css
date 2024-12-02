@@ -1,0 +1,232 @@
+/* Container behind card-tops*/
+.card-top-container {
+    transform: translateY(-50%);
+}
+
+.overview-container {
+    color: white;
+}
+
+.overview-container h1 {
+    padding-left: 2rem;
+}
+
+.card-top {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 30px;
+    position: relative;
+    z-index: 1;
+    transition: var(--tran-05);
+    width: 400px;
+    height: 100px;
+}
+
+.card-top:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
+    backdrop-filter: blur(20px);
+    transition: var(--tran-05);
+}
+
+.card-top .badge {
+    font-size: 1.5rem;
+    background: var(--sidebar-color);
+}
+
+.hover-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-hover {
+    position: absolute;
+    top: 50%;
+    right: -120px;
+    transform: translateY(-50%);
+    padding: 10px 20px;
+    background-color: var(--sidebar-color);
+    color: var(--text-color);
+    border-radius: 30px;
+    font-size: 14px;
+    text-decoration: none;
+    transition: var(--tran-05);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.hover-card:hover .btn-hover {
+    right: 20px;
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.btn-hover:hover {
+    background-color: var(--hover-color);
+    color: var(--text-color);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    transform: scale(1.1) translateY(-50%);
+}
+
+.paginationjs {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 6px;
+    color: var(--text-color) !important;
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+    border-radius: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    scale: 0.7;
+}
+
+.paginationjs .paginationjs-page,
+.paginationjs .paginationjs-prev,
+.paginationjs .paginationjs-next {
+    color: var(--text-color) !important;
+    background: rgba(0, 0, 0, 0.3);
+    border: none;
+    padding: 5px 5px;
+    margin: 0 5px;
+    font-size: 14px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border-radius: 30px;
+}
+
+.paginationjs .paginationjs-page > a,
+.paginationjs .paginationjs-prev > a,
+.paginationjs .paginationjs-next > a {
+    background-color: transparent !important;
+    color: var(--text-color) !important;
+}
+
+.paginationjs-prev,
+.paginationjs-next {
+    border-radius: 30px !important;
+}
+
+.paginationjs .paginationjs-page:hover,
+.paginationjs .paginationjs-prev:hover,
+.paginationjs .paginationjs-next:hover {
+    background: rgba(255, 255, 255, 0.3);
+    color: var(--text-color) !important;
+    transform: scale(1.05);
+}
+
+.paginationjs .paginationjs-page.active {
+    background-color: var(--text-color-not-active) !important;
+    color: var(--text-color) !important;
+    font-weight: bold;
+    border: none;
+}
+
+.paginationjs-nav {
+    display: flex;
+    align-items: center;
+    margin-right: 1rem;
+}
+
+.duplicated-ips-container {
+    overflow-y: auto; /* Scroll vertical solo si es necesario */
+}
+
+.duplicated-ips-container::-webkit-scrollbar {
+    display: none;
+}
+
+.main-row {
+    height: auto;
+}
+
+.dashboard-content .card-bottom {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(30px);
+}
+
+.inner-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(50px);
+}
+
+.ip-badge {
+    background: var(--sidebar-color);
+    color: var(--text-color);
+    font-size: 1.3rem;
+}
+
+.mac-list {
+    background: none;
+}
+
+.list-group-item {
+    border-radius: 30px !important;
+    background: var(--hover-color) !important;
+}
+
+.dashboard-content {
+    padding-bottom: 3rem;
+}
+
+.dashboard-jumbotron {
+    background: transparent;
+    background-size: cover;
+    width: 100%;
+    min-height: 200px;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+}
+
+
+.dashboard-bg {
+    background: url("../../img/dashboard-bg.svg") no-repeat center;
+    background-size: cover;
+}
+
+.dashboard-decoration {
+    position: relative;
+    overflow: hidden; /* Asegura que los elementos no salgan de su contenedor */
+}
+
+/* Media Queries for Responsive Design */
+@media (max-width: 768px) {
+
+
+    .text-card {
+        font-size: 0.8em !important;
+    }
+
+    .card-top {
+        min-width: fit-content;
+        margin: 10px;
+    }
+
+    .card-top-container {
+        overflow-x: auto;
+        overflow-y: hidden;
+    }
+
+    .hover-card {
+        transition: transform 0.3s ease;
+    }
+
+    .hover-card:hover {
+        transform: scale(1.05);
+    }
+
+    .btn-hover {
+        right: 0;
+        scale: 0.8;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+    .text-card {
+        font-size: 0.8em !important;
+    }
+}

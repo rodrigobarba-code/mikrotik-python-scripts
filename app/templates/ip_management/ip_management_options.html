@@ -9,10 +9,11 @@
 {% block content %}
     <!-- IP Management Options Jumbotron -->
     <section class="management-options-jumbotron pt-5 mb-3">
-        <div class="container-fluid py-5 d-flex flex-column flex-md-row">
+        <div id="jumbotron-content" class="container-fluid py-5 d-flex flex-column flex-md-row">
             <div class="d-flex col-md-1 order-md-1 order-2 text-md-start text-center my-md-0 my-3 justify-content-center align-items-center">
                 <button class="btn btn-c-return">
-                    <a href="{{ url_for('ip_management.ip_management') }}" class="text-decoration-none text-dark" style="font-size: 2.5rem">
+                    <a href="{{ url_for('ip_management.ip_management') }}" class="text-decoration-none text-dark"
+                       style="font-size: 2.5rem">
                         <i class="fa-solid fa-backward" style="color: white"></i>
                     </a>
                 </button>
@@ -26,7 +27,7 @@
     <!-- IP Management Options Jumbotron -->
 
     <!-- IP Management Options Database -->
-    <section class="management-options-database pt-3">
+    <section class="management-options-database pt-3 text">
         <div class="container w-75">
             <div class="row">
                 <div class="col-12 col-md-12 text-left">
@@ -38,7 +39,7 @@
     <!-- IP Management Options Database -->
 
     <!-- IP Management Options Separator -->
-    <section class="management-options-separator">
+    <section class="management-options-separator textl">
         <div class="container w-75">
             <hr>
         </div>
@@ -46,7 +47,7 @@
     <!-- IP Management Options Separator -->
 
     <!-- IP Management Options Available Options -->
-    <section class="management-options-available-options">
+    <section class="management-options-available-options text">
         <div class="container w-75">
             <div class="row row-c">
                 <a href="{{ url_for('ip_management.ip_segment', site_id=site_id) }}">
@@ -68,9 +69,9 @@
                         </div>
                     </div>
                 </a>
-                <a href="{{ url_for('home.home') }}">
+                <a href="{{ url_for('ip_management.blacklist', site_id=site_id) }}">
                     <div class="col-c col-12 col-md-12">
-                        <div class="card-c card mb-3">
+                        <div class="card-c card mb-5">
                             <div class="row g-0">
                                 <div class="col-md-2">
                                     <div class="blacklist-background-c bg-c m-3 d-flex justify-content-center align-items-center">
@@ -87,9 +88,28 @@
                         </div>
                     </div>
                 </a>
-                <a href="{{ url_for('home.home') }}">
+                <a href="{{ url_for('ip_management.ip_group_tags', site_id=site_id) }}">
                     <div class="col-c col-12 col-md-12">
                         <div class="card-c card mb-3">
+                            <div class="row g-0">
+                                <div class="col-md-2">
+                                    <div class="tags-background-c bg-c m-3 d-flex justify-content-center align-items-center">
+                                        <i class="fa-solid fa-tags" style="color: white; font-size: 30px"></i>
+                                    </div>
+                                </div>
+                                <div class="col-md-10 d-flex align-items-center">
+                                    <div class="card-body">
+                                        <h5 class="card-title"><b>Tags</b></h5>
+                                        <p class="card-text">Manage tags to categorize IP addresses</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                <a href="{{ url_for('ip_management.authorized', site_id=site_id) }}">
+                    <div class="col-c col-12 col-md-12">
+                        <div class="card-c card mb-5">
                             <div class="row g-0">
                                 <div class="col-md-2">
                                     <div class="authorized-background-c bg-c m-3 d-flex justify-content-center align-items-center">
@@ -99,14 +119,15 @@
                                 <div class="col-md-10 d-flex align-items-center">
                                     <div class="card-body">
                                         <h5 class="card-title"><b>Authorized IPs</b></h5>
-                                        <p class="card-text">Check what IPs Addresses are authorized and validate them for {{ site_name }}.</p>
+                                        <p class="card-text">Check what IPs Addresses are authorized and validate them
+                                            for {{ site_name }}.</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </a>
-                <a href="{{ url_for('home.home') }}">
+                <a href="{{ url_for('ip_management.available_ip_segments', site_id=site_id) }}">
                     <div class="col-c col-12 col-md-12">
                         <div class="card-c card mb-3">
                             <div class="row g-0">

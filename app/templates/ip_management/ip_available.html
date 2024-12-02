@@ -1,0 +1,101 @@
+{% from 'macros.html' import delete_modal, delete_select_modal, delete_all_modal %}
+{% extends 'base.html' %}
+
+{% block title %} Available IPs for {{ site_name }} {% endblock %}
+
+{% block head %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/ip_management/styles.css') }}">
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='/js/ip_management/scripts.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.ip-seat').forEach(seat => {
+                seat.addEventListener('click', () => {
+                    const ipAddress = seat.getAttribute('title');
+                    const isOccupied = seat.classList.contains('occupied');
+                    const status = isOccupied ? "Occupied" : "Available";
+
+                    Swal.fire({
+                        title: `<strong class="text">IP Details</strong>`,
+                        icon: isOccupied ? 'error' : 'success',
+                        html: `
+                    <p class="text"><b>IP Address:</b> ${ipAddress}</p>
+                    <p class="text"><b>State:</b> ${status}</p>
+                `,
+                        showCloseButton: true,
+                        focusConfirm: false,
+                        confirmButtonText: 'Close',
+                        confirmButtonColor: '#3085d6'
+                    });
+                });
+            });
+        });
+
+
+    </script>
+{% endblock %}
+
+{% block content %}
+    <!-- Available IPs Jumbotron -->
+    <section class="available-jumbotron pt-5 mb-3">
+        <div class="container-fluid py-5 d-flex flex-column flex-md-row">
+            <div class="d-flex col-md-1 order-md-1 order-2 text-md-start text-center my-md-0 my-3 justify-content-center align-items-center">
+                <button class="btn btn-c-return">
+                    <a onclick="history.back()"
+                       class="text-decoration-none text-dark" style="font-size: 2.5rem">
+                        <i class="fa-solid fa-backward" style="color: white"></i>
+                    </a>
+                </button>
+            </div>
+            <div class="col-md-11 order-md-2 order-1">
+                <h1 class="display-5 fw-bold">Available IP Segments for {{ site_name }}</h1>
+                <p class="col-md-8 fs-4">Here you can view the available IP Segments for the site {{ site_name }}.</p>
+            </div>
+        </div>
+    </section>
+    <!-- Available IPs Jumbotron -->
+
+    <!-- Available IPs Database -->
+    <section class="available-database pt-3 text">
+        <div class="container w-75">
+            <div class="row">
+                <div class="col-12 col-md-8 text-left">
+                    <h2 class="available-database-title"><b>Available</b> IPs</h2>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Available IPs Database -->
+
+    <!-- Available IPs Separator -->
+    <section class="available-separator">
+        <div class="container w-75">
+            <hr class="text">
+        </div>
+    </section>
+    <!-- Available IPs Separator -->
+
+
+    <!-- Available IPs Available Container -->
+    <section class="available-ips-container">
+        <div class="container w-75">
+            <div class="row">
+                <div class="col-12">
+                    <div class="ip-grid">
+                        <div class="ip-row">
+                            {% for ip in ip_availables %}
+                                <div class="ip-seat {{ 'occupied' if ip.is_occupied else 'available' }}"
+                                     title="{{ ip.address }}">
+                                    {{ ip.address }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Available IPs Available Container -->
+{% endblock %}

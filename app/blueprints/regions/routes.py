@@ -1,137 +1,240 @@
-# Description: Regions Routes for the Region Blueprint
-
-# Importing Required Local Modules
-from app.blueprints.users.functions import users_functions as functions  # Import the users functions object
-from . import regions_bp  # Import the regions Blueprint
-# Importing Required Local Modules
-
-# Importing Required Libraries
-from flask import render_template, redirect, url_for, flash, request, jsonify, session
-# Importing Required Libraries
-
-# Importing Required Decorators
+import requests
+from . import regions_bp
+from entities.region import RegionEntity
+from app.functions import get_verified_jwt_header
 from app.decorators import RequirementsDecorators as restriction
-# Importing Required Decorators
+from flask import render_template, redirect, url_for, flash, request, jsonify, session
 
-# Importing Required Entities
-from app.blueprints.regions.entities import RegionEntity
-# Importing Required Entities
 
-# Importing Required Models
-from app.blueprints.regions.models import Region
-# Importing Required Models
-
-# Regions Main Route
 @regions_bp.route('/', methods=['GET'])
-@restriction.login_required  # Need to be logged in
+@restriction.login_required
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
 def regions():
     try:
-        region_list = Region.get_regions()  # Get all regions on the database
-        return render_template(
-            'regions/regions.html',  # Render the regions template
-            region_list=region_list, region=None  # Pass the region list and None to the template
+        response = requests.get(
+            'http://localhost:8080/api/private/regions/',
+            headers=get_verified_jwt_header(),
+            params={'user_id': session.get('user_id')}
         )
-    except Exception as e:  # If an exception occurs
-        flash(str(e), 'danger')  # Flash an error message
-        return redirect(url_for('regions.regions'))  # Redirect to the regions route
-# Regions Main Route
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                region_list = [
+                    RegionEntity(region.get('region_id'), region.get('region_name'))
+                    for region in response.json().get('regions')
+                ]
+            else:
+                raise Exception(response.json().get('message'))
+        elif response.status_code == 500:
+            raise Exception('Failed to retrieve regions')
+        return render_template(
+            'regions/regions.html',
+            region_list=region_list,
+            region=None
+        )
+    except Exception as e:
+        flash(str(e), 'danger')
+        return redirect(url_for('regions.regions'))
 
-# Regions Add Route
+
 @regions_bp.route('/add', methods=['GET', 'POST'])
-@restriction.login_required  # Need to be logged in
-@restriction.admin_required  # Need to be an admin
+@restriction.login_required
+@restriction.admin_required
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
 def add_region():
-    if request.method == 'POST':  # If the request method is POST
-        try:  # Try to add the region
-            region = RegionEntity(  # Create a RegionEntity object
-                region_id=int(),  # Set the region ID
-                region_name=request.form['region_name']  # Set the region name
+    if request.method == 'POST':
+        try:
+            response = requests.post(
+                'http://localhost:8080/api/private/region/',
+                headers=get_verified_jwt_header(),
+                params={
+                    'user_id': session.get('user_id'),
+                    'region_name': request.form['region_name']
+                }
             )
-            Region.add_region(region)  # Add the region
-            flash('Region added successfully', 'success')  # Flash a success message
-            functions.create_log(session['user_id'], 'Region Added', 'INSERT', 'regions')  # Create a log
-        except Exception as e:  # If an exception occurs
-            flash(str(e), 'danger')  # Flash an error message
-        return redirect(url_for('regions.regions'))  # Redirect to the regions route
+            if response.status_code == 200:
+                if response.json().get('backend_status') == 200:
+                    flash('Region added successfully', 'success')
+                else:
+                    raise Exception(response.json().get('message'))
+            elif response.status_code == 500:
+                raise Exception('Failed to add region')
+        except Exception as e:
+            flash(str(e), 'danger')
+        return redirect(url_for('regions.regions'))
     return render_template(
-        'regions/form_regions.html',  # Render the form_regions template
-        region=None  # Pass None to the template
+        'regions/form_regions.html',
+        region=None
     )
-# Regions Add Route
 
-# Regions Update Route
+
 @regions_bp.route('/update/<int:region_id>', methods=['GET', 'POST'])
-@restriction.login_required  # Need to be logged in
-@restriction.admin_required  # Need to be an admin
+@restriction.login_required
+@restriction.admin_required
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
 def update_region(region_id):
-    if request.method == 'POST':  # If the request method is POST
-        try:  # Try to update the region
-            region = RegionEntity(  # Create a RegionEntity object
-                region_id=region_id,  # Set the region ID
-                region_name=request.form['region_name']  # Set the region name
+    if request.method == 'POST':
+        try:
+            response = requests.put(
+                f'http://localhost:8080/api/private/region/{region_id}',
+                headers=get_verified_jwt_header(),
+                params={
+                    'user_id': session.get('user_id'),
+                    'region_id': region_id,
+                    'region_name': request.form['region_name']}
             )
-            Region.update_region(region)  # Update the region
-            flash('Region was updated successfully', 'success')  # Flash a success message
-            functions.create_log(session['user_id'], 'Region Updated', 'UPDATE', 'regions')  # Create a log
-        except Exception as e:  # If an exception occurs
-            flash(str(e), 'danger')  # Flash an error message
-        return redirect(url_for('regions.regions'))  # Redirect to the regions route
-    try:  # Try to get the region
-        region = Region.get_region(region_id)  # Get the region
-        return render_template(
-            'regions/form_regions.html',  # Render the form_regions template
-            region=region  # Pass the region to the template
-        )
-    except Exception as e:  # If an exception occurs
-        flash(str(e), 'danger')  # Flash an error message
-        return redirect(url_for('regions.regions'))  # Redirect to the regions route
-# Regions Update Route
-
-# Regions Delete Route
-@regions_bp.route('/delete/<int:region_id>', methods=['GET'])
-@restriction.login_required  # Need to be logged in
-@restriction.admin_required  # Need to be an admin
-def delete_region(region_id):
-    try:  # Try to delete the region
-        Region.delete_region(region_id)  # Delete the region
-        flash('Region deleted successfully', 'success')  # Flash a success message
-        functions.create_log(session['user_id'], 'Region Deleted', 'DELETE', 'regions')  # Create a log
-    except Exception as e:  # If an exception occurs
-        flash(str(e), 'danger')  # Flash an error message
-    return redirect(url_for('regions.regions'))  # Redirect to the regions route
-# Regions Delete Route
-
-# Regions Bulk Delete Route
-@regions_bp.route('/delete/bulk', methods=['POST'])
-@restriction.login_required  # Need to be logged in
-@restriction.admin_required  # Need to be an admin
-def bulk_delete_region():
-    data = request.get_json()  # Get the JSON data
-    regions_ids = data.get('items_ids', [])  # Get the regions IDs
+            if response.status_code == 200:
+                if response.json().get('backend_status') == 200:
+                    flash('Region updated successfully', 'success')
+                else:
+                    raise Exception(response.json().get('message'))
+            else:
+                raise Exception('Failed to update region')
+        except Exception as e:
+            flash(str(e), 'danger')
+        return redirect(url_for('regions.regions'))
     try:
-        flag = 0  # Set the flag to 0
-        for region_id in regions_ids:  # Loop through the regions IDs
-            Region.delete_region(region_id)  # Delete the region
-            flag += 1  # Increment the flag
-        flash(f'{flag} Regions Deleted Successfully', 'success')  # Flash a success message
-        functions.create_log(session['user_id'], f'{flag} Regions Deleted', 'DELETE', 'regions')  # Create a log
-        return jsonify({'message': 'Regions deleted successfully'}), 200  # Return a success message
-    except Exception as e:  # If an exception occurs
-        flash(str(e), 'danger')  # Flash an error message
-        return jsonify({'message': 'Failed to delete regions', 'error': str(e)}), 500  # Return an error message
-# Regions Bulk Delete Route
+        response = requests.get(
+            f'http://localhost:8080/api/private/region/{region_id}',
+            headers=get_verified_jwt_header(),
+            params={'user_id': session.get('user_id')}
+        )
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                region_object = response.json().get('region')
+                region = RegionEntity(
+                    region_object.get('region_id'),
+                    region_object.get('region_name')
+                )
+            else:
+                raise Exception(response.json().get('message'))
+        elif response.status_code == 500:
+            raise Exception('Failed to retrieve region')
+        return render_template(
+            'regions/form_regions.html',
+            region=region
+        )
+    except Exception as e:
+        flash(str(e), 'danger')
+        return redirect(url_for('regions.regions'))
 
-# Regions Delete All Route
+
+@regions_bp.route('/delete/<int:region_id>', methods=['GET'])
+@restriction.login_required
+@restriction.admin_required
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
+def delete_region(region_id):
+    try:
+        response = requests.delete(
+            f'http://localhost:8080/api/private/region/{region_id}',
+            headers=get_verified_jwt_header(),
+            params={'user_id': session.get('user_id')}
+        )
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                flash('Region Deleted Successfully', 'success')
+            else:
+                raise Exception(response.json().get('message'))
+        elif response.status_code == 500:
+            raise Exception('Failed to delete region')
+    except Exception as e:
+        flash(str(e), 'danger')
+    return redirect(url_for('regions.regions'))
+
+
+@regions_bp.route('/delete/bulk', methods=['POST'])
+@restriction.login_required
+@restriction.admin_required
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
+def bulk_delete_region():
+    data = request.get_json()
+    regions_ids = data.get('items_ids', [])
+    regions_ids = [int(region_id) for region_id in regions_ids]
+    try:
+        response = requests.delete(
+            'http://localhost:8080/api/private/regions/bulk/',
+            json={'regions_ids': regions_ids},
+            headers=get_verified_jwt_header(),
+            params={'user_id': session.get('user_id')}
+        )
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                flag = response.json().get('count_flag')
+                flash(f'{flag} Regions Deleted Successfully', 'success')
+
+                return jsonify({'message': f'{flag} regions deleted successfully'}), 200
+            else:
+                raise Exception(response.json().get('message'))
+        elif response.status_code == 500:
+            return jsonify({'message': 'Failed to delete regions'}), 500
+    except Exception as e:
+        flash(str(e), 'danger')
+        return jsonify({'message': 'Failed to delete regions', 'error': str(e)}), 500
+
+
 @regions_bp.route('/delete/all', methods=['POST'])
-@restriction.login_required  # Need to be logged in
-@restriction.admin_required  # Need to be an admin
+@restriction.login_required
+@restriction.admin_required
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
 def delete_all_regions():
-    try:  # Try to delete all regions
-        Region.delete_all_regions()  # Delete all regions
-        flash('All Regions Deleted Successfully', 'success')  # Flash a success message
-        functions.create_log(session['user_id'], 'All Regions Deleted', 'DELETE', 'regions')  # Create a log
-        return jsonify({'message': 'Regions deleted successfully'}), 200  # Return a success message
-    except Exception as e:  # If an exception occurs
-        flash(str(e), 'danger')  # Flash an error message
-        return jsonify({'message': 'Failed to delete regions', 'error': str(e)}), 500  # Return an error message
-# Regions Delete All Route
+    try:
+        response = requests.delete(
+            'http://localhost:8080/api/private/regions/',
+            headers=get_verified_jwt_header(),
+            params={'user_id': session.get('user_id')}
+        )
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                flash('All Regions Deleted Successfully', 'success')
+                return jsonify({'message': 'All regions deleted successfully'}), 200
+            else:
+                raise Exception(response.json().get('message'))
+        elif response.status_code == 500:
+            return jsonify({'message': 'Failed to delete regions'}), 500
+    except Exception as e:
+        flash(str(e), 'danger')
+        return jsonify({'message': 'Failed to delete regions', 'error': str(e)}), 500
+
+
+@regions_bp.route('/import/excel', methods=['POST'])
+@restriction.login_required
+@restriction.admin_required
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
+def import_regions_from_excel():
+    try:
+        import pandas as pd
+
+        file = request.files['file']
+
+        if file.filename.split('.')[-1] not in ['xls', 'xlsx']:
+            raise Exception('Invalid file format')
+
+        df = pd.read_excel(file)
+        df = df.where(pd.notnull(df), None)
+
+        json_region_list = []
+        for index, row in df.iterrows():
+            region = {
+                'region_name': row['Region Name']
+            }
+            json_region_list.append(region)
+
+        response = requests.post(
+            'http://localhost:8080/api/private/bulk/insert/regions/',
+            json={'regions': json_region_list},
+            headers=get_verified_jwt_header(),
+            params={'user_id': session.get('user_id')}
+        )
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                flash(response.json().get('message'), 'success')
+                return jsonify(
+                    {'message': response.json().get('message')}
+                ), 200
+            else:
+                raise Exception(response.json().get('message'))
+        elif response.status_code == 500:
+            raise Exception('Failed to import regions from excel')
+    except Exception as e:
+        flash(str(e), 'danger')
+        return jsonify({'message': str(e)}), 500
+    return redirect(url_for('regions.regions'))

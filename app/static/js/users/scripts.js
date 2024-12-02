@@ -24,7 +24,7 @@ $(document).ready(function() {
 
         $('.timeline .event').each(function() {  // Iterate over each log
             let logText = $(this).text().toLowerCase();  // Get the log text
-            let logDate = $(this).attr('data-datetime').split(' ')[0].replace(/\//g, '-');  // Get the log date
+            let logDate = $(this).data('datetime').split(' ')[0].replace(/\//g, '-');  // Get the log date
             let logAction = $(this).find('.badge').text().toLowerCase();  // Get the log action
 
             let matchesSearch = searchQuery === "" || logText.includes(searchQuery);  // Check if the search query matches
@@ -96,22 +96,6 @@ $(document).ready(function() {
     // Add event listener to the previous and next buttons
 
     filterLogs();  // Filter the logs
-
-    // Show date and time on each log
-    $('.event').each(function () {
-        var date = $(this).data('datetime');  // Get the date and time
-        var newDate = new Date(date);  // Create a new date object
-        var year = newDate.getFullYear();  // Get the year
-        var month = newDate.getMonth() + 1;  // Get the month
-        var day = newDate.getDate();  // Get the day
-        var hours = newDate.getHours();  // Get the hours
-        var minutes = newDate.getMinutes();  // Get the minutes
-        var seconds = newDate.getSeconds();  // Get the seconds
-        var dateString = month + '/' + day + '/' + year + '\n';  // Create the date string
-        var timeString = hours + ':' + minutes + ':' + seconds;  // Create the time string
-        $(this).attr('data-date', dateString + timeString);  // Set the date attribute
-    });
-    // Show date and time on each log
 });
 /* Contains all the scripts for the base app running on the client side. */
 
@@ -134,7 +118,7 @@ function deleteByDateUserLogModal(urlIn, urlOut) {
             if (response.ok) {  // Check if the response is ok
                 location.href = urlOut;  // Redirect the user to the urlOut
             } else {  // If not, alert the user that the delete failed
-                alert('Failed to delete logs');  // Alert the user that the delete failed
+                alert('Failed to delete logs by date. Please try again.');
             }
         });
     });

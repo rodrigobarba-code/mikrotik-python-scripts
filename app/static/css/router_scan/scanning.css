@@ -1,0 +1,150 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+@font-face {
+    font-family: 'CocomatPro';
+    src: url('../../fonts/CocomatPro-Bold.ttf') format('truetype');
+}
+
+/* General Styles */
+
+p {
+    font-weight: 300;
+    font-size: 16px;
+    line-height: 1.5;
+    margin: 0;
+}
+
+body {
+    font-family: 'CocomatPro', sans-serif;
+    height: 100vh;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: url("/static/img/curve.svg") no-repeat center center fixed;
+    background-size: 100% 100%;
+    color: white;
+}
+
+
+/* Phones */
+@media (max-width: 768px) {
+    body {
+        background-size: 200% 200%;
+    }
+}
+
+/* Tablets */
+@media (min-width: 768px) and (max-width: 1024px) {
+    body {
+        background-size: 150% 150%;
+    }
+}
+
+/* General Styles */
+
+/* Container Styles */
+
+.loading-container {
+    background: rgba(17, 25, 40, 0.17);
+    backdrop-filter: blur(30px); /* Desenfoque de fondo */
+    border-radius: 15px; /* Bordes redondeados */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Sombra suave y más pronunciada */
+    padding: 20px;
+    width: 100%;
+    max-width: 600px; /* Máximo ancho para pantallas grandes */
+    margin: 0 auto;
+}
+
+#footer-main {
+    background: rgba(17, 25, 40, 0.17) !important;
+    backdrop-filter: blur(30px) !important;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2) !important;
+}
+
+.seven-suite-logo > img {
+    width: 100%;
+    max-width: 85px;
+    margin: 0 auto;
+    display: block;
+}
+
+.scan-svg {
+    display: block;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 100px;
+}
+
+.progress-container {
+    text-align: center;
+    margin-top: 20px;
+}
+
+/* Estilo de los botones */
+.btn {
+    border-radius: 25px !important;
+    font-size: 16px !important;
+}
+
+.music-button {
+    background: linear-gradient(to right, #72c55f, #348bff);
+    border: none;
+}
+
+.progress {
+    background: rgb(0, 0, 0, 0.0);
+}
+
+.progress-bar {
+    /* Gradiante azul y verde */
+    background: linear-gradient(to right, #87ff6d, #348bff);
+    border-radius: 15px; /* Bordes redondeados */
+}
+
+/* Estilo responsive */
+@media (max-width: 768px) {
+    .loading-container {
+        padding: 15px; /* Reducir padding en dispositivos más pequeños */
+        margin-left: 15px; /* Agregar margen a los lados en pantallas medianas */
+        margin-right: 15px;
+    }
+
+    .progress-container {
+        margin-top: 15px;
+    }
+
+    #progress-bar {
+        height: 15px; /* Reducir la altura de la barra de progreso */
+    }
+}
+
+@media (max-width: 480px) {
+    .loading-container {
+        padding: 10px; /* Reducir aún más el padding en teléfonos */
+        margin-left: 10px; /* Margen más pequeño en pantallas de teléfonos */
+        margin-right: 10px;
+    }
+
+    h1 {
+        font-size: 20px; /* Reducir el tamaño del título */
+    }
+
+    #status-text {
+        font-size: 14px; /* Reducir el tamaño del texto */
+    }
+
+    #toggleButton, .btn {
+        font-size: 14px; /* Reducir el tamaño de los botones */
+    }
+}
+
+/* Container Styles */
+
+/* Audio Element */
+
+#audioElement {
+    display: none;
+}
+
+/* Audio Element */

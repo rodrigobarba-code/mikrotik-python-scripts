@@ -1,0 +1,117 @@
+{% from 'macros.html' import pagination %}
+{% extends 'base.html' %}
+
+{% block title %}Available IPs Segments{% endblock %}
+
+{% block head %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/ip_management/styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/paginationjs/2.1.5/pagination.css">
+{% endblock %}
+
+{% block scripts %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paginationjs/2.1.5/pagination.min.js"></script>
+    <script src="{{ url_for('static', filename='/js/ip_management/scripts.js') }}"></script>
+    <script>
+        $(document).ready(function () {
+            const items = $('#row-c .item').toArray();
+
+            if (items.length === 0) {
+                console.warn('No hay elementos en el contenedor para paginar.');
+                return;
+            }
+
+            $('#pagination-container').pagination({
+                dataSource: items,
+                pageSize: 16,
+                showGoInput: true,
+                showGoButton: true,
+                formatGoInput: 'go to <%= input %> st/rd/th',
+                className: 'paginationjs-theme-green paginationjs-big',// Número de elementos por página
+                callback: function (data, pagination) {
+                    $('#row-c').empty();
+
+                    data.forEach(function (item) {
+                        $('#row-c').append(item);
+                    });
+                }
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+    <!-- Available IPs Jumbotron -->
+    <section class="available-jumbotron pt-5 mb-3">
+        <div class="container-fluid py-5 d-flex flex-column flex-md-row">
+            <div class="d-flex col-md-1 order-md-1 order-2 text-md-start text-center my-md-0 my-3 justify-content-center align-items-center">
+                <button class="btn btn-c-return">
+                    <a href="{{ url_for('ip_management.ip_management_options_by_site', site_id=site_id) }}"
+                       class="text-decoration-none text-dark" style="font-size: 2.5rem">
+                        <i class="fa-solid fa-backward" style="color: white"></i>
+                    </a>
+                </button>
+            </div>
+            <div class="col-md-11 order-md-2 order-1">
+                <h1 class="display-5 fw-bold">Available IP Segments for {{ site_name }}</h1>
+                <p class="col-md-8 fs-4">Here you can view the available IP Segments for the site {{ site_name }}.</p>
+            </div>
+        </div>
+    </section>
+    <!-- Available IPs Jumbotron -->
+
+    <!-- Available IPs Database -->
+    <section class="available-database pt-3 text">
+        <div class="container w-75">
+            <div class="row">
+                <div class="col-12 col-md-6 text-left">
+                    <h2 class="available-database-title"><b>Choose</b> an IP Segment</h2>
+                </div>
+                <div class="col-12 col-md-12 mt-3">
+                    <div id="pagination-container" style="margin-left: auto !important"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Available IPs Database -->
+
+    <!-- Available IPs Separator -->
+    <section class="available-separator">
+        <div class="container w-75">
+            <hr class="text">
+        </div>
+    </section>
+    <!-- Available IPs Separator -->
+
+    <!-- Segment Available IPs Available Container -->
+    <section class="ip-segments-container">
+        <div class="container w-75">
+            <div class="row row-c" id="row-c">
+                {% for segment in segments %}
+                    {% if not segment.is_disabled %}
+                        <div class="col-md-4 mb-4 item">
+                            <a href="{{ url_for('ip_management.ip_available', site_id=site_id) }}?segment={{ segment.ip }}/{{ segment.subnet_mask }}">
+                                <div class="custom-card">
+                                    <div class="card-content">
+                                        <span class="ip-text text">{{ segment.ip }}</span>
+                                        <span class="port-text text">{{ segment.subnet_mask }}</span>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    {% else %}
+                        <div class="col-md-4 mb-4 item">
+                            <div class="custom-card-disabled">
+                                <div class="card-content">
+                                    <span class="ip-text text">{{ segment.ip }} <span style="font-size: 14px">- Disabled</span></span>
+                                    <span class="port-text text">{{ segment.subnet_mask }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+    <!-- Segment Available Container -->
+{% endblock %}

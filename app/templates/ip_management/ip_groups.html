@@ -1,0 +1,173 @@
+{% from 'macros.html' import delete_modal, delete_select_modal, delete_all_modal, show_details_button %}
+{% extends 'base.html' %}
+{% block title %} IP Management &#10095; Sites &#10095; Options &#10095;
+    {{ 'Blacklist' if is_blacklist else 'Authorized' }} for {{ site_name }} {% endblock %}
+{% block head %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/ip_management/styles.css') }}">
+{% endblock %}
+{% block scripts %}
+    <script src="{{ url_for('static', filename='/js/ip_management/scripts.js') }}"></script>
+    <script>
+        {% if is_blacklist %}
+            deleteSelectModal("{{ url_for('ip_management.bulk_delete_ip_group', site_id=site_id) }}", "{{ url_for('ip_management.blacklist', site_id=site_id) }}", 'ip-group');
+            deleteAllModal("{{ url_for('ip_management.delete_all_ip_groups', site_id=site_id, is_blacklist=is_blacklist) }}", "{{ url_for('ip_management.blacklist', site_id=site_id) }}", 'ip-group');
+            moveAllToAuthorized("{{ url_for('ip_management.transfer_all_to_authorized', site_id=site_id) }}", "{{ url_for('ip_management.blacklist', site_id=site_id) }}", 'ip-group');
+            moveSelectToAuthorized("{{ url_for('ip_management.transfer_bulk_to_authorized') }}", "{{ url_for('ip_management.blacklist', site_id=site_id) }}", 'ip-group');
+        {% else %}
+            deleteSelectModal("{{ url_for('ip_management.bulk_delete_ip_group', site_id=site_id) }}", "{{ url_for('ip_management.authorized', site_id=site_id) }}", 'ip-group');
+            deleteAllModal("{{ url_for('ip_management.delete_all_ip_groups', site_id=site_id, is_blacklist=is_blacklist) }}", "{{ url_for('ip_management.authorized', site_id=site_id) }}", 'ip-group');
+        {% endif %}
+    </script>
+{% endblock %}
+{% block content %}
+    <!-- IP Groups Jumbotron -->
+    <section class="{{ 'blacklist' if is_blacklist else 'authorized' }}-jumbotron pt-5 mb-3">
+        <div class="container-fluid py-5 d-flex flex-column flex-md-row">
+            <div class="d-flex col-md-1 order-md-1 order-2 text-md-start text-center my-md-0 my-3 justify-content-center align-items-center">
+                <button class="btn btn-c-return">
+                    <a href="{{ url_for('ip_management.ip_management_options_by_site', site_id=site_id) }}"
+                       class="text-decoration-none text-dark" style="font-size: 2.5rem">
+                        <i class="fa-solid fa-backward" style="color: white"></i>
+                    </a>
+                </button>
+            </div>
+            <div class="col-md-11 order-md-2 order-1">
+                <h1 class="display-5 fw-bold">{{ 'Blacklist' if is_blacklist else 'Authorized' }}
+                    for {{ site_name }}</h1>
+                {% if is_blacklist %}
+                    <p class="col-md-8 fs-4">List of IP addresses that are not identified.</p>
+                {% else %}
+                    <p class="col-md-8 fs-4">List of IP addresses that are authorized.</p>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+    <!-- IP Groups Jumbotron -->
+
+    <!-- IP Groups Database -->
+    <section class="blacklist-database pt-3 text">
+        <div class="container w-75 align-items-center">
+            <div class="row">
+                <div class="col-8 col-md-7 text-left">
+                    <h2 class="routers-database-title"><b>{{ 'Blacklist' if is_blacklist else 'Authorized' }}</b>
+                        IP Groups</h2>
+                </div>
+                <div class="col-12 col-md-5 d-flex justify-content-end">
+                    {% if session['user_privileges'] == 'admin' %}
+                        {% if is_blacklist %}
+                            <button type="button" class="btn btn-md btn-warning me-2" id="move-select-to-authorized">
+                                <i class="fa-solid fa-star"></i>
+                            </button>
+                            <button type="button" class="btn btn-md btn-success me-2" id="move-all-to-authorized">
+                                <i class="fa-solid fa-star"></i>
+                            </button>
+                        {% endif %}
+                        <button type="button" class="btn btn-md btn-danger me-2" id="delete-select">
+                            <i style="font-size: large" class="fa-solid fa-trash-can-plus"></i>
+                        </button>
+                        <button type="button" class="btn btn-md btn-dark" id="delete-all">
+                            <i style="font-size: large" class="fa-solid fa-trash-can-xmark"></i>
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- IP Groups Database -->
+
+    <!-- IP Groups Separator -->
+    <section class="groups-separator">
+        <div class="container w-75 text">
+            <hr>
+        </div>
+    </section>
+    <!-- IP Groups Separator -->
+
+    <!-- IP Groups Table -->
+    <section class="groups-table hide-scroll pt-3 pb-3 text">
+        <div class="container w-75" id="sites-table-c">
+            <table class="table table-responsive text" id="datatable-object">
+                <thead>
+                <tr>
+                    <th scope="col"></th>
+                    <th scope="col">#</th>
+                    <th scope="col">IP Address</th>
+                    <th scope="col">MAC Address</th>
+                    <th scope="col">Interface</th>
+                    <th scope="col">Alias</th>
+                    <th scope="col">Description</th>
+                    <th scope="col">Tags</th>
+                    <th scope="col">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for ip_group in groups %}
+                    <tr>
+                        <td class="text-center"><label for="ip-group-{{ ip_group[0].ip_group_id }}"></label>
+                            <input type="checkbox" class="form-check-input"
+                                   id="ip-group-{{ ip_group[0].ip_group_id }}">
+                        </td>
+                        <td>{{ ip_group[0].ip_group_id }}</td>
+                        <td>{{ ip_group[0].ip_group_ip }}</td>
+                        {% if ip_group[0].ip_group_mac %}
+                            <td>{{ ip_group[0].ip_group_mac }}</td>
+                        {% else %}
+                            <td><i class="no_identified">No MAC Address</i></td>
+                        {% endif %}
+                        <td>{{ ip_group[0].ip_group_interface }}</td>
+                        {% if ip_group[0].ip_group_alias %}
+                            <td>{{ ip_group[0].ip_group_alias }}</td>
+                        {% else %}
+                            <td><i class="no_identified">No Alias</i></td>
+                        {% endif %}
+                        <td>{{ ip_group[0].ip_group_description }}</td>
+                        {% if ip_group[1] != [] %}
+                            <td>
+                                {% for tag in ip_group[1] %}
+                                    <span class="badge"
+                                          style="background-color: {{ tag.ip_group_tag_color }}; color: {{ tag.ip_group_tag_text_color }}">{{ tag.ip_group_tag_name }}
+                                    </span>
+                                {% endfor %}
+                            </td>
+                        {% else %}
+                            <td><i class="no_identified">No Tags</i></td>
+                        {% endif %}
+                        <td>
+                            {% if session['user_privileges'] == 'admin' %}
+                                <a href="{{ url_for('ip_management.update_ip_group', ip_group_id=ip_group[0].ip_group_id, site_id=site_id) }}"
+                                   type="button"
+                                   class="btn btn-sm btn-warning"><i class="fa-solid fa-edit"></i></a>
+                                <button type="button" id="delete-button-blacklist-{{ ip_group[0].ip_group_id }}"
+                                        class="btn btn-sm btn-danger"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#delete-modal"
+                                        data-id="{{ ip_group[0].ip_group_id }}"
+                                        data-type="blacklist"
+                                        data-url="{{ url_for('ip_management.delete_ip_group', ip_group_id=ip_group[0].ip_group_id, site_id=site_id) }}"
+                                        data-name="{{ ip_group[0].ip_group_ip }}"
+                                ><i class="fa-solid fa-trash"></i></button>
+                                {% if is_blacklist %}
+                                    <a href="{{ url_for('ip_management.transfer_to_authorized', ip_group_id=ip_group[0].ip_group_id, site_id=site_id) }}"
+                                       type="button"
+                                       class="btn btn-sm btn-info"><i class="fa-solid fa-right-left"></i>
+                                    </a>
+                                {% endif %}
+                            {% endif %}
+                            <!-- Show Details Button -->
+                            {{ show_details_button(ip_group[0].ip_group_id, url_for('ip_management.get_ip_group_details'), 'Blacklist' if is_blacklist else 'Authorized') }}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+    <!-- IP Groups Table -->
+
+
+    <!-- Delete Modals -->
+    <div class="delete-modal-container">{{ delete_modal() }}</div>
+    <div class="delete-select-modal-container">{{ delete_select_modal() }}</div>
+    <div class="delete-all-modal-container">{{ delete_all_modal() }}</div>
+    <!-- Delete Modals -->
+{% endblock %}
