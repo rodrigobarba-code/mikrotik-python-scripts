@@ -1,11 +1,9 @@
-from multiprocessing.reduction import duplicate
-
 import requests
 from . import dashboard_bp
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from app.decorators import RequirementsDecorators as restriction
 from app.functions import get_verified_jwt_header
 from flask import render_template, flash, session
+from concurrent.futures import ThreadPoolExecutor
+from app.decorators import RequirementsDecorators as restriction
 
 
 # Function to Fetch URL
