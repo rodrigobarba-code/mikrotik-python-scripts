@@ -190,6 +190,8 @@
     color: #bb4430 !important;
     animation: pulse 1s infinite !important;
 
+}
+
 .card {
     background-color: var(--active-color);
     color: var(--text-color);
