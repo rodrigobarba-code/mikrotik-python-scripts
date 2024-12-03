@@ -64,6 +64,8 @@ def get_site_names():
 @restriction.login_required  # Login Required Decorator
 @restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
 def dashboard():
+    not_data_found = 0
+
     # Obtener el user_id desde la sesión
     user_id = session.get('user_id')
 
@@ -89,30 +91,36 @@ def dashboard():
 
     # Procesar los datos combinados por sitio
     combined_data = {}
-    for site, site_data in assigned_data.items():
-        combined_data[site] = {
-            "assigned": site_data["by_segment"],
-            "available": available_data.get(site, {}).get("by_segment", [])
-        }
+    if assigned_data and available_data:
+        for site, site_data in assigned_data.items():
+            combined_data[site] = {
+                "assigned": site_data["by_segment"],
+                "available": available_data.get(site, {}).get("by_segment", [])
+            }
 
     # Procesar los datos de IPs públicas
     public_ips_data = {}
-    for site, site_data in assigned_public_data.items():
-        public_ips_data[site] = {
-            "assigned": site_data["by_segment"],
-            "available": available_public_data.get(site, {}).get("by_segment", [])
-        }
+    if assigned_public_data and available_public_data:
+        for site, site_data in assigned_public_data.items():
+            public_ips_data[site] = {
+                "assigned": site_data["by_segment"],
+                "available": available_public_data.get(site, {}).get("by_segment", [])
+            }
 
     # Procesar los datos de segmentos por sitio
     segments_data = total_segments_per_site_data
 
+    if combined_data == {} or public_ips_data == {} or duplicated_ips_response == {} or segments_data == {}:
+        not_data_found = 1
+
     # Renderizar el template con los datos preparados
     return render_template(
         'dashboard/dashboard.html',
-        dashboard_data=combined_data,  # Datos combinados de IPs asignadas y disponibles
-        public_ips_data=public_ips_data,  # Datos de IPs públicas
-        total_ips_data=total_ips_data,  # Datos de total_ips
-        duplicated_ips=duplicated_ips_response,  # Datos de IPs duplicadas
-        segments_data=segments_data,  # Datos de segmentos totales por sitio
-        sites=get_site_names()  # Lista de sitios para los filtros
+        dashboard_data=combined_data if combined_data else {},  # Datos de IPs asignadas y disponibles
+        public_ips_data=public_ips_data if public_ips_data else {},  # Datos de IPs públicas asignadas y disponibles
+        total_ips_data=total_ips_data if total_ips_data else {},  # Datos de IPs totales
+        duplicated_ips=duplicated_ips_response if duplicated_ips_response else {},  # Datos de IPs duplicadas
+        segments_data=segments_data if segments_data else {},  # Datos de segmentos por sitio
+        sites=get_site_names(),  # Nombres de los sitios
+        not_data_found=not_data_found  # Indicador de que no se encontraron datos
     )

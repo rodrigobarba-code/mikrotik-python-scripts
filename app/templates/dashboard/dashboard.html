@@ -301,44 +301,52 @@
         </section>
         <!-- Dashboard Jumbotron -->
 
-        <!-- Overview Card-Top -->
-        <div class="container card-top-container">
-            <div class="row">
-                <div class="col-lg-12 col-md-12 col-sm-12 card-container">
-                    <div class="d-flex justify-content-evenly">
-                        <div class="card card-top">
-                            <div class="card-body">
-                                <h5 class="card-title">Total IPs</h5>
-                                <span class="badge rounded-pill text">
+        {% if not_data_found == 1 %}
+            <!-- No data found -->
+            <div style="color: var(--text-color);" class="text-center">
+                <h1> No data found </h1>
+                <p> Please run the scan to get the data </p>
+            </div>
+        {% else %}
+            <!-- Overview Card-Top -->
+            <div class="container card-top-container">
+                <div class="row">
+                    <div class="col-lg-12 col-md-12 col-sm-12 card-container">
+                        <div class="d-flex justify-content-evenly">
+                            <div class="card card-top">
+                                <div class="card-body">
+                                    <h5 class="card-title">Total IPs</h5>
+                                    <span class="badge rounded-pill text">
                                 {{ total_ips_data.total }}
                             </span>
+                                </div>
                             </div>
-                        </div>
-                        <div class="card card-top hover-card">
-                            <div class="card-body">
-                                <h5 class="card-title text-card">Anomalies found<i
-                                        class="fa-solid fa-circle-exclamation ps-2"></i>
-                                </h5>
-                                <span class="badge rounded-pill text">
+                            <div class="card card-top hover-card">
+                                <div class="card-body">
+                                    <h5 class="card-title text-card">Anomalies found<i
+                                            class="fa-solid fa-circle-exclamation ps-2"></i>
+                                    </h5>
+                                    <span class="badge rounded-pill text">
                                 {{ total_ips_data.count_arps }}
                             </span>
-                                <a href="{{ url_for('router_scan.scan') }}" class="btn-hover">View Details</a>
+                                    <a href="{{ url_for('router_scan.scan') }}" class="btn-hover">View Details</a>
+                                </div>
                             </div>
-                        </div>
-                        <div class="card card-top">
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-6 text-center">
-                                        <h6 class="text-card">Blacklist</h6>
-                                        <span class="badge rounded-pill text">
+                            <div class="card card-top">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-6 text-center">
+                                            <h6 class="text-card">Blacklist</h6>
+                                            <span class="badge rounded-pill text">
                                     {{ total_ips_data.count_blacklist }}
                                     </span>
-                                    </div>
-                                    <div class="col-6 text-center">
-                                        <h6 class="text-card">Authorized</h6>
-                                        <span class="badge rounded-pill text">
+                                        </div>
+                                        <div class="col-6 text-center">
+                                            <h6 class="text-card">Authorized</h6>
+                                            <span class="badge rounded-pill text">
                                     {{ total_ips_data.count_authorized }}
                                     </span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -346,118 +354,120 @@
                     </div>
                 </div>
             </div>
-        </div>
-        <!-- Overview Card-Top -->
+            <!-- Overview Card-Top -->
 
-        <!-- Dashboard Content -->
-        <div class="container-fluid dashboard-content-container">
-            <div class="container">
-                <div class="row main-row">
-                    <!-- Panel 1 -->
-                    <div class="col-lg-4 col-md-6 col-sm-12 dashboard-content">
-                        <div class="card card-bottom p-3">
-                            <h5 class="card-title">Assigned and Available Private IP</h5>
+            <!-- Dashboard Content -->
+            <div class="container-fluid dashboard-content-container">
+                <div class="container">
+                    <div class="row main-row">
+                        <!-- Panel 1 -->
+                        <div class="col-lg-4 col-md-6 col-sm-12 dashboard-content">
+                            <div class="card card-bottom p-3">
+                                <h5 class="card-title">Assigned and Available Private IP</h5>
 
-                            <!-- Selector for site -->
-                            <label for="siteFilter" class="form-label">Select a site:</label>
-                            <select id="siteFilter" class="form-select mb-3">
-                                {% for site in sites %}
-                                    <option value="{{ site[1] }}">{{ site[1] }}</option>
-                                {% endfor %}
-                            </select>
+                                <!-- Selector for site -->
+                                <label for="siteFilter" class="form-label">Select a site:</label>
+                                <select id="siteFilter" class="form-select mb-3">
+                                    {% for site in sites %}
+                                        <option value="{{ site[1] }}">{{ site[1] }}</option>
+                                    {% endfor %}
+                                </select>
 
-                            <!-- Segment selector -->
-                            <label for="segmentFilter" class="form-label">Select a segment:</label>
-                            <select id="segmentFilter" class="form-select mb-3">
-                            </select>
-                            <!-- Canvas for the chart -->
-                            <canvas id="myChart"></canvas>
+                                <!-- Segment selector -->
+                                <label for="segmentFilter" class="form-label">Select a segment:</label>
+                                <select id="segmentFilter" class="form-select mb-3">
+                                </select>
+                                <!-- Canvas for the chart -->
+                                <canvas id="myChart"></canvas>
+                            </div>
                         </div>
-                    </div>
-                    <!-- Panel 2 -->
-                    <div class="col-lg-4 col-md-6 col-sm-12 dashboard-content">
-                        <div class="card card-bottom p-3">
-                            <h5 class="card-title">Assigned and Available Public IP</h5>
+                        <!-- Panel 2 -->
+                        <div class="col-lg-4 col-md-6 col-sm-12 dashboard-content">
+                            <div class="card card-bottom p-3">
+                                <h5 class="card-title">Assigned and Available Public IP</h5>
 
-                            <!-- Selector for choose the site -->
-                            <label for="site-select" class="form-label">Select a site:</label>
-                            <select id="site-select" class="form-select mb-3">
-                                {% for site in sites %}
-                                    <option value="{{ site[1] }}">{{ site[1] }}</option>
-                                {% endfor %}
-                            </select>
+                                <!-- Selector for choose the site -->
+                                <label for="site-select" class="form-label">Select a site:</label>
+                                <select id="site-select" class="form-select mb-3">
+                                    {% for site in sites %}
+                                        <option value="{{ site[1] }}">{{ site[1] }}</option>
+                                    {% endfor %}
+                                </select>
 
-                            <!-- Segment selector -->
-                            <label for="segment-select" class="form-label">Select a segment:</label>
-                            <select id="segment-select" class="form-select mb-3">
-                            </select>
-                            <!-- Canvas for the chart -->
-                            <canvas id="publicIpChart"></canvas>
+                                <!-- Segment selector -->
+                                <label for="segment-select" class="form-label">Select a segment:</label>
+                                <select id="segment-select" class="form-select mb-3">
+                                </select>
+                                <!-- Canvas for the chart -->
+                                <canvas id="publicIpChart"></canvas>
+                            </div>
                         </div>
-                    </div>
 
-                    <!-- Panel Container -->
-                    <div class="col-lg-4 col-md-12 col-sm-12 dashboard-content d-flex flex-column">
-                        <!-- Flex container for large devices -->
-                        <div class="d-lg-flex flex-lg-column h-100">
-                            <!-- Panel 3 -->
-                            <div class="panel-3 flex-grow-1">
-                                <div class="card card-bottom p-3 d-flex h-100">
-                                    <div>
-                                        <h5 class="card-title align-items-center">Duplicated IPs</h5>
-                                    </div>
-                                    <div class="duplicated-ips-container">
-                                        {% if duplicated_ips %}
-                                            {% for key, value in duplicated_ips.items() %}
-                                                <div class="card inner-card section" id="section-{{ loop.index }}">
-                                                    <div class="card-body">
-                                                        <div class="d-flex align-items-center">
-                                                            <div class="flex-col>">
-                                                                <h6 class="badge rounded-pill ip-badge">{{ key }}</h6>
-                                                            </div>
-                                                            <div class="flex-col">
-                                                                <h6 class="ps-1"> in <span
-                                                                        class="fw-bold">{{ value.segment }}</span></h6>
-                                                            </div>
-                                                        </div>
-                                                        <h6>MAC incidences:</h6>
-                                                        <div class="mac-list">
-                                                            {% for mac in value.indexes %}
-                                                                <div class="item list-group">
-                                                                    <h6 class="list-group-item">{{ mac }}</h6>
+                        <!-- Panel Container -->
+                        <div class="col-lg-4 col-md-12 col-sm-12 dashboard-content d-flex flex-column">
+                            <!-- Flex container for large devices -->
+                            <div class="d-lg-flex flex-lg-column h-100">
+                                <!-- Panel 3 -->
+                                <div class="panel-3 flex-grow-1">
+                                    <div class="card card-bottom p-3 d-flex h-100">
+                                        <div>
+                                            <h5 class="card-title align-items-center">Duplicated IPs</h5>
+                                        </div>
+                                        <div class="duplicated-ips-container">
+                                            {% if duplicated_ips %}
+                                                {% for key, value in duplicated_ips.items() %}
+                                                    <div class="card inner-card section" id="section-{{ loop.index }}">
+                                                        <div class="card-body">
+                                                            <div class="d-flex align-items-center">
+                                                                <div class="flex-col>">
+                                                                    <h6 class="badge rounded-pill ip-badge">{{ key }}</h6>
                                                                 </div>
-                                                            {% endfor %}
-                                                        </div>
-                                                        <div class="d-flex justify-content-center">
-                                                            <div id="pagination-{{ loop.index }}"
-                                                                 class="pagination"></div>
+                                                                <div class="flex-col">
+                                                                    <h6 class="ps-1"> in <span
+                                                                            class="fw-bold">{{ value.segment }}</span>
+                                                                    </h6>
+                                                                </div>
+                                                            </div>
+                                                            <h6>MAC incidences:</h6>
+                                                            <div class="mac-list">
+                                                                {% for mac in value.indexes %}
+                                                                    <div class="item list-group">
+                                                                        <h6 class="list-group-item">{{ mac }}</h6>
+                                                                    </div>
+                                                                {% endfor %}
+                                                            </div>
+                                                            <div class="d-flex justify-content-center">
+                                                                <div id="pagination-{{ loop.index }}"
+                                                                     class="pagination"></div>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                            {% endfor %}
-                                        {% else %}
-                                            <p>No duplicated IPs found</p>
-                                        {% endif %}
-                                    </div>
-                                    <div id="main-pagination-container" class="pagination pt-2 justify-content-center">
+                                                {% endfor %}
+                                            {% else %}
+                                                <p>No duplicated IPs found</p>
+                                            {% endif %}
+                                        </div>
+                                        <div id="main-pagination-container"
+                                             class="pagination pt-2 justify-content-center">
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <!-- Panel 4 -->
-                            <div class="panel-4 flex-grow-1 pt-2">
-                                <div class="card card-bottom p-3 h-100">
-                                    <h5 class="card-title">IP Segments per Site</h5>
-                                    <!-- Canvas for the total segment chart -->
-                                    <canvas id="segmentsChart"></canvas>
+                                <!-- Panel 4 -->
+                                <div class="panel-4 flex-grow-1 pt-2">
+                                    <div class="card card-bottom p-3 h-100">
+                                        <h5 class="card-title">IP Segments per Site</h5>
+                                        <!-- Canvas for the total segment chart -->
+                                        <canvas id="segmentsChart"></canvas>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
+                    </div>
                 </div>
+                <!-- Dashboard Content-->
             </div>
-            <!-- Dashboard Content-->
-        </div>
-    </div>
-    <!-- Dashboard -->
+            </div>
+            <!-- Dashboard -->
+        {% endif %}
 {% endblock %}
