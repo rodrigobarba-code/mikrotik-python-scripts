@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Seven Suite</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .email-container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .email-header {
+            background-image: radial-gradient(circle farthest-corner at 10% 20%, rgba(2, 37, 78, 1) 0%, rgba(4, 56, 126, 1) 19.7%, rgba(85, 245, 221, 1) 100.2%);
+            color: white;
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .email-body {
+            padding: 20px;
+            color: #333333;
+        }
+
+        .email-body h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .email-body p {
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        .welcome-banner img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        .email-footer {
+            background-color: #f8f9fa;
+            text-align: center;
+            padding: 15px 20px;
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+        .credentials {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+<div class="email-container">
+    <div class="email-header">
+        <h1>Seven Suite Application</h1>
+    </div>
+    <div class="email-body">
+        <h1>Hi {{ user_name }},</h1>
+        <p>We're thrilled to have you join the Seven Suite community! Our platform is designed to help you manage and
+            optimize your network with ease and efficiency.</p>
+
+        <div class="credentials">
+            <p>Your account has been created and is ready to use. Here are your login details:</p>
+            <p><strong>Username:</strong> [username]</p>
+            <p><strong>Password:</strong> [password]</p>
+        </div>
+
+        <p>To get started, simply log in to your account using the button below and explore everything Seven Suite has
+            to offer.</p>
+
+        <p>If you have any questions or need assistance, our support team is here to help you every step of the way.</p>
+
+        <p>Thank you for choosing Seven Suite,<br>The Seven Suite Team</p>
+    </div>
+    <div class="email-footer">
+        <p>&copy; 2024 Seven Suite. All rights reserved.</p>
+    </div>
+</div>
+</body>
+</html>

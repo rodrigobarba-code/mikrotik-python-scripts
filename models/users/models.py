@@ -13,6 +13,7 @@ class User(Base):
 
     user_id = Column(Integer, primary_key=True, autoincrement=True)
     user_username = Column(String(128), nullable=False)
+    user_email = Column(String(128), nullable=True)
     user_password = Column(String(128), nullable=False)
     user_name = Column(String(128), nullable=False)
     user_lastname = Column(String(128), nullable=False)
@@ -26,6 +27,7 @@ class User(Base):
         return {
             'user_id': self.user_id,
             'user_username': self.user_username,
+            'user_email': self.user_email,
             'user_password': self.user_password,
             'user_name': self.user_name,
             'user_lastname': self.user_lastname,
@@ -49,13 +51,14 @@ class User(Base):
             if v_user.validate_user(session, user, "insert", model_u):
                 hashed_password = bcrypt.hashpw(user.user_password.encode('utf-8'), bcrypt.gensalt())
                 new_user = User(
-                    user_id=None,
+                    user_id=0,
                     user_username=str(user.user_username),
+                    user_email=str(user.user_email),
                     user_password=hashed_password,
                     user_name=str(user.user_name),
                     user_lastname=str(user.user_lastname),
                     user_privileges=str(user.user_privileges),
-                    user_state=str(user.user_state)
+                    user_state=int(user.user_state)
                 )
                 session.add(new_user)
             else:
@@ -72,6 +75,8 @@ class User(Base):
                 hashed_password = bcrypt.hashpw(new_user.user_password.encode('utf-8'), bcrypt.gensalt())
                 old_user = session.query(User).get(new_user.user_id)
                 old_user.user_username = new_user.user_username
+                if new_user.user_email != old_user.user_email:
+                    old_user.user_email = new_user.user_email
                 if new_user.user_password != old_user.user_password and new_user.user_password != '':
                     old_user.user_password = hashed_password
                 old_user.user_name = new_user.user_name
@@ -122,6 +127,7 @@ class User(Base):
                     UserEntity(
                         user_id=user_id,
                         user_username=str(),
+                        user_email=str(),
                         user_password=str(),
                         user_name=str(),
                         user_lastname=str(),
@@ -169,6 +175,7 @@ class User(Base):
                     UserEntity(
                         user_id=user_id,
                         user_username=str(),
+                        user_email=str(),
                         user_password=str(),
                         user_name=str(),
                         user_lastname=str(),
@@ -182,6 +189,7 @@ class User(Base):
                 obj = UserEntity(
                     user_id=user.user_id,
                     user_username=user.user_username,
+                    user_email=user.user_email,
                     user_password=str(),
                     user_name=user.user_name,
                     user_lastname=user.user_lastname,
@@ -204,6 +212,7 @@ class User(Base):
                 obj = UserEntity(
                     user_id=user.user_id,
                     user_username=user.user_username,
+                    user_email=user.user_email,
                     user_password=str(),
                     user_name=user.user_name,
                     user_lastname=user.user_lastname,
@@ -251,6 +260,44 @@ class User(Base):
             }
         except Exception as e:
             return e
+
+    @staticmethod
+    def reset_password_with_random(session, user_email: str) -> dict:
+        """
+        Reset the password of a user with a random password.
+        :param session: SQLAlchemy session
+        :param user_email: Email of the user
+        :return: New password
+        """
+        try:
+            # Import the necessary modules
+            import random
+            import string
+
+            # Create a random password
+            new_password = ''.join(random.choices(string.ascii_letters + string.digits, k=8))
+
+            # Hash the password
+            hashed_password = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt())
+
+            # Get the user using email
+            user = session.query(User).filter(User.user_email == user_email).first()
+
+            # Verify if the user exists
+            if user is None:
+                raise Exception(f"User with email '{user_email}' not found.")
+
+            # Update the user password
+            user.user_password = hashed_password
+
+            # Return the new password
+            return {
+                'user_name': user.user_name,
+                'user_lastname': user.user_lastname,
+                'new_password': new_password
+            }
+        except Exception as e:
+            raise e
 
 
 class UserLog(Base):

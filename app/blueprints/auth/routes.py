@@ -5,6 +5,7 @@ from datetime import timedelta
 from dotenv import load_dotenv
 from app.functions import get_verified_jwt_header
 from app.functions import get_local_ip, get_public_ip
+from app.decorators import RequirementsDecorators as restrictions
 from flask import render_template, redirect, url_for, flash, request, session, current_app, jsonify
 
 load_dotenv()
@@ -108,3 +109,36 @@ def logout():
 @auth_bp.route('/get/jwt', methods=['GET'])
 def get_jwt():
     return jsonify({'jwt': get_verified_jwt_header()}), 200
+
+
+@auth_bp.route('/reset-password', methods=['GET', 'POST'])
+@restrictions.without_login_required
+def reset_password():
+    if request.method == 'GET':
+        return render_template('auth/forgot_password.html')
+    elif request.method == 'POST':
+        email = request.form.get('email')
+
+        api_url = "http://localhost:8080/api/private/email/reset-password/"
+
+        headers = get_verified_jwt_header()
+
+        payload = {
+            'user_email': email
+        }
+
+        try:
+            response = requests.get(api_url, headers=headers, params=payload)
+            if response.status_code == 200:
+                if response.json().get('backend_status') == 200:
+                    flash('Password reset email sent successfully.', 'success')
+                    return render_template('auth/login.html')
+                else:
+                    flash(response.json().get('message'), 'error')
+                    return render_template('auth/login.html')
+            else:
+                flash('API Error: An error occurred, please try again later', 'error')
+                return render_template('auth/login.html')
+        except requests.RequestException as e:
+            flash(f'API Error: {e}', 'error')
+            return render_template('auth/login.html')

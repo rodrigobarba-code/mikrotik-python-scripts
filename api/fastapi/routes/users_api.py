@@ -25,6 +25,7 @@ async def get_users(user_idx: int, metadata: Request, token: dict = Depends(veri
                 {
                     "user_id": user.user_id,
                     "user_username": user.user_username,
+                    "user_email": user.user_email,
                     "user_name": user.user_name,
                     "user_lastname": user.user_lastname,
                     "user_privileges": user.user_privileges,
@@ -61,6 +62,7 @@ def get_user(user_idx: int, metadata: Request, user_id: int, token: dict = Depen
             user = {
                 "user_id": request.user_id,
                 "user_username": request.user_username,
+                "user_email": request.user_email,
                 "user_name": request.user_name,
                 "user_lastname": request.user_lastname,
                 "user_privileges": request.user_privileges,
@@ -97,6 +99,7 @@ def authenticate_user(metadata: Request, user_username: str, user_password: str,
             user = {
                 "user_id": user_data.user_id,
                 "user_username": user_data.user_username,
+                "user_email": user_data.user_email,
                 "user_name": user_data.user_name,
                 "user_lastname": user_data.user_lastname,
                 "user_privileges": user_data.user_privileges,
@@ -133,6 +136,7 @@ def add_user(
         user_idx: int,
         metadata: Request,
         user_username: str,
+        user_email: str,
         user_password: str,
         user_name: str,
         user_lastname: str,
@@ -145,6 +149,7 @@ def add_user(
             user = UserEntity(
                 user_id=int(),
                 user_username=user_username,
+                user_email=user_email,
                 user_password=user_password,
                 user_name=user_name,
                 user_lastname=user_lastname,
@@ -176,6 +181,7 @@ def update_user(
         metadata: Request,
         user_id: int,
         user_username: str,
+        user_email: str,
         user_password: str,
         user_name: str,
         user_lastname: str,
@@ -188,6 +194,7 @@ def update_user(
             user = UserEntity(
                 user_id=user_id,
                 user_username=user_username,
+                user_email=user_email,
                 user_password=user_password,
                 user_name=user_name,
                 user_lastname=user_lastname,

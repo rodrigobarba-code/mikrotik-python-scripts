@@ -24,6 +24,7 @@ def users():
                     UserEntity(
                         user_id=user['user_id'],
                         user_username=user['user_username'],
+                        user_email=user['user_email'],
                         user_name=user['user_name'],
                         user_lastname=user['user_lastname'],
                         user_privileges=user['user_privileges'],
@@ -58,6 +59,7 @@ def add_user():
                 params={
                     'user_idx': session.get('user_id'),
                     'user_username': request.form['user_username'],
+                    'user_email': request.form['user_email'],
                     'user_password': request.form['user_password'],
                     'user_name': request.form['user_name'],
                     'user_lastname': request.form['user_lastname'],
@@ -104,6 +106,7 @@ def update_user(user_id):
                 user = UserEntity(
                     user_id=user_obj['user_id'],
                     user_username=user_obj['user_username'],
+                    user_email=user_obj['user_email'],
                     user_name=user_obj['user_name'],
                     user_lastname=user_obj['user_lastname'],
                     user_privileges=user_obj['user_privileges'],
@@ -127,7 +130,7 @@ def update_user(user_id):
                     'user_idx': session.get('user_id'),
                     'user_id': user_id,
                     'user_username': request.form['user_username'],
-                    'user_username': request.form['user_username'],
+                    'user_email': request.form['user_email'],
                     'user_password': request.form['user_password'],
                     'user_name': request.form['user_name'],
                     'user_lastname': request.form['user_lastname'],

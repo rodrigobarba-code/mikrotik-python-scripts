@@ -5,7 +5,7 @@ from email.mime.base import MIMEBase
 from email.message import EmailMessage
 
 class EmailSender:
-    def __init__(self, sender_email, password, smtp_server='smtp.gmail.com', port=465):
+    def __init__(self, sender_email, password, smtp_server='smtp.yandex.com', port=465):
         """
         Constructor for the EmailSender class.
         :param sender_email: Email address of the sender
@@ -62,36 +62,20 @@ class EmailSender:
             print(f"Failed to send email: {e}")
 
     @staticmethod
-    def read_html_template(file_path):
+    def read_html_template(file_path, metadata: dict):
         """
-        Read an HTML file and return its content as a string.
+        Read an HTML file, replace placeholders like {{ key }} with values from metadata, and return the content as a string.
         """
         try:
             with open(file_path, 'r', encoding='utf-8') as file:
-                return file.read()
-        except FileNotFoundError:
+                html_content = file.read()
+
+            # Replace placeholders {{ key }} with corresponding values from metadata
+            for key, value in metadata.items():
+                placeholder = f"{{{{ {key} }}}}"  # This creates the placeholder format {{ key }}
+                html_content = html_content.replace(placeholder, str(value))
+
+            return html_content
+        except FileNotFoundError as e:
             print(f"HTML file '{file_path}' not found.")
-            return ""
-
-# Example usage
-if __name__ == "__main__":
-    # Initialize the email sender
-    email_sender = EmailSender(
-        sender_email='sevensuite.service.noreply@gmail.com',
-        password='rodj eotq jgci lktn'
-    )
-
-    # Define email details
-    subject = 'Seven Suite Test Email'
-    html_file_path = 'forgot_password_template.html'
-    html_content = email_sender.read_html_template(html_file_path)
-    recipients = ['recipient1@example.com', 'recipient2@example.com']  # List of recipients
-    attachment_path = None  # Optional attachment
-
-    # Send email
-    email_sender.send_email(
-        subject=subject,
-        body_html=html_content,
-        recipients=recipients,
-        attachment_path=attachment_path
-    )
+            raise e

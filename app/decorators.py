@@ -17,6 +17,16 @@ class RequirementsDecorators:
             return f(*args, **kwargs)  # Return the function
 
         return decorated_function  # Return the decorated function
+
+    @staticmethod
+    def without_login_required(f):
+        @wraps(f)  # Wraps the function to keep the original function name
+        def decorated_function(*args, **kwargs):
+            if 'user_id' in session:
+                return redirect(url_for('home.home'))
+            return f(*args, **kwargs)  # Return the function
+
+        return decorated_function  # Return the decorated function
     # Decorator for login requirements
 
     # Decorator for admin requirements
