@@ -204,6 +204,27 @@ class User(Base):
             raise e
 
     @staticmethod
+    def get_user_by_username(session, user_username: str):
+        try:
+            user = session.query(User).filter(User.user_username == user_username).first()
+            if user is None:
+                return None
+            obj = UserEntity(
+                user_id=user.user_id,
+                user_username=user.user_username,
+                user_email=user.user_email,
+                user_password=str(),
+                user_name=user.user_name,
+                user_lastname=user.user_lastname,
+                user_privileges=user.user_privileges,
+                user_state=user.user_state
+            )
+            obj.validate()
+            return obj
+        except Exception as e:
+            raise e
+
+    @staticmethod
     def get_users(session):
         try:
             r_list = []
@@ -286,6 +307,8 @@ class User(Base):
             # Verify if the user exists
             if user is None:
                 raise Exception(f"User with email '{user_email}' not found.")
+            if user.user_state == 0:
+                raise Exception(f"Your account is disabled. Please contact the administrator.")
 
             # Update the user password
             user.user_password = hashed_password

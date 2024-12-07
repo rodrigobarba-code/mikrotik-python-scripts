@@ -7,6 +7,33 @@ from app.decorators import RequirementsDecorators as restriction
 from flask import render_template, redirect, url_for, flash, request, jsonify, session
 
 
+def send_welcome_email(user_username: str, user_password: str) -> bool:
+    api_url = "http://localhost:8080/api/private/email/welcome/"
+
+    headers = get_verified_jwt_header()
+
+    payload = {
+        'user_username': user_username,
+        'user_password': user_password
+    }
+
+    try:
+        response = requests.get(api_url, headers=headers, params=payload)
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                flash('Welcome email sent successfully.', 'success')
+                return True
+            else:
+                flash(response.json().get('message'), 'error')
+                raise Exception(response.json().get('message'))
+        else:
+            flash('API Error: An error occurred, please try again later', 'error')
+            raise Exception('API Error: An error occurred, please try again later')
+    except requests.RequestException as e:
+        flash(f'API Error: {e}', 'error')
+        return False
+
+
 @users_bp.route('/')
 @restriction.login_required
 @restriction.admin_required
@@ -70,6 +97,7 @@ def add_user():
             if response.status_code == 200:
                 if response.json().get('backend_status') == 200:
                     flash('User added successfully', 'success')
+                    send_welcome_email(str(request.form['user_username']), str(request.form['user_password']))
                     return redirect(url_for('users.users'))
                 else:
                     raise Exception(response.json().get('message'))
