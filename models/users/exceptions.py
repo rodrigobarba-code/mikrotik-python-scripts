@@ -15,6 +15,11 @@ class UserAlreadyExists(UserError):
     def __init__(self, user_id, user_username):
         self.message = f"User with ID {user_id} and Username {user_username} already exists"  
         super().__init__(self.message)
+
+class UserEmailAlreadyExists(UserError):
+    def __init__(self, user_id, user_email):
+        self.message = f"User with ID {user_id} and Email {user_email} already exists"
+        super().__init__(self.message)
     
 class UserLogError(BaseCustomError):
     def __init__(self, message="An error occurred with the User Log Section"):

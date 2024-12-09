@@ -5,6 +5,8 @@ services:
       dockerfile: Dockerfile
     container_name: mariadb_database
     restart: always
+    ports:
+        - "3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
       MYSQL_DATABASE: sevensuite
@@ -36,29 +38,22 @@ services:
       mariadb_network:
         ipv4_address: 192.168.1.10
 
-  sevensuite-api:
+  sevensuite:
     build:
       context: ../
-      dockerfile: /docker/api/Dockerfile
+      dockerfile: /docker/app/Dockerfile
     environment:
-      DATABASE_URI: mariadb+mariadbconnector://sevensuiteuser:development-sevensuiteapp@mariadb-database/sevensuite
+      DATABASE_URI: mariadb+mariadbconnector://sevensuiteuser:development-sevensuiteapp@mariadb-database:3306/sevensuite
+      FLASK_ENV: development
     ports:
       - "8080:8080"
+      - "5000:5000"
     depends_on:
       mariadb-database:
         condition: service_healthy
     networks:
       mariadb_network:
         ipv4_address: 192.168.1.15
-
-  sevensuite-app:
-    build:
-      context: ../
-      dockerfile: /docker/app/Dockerfile
-    ports:
-      - "5000:5000"
-    environment:
-      FLASK_ENV: development
 
   nextcloud-database:
     image: mariadb:latest

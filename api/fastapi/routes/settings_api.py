@@ -1,5 +1,4 @@
 # Importing necessary libraries and modules
-from app.blueprints.settings.routes import settings
 from ...auth import verify_jwt
 from fastapi import APIRouter, Depends, Request
 

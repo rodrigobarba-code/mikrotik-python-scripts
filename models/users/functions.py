@@ -20,6 +20,13 @@ class UsersFunctions:
                             func.lower(model.user_username) == func.lower(user.user_username)).first().user_id,
                         user_username=user.user_username  
                     )
+                if session.query(model).filter(func.lower(model.user_email) == func.lower(user.user_email)).first() and \
+                        session.query(model).filter(func.lower(model.user_email) == func.lower(user.user_email)).first().user_id != user.user_id:
+                    raise UserEmailAlreadyExists(
+                        user_id=session.query(model).filter(
+                            func.lower(model.user_email) == func.lower(user.user_email)).first().user_id,
+                        user_email=user.user_email
+                    )
                 return True
             elif operation in ["delete", "get"]:  
                 if not session.query(model).filter_by(user_id=user.user_id).first():
