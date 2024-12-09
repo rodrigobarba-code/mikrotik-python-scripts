@@ -1,4 +1,3 @@
-/*M!999999\- enable the sandbox mode */ 
 -- MariaDB dump 10.19-11.4.3-MariaDB, for Win64 (AMD64)
 --
 -- Host: localhost    Database: sevensuite

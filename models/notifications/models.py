@@ -1,4 +1,3 @@
-from app.blueprints.notifications.routes import notifications
 from .. import Base
 from sqlalchemy import delete, text, update
 from sqlalchemy import Column, Integer, String, Enum
