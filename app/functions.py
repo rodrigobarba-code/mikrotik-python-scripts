@@ -27,6 +27,7 @@ def get_local_ip():
 
 
 def get_verified_jwt_header() -> dict:
+    """
     import json
     import http.client
 
@@ -46,6 +47,8 @@ def get_verified_jwt_header() -> dict:
     access_token = data['access_token']
     token_type = data['token_type']
     return {'Authorization': f'{token_type} {access_token}'}
+    """
+    return {'Authorization': f'Bearer john-doe'}
 
 
 def get_unread_notifications() -> int:

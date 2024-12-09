@@ -7,6 +7,33 @@ from app.decorators import RequirementsDecorators as restriction
 from flask import render_template, redirect, url_for, flash, request, jsonify, session
 
 
+def send_welcome_email(user_username: str, user_password: str) -> bool:
+    api_url = "http://localhost:8080/api/private/email/welcome/"
+
+    headers = get_verified_jwt_header()
+
+    payload = {
+        'user_username': user_username,
+        'user_password': user_password
+    }
+
+    try:
+        response = requests.get(api_url, headers=headers, params=payload)
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                flash('Welcome email sent successfully.', 'success')
+                return True
+            else:
+                flash(response.json().get('message'), 'error')
+                raise Exception(response.json().get('message'))
+        else:
+            flash('API Error: An error occurred, please try again later', 'error')
+            raise Exception('API Error: An error occurred, please try again later')
+    except requests.RequestException as e:
+        flash(f'API Error: {e}', 'error')
+        return False
+
+
 @users_bp.route('/')
 @restriction.login_required
 @restriction.admin_required
@@ -24,6 +51,7 @@ def users():
                     UserEntity(
                         user_id=user['user_id'],
                         user_username=user['user_username'],
+                        user_email=user['user_email'],
                         user_name=user['user_name'],
                         user_lastname=user['user_lastname'],
                         user_privileges=user['user_privileges'],
@@ -58,6 +86,7 @@ def add_user():
                 params={
                     'user_idx': session.get('user_id'),
                     'user_username': request.form['user_username'],
+                    'user_email': request.form['user_email'],
                     'user_password': request.form['user_password'],
                     'user_name': request.form['user_name'],
                     'user_lastname': request.form['user_lastname'],
@@ -68,6 +97,7 @@ def add_user():
             if response.status_code == 200:
                 if response.json().get('backend_status') == 200:
                     flash('User added successfully', 'success')
+                    send_welcome_email(str(request.form['user_username']), str(request.form['user_password']))
                     return redirect(url_for('users.users'))
                 else:
                     raise Exception(response.json().get('message'))
@@ -104,6 +134,7 @@ def update_user(user_id):
                 user = UserEntity(
                     user_id=user_obj['user_id'],
                     user_username=user_obj['user_username'],
+                    user_email=user_obj['user_email'],
                     user_name=user_obj['user_name'],
                     user_lastname=user_obj['user_lastname'],
                     user_privileges=user_obj['user_privileges'],
@@ -127,7 +158,7 @@ def update_user(user_id):
                     'user_idx': session.get('user_id'),
                     'user_id': user_id,
                     'user_username': request.form['user_username'],
-                    'user_username': request.form['user_username'],
+                    'user_email': request.form['user_email'],
                     'user_password': request.form['user_password'],
                     'user_name': request.form['user_name'],
                     'user_lastname': request.form['user_lastname'],

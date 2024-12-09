@@ -20,12 +20,3 @@ __pycache__/
 .vscode/
 .idea/
 # Setuptools distribution folder
-
-# Operating System files
-.DS_Store
-Thumbs.db
-# Operating System files
-
-# Jupyter Notebook checkpoints
-.ipynb_checkpoints
-# Jupyter Notebook checkpoints
