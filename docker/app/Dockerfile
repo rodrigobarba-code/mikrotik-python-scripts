@@ -14,22 +14,20 @@ COPY alembic.ini .
 COPY utils/ utils/
 COPY start_api.py .
 COPY start_app.py .
+COPY api/dump.sql .
 COPY models/ models/
+COPY requirements.txt .
+COPY entities/ entities/
+COPY websockets/ websockets/
 COPY alembic/env.py alembic/env.py
 COPY alembic/script.py.mako alembic/script.py.mako
-COPY entities/ entities/
-COPY requirements-api.txt .
-COPY requirements-app.txt .
-COPY websockets/ websockets/
-COPY api/dump.sql .
 
 COPY docker/app/entrypoint.sh /entrypoint.sh
 
 RUN mkdir -p alembic/versions
 
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements-api.txt && \
-    pip install --no-cache-dir -r requirements-app.txt && \
+    pip install --no-cache-dir -r requirements.txt && \
     chmod +x /entrypoint.sh
 
 EXPOSE 8080
