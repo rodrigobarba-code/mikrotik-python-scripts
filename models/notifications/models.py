@@ -3,7 +3,8 @@ from sqlalchemy import delete, text, update
 from sqlalchemy import Column, Integer, String, Enum
 
 from entities.notification import NotificationEntity
-from models.notifications.exceptions import NotificationError, NotificationNotFoundError
+from models.notifications.exceptions import NotificationError, NotificationNotFoundError, \
+    NotNotificationsToArchiveError, NotNotificationsToDeleteError, NotNotificationsToRestoreError
 
 
 # Class for Notification Model
@@ -87,24 +88,6 @@ class Notification(Base):
             raise NotificationError()
 
     @staticmethod
-    def unarchive_notification(session, notification_id: int) -> None:
-        """
-        Unarchive Notification
-        :param session: Database context session
-        :param notification_id: Notification ID
-        :return: None
-        """
-        try:
-            notification = session.query(Notification).get(notification_id)  # Get Notification
-            if not notification:  # Check if Notification is not found
-                raise NotificationNotFoundError()
-            notification.is_archived = 0  # Unarchive Notification
-        except NotificationNotFoundError as e:
-            raise e
-        except Exception as e:
-            raise NotificationError
-
-    @staticmethod
     def archive_all_notifications(session) -> None:
         """
         Archive All Notifications
@@ -113,7 +96,46 @@ class Notification(Base):
         """
         try:
             # Check if Notifications are not found
+            if not session.query(Notification).filter(Notification.is_archived == 0).all():
+                raise NotNotificationsToArchiveError()
             session.execute(update(Notification).values(is_archived=1))  # Archive All Notifications
+        except NotNotificationsToArchiveError as e:
+            raise e
+        except Exception as e:
+            raise NotificationError()
+
+    @staticmethod
+    def restore_notification(session, notification_id: int) -> None:
+        """
+        Restore Notification
+        :param session: Database context session
+        :param notification_id: Notification ID
+        :return: None
+        """
+        try:
+            notification = session.query(Notification).get(notification_id)  # Get Notification
+            if not notification:  # Check if Notification is not found
+                raise NotificationNotFoundError()
+            notification.is_archived = 0  # Restore Notification
+        except NotificationNotFoundError as e:
+            raise e
+        except Exception as e:
+            raise NotificationError()
+
+    @staticmethod
+    def restore_all_notifications(session) -> None:
+        """
+        Restore All Notifications
+        :param session: Database context session
+        :return: None
+        """
+        try:
+            # Check if Notifications are not found
+            if not session.query(Notification).filter(Notification.is_archived == 1).all():
+                raise NotNotificationsToRestoreError()
+            session.execute(update(Notification).values(is_archived=0))  # Restore All Notifications
+        except NotNotificationsToRestoreError as e:
+            raise e
         except Exception as e:
             raise NotificationError()
 
@@ -128,7 +150,8 @@ class Notification(Base):
         try:
             # Check if Notification is not found
             session.execute(
-                delete(Notification).where(Notification.notification_id == notification_id))  # Delete Notification
+                delete(Notification).where(Notification.notification_id == notification_id)
+            )  # Delete Notification
         except Exception as e:
             raise NotificationError()
 
@@ -141,9 +164,13 @@ class Notification(Base):
         """
         try:
             # Check if Notifications are not found
+            if not session.query(Notification).filter(Notification.is_archived == 1).all():
+                raise NotNotificationsToDeleteError()
             session.execute(delete(Notification))  # Delete All Notifications
+        except NotNotificationsToDeleteError as e:
+            raise e
         except Exception as e:
-            raise NotificationError()
+            raise e
 
     @staticmethod
     def get_notifications(session) -> list:

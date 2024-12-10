@@ -116,7 +116,7 @@ def archive_notification(notification_id: int):
             raise Exception('Failed to archive notification')
     except Exception as e:
         flash(f'Error: {str(e)}', 'danger')
-        return jsonify({'status': 'error'}), 500
+        return jsonify({'status': str(e)}), 500
 
 
 @notifications_bp.route('/restore/<int:notification_id>', methods=['POST'])
@@ -139,7 +139,7 @@ def restore_notification(notification_id: int):
             raise Exception('Failed to unarchive notification')
     except Exception as e:
         flash(f'Error: {str(e)}', 'danger')
-        return jsonify({'status': 'error'}), 500
+        return jsonify({'status': str(e)}), 500
 
 
 @notifications_bp.route('/delete/<int:notification_id>', methods=['POST'])
@@ -162,4 +162,73 @@ def delete_notification(notification_id: int):
             raise Exception('Failed to delete notification')
     except Exception as e:
         flash(f'Error: {str(e)}', 'danger')
-        return jsonify({'status': 'error'}), 500
+        return jsonify({'status': str(e)}), 500
+
+
+@notifications_bp.route('/archive/all', methods=['POST'])
+@restriction.login_required  # Login Required Decorator
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
+def archive_all_notifications():
+    try:
+        response = requests.put(
+            'http://localhost:8080/api/private/notifications/',
+            headers=get_verified_jwt_header(),
+            params={'user_id': session.get('user_id')}
+        )
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                flash('Notifications archived successfully', 'success')
+                return jsonify({'status': 'success'}), 200
+            else:
+                raise Exception(response.json().get('message'))
+        elif response.status_code == 500:
+            raise Exception('Failed to archive notifications')
+    except Exception as e:
+        flash(f'Error: {str(e)}', 'danger')
+        return jsonify({'status': str(e)}), 500
+
+
+@notifications_bp.route('/restore/all', methods=['POST'])
+@restriction.login_required  # Login Required Decorator
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
+def restore_all_notifications():
+    try:
+        response = requests.put(
+            'http://localhost:8080/api/private/notifications/restore/',
+            headers=get_verified_jwt_header(),
+            params={'user_id': session.get('user_id')}
+        )
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                flash('Notifications restored successfully', 'success')
+                return jsonify({'status': 'success'}), 200
+            else:
+                raise Exception(response.json().get('message'))
+        elif response.status_code == 500:
+            raise Exception('Failed to restore notifications')
+    except Exception as e:
+        flash(f'Error: {str(e)}', 'danger')
+        return jsonify({'status': str(e)}), 500
+
+
+@notifications_bp.route('/delete/all', methods=['POST'])
+@restriction.login_required  # Login Required Decorator
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
+def delete_all_notifications():
+    try:
+        response = requests.delete(
+            'http://localhost:8080/api/private/notifications/',
+            headers=get_verified_jwt_header(),
+            params={'user_id': session.get('user_id')}
+        )
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                flash('Notifications deleted successfully', 'success')
+                return jsonify({'status': 'success'}), 200
+            else:
+                raise Exception(response.json().get('message'))
+        elif response.status_code == 500:
+            raise Exception('Failed to delete notifications')
+    except Exception as e:
+        flash(f'Error: {str(e)}', 'danger')
+        return jsonify({'status': str(e)}), 500

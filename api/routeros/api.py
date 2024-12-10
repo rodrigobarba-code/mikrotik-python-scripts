@@ -48,6 +48,8 @@ The RouterAPI class contains the following methods:
 
 # Import the necessary libraries
 import asyncio
+from logging import warning
+
 import ros_api
 
 # Import the mac_vendor_lookup library
@@ -774,6 +776,13 @@ class RouterAPI:
 
             # Create a success notification
             notification.create_success_notification()
+
+            # if there are duplicities, create a notification
+            if duplicity > 0:
+                warning_duplicity = CreateNotification(
+                    duplicity=duplicity
+                )
+                warning_duplicity.create_warning_notification()
 
             # Set the scan status to IDLE
             SocketIOManager.set_scan_status(0)

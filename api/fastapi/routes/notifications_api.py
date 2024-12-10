@@ -169,7 +169,7 @@ async def restore_notification(
 ):
     try:
         if notifications_functions.verify_user_existence(user_id):
-            ThreadingManager().run_thread(Notification.unarchive_notification, 'w', notification_id)
+            ThreadingManager().run_thread(Notification.restore_notification, 'w', notification_id)
             notifications_functions.create_transaction_log(
                 action="PUT",
                 table="notifications",
@@ -216,6 +216,93 @@ async def delete_notification(
     except Exception as e:
         return {
             'message': f"Failed to delete notification: {str(e)}",
+            'backend_status': 400
+        }
+
+
+@notifications_router.put('/notifications/')
+async def archive_all_notifications(
+        user_id: int,
+        metadata: Request,
+        token: dict = Depends(verify_jwt)
+):
+    try:
+        if notifications_functions.verify_user_existence(user_id):
+            ThreadingManager().run_thread(Notification.archive_all_notifications, 'wx')
+            notifications_functions.create_transaction_log(
+                action="PUT",
+                table="notifications",
+                user_id=int(user_id),
+                description="All notifications archived successfully",
+                public=str(str(metadata.client.host) + ':' + str(metadata.client.port))
+            )
+            return {
+                'message': "All notifications archived successfully",
+                'backend_status': 200
+            }
+        else:
+            raise Exception("User not registered in the system")
+    except Exception as e:
+        return {
+            'message': f"Failed to archive all notifications: {str(e)}",
+            'backend_status': 400
+        }
+
+
+@notifications_router.put('/notifications/restore')
+async def restore_all_notifications(
+        user_id: int,
+        metadata: Request,
+        token: dict = Depends(verify_jwt)
+):
+    try:
+        if notifications_functions.verify_user_existence(user_id):
+            ThreadingManager().run_thread(Notification.restore_all_notifications, 'wx')
+            notifications_functions.create_transaction_log(
+                action="PUT",
+                table="notifications",
+                user_id=int(user_id),
+                description="All notifications restored successfully",
+                public=str(str(metadata.client.host) + ':' + str(metadata.client.port))
+            )
+            return {
+                'message': "All notifications restored successfully",
+                'backend_status': 200
+            }
+        else:
+            raise Exception("User not registered in the system")
+    except Exception as e:
+        return {
+            'message': f"Failed to restored all notifications: {str(e)}",
+            'backend_status': 400
+        }
+
+
+@notifications_router.delete('/notifications/')
+async def delete_all_notifications(
+        user_id: int,
+        metadata: Request,
+        token: dict = Depends(verify_jwt)
+):
+    try:
+        if notifications_functions.verify_user_existence(user_id):
+            ThreadingManager().run_thread(Notification.delete_all_notifications, 'wx')
+            notifications_functions.create_transaction_log(
+                action="DELETE",
+                table="notifications",
+                user_id=int(user_id),
+                description="All notifications deleted successfully",
+                public=str(str(metadata.client.host) + ':' + str(metadata.client.port))
+            )
+            return {
+                'message': "All notifications deleted successfully",
+                'backend_status': 200
+            }
+        else:
+            raise Exception("User not registered in the system")
+    except Exception as e:
+        return {
+            'message': f"Failed to delete all notifications: {str(e)}",
             'backend_status': 400
         }
 
