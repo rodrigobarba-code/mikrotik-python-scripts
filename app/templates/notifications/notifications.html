@@ -63,6 +63,41 @@
                             Show Archived
                         {% endif %}
                     </a>
+                    {% if archived %}
+                        <div class="archived-buttons d-flex">
+                            <button
+                                    type="button"
+                                    id="restore-all"
+                                    class="btn btn-md ms-2 text button-glass d-flex align-items-center justify-content-center"
+                                    data-bs-toggle="tooltip"
+                                    data-bs-placement="top"
+                                    title="Restore All"
+                            >
+                                <i class="fa-duotone fa-solid fa-inbox"></i>
+                            </button>
+                            <button
+                                    type="button"
+                                    id="delete-all"
+                                    class="btn btn-md ms-2 text button-glass d-flex align-items-center justify-content-center"
+                                    data-bs-toggle="tooltip"
+                                    data-bs-placement="top"
+                                    title="Delete All"
+                            >
+                                <i class="fa-duotone fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    {% else %}
+                        <button
+                                type="button"
+                                id="archive-all"
+                                class="btn btn-md ms-2 text button-glass d-flex align-items-center justify-content-center"
+                                data-bs-toggle="tooltip"
+                                data-bs-placement="top"
+                                title="Archive All"
+                        >
+                            <i class="fa-duotone fa-solid fa-box-archive"></i>
+                        </button>
+                    {% endif %}
                 </div>
             </div>
         </div>
