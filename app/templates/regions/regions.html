@@ -1,6 +1,6 @@
 {% from 'macros.html' import delete_modal, delete_select_modal, delete_all_modal, excel_import_file %}
 {% extends 'base.html' %}
-{% block title %} Regions {% endblock %}
+{% block title %} Cities {% endblock %}
 {% block head %}
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/regions/styles.css') }}">
 {% endblock %}
@@ -12,61 +12,61 @@
     </script>
 {% endblock %}
 {% block content %}
-    <!-- Regions Jumbotron -->
+    <!-- Cities Jumbotron -->
     <section class="regions-jumbotron">
         <div class="p-5 mb-4 base-jumbotron">
             <div class="container-fluid py-5">
-                <h1 class="display-5 fw-bold ">Regions</h1>
+                <h1 class="display-5 fw-bold ">Cities</h1>
                 <p class="col-md-8 fs-4">
                 {% if session['user_privileges'] == 'admin' %}
-                    Here you can manage the regions of the system. You can create, update, delete, import regions from an Excel file.
+                    Here you can manage the cities of the system. You can create, update, delete, import cities from an Excel file.
                 {% else %}
-                    Here you can view the regions of the system.
+                    Here you can view the cities of the system.
                 {% endif %}
                 </p>
                 {% if session['user_privileges'] == 'admin' %}
-                <a href="{{ url_for('regions.add_region') }}" class="btn btn-primary btn-lg" type="button"><i
-                        class="fa-solid fa-plus"></i> Create New Region</a>
+                <a href="{{ url_for('regions.add_region') }}" id="create-new-btn" class="btn btn-lg" type="button"><i
+                        class="fa-solid fa-plus"></i> Create New City</a>
                 {% endif %}
             </div>
         </div>
     </section>
-    <!-- Regions Jumbotron -->
+    <!-- Cities Jumbotron -->
 
-    <!-- Regions Database -->
+    <!-- Cities Database -->
     <section class="regions-database pt-3 text">
         <div class="container w-75">
             <div class="row">
                 <div class="col-12 col-md-8 text-left">
-                    <h2 class="regions-database-title"><b>Available</b> Regions</h2>
+                    <h2 class="regions-database-title"><b>Available</b> Cities</h2>
                 </div>
                 {% if session['user_privileges'] == 'admin' %}
                 <div class="col-12 col-md-4 d-flex justify-content-end">
-                    {{ excel_import_file(url_for('regions.import_regions_from_excel'), 'Regions', url_for('regions.regions'), url_for('static', filename='files/regions.xlsx')) }}
-                    <button type="button" class="btn btn-md btn-danger me-2" id="delete-select"
+                    {{ excel_import_file(url_for('regions.import_regions_from_excel'), 'Cities', url_for('regions.regions'), url_for('static', filename='files/regions.xlsx')) }}
+                    <button type="button" class="btn btn-delete btn-lg-actions-custom btn-md me-2" id="delete-select"
                             data-bs-target="#delete-select-modal">
-                        <i class="fa-solid fa-square-minus"></i>
+                        <i class="fa-duotone fa-solid fa-square-minus"></i>
                     </button>
-                    <button type="button" class="btn btn-md btn-dark" id="delete-all"
+                    <button type="button" class="btn btn-dangerous btn-lg-actions-custom btn-md" id="delete-all"
                             data-bs-target="#delete-all-modal">
-                        <i class="fa-solid fa-trash"></i>
+                        <i class="fa-duotone fa-solid fa-trash"></i>
                     </button>
                 </div>
                 {% endif %}
             </div>
         </div>
     </section>
-    <!-- Regions Database -->
+    <!-- Cities Database -->
 
-    <!-- Regions Separator -->
+    <!-- Cities Separator -->
     <section class="regions-separator">
         <div class="container w-75">
             <hr class="text">
         </div>
     </section>
-    <!-- Regions Separator -->
+    <!-- Cities Separator -->
 
-    <!-- Regions Table -->
+    <!-- Cities Table -->
     <section class="regions-table hide-scroll pt-3 pb-3">
         <div class="container w-75 text" id="regions-table-c">
             <table class="table table-responsive" id="datatable-object">
@@ -76,7 +76,7 @@
                     <th scope="col"></th>
                     {% endif %}
                     <th scope="col">#</th>
-                    <th scope="col">Region's Name</th>
+                    <th scope="col">City Name</th>
                     {% if session['user_privileges'] == 'admin' %}
                     <th scope="col">Actions</th>
                     {% endif %}
@@ -95,16 +95,16 @@
                         {% if session['user_privileges'] == 'admin' %}
                         <td>
                             <a href="{{ url_for('regions.update_region', region_id=region.region_id) }}" type="button"
-                               class="btn btn-sm btn-warning"><i class="fa-solid fa-edit"></i></a>
+                               class="btn btn-sm btn-update btn-md-actions-custom"><i class="fa-duotone fa-solid fa-edit"></i></a>
                             <button type="button" id="delete-button-region-{{ region.region_id }}"
-                                    class="btn btn-sm btn-danger"
+                                    class="btn btn-sm btn-delete btn-md-actions-custom"
                                     data-bs-toggle="modal"
                                     data-bs-target="#delete-modal"
                                     data-id="{{ region.region_id }}"
                                     data-type="region"
                                     data-url="{{ url_for('regions.delete_region', region_id=region.region_id) }}"
                                     data-name="{{ region.region_name }}"
-                            ><i class="fa-solid fa-trash"></i></button>
+                            ><i class="fa-duotone fa-solid fa-trash"></i></button>
                         </td>
                         {% endif %}
                     </tr>
@@ -113,7 +113,7 @@
             </table>
         </div>
     </section>
-    <!-- Regions Table -->
+    <!-- Cities Table -->
 
     <!-- Delete Modals -->
     <div class="delete-select-modal-container">{{ delete_select_modal() }}</div>
