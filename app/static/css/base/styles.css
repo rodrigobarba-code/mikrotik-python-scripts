@@ -197,3 +197,129 @@
     color: var(--text-color);
     border-radius: 20px;
 }
+
+#create-new-btn {
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(5px);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: white;
+    transition: var(--tran-03);
+}
+
+#create-new-btn:hover {
+    scale: 1.05;
+}
+
+@media (max-width: 768px) {
+    #create-new-btn {
+        font-size: 0.9rem;
+    }
+}
+
+.btn-md-actions-custom {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(5px);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: var(--text-color);
+    transition: var(--tran-03);
+    width: 40px;
+    height: 40px;
+}
+
+body:not(.dark) .btn-md-actions-custom,
+body:not(.dark) .btn-lg-actions-custom {
+    background: rgba(39, 39, 39, 0.2);
+    backdrop-filter: blur(5px);
+    color: var(--text-color);
+    transition: var(--tran-03);
+    border: 1px solid rgba(0, 0, 0, 0.20);
+}
+
+.btn-md-actions-custom i {
+    margin-top: -5px;
+    margin-left: -1px;
+    font-size: 0.85rem;
+}
+
+.btn-md-actions-custom:hover {
+    scale: 1.05;
+}
+
+.btn-md-actions-custom #btn-update:hover {
+    background: var(--update);
+}
+
+.btn-lg-actions-custom {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(5px);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: var(--text-color);
+    transition: var(--tran-03);
+    width: 50px;
+    height: 50px;
+}
+
+.btn-lg-actions-custom i {
+    margin-top: 2px;
+    font-size: 1.3rem;
+}
+
+.btn-lg-actions-custom:hover {
+    scale: 1.05;
+}
+
+:root {
+    --update: rgb(255, 198, 117);
+    --delete: rgb(255, 117, 117);
+    --create: rgb(106, 231, 106);
+    --show: rgb(117, 177, 255);
+    --danger: rgb(170, 117, 255);
+    --update-dark: rgb(167, 133, 75);
+    --delete-dark: rgb(167, 75, 75);
+    --create-dark: rgb(75, 167, 75);
+    --show-dark: rgb(75, 115, 167);
+    --danger-dark: rgb(120, 75, 167);
+}
+
+body:not(.dark) .btn-update:hover {
+    background: var(--update);
+}
+
+.btn-update:hover {
+    background: var(--update-dark);
+}
+
+body:not(.dark) .btn-delete:hover {
+    background: var(--delete);
+}
+
+.btn-delete:hover {
+    background: var(--delete-dark);
+}
+
+#create-new-btn:hover {
+    background: var(--create);
+}
+
+body:not(.dark) #create-new-btn:hover {
+    background: var(--create);
+}
+
+body:not(.dark) .btn-show:hover {
+    background: var(--show);
+}
+
+.btn-show:hover {
+    background: var(--show-dark);
+}
+
+body:not(.dark) .btn-dangerous:hover {
+    background: var(--danger);
+}
+
+.btn-dangerous:hover {
+    background: var(--danger-dark);
+}

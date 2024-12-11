@@ -4,17 +4,8 @@
 
 .regions-jumbotron {
     color: white;
-    background: url(
-    "../../img/banner-regions.svg"
-    ) no-repeat center,
-    linear-gradient(
-            221deg,
-            rgba(33, 37, 41, 1) 15%,
-            rgba(48, 61, 74, 1) 40%,
-            rgba(59, 81, 93, 1) 65%,
-            rgba(54, 93, 115, 1) 82%
-    );
-    background-size: cover;
+    background-color: #FF9A8B;
+    background-image: linear-gradient(90deg, #FF9A8B 0%, #FF6A88 55%, #FF99AC 100%);
 
     z-index: 2;
     width: 100%;
