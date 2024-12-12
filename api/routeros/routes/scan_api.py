@@ -3,6 +3,11 @@ from ..api import RouterAPI
 from ...auth import verify_jwt
 from ...functions import APIFunctions
 from fastapi import APIRouter, Depends, Request
+import asyncio
+from ..api import RouterAPI
+from ...auth import verify_jwt
+from ...functions import APIFunctions
+from fastapi import APIRouter, Depends, Request
 
 scan_router = APIRouter()
 
