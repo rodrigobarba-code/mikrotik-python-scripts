@@ -38,10 +38,10 @@ urls = {
 
 
 # Function to Get Site Names
-def get_site_names():
+def get_site_names_with_ip_segments():
     try:
         response = requests.get(
-            'http://localhost:8080/api/private/sites/',
+            'http://localhost:8080/api/private/sites/with-ip-segment',
             headers=get_verified_jwt_header(),
             params={'user_id': session.get('user_id')}  # Pass user_id explicitly
         )
@@ -64,7 +64,8 @@ def get_site_names():
 @restriction.login_required  # Login Required Decorator
 @restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
 def dashboard():
-    not_data_found = 0
+    # Variable to indicate that no data was found
+    not_data_found = False
 
     # Obtener el user_id desde la sesión
     user_id = session.get('user_id')
@@ -110,9 +111,9 @@ def dashboard():
     # Procesar los datos de segmentos por sitio
     segments_data = total_segments_per_site_data
 
-    if combined_data == {} or public_ips_data == {} or duplicated_ips_response == {} or segments_data == {}:
-        not_data_found = 1
-
+    # Verificar si no se encontraron datos
+    if not combined_data and not public_ips_data and not total_ips_data and not duplicated_ips_response and not segments_data:
+        not_data_found = True
     # Renderizar el template con los datos preparados
     return render_template(
         'dashboard/dashboard.html',
@@ -121,6 +122,6 @@ def dashboard():
         total_ips_data=total_ips_data if total_ips_data else {},  # Datos de IPs totales
         duplicated_ips=duplicated_ips_response if duplicated_ips_response else {},  # Datos de IPs duplicadas
         segments_data=segments_data if segments_data else {},  # Datos de segmentos por sitio
-        sites=get_site_names(),  # Nombres de los sitios
+        sites=get_site_names_with_ip_segments(),  # Nombres de los sitios
         not_data_found=not_data_found  # Indicador de que no se encontraron datos
     )

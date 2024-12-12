@@ -310,3 +310,37 @@ async def bulk_insert_sites(
             'message': f"Failed to bulk insert sites: {str(e)}",
             'backend_status': 400
         }
+
+
+# resource for obtain the site name with ipsegments
+@sites_router.get("/sites/with-ip-segment/")
+async def get_site_with_ip_segment(user_id: int, metadata: Request, token: dict = Depends(verify_jwt)):
+    try:
+        if sites_functions.verify_user_existence(user_id):
+            request = ThreadingManager().run_thread(Site.get_sites_with_segments, 'r')
+            site_list = [
+                {
+                    "site_id": site.site_id,
+                    "site_name": site.site_name
+                }
+                for site in request
+            ]
+            sites_functions.create_transaction_log(
+                action="GET",
+                table="sites",
+                user_id=int(user_id),
+                description="Sites retrieved successfully",
+                public=str(str(metadata.client.host) + ':' + str(metadata.client.port))
+            )
+            return {
+                'message': "Sites retrieved successfully",
+                'sites': site_list,
+                'backend_status': 200
+            }
+        else:
+            raise Exception("User not registered in the system")
+    except Exception as e:
+        return {
+            'message': f"Failed to retrieve sites: {str(e)}",
+            'backend_status': 400
+        }
