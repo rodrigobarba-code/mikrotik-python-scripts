@@ -6,6 +6,7 @@ from sqlalchemy import Column, Integer, String, ForeignKey
 from entities.site import SiteEntity
 from models.sites.exceptions import *
 from models.routers.models import Router
+from ..ip_management.models import IPSegment
 
 
 class Site(Base):
@@ -255,3 +256,39 @@ class Site(Base):
         except Exception as e:
             # Raise the exception
             raise e
+
+    @staticmethod
+    def get_sites_with_segments(session):
+        from models.ip_management.models import IPSegment
+
+        try:
+            # Get the sites
+            sites = session.query(Site).all()
+
+            # Create a list for the sites
+            site_list = []
+
+            # Iterate over the sites
+            for site in sites:
+                # Obtain the routers associated with the site
+                router = session.query(Router).filter(Router.fk_site_id == site.site_id).first()
+                # Obtain the segments associated with the router
+                segment_list = session.query(IPSegment).filter(IPSegment.fk_router_id == router.router_id).all()
+
+                # If the segment list is not empty, append the site to the list
+                if len(segment_list) > 0:
+                    site_list.append(SiteEntity(
+                        site_id=site.site_id,
+                        fk_region_id=site.fk_region_id,
+                        region_name=str(),
+                        site_name=site.site_name,
+                        site_segment=site.site_segment
+                    ))
+
+                else:
+                    continue
+
+            # Return the list of sites
+            return site_list
+        except Exception as e:
+            raise SiteError()
