@@ -301,12 +301,26 @@
         </section>
         <!-- Dashboard Jumbotron -->
 
-        {% if not_data_found == 1 %}
+        {% if not_data_found == True %}
             <!-- No data found -->
-            <div style="color: var(--text-color);" class="text-center">
-                <h1> No data found </h1>
-                <p> Please run the scan to get the data </p>
+            <div class="d-flex dashboard-content-container justify-content-center">
+                <div class="row main-row m-2">
+                    <div class="col-lg-12 col-md-12 col-sm-12 dashboard-content">
+                        <div class="glass-banner m-2">
+                            <img src="{{ url_for('static', filename='img/svg/cloud.svg') }}" alt="No data found"
+                                 class="no-data-found">
+                            <div class="no-data-found-content">
+                                <h1 class="display-6">No Data Found</h1>
+                                <p class="lead">It seems we couldn't find any data to display. Please do a router scan
+                                    and
+                                    check again.</p>
+                                <button class="btn btn-primary" onclick="location.reload()">Reload</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
+            <!-- No data found -->
         {% else %}
             <!-- Overview Card-Top -->
             <div class="container card-top-container">
@@ -443,21 +457,27 @@
                                                         </div>
                                                     </div>
                                                 {% endfor %}
+                                                <div id="main-pagination-container"
+                                                     class="pagination pt-2 justify-content-center">
+                                                </div>
                                             {% else %}
-                                                <p>No duplicated IPs found</p>
+                                                <div class="d-flex no-data-found-container align-items-center">
+                                                    <img src="{{ url_for('static', filename='img/svg/checkbox.svg') }}"
+                                                         alt="No duplicated IPs found" class="no-duplicated-blob">
+                                                    <p>No duplicated IPs found</p>
+                                                </div>
                                             {% endif %}
-                                        </div>
-                                        <div id="main-pagination-container"
-                                             class="pagination pt-2 justify-content-center">
                                         </div>
                                     </div>
                                 </div>
                                 <!-- Panel 4 -->
                                 <div class="panel-4 flex-grow-1 pt-2">
-                                    <div class="card card-bottom p-3 h-100">
+                                    <div class="card d-flex card-bottom p-3 h-100">
                                         <h5 class="card-title">IP Segments per Site</h5>
                                         <!-- Canvas for the total segment chart -->
-                                        <canvas id="segmentsChart"></canvas>
+                                        <div class="d-flex align-items-center justify-content-center h-100">
+                                            <canvas id="segmentsChart"></canvas>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -465,9 +485,9 @@
 
                     </div>
                 </div>
-                <!-- Dashboard Content-->
-            </div>
+                <!-- Dashboard Content -->
             </div>
             <!-- Dashboard -->
         {% endif %}
+    </div>
 {% endblock %}
