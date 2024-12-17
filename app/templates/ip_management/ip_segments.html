@@ -26,9 +26,9 @@
             <div class="col-md-11 order-md-2 order-1">
                 <h1 class="display-5 fw-bold">IP Segments for {{ site_name }}</h1>
                 {% if session['user_privileges'] == 'admin' %}
-                <p class="col-md-8 fs-4">Here you can manage the IP Segments for the site {{ site_name }}.</p>
+                    <p class="col-md-8 fs-4">Here you can manage the IP Segments for the site {{ site_name }}.</p>
                 {% else %}
-                <p class="col-md-8 fs-4">Here you can view the IP Segments for the site {{ site_name }}.</p>
+                    <p class="col-md-8 fs-4">Here you can view the IP Segments for the site {{ site_name }}.</p>
                 {% endif %}
             </div>
         </div>
@@ -43,14 +43,14 @@
                     <h2 class="regions-database-title"><b>Available</b> IP Segments</h2>
                 </div>
                 {% if session['user_privileges'] == 'admin' %}
-                <div class="col-12 col-md-4 d-flex justify-content-end">
-                    <button type="button" class="btn btn-md btn-danger me-2" id="delete-select">
-                        <i class="fa-solid fa-square-minus"></i>&nbsp; Delete Selected
-                    </button>
-                    <button type="button" class="btn btn-md btn-dark" id="delete-all">
-                        <i class="fa-solid fa-trash"></i>&nbsp; Delete All
-                    </button>
-                </div>
+                    <div class="col-12 col-md-4 d-flex justify-content-end">
+                        <button type="button" class="btn btn-md btn-danger me-2" id="delete-select">
+                            <i class="fa-solid fa-square-minus"></i>&nbsp; Delete Selected
+                        </button>
+                        <button type="button" class="btn btn-md btn-dark" id="delete-all">
+                            <i class="fa-solid fa-trash"></i>&nbsp; Delete All
+                        </button>
+                    </div>
                 {% endif %}
             </div>
         </div>
@@ -84,45 +84,58 @@
                 {% if ip_segment_list %}
                     {% for ip_segment in ip_segment_list %}
                         <tr>
-                            <td class="text-center"><label for="segment-{{ ip_segment.ip_segment_id }}"></label>
+                            <td class="text-center"><label for="segment-{{ ip_segment.id }}"></label>
                                 <input type="checkbox" class="form-check-input"
-                                       id="segment-{{ ip_segment.ip_segment_id }}">
+                                       id="segment-{{ ip_segment.id }}">
                             </td>
-                            <th scope="row">{{ ip_segment.ip_segment_id }}</th>
-                            <td>{{ ip_segment.ip_segment_ip }}</td>
-                            <td>{{ ip_segment.ip_segment_mask }}</td>
-                            <td>{{ ip_segment.ip_segment_network }}</td>
-
-                            {% if ip_segment.ip_segment_tag == 'PUBLIC_IP' %}
-                                {% set badge_color = '#0B6477' %}
-                                {% set badge_text = 'Public' %}
-                            {% elif ip_segment.ip_segment_tag == 'PRIVATE_IP' %}
-                                {% set badge_color = '#0AD1C8' %}
-                                {% set badge_text = 'Private' %}
-                            {% elif ip_segment.ip_segment_tag == '' %}
-                                {% set badge_color = '#80ED99' %}
-                                {% set badge_text = 'No Tag' %}
-                            {% else %}
-                                {% set badge_color = '#213A57' %}
-                                {% set badge_text = 'Unknown' %}
-                            {% endif %}
+                            <th scope="row">{{ ip_segment.id }}</th>
+                            <td>{{ ip_segment.ip }}</td>
+                            <td>{{ ip_segment.mask }}</td>
+                            <td>{{ ip_segment.network }}</td>
 
                             <td>
-                                <span class="badge" style="background-color: {{ badge_color }}">{{ badge_text }}</span>
+                                {% for tag in ip_segment.tags %}
+                                    {% set color = '' %}
+                                    {% if tag == 'Private' %}
+                                        {% set color = '#d9ed92' %}
+                                    {% elif tag == 'Public' %}
+                                        {% set color = '#b5e48c' %}
+                                    {% elif tag == 'Other Interface' %}
+                                        {% set color = '#99d98c' %}
+                                    {% elif tag == 'Main Interface' %}
+                                        {% set color = '#76c893' %}
+                                    {% elif tag == 'Static' %}
+                                        {% set color = '#52b69a' %}
+                                    {% elif tag == 'Dynamic' %}
+                                        {% set color = '#34a0a4' %}
+                                    {% elif tag == 'Used' %}
+                                        {% set color = '#168aad' %}
+                                    {% elif tag == 'Not Used' %}
+                                        {% set color = '#1a759f' %}
+                                    {% elif tag == 'Commented' %}
+                                        {% set color = '#f8961e' %}
+                                    {% elif tag == 'No Commented' %}
+                                        {% set color = '#f3722c' %}
+                                    {% else %}
+                                        {% set color = '#f94144' %}
+                                    {% endif %}
+                                    <span class="badge"
+                                          style="color: #2e2e30; background-color: {{ color }}">{{ tag }}</span>
+                                {% endfor %}
                             </td>
                             <td>
                                 {% if session['user_privileges'] == 'admin' %}
-                                <button type="button" id="delete-button-segment-{{ ip_segment.ip_segment_id }}"
-                                        class="btn btn-sm btn-danger"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#delete-modal"
-                                        data-id="{{ ip_segment.ip_segment_id }}"
-                                        data-type="segment"
-                                        data-url="{{ url_for('ip_management.delete_segment', segment_id=ip_segment.ip_segment_id, site_id=site_id) }}"
-                                        data-name="{{ ip_segment.ip_segment_ip }}"
-                                ><i class="fa-solid fa-trash"></i></button>
+                                    <button type="button" id="delete-button-segment-{{ ip_segment.id }}"
+                                            class="btn btn-sm btn-danger"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#delete-modal"
+                                            data-id="{{ ip_segment.id }}"
+                                            data-type="segment"
+                                            data-url="{{ url_for('ip_management.delete_segment', segment_id=ip_segment.id, site_id=site_id) }}"
+                                            data-name="{{ ip_segment.ip }}"
+                                    ><i class="fa-solid fa-trash"></i></button>
                                 {% endif %}
-                                {{ show_details_button(ip_segment.ip_segment_id, url_for('ip_management.get_ip_segment_details'), 'Segment') }}
+                                {{ show_details_button(ip_segment.id, url_for('ip_management.get_ip_segment_details'), 'Segment') }}
                             </td>
                         </tr>
                     {% endfor %}

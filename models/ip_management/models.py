@@ -1,7 +1,9 @@
+from re import match
+
 from .. import Base
 from models.routers.models import Router
 from sqlalchemy.orm import relationship, backref
-from entities.ip_segment import IPSegmentTag, IPSegmentEntity
+from entities.ip_segment import IPSegmentEntity
 from models.ip_management.functions import IPAddressesFunctions
 from entities.ip_groups import IPGroupsEntity, IPGroupsTagsEntity
 from sqlalchemy import Column, Integer, String, Boolean, Enum, ForeignKey, PrimaryKeyConstraint, text
@@ -17,7 +19,7 @@ class IPSegment(Base):
     ip_segment_network = Column(String(15), nullable=False)
     ip_segment_interface = Column(String(255), nullable=False)
     ip_segment_actual_iface = Column(String(255), nullable=False)
-    ip_segment_tag = Column(Enum(IPSegmentTag), nullable=False)
+    ip_segment_tag = Column(String(255), nullable=False)
     ip_segment_comment = Column(String(255), nullable=False)
     ip_segment_is_invalid = Column(Boolean, nullable=False)
     ip_segment_is_dynamic = Column(Boolean, nullable=False)
@@ -58,11 +60,16 @@ class IPSegment(Base):
         :arg ip_segments: The list of IP segments to possibly add to the database
         :return: None
         """
+        import re
+        import datetime
 
         try:
             # Variables to stored added and updated IP segments
             added = 0
             updated = 0
+
+            new_pattern = r"New: \d{2}-\d{2}-\d{2} \d{2}:\d{2},"
+            update_pattern = r"Updated: \d{2}-\d{2}-\d{2} \d{2}:\d{2},"
 
             # Create a list of IPSegment objects obtained from router
             bulk_list = [IPSegment(
@@ -92,33 +99,59 @@ class IPSegment(Base):
                         ip_segment.ip_segment_interface
                 )):
                     # If it does not exist, add it to the list
-                    to_add.append(ip_segment)
+                    ip_segment.ip_segment_tag += f'New: {datetime.datetime.now().strftime("%y-%m-%d %H:%M")},'
 
                     # Increment the added counter
                     added += 1
+                    to_add.append(ip_segment)
                 else:
                     # If it exists, update the IP segment in the database
 
                     # Get the IP segment from the database based on the IP address, mask and interface
-                    ip_segment = session.query(IPSegment).filter(
+                    old_ip_segment = session.query(IPSegment).filter(
                         IPSegment.ip_segment_ip == ip_segment.ip_segment_ip,
                         IPSegment.ip_segment_mask == ip_segment.ip_segment_mask,
                         IPSegment.ip_segment_interface == ip_segment.ip_segment_interface
                     ).first()
 
-                    # Update the IP segment in the database
-                    ip_segment.fk_router_id = ip_segment.fk_router_id
-                    ip_segment.ip_segment_network = ip_segment.ip_segment_network
-                    ip_segment.ip_segment_interface = ip_segment.ip_segment_interface
-                    ip_segment.ip_segment_actual_iface = ip_segment.ip_segment_actual_iface
-                    ip_segment.ip_segment_tag = ip_segment.ip_segment_tag
-                    ip_segment.ip_segment_comment = ip_segment.ip_segment_comment
-                    ip_segment.ip_segment_is_invalid = ip_segment.ip_segment_is_invalid
-                    ip_segment.ip_segment_is_dynamic = ip_segment.ip_segment_is_dynamic
-                    ip_segment.ip_segment_is_disabled = ip_segment.ip_segment_is_disabled
+                    # Validate if the other information is the same
+                    if ip_segment.ip_segment_network != old_ip_segment.ip_segment_network or \
+                            ip_segment.ip_segment_actual_iface != old_ip_segment.ip_segment_actual_iface or \
+                            ip_segment.ip_segment_comment != old_ip_segment.ip_segment_comment or \
+                            ip_segment.ip_segment_is_invalid != old_ip_segment.ip_segment_is_invalid or \
+                            ip_segment.ip_segment_is_dynamic != old_ip_segment.ip_segment_is_dynamic or \
+                            ip_segment.ip_segment_is_disabled != old_ip_segment.ip_segment_is_disabled:
 
-                    # Increment the updated counter
-                    updated += 1
+                        # Update the IP segment in the database
+                        old_ip_segment.fk_router_id = ip_segment.fk_router_id
+                        old_ip_segment.ip_segment_network = ip_segment.ip_segment_network
+                        old_ip_segment.ip_segment_interface = ip_segment.ip_segment_interface
+                        old_ip_segment.ip_segment_actual_iface = ip_segment.ip_segment_actual_iface
+
+                        match_on_update = re.search(update_pattern, old_ip_segment.ip_segment_tag)
+                        if match_on_update:
+                            text = match_on_update.group()
+                            old_ip_segment.ip_segment_tag = old_ip_segment.ip_segment_tag.replace(str(text), f'Updated: {datetime.datetime.now().strftime("%y-%m-%d %H:%M")},')
+                        else:
+                            old_ip_segment.ip_segment_tag += f'Updated: {datetime.datetime.now().strftime("%y-%m-%d %H:%M")},'
+
+                        old_ip_segment.ip_segment_comment = ip_segment.ip_segment_comment
+                        old_ip_segment.ip_segment_is_invalid = ip_segment.ip_segment_is_invalid
+                        old_ip_segment.ip_segment_is_dynamic = ip_segment.ip_segment_is_dynamic
+                        old_ip_segment.ip_segment_is_disabled = ip_segment.ip_segment_is_disabled
+
+                        # Increment the updated counter
+                        updated += 1
+                    else:
+                        match_on_update = re.search(update_pattern, old_ip_segment.ip_segment_tag)
+                        if match_on_update:
+                            text = match_on_update.group()
+                            old_ip_segment.ip_segment_tag = old_ip_segment.ip_segment_tag.replace(str(text), '')
+
+                    match_on_new = re.search(new_pattern, old_ip_segment.ip_segment_tag)
+                    if match_on_new:
+                        text = match_on_new.group()
+                        old_ip_segment.ip_segment_tag = old_ip_segment.ip_segment_tag.replace(str(text), '')
 
             # if there are IP segments to add, add them to the database in bulk
             if to_add:

@@ -220,10 +220,28 @@ def ip_segment(site_id):
     try:
         site_id = site_id
         site_name = get_site_name(site_id, get_sites())
-        ip_segment_list = get_segments_by_site(site_id)
+        ip_segment_raw_list = get_segments_by_site(site_id)
+        ip_segment_clean_list = [
+            {
+                'id': segment.ip_segment_id,
+                'router_id': segment.fk_router_id,
+                'ip': segment.ip_segment_ip,
+                'mask': segment.ip_segment_mask,
+                'network': segment.ip_segment_network,
+                'interface': segment.ip_segment_interface,
+                'actual_iface': segment.ip_segment_actual_iface,
+                'tags': segment.ip_segment_tag.split(','),
+                'comment': segment.ip_segment_comment,
+                'is_invalid': segment.ip_segment_is_invalid,
+                'is_dynamic': segment.ip_segment_is_dynamic,
+                'is_disabled': segment.ip_segment_is_disabled
+            }
+            for segment in ip_segment_raw_list
+        ]
+
         return render_template(
             'ip_management/ip_segments.html',
-            ip_segment_list=ip_segment_list,
+            ip_segment_list=ip_segment_clean_list,
             site_name=site_name,
             site_id=site_id
         )
@@ -329,7 +347,7 @@ def get_ip_segment_details():
                 'network': ['Network', segment.ip_segment_network],
                 'interface': ['Interface', segment.ip_segment_interface],
                 'actual_iface': ['Actual Interface', segment.ip_segment_actual_iface],
-                'tags': ['Public IP' if segment.ip_segment_tag == 'PUBLIC_IP' else 'Private IP'],
+                'tags': segment.ip_segment_tag.split(','),
                 'comment': ['Comment', segment.ip_segment_comment],
                 'is_invalid': ['Is Invalid', segment.ip_segment_is_invalid],
                 'is_dynamic': ['Is Dynamic', segment.ip_segment_is_dynamic],

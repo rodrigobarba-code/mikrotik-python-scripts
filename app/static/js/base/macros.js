@@ -215,7 +215,7 @@ async function fetchItemsData(id, url, type) {
                         // If so, add a pill to the item list.
                         if (typeof value[1] === 'boolean') {
                             // Add a pill to the item list.
-                            let pill = value[1] ? '<span class="badge" style="background-color: #14919B">True</span>' : '<span class="badge" style="background-color: #FF5C5C">False</span>';
+                            let pill = value[1] ? '<span class="badge" style="background-color: black">True</span>' : '<span class="badge" style="background-color: black">False</span>';
                             // Add a pill to the item list.
                             itemList += `<li class="list-group-item"><b>${value[0]}</b>: ${pill}</li>`;
                         } else if (key === 'tags') {
@@ -224,13 +224,13 @@ async function fetchItemsData(id, url, type) {
                             // Loop through the value.
                             for (let i = 0; i < value.length; i++) {
                                 // Add a pill to the item list.
-                                tags += `<span class="badge" style="background-color: #14919B">${value[i]}</span> &nbsp;`;
+                                tags += `<span class="badge" style="background-color: black">${value[i]}</span> &nbsp;`;
                             }
                             // Add a pill to the item list.
                             itemList += `<li class="list-group-item"><b>Tags</b>: ${tags}</li>`;
                         } else if (key === 'type') {
                             // Add a pill to the item list.
-                            let pill = value[1] === 'public' ? '<span class="badge" style="background-color: #14919B">Public</span>' : '<span class="badge" style="background-color: #FF5C5C">Private</span>';
+                            let pill = value[1] === 'public' ? '<span class="badge" style="background-color: black">Public</span>' : '<span class="badge" style="background-color: black">Private</span>';
                             // Add a pill to the item list.
                             itemList += `<li class="list-group-item"><b>${value[0]}</b>: ${pill}</li>`;
                         } else {
