@@ -11,7 +11,7 @@ class IPAddress:
         pass
 
     @staticmethod
-    def _obtain_all() -> list[ips.IPSegmentEntity]:
+    def obtain_all() -> list[ips.IPSegmentEntity]:
         ip_addresses_list = []
 
         for router in ar.AllowedRouters.get_all():
@@ -49,7 +49,6 @@ class IPAddress:
                 else:
                     tag += 'Commented,'
 
-
                 ip_segment = ips.IPSegmentEntity(
                     ip_segment_id=int(),
                     fk_router_id=router.id,
@@ -72,8 +71,38 @@ class IPAddress:
         return ip_addresses_list
 
     @staticmethod
-    def _add_to_database(ip_addresses_list: list[ips.IPSegmentEntity]):
+    def add_to_database(ip_addresses_list: list[ips.IPSegmentEntity]):
         try:
             tm().run_thread(IPSegment.bulk_add_ip_segments, 'w', ip_addresses_list)
         except Exception as e:
             print(e)
+
+    @staticmethod
+    def _get_segments_by_router(id: int) -> list[ips.IPSegmentEntity]:
+        try:
+            return tm().run_thread(IPSegment.get_ip_segments_by_router_id, 'rx', id)
+        except Exception as e:
+            print(e)
+
+    @staticmethod
+    def _resolve_ip_segment(segment_list: list[ips.IPSegmentEntity], ip_c: str) -> list:
+        import ipaddress
+        try:
+            ip = ipaddress.ip_address(ip_c)
+
+            for segment in segment_list:
+                if segment.ip_segment_mask == '32':
+                    if ip == ipaddress.ip_address(segment.ip_segment_ip) or ip == ipaddress.ip_address(
+                            segment.ip_segment_network):
+                        return [True, int(segment.ip_segment_id), int(segment.ip_segment_mask)]
+                else:
+                    ip_range = f"{segment.ip_segment_network}/{segment.ip_segment_mask}"
+                    network = list(ipaddress.ip_network(ip_range, True).hosts())
+
+                    if ip in network:
+                        return [True, int(segment.ip_segment_id), int(segment.ip_segment_mask)]
+
+            return [False, None]
+
+        except Exception as e:
+            raise Exception(f"An error occurred while finding the IP Segment: {str(e)}")

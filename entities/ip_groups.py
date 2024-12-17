@@ -28,7 +28,7 @@ class IPGroupsEntity:
         self,
         ip_group_id: int,
         fk_ip_segment_id: int = None,
-        ip_group_name: str = 'blacklist',
+        ip_group_name: str = 'connected',
         ip_group_type: str = 'public',
         ip_group_alias: str = None,
         ip_group_description: str = None,
@@ -68,15 +68,8 @@ class IPGroupsEntity:
 
     def validate_ip_group(self):
         try:
-            valid_types = ['public', 'private']
-            valid_group_names = ['blacklist', 'authorized', 'unknown']
-
             assert isinstance(self.ip_group_id, int)
             assert isinstance(self.fk_ip_segment_id, int)
-            if self.ip_group_name not in valid_group_names:
-                raise ValueError(f"ip_group_name must be one of {valid_group_names}")
-            if self.ip_group_type not in valid_types:
-                raise ValueError(f"ip_group_type must be one of {valid_types}")
             assert isinstance(self.ip_group_alias, (str, type(None)))
             assert isinstance(self.ip_group_description, (str, type(None)))
             assert isinstance(self.ip_group_ip, (str, type(None)))

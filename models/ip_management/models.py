@@ -372,6 +372,30 @@ class IPSegment(Base):
         except Exception as e:
             raise e
 
+    @staticmethod
+    def get_data_by_ip_segment(session, ip: str) -> IPSegmentEntity:
+        try:
+            ip_segment = session.query(IPSegment).filter_by(ip_segment_ip=ip).first()
+            if ip_segment:
+                return IPSegmentEntity(
+                    ip_segment_id=ip_segment.ip_segment_id,
+                    fk_router_id=ip_segment.fk_router_id,
+                    ip_segment_ip=ip_segment.ip_segment_ip,
+                    ip_segment_mask=ip_segment.ip_segment_mask,
+                    ip_segment_network=ip_segment.ip_segment_network,
+                    ip_segment_interface=ip_segment.ip_segment_interface,
+                    ip_segment_actual_iface=ip_segment.ip_segment_actual_iface,
+                    ip_segment_tag=ip_segment.ip_segment_tag,
+                    ip_segment_comment=ip_segment.ip_segment_comment,
+                    ip_segment_is_invalid=ip_segment.ip_segment_is_invalid,
+                    ip_segment_is_dynamic=ip_segment.ip_segment_is_dynamic,
+                    ip_segment_is_disabled=ip_segment.ip_segment_is_disabled
+                )
+            else:
+                raise ValueError('IP segment not found')
+        except Exception as e:
+            raise e
+
 
 class IPGroupsTags(Base):
     __tablename__ = 'ip_groups_tags'
@@ -718,7 +742,7 @@ class IPGroups(Base):
     __tablename__ = 'ip_groups'
 
     types_values = ['public', 'private']
-    status_values = ['blacklist', 'authorized', 'unknown']
+    status_values = ['connected', 'authorized', 'unauthorized', 'available']
 
     ip_group_id = Column(Integer, primary_key=True, nullable=False)
     fk_ip_segment_id = Column(Integer, ForeignKey('ip_segment.ip_segment_id'), nullable=False)
@@ -745,31 +769,6 @@ class IPGroups(Base):
     def __repr__(self):
         return f'<IP Group {self.ip_group_id}>'
 
-    """
-    def __dict__(self):
-        return {
-            'ip_group_id': self.ip_group_id,
-            'fk_ip_segment_id': self.fk_ip_segment_id,
-            'ip_group_name': self.ip_group_name,
-            'ip_group_type': self.ip_group_type,
-            'ip_group_alias': self.ip_group_alias,
-            'ip_group_description': self.ip_group_description,
-            'ip_group_ip': self.ip_group_ip,
-            'ip_group_mask': self.ip_group_mask,
-            'ip_group_mac': self.ip_group_mac,
-            'ip_group_mac_vendor': self.ip_group_mac_vendor,
-            'ip_group_interface': self.ip_group_interface,
-            'ip_group_comment': self.ip_group_comment,
-            'ip_is_dhcp': self.ip_is_dhcp,
-            'ip_is_dynamic': self.ip_is_dynamic,
-            'ip_is_complete': self.ip_is_complete,
-            'ip_is_disabled': self.ip_is_disabled,
-            'ip_is_published': self.ip_is_published,
-            'ip_duplicity': self.ip_duplicity,
-            'ip_duplicity_indexes': self.ip_duplicity_indexes
-        }
-    """
-
     @staticmethod
     def verify_autoincrement_id(session):
         try:
@@ -787,7 +786,29 @@ class IPGroups(Base):
         :return: None
         """
         try:
-            session.bulk_save_objects(ip_group_list)
+            bulk_list = [
+                IPGroups(
+                    fk_ip_segment_id=ip_group.fk_ip_segment_id,
+                    ip_group_name=ip_group.ip_group_name,
+                    ip_group_type=ip_group.ip_group_type,
+                    ip_group_alias=ip_group.ip_group_alias,
+                    ip_group_description=ip_group.ip_group_description,
+                    ip_group_ip=ip_group.ip_group_ip,
+                    ip_group_mask=ip_group.ip_group_mask,
+                    ip_group_mac=ip_group.ip_group_mac,
+                    ip_group_mac_vendor=ip_group.ip_group_mac_vendor,
+                    ip_group_interface=ip_group.ip_group_interface,
+                    ip_group_comment=ip_group.ip_group_comment,
+                    ip_is_dhcp=ip_group.ip_is_dhcp,
+                    ip_is_dynamic=ip_group.ip_is_dynamic,
+                    ip_is_complete=ip_group.ip_is_complete,
+                    ip_is_disabled=ip_group.ip_is_disabled,
+                    ip_is_published=ip_group.ip_is_published,
+                    ip_duplicity=ip_group.ip_duplicity,
+                    ip_duplicity_indexes=ip_group.ip_duplicity_indexes
+                ) for ip_group in ip_group_list
+            ]
+            session.bulk_save_objects(bulk_list)
         except Exception as e:
             raise e
 
