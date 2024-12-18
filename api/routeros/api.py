@@ -8,6 +8,6 @@ class RouterAPI:
         IPAddress().add_to_database(ip_addresses_list)
 
         arp_list = ARP().obtain_all()
-        ARP().add_to_database(arp_list)
+        response = ARP().add_to_database(arp_list)
 
-        print('ARP Scan Completed')
+        print(f'ARP Scan: {response}')

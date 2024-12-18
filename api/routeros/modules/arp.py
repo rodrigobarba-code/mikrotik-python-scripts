@@ -1,5 +1,5 @@
 import entities.ip_groups as ipg
-from models.ip_management.models import IPGroups
+from models.ip_management.models import IPGroups, OldIPGroups
 from api.routeros.modules.ip_address import IPAddress
 from api.routeros.modules.queue_list import QueueList
 from utils.threading_manager import ThreadingManager as tm
@@ -60,9 +60,41 @@ class ARP(QueueList, IPAddress):
         return ip_groups_list
 
     @staticmethod
-    def add_to_database(ip_groups_list: list[ipg.IPGroupsEntity]):
+    def add_to_database(ip_groups_list: list[ipg.IPGroupsEntity]) -> tuple:
         try:
-            tm().run_thread(IPGroups.bulk_add_ip_groups, 'w', ip_groups_list)
+            tm().run_thread(OldIPGroups.delete_data, 'wx')  # Delete Old Data
+            tm().run_thread(OldIPGroups.transfer_data, 'wx')  # Transfer Data
+
+            _to_add_, _to_update_, _to_update_count = [], [], 0  # Lists to Add and Update
+
+            # Iterate over ip_groups_list
+            for ip in ip_groups_list:
+                # Validate Incoming IP
+                _response = tm().run_thread(IPGroups.validate_incoming_ip, 'rx', ip)
+
+                # Do depending on the response
+                if _response.get('exists') is False:
+                    _to_add_.append(ip)
+                elif _response.get('exists') is True:
+                    if list(_response.get('where').keys())[0] == 'ip_groups':
+                        if list(_response.get('where').values())[0] in ['authorized', 'available']:
+                            if ip.ip_is_complete is False or _response.get('ip').ip_group_mac != ip.ip_group_mac:
+                                ip.ip_group_name = 'unauthorized'
+                                _to_update_.append(ip)
+                            else:
+                                _to_update_.append(ip)
+                        elif list(_response.get('where').values())[0] == 'unauthorized' or list(_response.get('where').values())[0] == 'connected':
+                            _to_update_.append(ip)
+
+            # Bulk Add
+            if _to_add_:
+                tm().run_thread(IPGroups.bulk_add_ip_groups, 'w', _to_add_)
+            # Bulk Update
+            if _to_update_:
+                _to_update_count = tm().run_thread(IPGroups.bulk_update_ip_groups, 'rxc', _to_update_)
+
+            # Return Length of _to_add_ and _to_update_count
+            return len(_to_add_), _to_update_count
         except Exception as e:
             print(f'Error on _add_to_database: {e}')
 
