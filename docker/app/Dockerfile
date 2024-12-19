@@ -3,7 +3,7 @@ FROM python:3.12-slim
 WORKDIR /sevensuite
 
 RUN apt-get update && \
-    apt-get install -y default-libmysqlclient-dev gcc mariadb-client libmariadb-dev && \
+    apt-get install -y default-libmysqlclient-dev gcc mariadb-client libmariadb-dev wkhtmltopdf && \
     rm -rf /var/lib/apt/lists/*
 
 COPY run.py .

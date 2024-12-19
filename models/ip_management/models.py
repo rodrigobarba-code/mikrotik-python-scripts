@@ -792,32 +792,56 @@ class IPGroups(Base):
         knowledge = {
             'exists': False,
             'where': dict(),
-            'ip': None
+            'ip': None,
+            'interface': None
         }
 
-        # Check if already exists on IP Groups table
-        ip_group_x = session.query(IPGroups).filter_by(
+        # First check with same interface and IP on IP Groups table
+        ip_group_a = session.query(IPGroups).filter_by(
             ip_group_ip=ip_group.ip_group_ip,
             ip_group_interface=ip_group.ip_group_interface
         ).first()
 
-        # Check if already exists on ARP table
-        arp_x = session.query(ARP).filter_by(
+        # First check with same interface and IP on ARP table
+        arp_a = session.query(ARP).filter_by(
             arp_ip=ip_group.ip_group_ip,
             arp_interface=ip_group.ip_group_interface
         ).first()
 
+        # Second check with just same IP on IP Groups table
+        ip_group_b = session.query(IPGroups).filter_by(
+            ip_group_ip=ip_group.ip_group_ip
+        ).first()
+
+        # Second check with just same IP on ARP table
+        arp_b = session.query(ARP).filter_by(
+            arp_ip=ip_group.ip_group_ip
+        ).first()
+
         # Check if the IP group already exists in the database
-        if ip_group_x:
+        if ip_group_a:
             knowledge['exists'] = True
-            knowledge['where'] = {'ip_groups': ip_group_x.ip_group_name}
-            knowledge['ip'] = ip_group_x
-        elif arp_x:
+            knowledge['where'] = {'ip_groups': ip_group_a.ip_group_name}
+            knowledge['ip'] = ip_group_a
+            knowledge['interface'] = ip_group_a.ip_group_interface
+        elif arp_a:
             knowledge['exists'] = True
-            knowledge['where'] = {'arp': arp_x.arp_ip}
-            knowledge['ip'] = arp_x
+            knowledge['where'] = {'arp': arp_a.arp_ip}
+            knowledge['ip'] = arp_a
+            knowledge['interface'] = arp_a.arp_interface
         else:
-            knowledge['exists'] = False
+            if ip_group_b:
+                knowledge['exists'] = True
+                knowledge['where'] = {'ip_groups': ip_group_b.ip_group_name}
+                knowledge['ip'] = ip_group_b
+                knowledge['interface'] = ip_group_b.ip_group_interface
+            elif arp_b:
+                knowledge['exists'] = True
+                knowledge['where'] = {'arp': arp_b.arp_ip}
+                knowledge['ip'] = arp_b
+                knowledge['interface'] = arp_b.arp_interface
+            else:
+                knowledge['exists'] = False
 
         return knowledge
 
@@ -857,7 +881,7 @@ class IPGroups(Base):
             raise e
 
     @staticmethod
-    def bulk_update_ip_groups(session, ip_group_list: list) -> int:
+    def bulk_update_ip_groups(session, ip_group_list: list) -> tuple:
         """
         Update a list of IP groups in the database in bulk
         :param session: The database session
@@ -866,7 +890,9 @@ class IPGroups(Base):
         """
         try:
             # Iterate on the list of IP groups
+            l = []
             count = 0
+
             for ip_group in ip_group_list:
                 # Get the IP group from the database based on the IP group ID
                 ip_group_x = session.query(IPGroups).filter_by(
@@ -876,7 +902,6 @@ class IPGroups(Base):
 
                 # Validate if there is something to update
                 if (
-                        ip_group_x.ip_group_name != ip_group.ip_group_name or
                         ip_group_x.ip_group_type != ip_group.ip_group_type or
                         ip_group_x.ip_group_ip != ip_group.ip_group_ip or
                         ip_group_x.ip_group_mask != ip_group.ip_group_mask or
@@ -892,9 +917,12 @@ class IPGroups(Base):
                         ip_group_x.ip_duplicity != ip_group.ip_duplicity or
                         ip_group_x.ip_duplicity_indexes != ip_group.ip_duplicity_indexes
                 ):
+                    # Add the IP group to the list
+                    l.append(ip_group)
 
                     # Update the IP group in the database
-                    if ip_group_x.ip_group_name in ['authorized', 'available', 'unauthorized'] and ip_group.ip_group_name == 'unauthorized':
+                    if ip_group_x.ip_group_name in ['authorized', 'available',
+                                                    'unauthorized'] and ip_group.ip_group_name == 'unauthorized':
                         ip_group_x.ip_group_name = ip_group.ip_group_name
                     elif ip_group.ip_group_name == 'connected' and ip_group_x.ip_group_name == 'connected':
                         ip_group_x.ip_group_name = ip_group.ip_group_name
@@ -918,7 +946,7 @@ class IPGroups(Base):
 
                     count += 1
 
-            return count
+            return count, l
         except Exception as e:
             raise e
 
@@ -1128,11 +1156,11 @@ class IPGroups(Base):
 
         try:
             # Delete the tags assigned to the IP groups and the IP groups from the database
-            session.query(IPGroupsToIPGroupsTags).filter(IPGroupsToIPGroupsTags.fk_ip_group_id.in_(
-                [ip_group.ip_group_id for ip_group in ip_group_list])).delete(synchronize_session=False)
-            session.query(IPGroups).filter(
-                IPGroups.ip_group_id.in_([ip_group.ip_group_id for ip_group in ip_group_list])).delete(
-                synchronize_session=False)
+            if ip_group_list:
+                for ip_group in ip_group_list:
+                    session.query(IPGroupsToIPGroupsTags).filter_by(fk_ip_group_id=ip_group.ip_group_id).delete()
+                    session.query(IPGroups).filter_by(ip_group_id=ip_group.ip_group_id).delete()
+                session.commit()
         except Exception as e:
             raise e
 
@@ -1241,6 +1269,37 @@ class IPGroups(Base):
 
             # Return the list of IP groups and their tags
             return ip_group_tags_list
+        except Exception as e:
+            raise e
+
+    @staticmethod
+    def get_ip_group_via_ip_interface(session, metadata: dict):
+        try:
+            response = session.query(IPGroups).filter_by(ip_group_ip=metadata['ip'], ip_group_interface=metadata['interface']).first()
+            if response:
+                return IPGroupsEntity(
+                    ip_group_id=response.ip_group_id,
+                    fk_ip_segment_id=response.fk_ip_segment_id,
+                    ip_group_name=response.ip_group_name,
+                    ip_group_type=response.ip_group_type,
+                    ip_group_alias=response.ip_group_alias,
+                    ip_group_description=response.ip_group_description,
+                    ip_group_ip=response.ip_group_ip,
+                    ip_group_mask=response.ip_group_mask,
+                    ip_group_mac=response.ip_group_mac,
+                    ip_group_mac_vendor=response.ip_group_mac_vendor,
+                    ip_group_interface=response.ip_group_interface,
+                    ip_group_comment=response.ip_group_comment,
+                    ip_is_dhcp=response.ip_is_dhcp,
+                    ip_is_dynamic=response.ip_is_dynamic,
+                    ip_is_complete=response.ip_is_complete,
+                    ip_is_disabled=response.ip_is_disabled,
+                    ip_is_published=response.ip_is_published,
+                    ip_duplicity=response.ip_duplicity,
+                    ip_duplicity_indexes=response.ip_duplicity_indexes
+                )
+            else:
+                return None
         except Exception as e:
             raise e
 
@@ -1828,5 +1887,43 @@ class OldIPGroups(Base):
 
                 # Add the Old IP Groups objects to the database
                 session.bulk_save_objects(old_ip_groups)
+        except Exception as e:
+            raise e
+
+    @staticmethod
+    def get_all(session) -> list:
+        """
+        Get all IP groups from the Old IP Groups table
+        :param session: The database session
+        :return: List of Old IP Groups
+        """
+        try:
+            # Import entity
+            from entities.old_ip_groups import OldIPGroupsEntity
+
+            # Get all IP groups from the Old IP Groups table
+            return [
+                OldIPGroupsEntity(
+                    ip_group_id=ip_group.ip_group_id,
+                    fk_ip_segment_id=ip_group.fk_ip_segment_id,
+                    ip_group_name=ip_group.ip_group_name,
+                    ip_group_type=ip_group.ip_group_type,
+                    ip_group_alias=ip_group.ip_group_alias,
+                    ip_group_description=ip_group.ip_group_description,
+                    ip_group_ip=ip_group.ip_group_ip,
+                    ip_group_mask=ip_group.ip_group_mask,
+                    ip_group_mac=ip_group.ip_group_mac,
+                    ip_group_mac_vendor=ip_group.ip_group_mac_vendor,
+                    ip_group_interface=ip_group.ip_group_interface,
+                    ip_group_comment=ip_group.ip_group_comment,
+                    ip_is_dhcp=ip_group.ip_is_dhcp,
+                    ip_is_dynamic=ip_group.ip_is_dynamic,
+                    ip_is_complete=ip_group.ip_is_complete,
+                    ip_is_disabled=ip_group.ip_is_disabled,
+                    ip_is_published=ip_group.ip_is_published,
+                    ip_duplicity=ip_group.ip_duplicity,
+                    ip_duplicity_indexes=ip_group.ip_duplicity_indexes
+                ) for ip_group in session.query(OldIPGroups).all()
+            ]
         except Exception as e:
             raise e

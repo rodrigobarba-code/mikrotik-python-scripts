@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IP Scanning Report</title>
+    <style>
+        * {
+            font-family: Arial, sans-serif;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background-color: #1A6AC2;
+            border-radius: 20px;
+            color: #fff;
+        }
+
+        .header img {
+            width: 50px;
+            height: auto;
+            float: right;
+        }
+
+        .header .header-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header-info h1 {
+            margin-top: -3px;
+            font-size: 1.5rem;
+            color: #fff;
+        }
+
+        .header-info p {
+            margin: 2px 0;
+            font-size: 0.9rem;
+            color: #fff;
+        }
+
+        section {
+            padding: 5px;
+        }
+
+        h2 {
+            color: #1A6AC2;
+            font-size: 1.8rem;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            border-radius: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #21CB76ff;
+            color: #2e2e30;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #21CB76ff;
+            margin: 20px 0;
+            color: #3a3b3c;
+            width: 75%;
+        }
+
+        .center-text {
+            text-align: center;
+            font-size: 1.2rem;
+            margin: 20px 0;
+            color: #7f8c8d;
+        }
+
+        footer {
+            text-align: center;
+            padding: 4px;
+            background-color: #1A6AC2;
+            color: #fff;
+            margin-top: 30px;
+            border-radius: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <img src="{{ app_logo }}" alt="Logo">
+
+    <div class="header-info">
+        <h1>Seven Suite Application - IP Scanning Report</h1>
+        <p>{{ company_name }}</p>
+        <p>{{ company_address }}</p>
+        <p>{{ company_email }}</p>
+        <p>{{ company_phone }}</p>
+    </div>
+</div>
+
+<section>
+    <h2>General Report</h2>
+    <p>{{ general_report }}</p>
+</section>
+
+<hr>
+
+<section>
+    <h2>Annomalies Found</h2>
+    {% if anomalies | length < 1 %}
+        <p>No anomalies were found during the scanning process.</p>
+    {% else %}
+        <p>Number of anomalies found: {{ anomalies | length }}</p>
+        <table>
+            <thead>
+            <tr>
+                <th>IP</th>
+                <th>System IP <span style="color: red">*</span></th>
+                <th>System MAC <span style="color: red">*</span></th>
+                <th>MAC Duplicities <span style="color: red">**</span></th>
+                <th>System IPs with Same MAC <span style="color: red">***</span></th>
+                <th>Reasons</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for anomaly in anomalies %}
+                <tr>
+                    <td>{{ anomaly.system_ip }}</td>
+                    <td>{{ anomaly.system_mac }}</td>
+                    <td>{{ anomaly.mac_duplicities | join(", ") }}</td>
+                    <td>{{ anomaly.system_ips_with_same_mac | join(", ") }}</td>
+                    <td>{{ anomaly.reasons | join(", ") }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <pre style="font-size: 12px; color: #5a5a5b;">
+            <span style="color: red">*</span> System IP and System MAC are the IP and MAC that is alraedy in the system.
+            <span style="color: red">**</span> MAC Duplicities appears when the same IP is connected to different MACs.
+            <span style="color: red">***</span> System IPs with Same MAC appears when the same MAC is connected to different IPs.
+        </pre>
+    {% endif %}
+</section>
+
+<hr>
+
+<section>
+    <h2>Obtained IP Groups</h2>
+    <p>Here are the IP groups obtained from the scanning process.</p>
+    {% if ip_groups.connected_ips | length < 1 and ip_groups.blacklisted_ips | length < 1 %}
+        <p>No IP groups were found during the scanning process.</p>
+    {% else %}
+        <p><strong>Connected IPs
+            ({{ ip_groups.connected_ips | length }}):</strong> {{ ip_groups.connected_ips | join(", ") }}</p>
+        <p><strong>Blacklisted IPs
+            ({{ ip_groups.blacklisted_ips  | length }}):</strong> {{ ip_groups.blacklisted_ips | join(", ") }}</p>
+    {% endif %}
+</section>
+
+<hr>
+
+<section>
+    <h2>Movements on IP Groups</h2>
+    <p>Here are the movements on the IP groups obtained from the scanning process. These movements are related just with
+        the authorized and available groups, <span style="color: red">not with the connected IPs.</span></p>
+    {% if movements | length < 1 %}
+        <p>No movements were found during the scanning process.</p>
+    {% else %}
+        <table>
+            <thead>
+            <tr>
+                <th>IP</th>
+                <th>Action <span style="color: red">*</span></th>
+                <th>Base Group <span style="color: red">*</span></th>
+                <th>New Group <span style="color: red">**</span></th>
+                <th>Reason</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for movement in movements %}
+                <tr>
+                    <td>{{ movement.ip }}</td>
+                    <td>{{ movement.action }}</td>
+                    <td>{{ movement.base_group }}</td>
+                    <td>{{ movement.new_group }}</td>
+                    <td>{{ movement.reason }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <pre style="font-size: 12px; color: #5a5a5b;">
+        <span style="color: red">*</span> Base Group is the group where the IP was before the movement.
+        <span style="color: red">**</span> New Group is the group where the IP is now.
+    </pre>
+    {% endif %}
+</section>
+
+<hr>
+
+<section>
+    <h2>IP Changes / Updates</h2>
+    <p>Here are the changes on the IPs obtained from the scanning process, and they already exist in the system.</p>
+    {% if ip_changes | length < 1 %}
+        <p>No changes were found during the scanning process.</p>
+    {% else %}
+        <table>
+            <thead>
+            <tr>
+                <th>IP</th>
+                <th>Changes on Column Data <span style="color: red">*</span></th>
+                <th>Previous Data <span style="color: red">**</span></th>
+                <th>Current Data <span style="color: red">**</span></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for change in ip_changes %}
+                <tr>
+                    <td>{{ change.ip }}</td>
+                    <td>{{ change.column | join(", ") }}</td>
+                    <td>{{ change.previous | join(", ") }}</td>
+                    <td>{{ change.current | join(", ") }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <pre style="font-size: 12px; color: #5a5a5b;">
+            <span style="color: red">*</span> Column Data is the column that was changed.
+            <span style="color: red">**</span> Previous Data is the data that was before the change, and Current Data is the data that is now.
+        </pre>
+    {% endif %}
+</section>
+
+<div class="center-text">
+    <p>This present report was generated by Seven Suite Application, it is necessary to verify the information before
+        taking any action. Some information may be outdated.</p>
+</div>
+
+
+<footer style="text-align: center; margin-top: 30px; padding: 10px; color: #fff;">
+    <p style="display: inline-block; margin: 0;">&copy; 2024 Seven Suite Application. All rights reserved,</p>
+    <p style="display: inline-block; margin: 0 0 0 10px;vertical-align: middle;">
+        Powered by
+        <span style="display: inline-block; vertical-align: middle; margin-left: 5px;">
+            <img src="{{ app_logo }}" alt="Logo" style="width: 20px; height: auto;">
+        </span>
+    </p>
+</footer>
+
+</body>
+</html>
