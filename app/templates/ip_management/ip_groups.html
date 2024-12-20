@@ -1,27 +1,104 @@
 {% from 'macros.html' import delete_modal, delete_select_modal, delete_all_modal, show_details_button %}
 {% extends 'base.html' %}
 {% block title %} IP Management &#10095; Sites &#10095; Options &#10095;
-    {{ 'Blacklist' if is_blacklist else 'Authorized' }} for {{ site_name }} {% endblock %}
+    {% if group_name == 'Blacklist' %}
+        Blacklist for {{ site_name }}
+    {% elif group_name == 'Authorized' %}
+        Authorized for {{ site_name }}
+    {% elif group_name == 'Connected' %}
+        Connected for {{ site_name }}
+    {% elif group_name == 'Available' %}
+        Available for {{ site_name }}
+    {% endif %}
+{% endblock %}
 {% block head %}
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/ip_management/styles.css') }}">
 {% endblock %}
 {% block scripts %}
     <script src="{{ url_for('static', filename='/js/ip_management/scripts.js') }}"></script>
     <script>
-        {% if is_blacklist %}
+        {% if group_name == 'Blacklist' %}
+            const changedIPs = [
+                {ip: '192.168.1.1', reason: 'Cambio de segmento'},
+                {ip: '10.0.0.5', reason: 'No autorizada'},
+            ];
+
+            document.addEventListener('DOMContentLoaded', () => {
+                if (changedIPs.length > 0) {
+                    processIPsSequentially(changedIPs);
+                } else {
+                    console.log('Theres no IPs to process.');
+                }
+            });
+
+            function processIPsSequentially(ipList) {
+                if (ipList.length === 0) {
+                    console.log('No more IPs to process.');
+                    return;
+                }
+
+                // Sacar la primera IP de la lista para procesarla
+                const currentIP = ipList.shift();
+
+                handleIPDecision(currentIP).then(() => {
+                    // Callback to process the next IP
+                    processIPsSequentially(ipList);
+                });
+            }
+
+            function handleIPDecision(ipData) {
+                const {ip, reason} = ipData;
+
+                return Swal.fire({
+                    title: 'IP detectada con cambios',
+                    text: `La dirección IP ${ip} ha sufrido cambios: ${reason}. ¿Qué deseas hacer?`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    showDenyButton: true,
+                    showCloseButton: true,
+                    confirmButtonText: 'Mover a Authorized',
+                    denyButtonText: 'Mover a Available',
+                    cancelButtonText: 'Eliminar',
+                    footer: 'Selecciona "Cerrar" si no deseas realizar ningún cambio.',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        moveToAuthorized(ip);
+                    } else if (result.isDenied) {
+                        moveToAvailable(ip);
+                    } else if (result.dismiss === Swal.DismissReason.cancel) {
+                        deleteIP(ip);
+                    } else if (result.dismiss === Swal.DismissReason.close) {
+                        console.log(`No se realizó ninguna acción para la IP ${ip}.`);
+                    }
+                });
+            }
+
+            // Funciones de prueba para las acciones
+            function moveToAuthorized(ip) {
+                console.log(`La IP ${ip} se movió a Authorized.`);
+            }
+
+            function moveToAvailable(ip) {
+                console.log(`La IP ${ip} se movió a Available.`);
+            }
+
+            function deleteIP(ip) {
+                console.log(`La IP ${ip} fue eliminada.`);
+            }
+
             deleteSelectModal("{{ url_for('ip_management.bulk_delete_ip_group', site_id=site_id) }}", "{{ url_for('ip_management.blacklist', site_id=site_id) }}", 'ip-group');
-            deleteAllModal("{{ url_for('ip_management.delete_all_ip_groups', site_id=site_id, is_blacklist=is_blacklist) }}", "{{ url_for('ip_management.blacklist', site_id=site_id) }}", 'ip-group');
+            deleteAllModal("{{ url_for('ip_management.delete_all_ip_groups', site_id=site_id, group_name = group_name) }}", "{{ url_for('ip_management.blacklist', site_id=site_id) }}", 'ip-group');
             moveAllToAuthorized("{{ url_for('ip_management.transfer_all_to_authorized', site_id=site_id) }}", "{{ url_for('ip_management.blacklist', site_id=site_id) }}", 'ip-group');
             moveSelectToAuthorized("{{ url_for('ip_management.transfer_bulk_to_authorized') }}", "{{ url_for('ip_management.blacklist', site_id=site_id) }}", 'ip-group');
-        {% else %}
+        {% elif group_name == 'Authorized' %}
             deleteSelectModal("{{ url_for('ip_management.bulk_delete_ip_group', site_id=site_id) }}", "{{ url_for('ip_management.authorized', site_id=site_id) }}", 'ip-group');
-            deleteAllModal("{{ url_for('ip_management.delete_all_ip_groups', site_id=site_id, is_blacklist=is_blacklist) }}", "{{ url_for('ip_management.authorized', site_id=site_id) }}", 'ip-group');
+            deleteAllModal("{{ url_for('ip_management.delete_all_ip_groups', site_id=site_id, group_name = group_name) }}", "{{ url_for('ip_management.authorized', site_id=site_id) }}", 'ip-group');
         {% endif %}
     </script>
 {% endblock %}
 {% block content %}
     <!-- IP Groups Jumbotron -->
-    <section class="{{ 'blacklist' if is_blacklist else 'authorized' }}-jumbotron pt-5 mb-3">
+    <section class="{{ group_name|lower }}-jumbotron pt-5 mb-3">
         <div class="container-fluid py-5 d-flex flex-column flex-md-row">
             <div class="d-flex col-md-1 order-md-1 order-2 text-md-start text-center my-md-0 my-3 justify-content-center align-items-center">
                 <button class="btn btn-c-return">
@@ -32,12 +109,16 @@
                 </button>
             </div>
             <div class="col-md-11 order-md-2 order-1">
-                <h1 class="display-5 fw-bold">{{ 'Blacklist' if is_blacklist else 'Authorized' }}
+                <h1 class="display-5 fw-bold">{{ group_name }}
                     for {{ site_name }}</h1>
-                {% if is_blacklist %}
+                {% if group_name == 'Blacklist' %}
                     <p class="col-md-8 fs-4">List of IP addresses that are not identified.</p>
-                {% else %}
+                {% elif group_name == 'Authorized' %}
                     <p class="col-md-8 fs-4">List of IP addresses that are authorized.</p>
+                {% elif group_name == 'Connected' %}
+                    <p class="col-md-8 fs-4">List of IP addresses that are connected.</p>
+                {% elif group_name == 'Available' %}
+                    <p class="col-md-8 fs-4">List of IP addresses that are available.</p>
                 {% endif %}
             </div>
         </div>
@@ -49,12 +130,24 @@
         <div class="container w-75 align-items-center">
             <div class="row">
                 <div class="col-8 col-md-7 text-left">
-                    <h2 class="routers-database-title"><b>{{ 'Blacklist' if is_blacklist else 'Authorized' }}</b>
-                        IP Groups</h2>
+                    <h2 class="routers-database-title">
+                        <b>
+                            {% if group_name == 'Blacklist' %}
+                                Blacklist
+                            {% elif group_name == 'Authorized' %}
+                                Authorized
+                            {% elif group_name == 'Connected' %}
+                                Connected
+                            {% elif group_name == 'Available' %}
+                                Available
+                            {% endif %}
+                        </b>
+                        IPs
+                    </h2>
                 </div>
                 <div class="col-12 col-md-5 d-flex justify-content-end">
                     {% if session['user_privileges'] == 'admin' %}
-                        {% if is_blacklist %}
+                        {% if group_name == 'Blacklist' %}
                             <button type="button" class="btn btn-md btn-warning me-2" id="move-select-to-authorized">
                                 <i class="fa-solid fa-star"></i>
                             </button>
@@ -63,10 +156,10 @@
                             </button>
                         {% endif %}
                         <button type="button" class="btn btn-md btn-danger me-2" id="delete-select">
-                            <i style="font-size: large" class="fa-solid fa-trash-can-plus"></i>
+                            <i class="fa-solid fa-square-minus"></i>&nbsp; Delete Selected
                         </button>
                         <button type="button" class="btn btn-md btn-dark" id="delete-all">
-                            <i style="font-size: large" class="fa-solid fa-trash-can-xmark"></i>
+                            <i class="fa-solid fa-trash"></i>&nbsp; Delete All
                         </button>
                     {% endif %}
                 </div>
