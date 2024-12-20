@@ -418,7 +418,50 @@ def blacklist(site_id: int):
             site_name=site_name,
             site_id=site_id,
             groups=blacklist_list,
-            is_blacklist=True
+            group_name='Blacklist'
+        )
+    except Exception as e:
+        flash(str(e), 'danger')
+        return redirect(url_for('ip_management.ip_management'))
+
+
+# Get Connected
+def get_connected(site_id: int) -> list:
+    try:
+        response = requests.get(
+            f'http://localhost:8080/api/private/ip/connected/{site_id}',
+            headers=get_verified_jwt_header(),
+            params={
+                'user_id': session.get('user_id'),
+                'site_id': site_id
+            }
+        )
+        if response.status_code == 200:
+            if response.json().get('backend_status') == 200:
+                return response.json().get('connected')
+            else:
+                raise Exception(response.json().get('message'))
+        elif response.status_code == 500:
+            raise Exception('Failed to retrieve connected')
+    except Exception as e:
+        flash(str(e), 'danger')
+        return []
+
+
+# Get Connected endpoint
+@ip_management_bp.route('/connected/<int:site_id>', methods=['GET'])
+@restriction.login_required
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
+def connected(site_id: int):
+    try:
+        site_name = get_site_name(site_id, get_sites())
+        connected_list = get_connected(site_id)
+        return render_template(
+            'ip_management/ip_groups.html',
+            site_name=site_name,
+            site_id=site_id,
+            groups=connected_list,
+            group_name='Connected'
         )
     except Exception as e:
         flash(str(e), 'danger')
@@ -459,7 +502,7 @@ def authorized(site_id: int):
             site_name=site_name,
             site_id=site_id,
             groups=authorized_list,
-            is_blacklist=False
+            group_name='Authorized'
         )
     except Exception as e:
         flash(str(e), 'danger')
@@ -638,11 +681,17 @@ def bulk_delete_ip_group():
 @restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
 def delete_all_ip_groups(site_id):
     try:
-        is_blacklist = request.args.get('is_blacklist')
-        if is_blacklist == 'True':
+        group_name = request.args.get('group_name')
+        if group_name == 'Blacklist':
             url = f'http://localhost:8080/api/private/blacklist/site/{site_id}'
-        else:
+        elif group_name == 'Authorized':
             url = f'http://localhost:8080/api/private/ip/authorized/site/{site_id}'
+        elif group_name == 'Connected':
+            url = f'http://localhost:8080/api/private/ip/connected/site/{site_id}'
+        elif group_name == 'Available':
+            url = f'http://localhost:8080/api/private/ip/available/site/{site_id}'
+        else:
+            raise Exception('Invalid group name')
 
         delete_response = requests.delete(
             url,
@@ -667,7 +716,7 @@ def delete_all_ip_groups(site_id):
 @restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
 def update_ip_group(site_id, ip_group_id):
     try:
-        is_blacklist = False
+        group_name = None
         if request.method == 'GET':
             response = requests.get(
                 f'http://localhost:8080/api/private/ip/group/{ip_group_id}',
@@ -678,7 +727,7 @@ def update_ip_group(site_id, ip_group_id):
                 if response.json().get('backend_status') == 200:
                     site_name = get_site_name(site_id, get_sites())
                     ip_group = response.json().get('ip_group')
-                    is_blacklist = ip_group[0].get('ip_group_name') == 'blacklist'
+                    group_name = ip_group[0].get('ip_group_name') == 'blacklist'
                     tags = get_tags()
                     ip_group_tags = ', '.join([tag.get('ip_group_tag_name') for tag in ip_group[1]])
                 else:
@@ -693,7 +742,7 @@ def update_ip_group(site_id, ip_group_id):
                 int(i['id']) for i in temp_list
             ]
 
-            is_blacklist = request.form.get('ip_group_name') == 'blacklist'
+            group_name = request.form.get('ip_group_name') == 'blacklist'
 
             response = requests.put(
                 f'http://localhost:8080/api/private/ip/group/{ip_group_id}',
@@ -710,10 +759,14 @@ def update_ip_group(site_id, ip_group_id):
             if response.status_code == 200:
                 if response.json().get('backend_status') == 200:
                     flash('IP Group updated successfully', 'success')
-                    if is_blacklist is True:
+                    if group_name == 'Blacklist':
                         return redirect(url_for('ip_management.blacklist', site_id=site_id))
-                    else:
+                    elif group_name == 'Authorized':
                         return redirect(url_for('ip_management.authorized', site_id=site_id))
+                    elif group_name == 'Connected':
+                        return redirect(url_for('ip_management.connected', site_id=site_id))
+                    elif group_name == 'Available':
+                        return redirect(url_for('ip_management.available', site_id=site_id))
                 else:
                     raise Exception(response.json().get('message'))
             elif response.status_code == 500:
@@ -724,7 +777,7 @@ def update_ip_group(site_id, ip_group_id):
             site_name=site_name if site_name is not None else '',
             site_id=site_id if site_id is not None else '',
             ip_group=ip_group if ip_group is not None else '',
-            is_blacklist=is_blacklist if is_blacklist is not None else False,
+            group_name=group_name,
             tags=tags if tags is not None else [],
             ip_group_tags=ip_group_tags if ip_group_tags is not None else ''
         )
@@ -1008,7 +1061,7 @@ def available_ip_segments(site_id):
         return redirect(url_for('ip_management.ip_management'))
 
 
-@ip_management_bp.route('/ip/available/<int:site_id>', methods=['GET'])
+@ip_management_bp.route('/ip/available-segments/<int:site_id>', methods=['GET'])
 @restriction.login_required
 @restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
 def ip_available(site_id):
@@ -1054,6 +1107,24 @@ def ip_available(site_id):
                 raise Exception(response.json().get('message'))
         elif response.status_code == 500:
             raise Exception('Failed to retrieve available IPs')
+    except Exception as e:
+        flash(str(e), 'danger')
+        return redirect(url_for('ip_management.ip_management'))
+
+
+# Get Available not segments
+@ip_management_bp.route('/ip/available/<int:site_id>', methods=['GET'])
+@restriction.login_required
+@restriction.redirect_to_loading_screen  # Redirect to Loading Screen Decorator
+def available(site_id):
+    try:
+        site_name = get_site_name(site_id, get_sites())
+        return render_template(
+            'ip_management/ip_groups.html',
+            site_name=site_name,
+            site_id=site_id,
+            group_name='Available'
+        )
     except Exception as e:
         flash(str(e), 'danger')
         return redirect(url_for('ip_management.ip_management'))
