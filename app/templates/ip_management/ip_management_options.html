@@ -39,7 +39,7 @@
     <!-- IP Management Options Database -->
 
     <!-- IP Management Options Separator -->
-    <section class="management-options-separator textl">
+    <section class="management-options-separator text">
         <div class="container w-75">
             <hr>
         </div>
@@ -69,25 +69,15 @@
                         </div>
                     </div>
                 </a>
-                <a href="{{ url_for('ip_management.blacklist', site_id=site_id) }}">
-                    <div class="col-c col-12 col-md-12">
-                        <div class="card-c card mb-5">
-                            <div class="row g-0">
-                                <div class="col-md-2">
-                                    <div class="blacklist-background-c bg-c m-3 d-flex justify-content-center align-items-center">
-                                        <i class="fa-solid fa-radiation" style="color: white; font-size: 40px"></i>
-                                    </div>
-                                </div>
-                                <div class="col-md-10 d-flex align-items-center">
-                                    <div class="card-body">
-                                        <h5 class="card-title"><b>Blacklist</b></h5>
-                                        <p class="card-text">Blacklist an IP address.</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+
+                <!-- IP Management Options Separator -->
+                <section class="management-options-separator text">
+                    <div class="container w-75">
+                        <hr>
                     </div>
-                </a>
+                </section>
+                <!-- IP Management Options Separator -->
+
                 <a href="{{ url_for('ip_management.ip_group_tags', site_id=site_id) }}">
                     <div class="col-c col-12 col-md-12">
                         <div class="card-c card mb-3">
@@ -107,13 +97,41 @@
                         </div>
                     </div>
                 </a>
+
+                <!-- IP Management Options Separator -->
+                <section class="management-options-separator text">
+                    <div class="container w-75">
+                        <hr>
+                    </div>
+                </section>
+                <!-- IP Management Options Separator -->
+
+                <a href="{{ url_for('ip_management.connected', site_id=site_id) }}">
+                    <div class="col-c col-12 col-md-12">
+                        <div class="card-c card mb-3">
+                            <div class="row g-0">
+                                <div class="col-md-2">
+                                    <div class="connected-background-c bg-c m-3 d-flex justify-content-center align-items-center">
+                                        <i class="fa-solid fa-globe" style="color: white; font-size: 40px"></i>
+                                    </div>
+                                </div>
+                                <div class="col-md-10 d-flex align-items-center">
+                                    <div class="card-body">
+                                        <h5 class="card-title"><b>Connected IPs</b></h5>
+                                        <p class="card-text">Connected IPs to {{ site_name }}.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
                 <a href="{{ url_for('ip_management.authorized', site_id=site_id) }}">
                     <div class="col-c col-12 col-md-12">
-                        <div class="card-c card mb-5">
+                        <div class="card-c card mb-3">
                             <div class="row g-0">
                                 <div class="col-md-2">
                                     <div class="authorized-background-c bg-c m-3 d-flex justify-content-center align-items-center">
-                                        <i class="fa-solid fa-star" style="color: white; font-size: 40px"></i>
+                                        <i class="fa-solid fa-badge-check" style="color: white; font-size: 40px"></i>
                                     </div>
                                 </div>
                                 <div class="col-md-10 d-flex align-items-center">
@@ -127,19 +145,39 @@
                         </div>
                     </div>
                 </a>
-                <a href="{{ url_for('ip_management.available_ip_segments', site_id=site_id) }}">
+                <a href="{{ url_for('ip_management.available', site_id=site_id) }}">
                     <div class="col-c col-12 col-md-12">
                         <div class="card-c card mb-3">
                             <div class="row g-0">
                                 <div class="col-md-2">
                                     <div class="available-background-c bg-c m-3 d-flex justify-content-center align-items-center">
-                                        <i class="fa-solid fa-street-view" style="color: white; font-size: 40px"></i>
+                                        <i class="fa-solid fa-location-check" style="color: white; font-size: 40px"></i>
                                     </div>
                                 </div>
                                 <div class="col-md-10 d-flex align-items-center">
                                     <div class="card-body">
                                         <h5 class="card-title"><b>Available IPs</b></h5>
                                         <p class="card-text">Look for available IPs for {{ site_name }} to use.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                <a href="{{ url_for('ip_management.blacklist', site_id=site_id) }}">
+                    <div class="col-c col-12 col-md-12">
+                        <div class="card-c card mb-5">
+                            <div class="row g-0">
+                                <div class="col-md-2">
+                                    <div class="blacklist-background-c bg-c m-3 d-flex justify-content-center align-items-center">
+                                        <i class="fa-solid fa-seal-exclamation"
+                                           style="color: white; font-size: 40px"></i>
+                                    </div>
+                                </div>
+                                <div class="col-md-10 d-flex align-items-center">
+                                    <div class="card-body">
+                                        <h5 class="card-title"><b>Blacklist</b></h5>
+                                        <p class="card-text">Blacklist an IP address.</p>
                                     </div>
                                 </div>
                             </div>
