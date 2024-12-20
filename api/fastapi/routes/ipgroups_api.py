@@ -185,6 +185,34 @@ async def get_available_by_site(user_id: int, site_id: int, metadata: Request):
         }
 
 
+# Get connected IPs per site
+@ip_groups_router.get("/ip/connected/{site_id}")
+async def get_connected_by_site(user_id: int, site_id: int, metadata: Request):
+    try:
+        if ip_groups_functions.verify_user_existence(user_id):
+            group_metadata = {'site_id': site_id}
+            request = ThreadingManager().run_thread(IPGroups.get_connected_by_site, 'rx', group_metadata)
+            ip_groups_functions.create_transaction_log(
+                action="GET",
+                table="ip_groups",
+                user_id=int(user_id),
+                description=f"Connected IPs for Site {site_id} retrieved successfully",
+                public=str(str(metadata.client.host) + ':' + str(metadata.client.port))
+            )
+            return {
+                'message': f"Connected IPs for Site {site_id} retrieved successfully",
+                'connected': request,
+                'backend_status': 200
+            }
+        else:
+            raise Exception("User not registered in the system")
+    except Exception as e:
+        return {
+            'message': f"Failed to retrieve Connected IPs for Site {site_id}: {str(e)}",
+            'backend_status': 400
+        }
+
+
 @ip_groups_router.put("/ip/group/{ip_group_id}")
 async def update_ip_group(
         user_id: int,
@@ -254,7 +282,8 @@ async def move_blacklist_to_authorized_bulk(user_id: int, ip_groups_ids: Blackli
                                             token: dict = Depends(verify_jwt)):
     try:
         if ip_groups_functions.verify_user_existence(user_id):
-            ThreadingManager().run_thread(IPGroups.bulk_move_from_blacklist_to_authorized, 'w', ip_groups_ids.ip_groups_ids)
+            ThreadingManager().run_thread(IPGroups.bulk_move_from_blacklist_to_authorized, 'w',
+                                          ip_groups_ids.ip_groups_ids)
             ip_groups_functions.create_transaction_log(
                 action="UPDATE",
                 table="ip_groups",
